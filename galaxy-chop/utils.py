@@ -47,9 +47,6 @@ def rot(x,A):
     return x_rot
 
 
-import numpy as np
-
-
 def dens_2D(rd,rbin,md):
     """# rd = radio de todas las particulas del disco
     # rbin = radio de los anillos sobre los cuales se calcula la densidad
@@ -97,9 +94,6 @@ def dens_3D(rd,rbin,md):
     rho = M/vol
     return r, rho
 
-
-
-import numpy as np
 
 def rbin1(x, nbin):
     """# Bineado Equal Number
@@ -149,3 +143,4 @@ def rbin2(x, npar):
         nodos[i+1] = x_sort[i*npar:(i+1)*npar][-1]
     
     return med, nodos
+    
