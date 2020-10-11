@@ -10,7 +10,12 @@ Welcome to galaxy-chop's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+`galaxy-chop` is a Python code that tackles the dynamical decomposition problem
+by utilizing clustering techniques in phase space for stellar galactic 
+components.
 
+It runs in numerical N-body simulations populated with Semi-analytical models
+and full Hydrodynamical simulations, such as Illustris TNG.
 
 Indices and tables
 ==================
