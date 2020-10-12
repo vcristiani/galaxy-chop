@@ -28,7 +28,7 @@ MIT
 
 - Valeria Cristiani (E-mail: valeria.cristiani@unc.edu.ar)
 - Ornela Marioni (E-mail: ornela.marioni@unc.edu.ar)
-- Nelson Villagra (E-mail: xxx)
+- Nelson Villagra (E-mail: ntvillagra@gmail.com)
 - Antonela Taverna (E-mail: ataverna@unc.edu.ar)
 - Bruno Sanchez (E-mail: bruno.sanchez@duke.edu)
 
