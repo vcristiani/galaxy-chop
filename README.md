@@ -31,5 +31,5 @@ MIT
 - Nelson Villagra (E-mail: ntvillagra@gmail.com)
 - Antonela Taverna (E-mail: ataverna@unc.edu.ar)
 - Bruno Sanchez (E-mail: bruno.sanchez@duke.edu)
-
+- Rafael Pignata (E-mail: rafael.pignata@unc.edu.ar)
  
