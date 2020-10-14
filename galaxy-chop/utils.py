@@ -1,16 +1,30 @@
 import numpy as np
 
 
-def aling(m,pos,vel,r_corte):
-    """Esto devuelve las posiciones, las velocidades y J rotados, de forma que Jz quede 
-    alineado con z."""
+
+def _get_rot_matrix(m, pos, vel, r_corte=None):
+    """
+    Estimates rotation matrix
+
+    Parameters
+    ----------
+
+
+    Returns
+    -------
+
+    """
     
     jx = m*(pos[:,1]*vel[:,2] - pos[:,2]*vel[:,1])
     jy = m*(pos[:,2]*vel[:,0] - pos[:,0]*vel[:,2])
     jz = m*(pos[:,0]*vel[:,1] - pos[:,1]*vel[:,0])
 
     r = np.sqrt(pos[:,0]**2 + pos[:,1]**2 + pos[:,2]**2)
-    mask, = np.where(r < r_corte)
+    
+    if r_corte is not None:
+        mask = np.where(r < r_corte)
+    else:
+        mask = np.repeat(True, len(r)), 
 
     rjx = np.sum(jx[mask])
     rjy = np.sum(jy[mask])
@@ -32,15 +46,31 @@ def aling(m,pos,vel,r_corte):
     e3z = rjz/rj
 
     A = np.asarray(([e1x,e1y,e1z],[e2x,e2y,e2z],[e3x,e3y,e3z]))
-
-    pos_rot = np.dot(A,pos.T)
-    vel_rot = np.dot(A,vel.T)
     
-    return pos_rot.T, vel_rot.T, A
+    return(A)
+
+
+def aling(m, pos, vel, r_corte):
+    """Esto devuelve las posiciones, las velocidades y J rotados, 
+    de forma que Jz quede alineado con z.
+    
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    A = _get_rot_matrix(m, pos, vel, r_corte)
+
+    pos_rot = np.dot(A, pos.T)
+    vel_rot = np.dot(A, vel.T)
+    
+    return pos_rot.T, vel_rot.T
 
 ###################################################################
 
-def rot(x,A):
+def rot(x, A):
     """# Esto rota posiciones y velocidades usando la matriz de rotacion A
     """
     x_rot = np.dot(A,x.T).T
