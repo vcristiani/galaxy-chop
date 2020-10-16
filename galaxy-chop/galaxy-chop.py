@@ -1,8 +1,97 @@
+# This file is part of the
+#   galxy-chop project (https://github.com/vcristiani/galaxy-chop).
+# Copyright (c) 2020, Valeria Cristiani
+# License: MIT
+#   Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
+
+
+# #####################################################
+# IMPORTS
+# #####################################################
+
+import attr
 import numpy as np
 from aling import *
 from scipy.interpolate import InterpolatedUnivariateSpline
 from sklearn.mixture import GaussianMixture
 import random
+
+
+# #####################################################
+# GALAXY CLASS
+# #####################################################
+
+@attr.s(frozen=True)
+class Galaxy:
+    x = attr.ib()
+    y = attr.ib()
+    z = attr.ib()
+    vx = attr.ib()
+    vy = attr.ib()
+    vz = attr.ib()
+    m = attr.ib()
+    
+    components = attr.ib(default=None)
+    metadata = attr.ib()
+    
+    
+    
+
+g = Galaxy(x, y, z, vx, vy, vz, m, name="Sombrero")
+
+g.plot()
+
+g.j_
+
+
+# #####################################################
+# DINAMICAL DECOMPOSITION CLASS
+# #####################################################
+
+class Model:
+    
+    def split(self, glx):
+        raise NotImplementedError()
+    
+    def chop(self, glx, *, y=None, z=None, vx=None, vy=None, vz=None, m=None):
+        if isinstance(glx, Galaxy):
+            if (y, z, vx, vy, vz, m) == (None, None, None, None, None, None):
+                raise ValueError(".............")
+        else:
+            glx = Galaxy(x=glx, y, z....)
+        
+        gt = self.split(glx)
+        gt.metadata["method"] = self.method_name
+        return gt
+    
+    
+@attr.s(frozen=True)
+class Abadi(Model):
+    
+    method_name = "Abadi"
+    
+    bins = attr.ib(default=10)
+    
+    def split(self, glx):
+        self.bins
+        j = glx.j_
+        
+
+
+m = Abadi()
+
+gt = m.chop(g)
+gt = m.chop(x, y, z, vx, vy, vz, m)
+
+g.components # => None
+gt.components # => [.....]
+
+gt.metadata["method"]
+
+
+
+
+
 
 ####### En caso de que la galaxia TENGA particulas de GAS #############################################################
 try:
