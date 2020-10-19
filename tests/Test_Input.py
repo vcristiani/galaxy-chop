@@ -24,7 +24,19 @@ from galaxychop import utils
 random = np.random.RandomState(seed=31)
 
 
+# =============================================================================
+# Defining utility functions for mocking data
+# =============================================================================
 def solid_disc(N_part=100, rmax=30, rmin=5, omega=10):
+    """
+    Creates a set of particles that belong to a rigid body rotating disc, 
+    sampling particles from a flat annulus, with maximum radius and minimum 
+    radius `(rmax, rmin)`.
+    
+    The angular velocity `omega` is used to set an angular rotation around 
+    `z` axis. The function delivers mass vector (set to identical unity mass),
+
+    """
     r = (rmax - rmin) * np.random.random_sample(size=N_part) + rmin
     phi0 = 2 * np.pi * np.random.random_sample(size=N_part)
     mass = 1. * np.ones_like(r)
@@ -37,9 +49,9 @@ def solid_disc(N_part=100, rmax=30, rmin=5, omega=10):
     ydot = omega * r * np.cos(phi0)
     zdot = np.zeros_like(xdot)
 
-    pos = np.array([x, y, z])
-    vel = np.array([xdot, ydot, zdot])
-    return mass, pos.T, vel.T
+    pos = np.array([x, y, z]).T
+    vel = np.array([xdot, ydot, zdot]).T
+    return mass, pos, vel
 
 # transformation matrix
 def rot_matrix_xaxis(theta=0):
