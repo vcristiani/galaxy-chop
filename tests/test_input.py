@@ -11,7 +11,6 @@ import pytest
 
 import numpy as np
 
-from numpy.testing import assert_equal, assert_
 
 import sys
 sys.path.insert(0, '.')
@@ -29,7 +28,7 @@ random = np.random.RandomState(seed=31)
 # =============================================================================
 def solid_disc(N_part=100, rmax=30, rmin=5, omega=10):
     """
-    Creates a set of particles that belong to a rigid body rotating disc, 
+    Creates a set of particles that belong to a rigid body rotating disc,
     sampling particles from a flat annulus, with maximum radius and minimum 
     radius `(rmax, rmin)`.
     
@@ -151,7 +150,6 @@ def disc_xrotation():
 # =============================================================================
 # TESTS
 # =============================================================================
-
 
 # rotate it 
 def test_getrotmat0(disc_zero_angle):
