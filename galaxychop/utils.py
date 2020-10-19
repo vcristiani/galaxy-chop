@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def _get_rot_matrix(m, pos, vel, r_corte=None):
     """
     Estimates rotation matrix
@@ -45,7 +44,13 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     e3y = rjy/rj
     e3z = rjz/rj
 
-    A = np.asarray(([e1x,e1y,e1z],[e2x,e2y,e2z],[e3x,e3y,e3z]))
+    A = np.asarray(
+        (
+            [e1x,e1y,e1z],
+            [e2x,e2y,e2z],
+            [e3x,e3y,e3z]
+            )
+    )
     
     return(A)
 
@@ -171,6 +176,5 @@ def rbin2(x, npar):
     for i in range(0,nbin):
         med[i]     = np.median(x_sort[i*npar:(i+1)*npar])
         nodos[i+1] = x_sort[i*npar:(i+1)*npar][-1]
-    
+
     return med, nodos
-    
