@@ -6,7 +6,7 @@
 # DOCS
 # =============================================================================
 
-"""This file is for distribute galaxy-chop
+"""This file is for distribute galaxychop
 """
 
 # =============================================================================
@@ -32,9 +32,9 @@ PATH = os.path.abspath(os.path.dirname(__file__))
 # Get the version from galaxy-chop file itself (not imported)
 # =============================================================================
 
-galaxy-chop_INIT_PATH = os.path.join(PATH, "galaxy-chop", "__init__.py")
+galaxychop_INIT_PATH = os.path.join(PATH, "galaxychop", "__init__.py")
 
-with open(galaxy-chop_INIT_PATH, "r") as f:
+with open(galaxychop_INIT_PATH, "r") as f:
     for line in f:
         if line.startswith("__version__"):
             _, _, PI_VERSION = line.replace('"', "").split()
@@ -63,7 +63,7 @@ print(setuptools.find_packages())  # exclude=['test*']
 
 def do_setup():
     setuptools.setup(
-        name="galaxy-chop",
+        name="galaxychop",
         version=PI_VERSION,
         description="Galaxy dynamic de-composition",
         long_description=LONG_DESCRIPTION,
