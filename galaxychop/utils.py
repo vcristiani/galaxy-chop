@@ -3,15 +3,30 @@ import numpy as np
 
 def _get_rot_matrix(m, pos, vel, r_corte=None):
     """
-    Estimates rotation matrix
+    Calculates the rotation matrix that aligns the TOTAL
+    agular momentum of the particles with the z-axis. The 
+    positions, speeds and masses of the particles are 
+    used. Optionally, only particles within a cutting 
+    radius `(r_corte)` can be used.
 
     Parameters
     ----------
-
-
+    m : `np.ndarray`, shape(n,1)
+        Masses of particles.
+    pos : `np.ndarray`, shape(n,3)
+        Positions of particles.
+    vel : `np.ndarray`, shape(n,3)
+        Velocities of particles.
+    r_corte : `float`, optional
+        The default is ``None``; if provided, it must be 
+        positive and the rotation matrix `A` is calculated 
+        from the particles with radii smaller than 
+        r_corte.                
+   
     Returns
     -------
-
+    A : `np.ndarray`, shape(3,3)
+        Rotation matrix.
     """
     
     jx = m*(pos[:, 1]*vel[:, 2] - pos[:, 2]*vel[:, 1])
@@ -57,15 +72,33 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
 
 
 def aling(m, pos, vel, r_corte):
-    """Esto devuelve las posiciones, las velocidades y J rotados, 
-    de forma que Jz quede alineado con z.
+    """This rotates the positions, speeds and angular 
+    moments of the particles so that the total angular 
+    moment coincides with the z-axis. 
+    
+    Optionally, only particles within a cutting radius 
+    `(r_corte)` can be used to calculate the rotation 
+    matrix.
     
     Parameters
     ----------
-
+    m : `np.ndarray`, shape(n,1)
+        Masses of particles.
+    pos : `np.ndarray`, shape(n,3)
+        Positions of particles.
+    vel : `np.ndarray`, shape(n,3)
+        Velocities of particles.
+    r_corte : `float`, optional
+        The default is ``None``; if provided, it must be 
+        positive and the rotation matrix `A` is calculated 
+        from the particles with radii smaller than r_corte.
+   
     Returns
     -------
-
+    pos_rot : `np.ndarray`, shape(n,3)
+        Rotated, positions of particles
+    vel_rot : `np.ndarray`, shape(n,3)
+        Rotated, velocities of particles
     """
     A = _get_rot_matrix(m, pos, vel, r_corte)
 
