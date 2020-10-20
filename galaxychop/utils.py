@@ -5,7 +5,7 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     """
     Calculates the rotation matrix that aligns the TOTAL
     agular momentum of the particles with the z-axis. The 
-    positions, speeds and masses of the particles are 
+    positions, velocities and masses of the particles are 
     used. Optionally, only particles within a cutting 
     radius `(r_corte)` can be used.
 
