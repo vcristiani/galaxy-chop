@@ -20,7 +20,7 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     r_corte : `float`, optional
         The default is ``None``; if provided, it must be 
         positive and the rotation matrix `A` is calculated 
-        from the particles with radii smaller than 
+        for the particles with radii smaller than 
         r_corte.                
    
     Returns
@@ -74,7 +74,7 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
 def aling(m, pos, vel, r_corte):
     """This rotates the positions, speeds and angular 
     moments of the particles so that the total angular 
-    moment coincides with the z-axis. 
+    momentum match with the z-axis. 
     
     Optionally, only particles within a cutting radius 
     `(r_corte)` can be used to calculate the rotation 
@@ -96,9 +96,9 @@ def aling(m, pos, vel, r_corte):
     Returns
     -------
     pos_rot : `np.ndarray`, shape(n,3)
-        Rotated, positions of particles
+        Rotated positions of particles
     vel_rot : `np.ndarray`, shape(n,3)
-        Rotated, velocities of particles
+        Rotated velocities of particles
     """
     A = _get_rot_matrix(m, pos, vel, r_corte)
 

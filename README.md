@@ -2,37 +2,51 @@
 
 `galaxy-chop` is a package where you can find the most used methods for galaxy dynamical decomposition.
 
-### Methods implemented
+## Methods implemented
 - Abadi+ 2003
 - Obreja+ 2019
 - Cristiani+
 - Dou+...
 
+# Requirements
+
+# Installation
+You could find `galaxy-chop`at PyPI. The standar instalation via pip:
+
+    $ pip install galaxy-chop
+
+# Documentation
+
 ## Input data
- - Masses (in M_1 \\( a^2 = b^2 \\)
- - Velocities (in km)
- - Gravitational potential
- - Star catalog (pos and vel)
+ - Masses (in mass solar units) 
+ - Positions (in kpc)
+ - Velocities (in km/s)
+ 
+ **Note:** You must have one file for each particle type, e.g. the file _stars.dat_ must contain 7 columns: m, x, y, z, vx, vy, vz. Then you must have other file for dark matter particles and other for gas (if you have).
 
-## You will get
+## Output data
 
-- A gaussian mixture decomposition
-- A column on the star catalog with component probablities
+You will get the dinamical decomposition of the galaxy obtained with the method you had choose.
 
-# License
+### Additionally you could get:
+- The gravitational potencial of the particles
+- The rotation matrix of the galaxy with respect some dynamical axis (e.i: aling with the angular momentum or some compornent of it)
+- An ice-cream :)
 
-MIT
+
 
 # Quickstart
 
-# Documentation
 
 # Based on 
 
 - paper 1
 
-# Authors
+# License
 
+MIT
+
+# Authors
 - Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar)
 - Ornela Marioni (e-mail: ornela.marioni@unc.edu.ar)
 - Nelson Villagra (e-mail: ntvillagra@gmail.com)

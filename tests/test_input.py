@@ -27,7 +27,7 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
     """
     Creates a set of particles that belong to a rigid body rotating disk,
     sampling particles from a flat annulus, with maximum radius and minimum
-    radius `(rmax, rmin)`.
+    radius `(rmax, rmin)` and thickness iqual to 1.
 
     The angular velocity `omega` is used to set an angular rotation around
     `z` axis. The function delivers mass vector (set to identical unity mass),
@@ -188,6 +188,21 @@ def disc_xrotation():
 
     return m, pos @ a, vel @ a, a
 
+@pytest.fixture
+def disc_yrotation():
+    m, pos, vel = solid_disk(N_part=1000)
+    #We get a disc rotated with respect the `y`-axis.
+    a = rot_matrix_yaxis(theta=0.5 * np.pi * np.random.random())
+
+    return m, pos @ a, vel @ a, a
+
+@pytest.fixture
+def disc_zrotation():
+    m, pos, vel = solid_disk(N_part=1000)
+    #We get a disc rotated with respect the `z`-axis.
+    a = rot_matrix_zaxis(theta=0.5 * np.pi * np.random.random())
+
+    return m, pos @ a, vel @ a, a
 
 # =============================================================================
 # TESTS
@@ -206,6 +221,24 @@ def test_getrotmat0(disc_zero_angle):
 
 def test_invert_xaxis(disc_xrotation):
     m, pos, vel, a = disc_xrotation
+    gxchA = utils._get_rot_matrix(m, pos, vel)
+
+    # we want this to be the identity
+    invtest = a @ np.linalg.inv(gxchA)
+    np.testing.assert_allclose(invtest, np.identity(3), atol=1e-3, rtol=1e-4)
+
+
+def test_invert_yaxis(disc_yrotation):
+    m, pos, vel, a = disc_yrotation
+    gxchA = utils._get_rot_matrix(m, pos, vel)
+
+    # we want this to be the identity
+    invtest = a @ np.linalg.inv(gxchA)
+    np.testing.assert_allclose(invtest, np.identity(3), atol=1e-3, rtol=1e-4)
+
+
+def test_invert_xaxis(disc_zrotation):
+    m, pos, vel, a = disc_zrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
     # we want this to be the identity
