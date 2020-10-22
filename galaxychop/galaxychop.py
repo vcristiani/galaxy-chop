@@ -28,25 +28,25 @@ class Galaxy:
     Parameters
     ----------
     x_s, y_s, z_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Star positions
+        Star positions. Units: kpc
     vx_s, vy_s, vz_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Star velocities
+        Star velocities. Units: km/s
     m_s: `np.ndarray(n,1)`
-        Star masses
+        Star masses. Units 1e10 M_sun
 
     x_dm, y_dm, z_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Dark matter positions
+        Dark matter positions. Units: kpc
     vx_dm, vy_dm, vz_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Dark matter velocities
+        Dark matter velocities. Units: km/s
     m_dm: `np.ndarray(n,1)`
-        Dark matter masses    
+        Dark matter masses. Units 1e10 M_sun    
 
     x_g, y_g, z_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Gas positions
+        Gas positions. Units: kpc
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Gas velocities
+        Gas velocities. Units: km/s
     m_g: `np.ndarray(n,1)`
-        Gas masses 
+        Gas masses. Units 1e10 M_sun 
     
     components_s: `np.ndarray(n_star,1)`
         This indicates the component to which the stellar particle is assigned.
