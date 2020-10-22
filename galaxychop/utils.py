@@ -32,7 +32,6 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     jx = m*(pos[:, 1]*vel[:, 2] - pos[:, 2]*vel[:, 1])
     jy = m*(pos[:, 2]*vel[:, 0] - pos[:, 0]*vel[:, 2])
     jz = m*(pos[:, 0]*vel[:, 1] - pos[:, 1]*vel[:, 0])
-==== BASE ====
 
     r = np.sqrt(pos[:, 0]**2 + pos[:, 1]**2 + pos[:, 2]**2)
     
