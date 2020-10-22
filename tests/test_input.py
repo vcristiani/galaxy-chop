@@ -19,7 +19,6 @@ from galaxychop import utils
 # Fix the random state
 random = np.random.RandomState(seed=31)
 
-
 # =============================================================================
 # Defining utility functions for mocking data
 # =============================================================================
@@ -67,6 +66,7 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
 
     pos = np.array([x, y, z]).T
     vel = np.array([xdot, ydot, zdot]).T
+   
     return mass, pos, vel
 
 
@@ -111,9 +111,9 @@ def rot_matrix_yaxis(theta=0):
     """
     A = np.array(
         [
-            [np.cos(theta), 0, -1 * np.sin(theta)],
+            [np.cos(theta), 0, np.sin(theta)],
             [0, 1,  0],
-            [np.sin(theta), 0, np.cos(theta)],
+            [-1*np.sin(theta), 0, np.cos(theta)],
         ]
     )
     return A
@@ -184,23 +184,21 @@ def disc_zero_angle():
 @pytest.fixture
 def disc_xrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    a = rot_matrix_xaxis(theta=0.5 * np.pi * np.random.random())
+    a = rot_matrix_xaxis(theta=0.3 * np.pi * np.random.random())
 
     return m, pos @ a, vel @ a, a
 
 @pytest.fixture
 def disc_yrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    #We get a disc rotated with respect the `y`-axis.
-    a = rot_matrix_yaxis(theta=0.5 * np.pi * np.random.random())
+    a = rot_matrix_yaxis(theta=0.3 * np.pi * np.random.random())
 
     return m, pos @ a, vel @ a, a
 
 @pytest.fixture
 def disc_zrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    #We get a disc rotated with respect the `z`-axis.
-    a = rot_matrix_zaxis(theta=0.5 * np.pi * np.random.random())
+    a = rot_matrix_zaxis(theta=0.3 * np.pi * np.random.random())
 
     return m, pos @ a, vel @ a, a
 
@@ -223,24 +221,28 @@ def test_invert_xaxis(disc_xrotation):
     m, pos, vel, a = disc_xrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    # we want this to be the identity
-    invtest = a @ np.linalg.inv(gxchA)
-    np.testing.assert_allclose(invtest, np.identity(3), atol=1e-3, rtol=1e-4)
-
+    np.testing.assert_allclose(1., gxchA[0, 0], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[0, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[1, 0], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-3, atol=1e-3)
 
 def test_invert_yaxis(disc_yrotation):
     m, pos, vel, a = disc_yrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    # we want this to be the identity
-    invtest = a @ np.linalg.inv(gxchA)
-    np.testing.assert_allclose(invtest, np.identity(3), atol=1e-3, rtol=1e-4)
+    np.testing.assert_allclose(0., gxchA[0, 0], rtol=1e-3, atol=1e-2)
+    np.testing.assert_allclose(1., gxchA[0, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[1, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-3, atol=1e-3)
 
-
-def test_invert_xaxis(disc_zrotation):
+def test_invert_zaxis(disc_zrotation):
     m, pos, vel, a = disc_zrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    # we want this to be the identity
-    invtest = a @ np.linalg.inv(gxchA)
-    np.testing.assert_allclose(invtest, np.identity(3), atol=1e-3, rtol=1e-4)
+    np.testing.assert_allclose(1., gxchA[2, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)

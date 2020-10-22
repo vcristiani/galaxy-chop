@@ -1,17 +1,21 @@
+[![Build Status](https://travis-ci.com/vcristiani/galaxy-chop.svg?branch=master)](https://travis-ci.com/vcristiani/galaxy-chop)
+
 # Welcome to `galaxy-chop`
 
 `galaxy-chop` is a package where you can find the most used methods for galaxy dynamical decomposition.
 
 ## Methods implemented
 - Abadi+ 2003
-- Obreja+ 2019
 - Cristiani+
-- Dou+...
+- Obreja+ 2019
+- Du+...
 
 # Requirements
 
+Libraries gfortran, gcc and others...
+
 # Installation
-You could find `galaxy-chop`at PyPI. The standar instalation via pip:
+You could find `galaxy-chop` at PyPI. The standar instalation via pip:
 
     $ pip install galaxy-chop
 
@@ -31,9 +35,6 @@ You will get the dinamical decomposition of the galaxy obtained with the method 
 ### Additionally you could get:
 - The gravitational potencial of the particles
 - The rotation matrix of the galaxy with respect some dynamical axis (e.i: aling with the angular momentum or some compornent of it)
-- An ice-cream :)
-
-
 
 # Quickstart
 
