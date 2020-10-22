@@ -22,7 +22,10 @@ random = np.random.RandomState(seed=42)
 # =============================================================================
 # Defining utility functions for mocking data
 # =============================================================================
+
+
 def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
+
     """
     Creates a set of particles that belong to a rigid body rotating disk,
     sampling particles from a flat annulus, with maximum radius and minimum
@@ -52,6 +55,7 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
     vel : `np.ndarray`, shape = N_part, 3
         Velocities of particles
     """
+
     r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
     phi0 = 2 * np.pi * random.random_sample(size=N_part)
     mass = 1. * np.ones_like(r)
@@ -66,7 +70,7 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
 
     pos = np.array([x, y, z]).T
     vel = np.array([xdot, ydot, zdot]).T
-   
+
     return mass, pos, vel
 
 
@@ -188,12 +192,14 @@ def disc_xrotation():
 
     return m, pos @ a, vel @ a, a
 
+
 @pytest.fixture
 def disc_yrotation():
     m, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
     return m, pos @ a, vel @ a, a
+
 
 @pytest.fixture
 def disc_zrotation():
@@ -227,6 +233,7 @@ def test_invert_xaxis(disc_xrotation):
     np.testing.assert_allclose(0., gxchA[1, 0], rtol=1e-3, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-3, atol=1e-3)
 
+
 def test_invert_yaxis(disc_yrotation):
     m, pos, vel, a = disc_yrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
@@ -236,6 +243,7 @@ def test_invert_yaxis(disc_yrotation):
     np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-3, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[1, 1], rtol=1e-3, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-3, atol=1e-3)
+
 
 def test_invert_zaxis(disc_zrotation):
     m, pos, vel, a = disc_zrotation
