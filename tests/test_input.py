@@ -246,3 +246,4 @@ def test_invert_zaxis(disc_zrotation):
     np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-4, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-4, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)
+    
