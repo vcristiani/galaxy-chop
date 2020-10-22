@@ -17,7 +17,7 @@ from galaxychop import utils
 # Random state
 # =============================================================================
 # Fix the random state
-random = np.random.RandomState(seed=31)
+random = np.random.RandomState(seed=42)
 
 # =============================================================================
 # Defining utility functions for mocking data
@@ -52,13 +52,13 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
     vel : `np.ndarray`, shape = N_part, 3
         Velocities of particles
     """
-    r = (rmax - rmin) * np.random.random_sample(size=N_part) + rmin
-    phi0 = 2 * np.pi * np.random.random_sample(size=N_part)
+    r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
+    phi0 = 2 * np.pi * random.random_sample(size=N_part)
     mass = 1. * np.ones_like(r)
 
     x = r * np.cos(phi0)
     y = r * np.sin(phi0)
-    z = 1 * np.random.random_sample(size=N_part) - 0.5
+    z = 1 * random.random_sample(size=N_part) - 0.5
 
     xdot = -1 * omega * r * np.sin(phi0)
     ydot = omega * r * np.cos(phi0)
@@ -184,21 +184,21 @@ def disc_zero_angle():
 @pytest.fixture
 def disc_xrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    a = rot_matrix_xaxis(theta=0.3 * np.pi * np.random.random())
+    a = rot_matrix_xaxis(theta=0.3 * np.pi * random.random())
 
     return m, pos @ a, vel @ a, a
 
 @pytest.fixture
 def disc_yrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    a = rot_matrix_yaxis(theta=0.3 * np.pi * np.random.random())
+    a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
     return m, pos @ a, vel @ a, a
 
 @pytest.fixture
 def disc_zrotation():
     m, pos, vel = solid_disk(N_part=1000)
-    a = rot_matrix_zaxis(theta=0.3 * np.pi * np.random.random())
+    a = rot_matrix_zaxis(theta=0.3 * np.pi * random.random())
 
     return m, pos @ a, vel @ a, a
 
