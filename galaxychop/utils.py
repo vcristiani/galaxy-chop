@@ -95,9 +95,9 @@ def aling(m, pos, vel, r_corte):
     Returns
     -------
     pos_rot : `np.ndarray`, shape(n,3)
-        Rotated, positions of particles
+        Rotated positions of particles
     vel_rot : `np.ndarray`, shape(n,3)
-        Rotated, velocities of particles
+        Rotated velocities of particles
     """
     A = _get_rot_matrix(m, pos, vel, r_corte)
 

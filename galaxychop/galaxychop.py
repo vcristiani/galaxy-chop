@@ -154,7 +154,7 @@ class Galaxy:
     E_tot_gas = k_gas - pot_gas[:, 1]
 
     E_tot = np.concatenate((E_tot_gas, E_tot_dark, E_tot_star))
-
+    
 
 ###############################################################################
 # Acá hacemos un filtrado de las partículas que no vamos a usar en la
