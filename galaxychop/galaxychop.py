@@ -11,7 +11,7 @@
 
 import attr
 import numpy as np
-from aling import *
+from utils import aling, rot
 from scipy.interpolate import InterpolatedUnivariateSpline
 from sklearn.mixture import GaussianMixture
 import random
@@ -92,54 +92,127 @@ class Galaxy:
     components_g = attr.ib(default=None)
     metadata = attr.ib()
 
-    # Rotamos las posiciones y velocidades de las estrelals para alinear con
-    # la dirección de J.
+    """ Rotation of the position and speed of the stars to align with
+    the direction of J, also obtain the rotation matrix,
+    and rotate dm and gas
+    
+    Parameters
+    ----------
+    
+    Coordinates and velocities for stars: x_s, y_s, z_s and vx_s, vy_s, vz_s.
+    
+    Coordinates and velocities for dark matter: x_dm, y_dm, z_dm and 
+                                               vx_dm, vy_dm, vz_dm.
+    
+    Coordinates and velocities for gas: x_g, y_g, z_g and vx_g, vy_g, vz_g.
+    
+    Returns
+    -------
+    
+    pos_star_rot = np.array(n, 3), takes the masses m_s and 
+    coordinates x_s, y_s, z_s of the stars and rotates them to 
+    align them in the direction of J. 
+    
+    vel_star_rot = np.array(n, 3), takes velocities vx_s, vy_s, vz_s 
+    of the stars and rotates them to align them in the direction of J.
+    
+    A = np.array(3, 3), rotation matrix.
+    
+    pos_dark_rot = np.array(m, 3), takes coordinates x_dm, y_dm, z_dm of the 
+    dark matter and rotates them repect the A matrix.
+    
+    vel_dark_rot = np.array(m, 3), takes velocities vx_dm, vy_dm, vz_dm of the
+    dark matter and rotates them repect the A matrix.
+    
+    pos_gas_rot = np.array(g, 3), takes coordinates x_g, y_g, z_g of the 
+    gas and rotates them repect the A matrix.
+    
+    vel_gas_rot = np.array(g, 3), takes velocities vx_g, vy_g, vz_g of the 
+    gas and rotates them repect the A matrix.
+    """
 
-    # Tambien obtenemos la matriz de rotacion, y rotamos dm y gas.
-    pos_star_rot, vel_star_rot, A = aling(star[:, 0], star[:, 1:4],
-                                          star[:, 4:7],
-                                          3.*R[j])
+    pos_star_rot, vel_star_rot, A = aling(m_s, [x_s, y_s, z_s], 
+                                        [vx_s, vy_s, vz_s], 3 .R[j])
 
-    pos_dark_rot = rot(dark[:, 1:4], A)
-    vel_dark_rot = rot(dark[:, 4:7], A)
+    pos_dark_rot = rot([x_dm, y_dm, z_dm], A)
+    vel_dark_rot = rot([vx_dm, vy_dm, vz_dm], A)
 
-    pos_gas_rot = rot(gas_[:, 1:4], A)
-    vel_gas_rot = rot(gas_[:, 4:7], A)
+    pos_gas_rot = rot([x_g, y_g, z_g], A)
+    vel_gas_rot = rot([vx_g, vy_g, vz_g], A)
 
-    # Calculamos las componentes de momento angular de estrellas, gas y DM.
-    L_dark = np.asarray((pos_dark_rot[:, 1]*vel_dark_rot[:, 2] -
-                         pos_dark_rot[:, 2]*vel_dark_rot[:, 1],
-                         pos_dark_rot[:, 2]*vel_dark_rot[:, 0] -
-                         pos_dark_rot[:, 0]*vel_dark_rot[:, 2],
-                         pos_dark_rot[:, 0]*vel_dark_rot[:, 1] -
-                         pos_dark_rot[:, 1]*vel_dark_rot[:, 0]))
+    """Calculation of the components of the angular momentum 
+    of stars, gas and DM.
+   
+    Parameters
+    ----------
+   
+    pos_star_rot, vel_star_rot. 
+    pos_dark_rot, vel_dark_rot. 
+    pos_gas_rot, vel_gas_rot.
+   
+    Returns
+    -------
+   
+   L_part = np.array(3, 3*n), concatenates angular momentum for the stars, 
+   dark matter and gas in a single array.
+   
+   Lr_star = np.array(n, 1), Component in the plane of the angular 
+   momentum of stars. 
+   
+   Lr = np.array(3*n, 1) Component in the plane of the angular 
+   momentum for all particles.
+   
+    """
 
-    L_star = np.asarray((pos_star_rot[:, 1]*vel_star_rot[:, 2] -
-                         pos_star_rot[:, 2]*vel_star_rot[:, 1],
-                         pos_star_rot[:, 2]*vel_star_rot[:, 0] -
-                         pos_star_rot[:, 0]*vel_star_rot[:, 2],
-                         pos_star_rot[:, 0]*vel_star_rot[:, 1] -
-                         pos_star_rot[:, 1]*vel_star_rot[:, 0]))
+    L_dark = np.asarray((pos_dark_rot[:, 1] * vel_dark_rot[:, 2] -
+                         pos_dark_rot[:, 2] * vel_dark_rot[:, 1],
+                         pos_dark_rot[:, 2] * vel_dark_rot[:, 0] -
+                         pos_dark_rot[:, 0] * vel_dark_rot[:, 2],
+                         pos_dark_rot[:, 0] * vel_dark_rot[:, 1] -
+                         pos_dark_rot[:, 1] * vel_dark_rot[:, 0]))
 
-    L_gas = np.asarray((pos_gas_rot[:, 1]*vel_gas_rot[:, 2] -
-                        pos_gas_rot[:, 2]*vel_gas_rot[:, 1],
-                        pos_gas_rot[:, 2]*vel_gas_rot[:, 0] -
-                        pos_gas_rot[:, 0]*vel_gas_rot[:, 2],
-                        pos_gas_rot[:, 0]*vel_gas_rot[:, 1] -
-                        pos_gas_rot[:, 1]*vel_gas_rot[:, 0]))
+    L_star = np.asarray((pos_star_rot[:, 1] * vel_star_rot[:, 2] -
+                         pos_star_rot[:, 2] * vel_star_rot[:, 1],
+                         pos_star_rot[:, 2] * vel_star_rot[:, 0] -
+                         pos_star_rot[:, 0] * vel_star_rot[:, 2],
+                         pos_star_rot[:, 0] * vel_star_rot[:, 1] -
+                         pos_star_rot[:, 1] * vel_star_rot[:, 0]))
+
+    L_gas = np.asarray((pos_gas_rot[:, 1] * vel_gas_rot[:, 2] - 
+                        pos_gas_rot[:, 2] * vel_gas_rot[:, 1],
+                        pos_gas_rot[:, 2] * vel_gas_rot[:, 0] - 
+                        pos_gas_rot[:, 0] * vel_gas_rot[:, 2],
+                        pos_gas_rot[:, 0] * vel_gas_rot[:, 1] - 
+                        pos_gas_rot[:, 1] * vel_gas_rot[:, 0]))
 
     L_part = np.concatenate((L_gas, L_dark, L_star), axis=1)
 
-    # Componente en el plano del momento angular de estrellas.
-    Lr_star = np.sqrt(L_star[0, :]**2 + L_star[1, :]**2)
-    # Componente en el plano del momento angular de las particulas.
-    Lr = np.sqrt(L_part[0, :]**2 + L_part[1, :]**2)
+    Lr_star = np.sqrt(L_star[0, :] ** 2 + L_star[1, :] ** 2)
 
-    # Calculamos la energia cinetica de las partículas.
-    k_star = 0.5*(star[:, 4]**2 + star[:, 5]**2 + star[:, 6]**2)
-    k_dark = 0.5*(dark[:, 4]**2 + dark[:, 5]**2 + dark[:, 6]**2)
-    k_gas = 0.5*(gas_[:, 4]**2 + gas_[:, 5]**2 + gas_[:, 6]**2)
+    Lr = np.sqrt(L_part[0, :] ** 2 + L_part[1, :] ** 2)
 
+    """Calculation of kinetic energy
+
+    Parameters
+    ----------
+   
+    vx_s, vy_s, vz_s.
+    vx_dm, vy_dm, vz_dm.
+    vx_g, vy_g, vz_g.
+   
+    Returns
+    -------
+   
+    k_star = np.array(n,1), kinetic energy for the stars 
+    k_dark = np.array(m,1), kinetic energy for the dark matter
+    k_gas = np.array(g,1), kinetic energy for the gas
+   
+    """
+
+    k_star = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
+    k_dark = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
+    k_gas = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
+   
     # Leemos los potenciales que guardamos en el archivo
     # (notar q los files de potencial tienen dos columnas: ID y pot).
     path_potencial = '/home/vcristiani/doctorado/TNG_potenciales/potencial_'
