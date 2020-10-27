@@ -20,9 +20,10 @@ import random
 # GALAXY CLASS
 # #####################################################
 
+
 @attr.s(frozen=True)
 class Galaxy:
-    """This class builds a galaxy object from the masses, positions, and 
+    """This class builds a galaxy object from the masses, positions, and
     velocities of the particles (stars, dark matter, and gas).
 
     Parameters
@@ -39,15 +40,15 @@ class Galaxy:
     vx_dm, vy_dm, vz_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter velocities. Units: km/s
     m_dm: `np.ndarray(n,1)`
-        Dark matter masses. Units 1e10 M_sun    
+        Dark matter masses. Units 1e10 M_sun
 
     x_g, y_g, z_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas positions. Units: kpc
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas velocities. Units: km/s
     m_g: `np.ndarray(n,1)`
-        Gas masses. Units 1e10 M_sun 
-    
+        Gas masses. Units 1e10 M_sun
+
     components_s: `np.ndarray(n_star,1)`
         This indicates the component to which the stellar particle is assigned.
         This is chosen as the most probable component.
@@ -62,7 +63,7 @@ class Galaxy:
     ---------
 
     """
-    
+
     x_s = attr.ib()
     y_s = attr.ib()
     z_s = attr.ib()
@@ -70,7 +71,7 @@ class Galaxy:
     vy_s = attr.ib()
     vz_s = attr.ib()
     m_s = attr.ib()
-    
+
     x_dm = attr.ib()
     y_dm = attr.ib()
     z_dm = attr.ib()
@@ -91,100 +92,21 @@ class Galaxy:
     components_g = attr.ib(default=None)
     metadata = attr.ib()
 
-###############################################################################
-# En caso de que la galaxia TENGA particulas de GAS ###########################
-# if:
+    # Rotamos las posiciones y velocidades de las estrelals para alinear con
+    # la dirección de J.
 
-'''
-#Leemos los archivos de la galaxia.
-# columna 0 = masa (estan en unidades de 1e10 M_sun).
-# columna 1-3 = posiciones (en kpc).
-# columna 4-6 = velocidades (en km/s).
-'''
-
-gas_ = np.load(path+'gas_'+str(ID)+'_particle_type_0.npy')
-dark = np.load(path+'dark'+str(ID)+'_particle_type_1.npy')
-star = np.load(path+'star'+str(ID)+'_particle_type_4.npy')
-
-# Rotamos las posiciones y velocidades de las estrelals para alinear con
-# la dirección de J.
-
-# Tambien obtenemos la matriz de rotacion, y rotamos dm y gas.
-pos_star_rot, vel_star_rot, A = aling(
-    star[:, 0], star[:, 1:4], star[:, 4:7], 3.*R[j]
-    )
-
-pos_dark_rot = rot(dark[:, 1:4], A)
-vel_dark_rot = rot(dark[:, 4:7], A)
-
-pos_gas_rot = rot(gas_[:, 1:4], A)
-vel_gas_rot = rot(gas_[:, 4:7], A)
-
-# Calculamos las componentes de momento angular de estrellas, gas y DM.
-L_dark = np.asarray((pos_dark_rot[:, 1]*vel_dark_rot[:, 2] -
-                    pos_dark_rot[:, 2]*vel_dark_rot[:, 1],
-                    pos_dark_rot[:, 2]*vel_dark_rot[:, 0] -
-                    pos_dark_rot[:, 0]*vel_dark_rot[:, 2],
-                    pos_dark_rot[:, 0]*vel_dark_rot[:, 1] -
-                    pos_dark_rot[:, 1]*vel_dark_rot[:, 0]))
-
-L_star = np.asarray((pos_star_rot[:, 1]*vel_star_rot[:, 2] -
-                    pos_star_rot[:, 2]*vel_star_rot[:, 1],
-                    pos_star_rot[:, 2]*vel_star_rot[:, 0] -
-                    pos_star_rot[:, 0]*vel_star_rot[:, 2],
-                    pos_star_rot[:, 0]*vel_star_rot[:, 1] -
-                    pos_star_rot[:, 1]*vel_star_rot[:, 0]))
-
-L_gas = np.asarray((pos_gas_rot[:, 1]*vel_gas_rot[:, 2] -
-                    pos_gas_rot[:, 2]*vel_gas_rot[:, 1],
-                    pos_gas_rot[:, 2]*vel_gas_rot[:, 0] -
-                    pos_gas_rot[:, 0]*vel_gas_rot[:, 2],
-                    pos_gas_rot[:, 0]*vel_gas_rot[:, 1] -
-                    pos_gas_rot[:, 1]*vel_gas_rot[:, 0]))
-
-L_part = np.concatenate((L_gas, L_dark, L_star), axis=1)
-
-# Componente en el plano del momento angular de estrellas.
-Lr_star = np.sqrt(L_star[0, :]**2 + L_star[1, :]**2)
-# Componente en el plano del momento angular de las particulas.
-Lr = np.sqrt(L_part[0, :]**2 + L_part[1, :]**2)
-
-# Calculamos la energia cinetica de las partículas.
-k_star = 0.5*(star[:, 4]**2 + star[:, 5]**2 + star[:, 6]**2)
-k_dark = 0.5*(dark[:, 4]**2 + dark[:, 5]**2 + dark[:, 6]**2)
-k_gas = 0.5*(gas_[:, 4]**2 + gas_[:, 5]**2 + gas_[:, 6]**2)
-
-# Leemos los potenciales que guardamos en el archivo
-# (notar q los files de potencial tienen dos columnas: ID y pot).
-path_potencial = '/home/vcristiani/doctorado/TNG_potential/potencial_'
-
-pot_star = np.loadtxt(path_potencial+'star_ID_'+str(ID[j])+'.dat')
-pot_dark = np.loadtxt(path_potencial+'dark_ID_'+str(ID[j])+'.dat')
-pot_gas = np.loadtxt(path_potencial+'gas_ID_'+str(ID[j])+'.dat')
-
-# Calculamos la energia.
-E_tot_star = k_star - pot_star[:, 1]
-E_tot_dark = k_dark - pot_dark[:, 1]
-E_tot_gas = k_gas - pot_gas[:, 1]
-
-E_tot = np.concatenate((E_tot_gas, E_tot_dark, E_tot_star))
-
-# En caso de que la galaxia NO TENGA particulas de GAS ########################
-###############################################################################
-
-else:
-    # Leemos los archivos de la galaxia.
-    dark = np.load(path+'dark'+str(ID[j])+'_particle_type_1.npy')
-    star = np.load(path+'star'+str(ID[j])+'_particle_type_4.npy')
-
-    # Rotamos las posiciones y velocidades.
+    # Tambien obtenemos la matriz de rotacion, y rotamos dm y gas.
     pos_star_rot, vel_star_rot, A = aling(star[:, 0], star[:, 1:4],
-                                          star[:, 4:7], 3.*R[j])
+                                          star[:, 4:7],
+                                          3.*R[j])
 
     pos_dark_rot = rot(dark[:, 1:4], A)
     vel_dark_rot = rot(dark[:, 4:7], A)
 
-    # Calculamos las componentes de momento angular.
+    pos_gas_rot = rot(gas_[:, 1:4], A)
+    vel_gas_rot = rot(gas_[:, 4:7], A)
+
+    # Calculamos las componentes de momento angular de estrellas, gas y DM.
     L_dark = np.asarray((pos_dark_rot[:, 1]*vel_dark_rot[:, 2] -
                          pos_dark_rot[:, 2]*vel_dark_rot[:, 1],
                          pos_dark_rot[:, 2]*vel_dark_rot[:, 0] -
@@ -199,7 +121,14 @@ else:
                          pos_star_rot[:, 0]*vel_star_rot[:, 1] -
                          pos_star_rot[:, 1]*vel_star_rot[:, 0]))
 
-    L_part = np.concatenate((L_dark, L_star), axis=1)
+    L_gas = np.asarray((pos_gas_rot[:, 1]*vel_gas_rot[:, 2] -
+                        pos_gas_rot[:, 2]*vel_gas_rot[:, 1],
+                        pos_gas_rot[:, 2]*vel_gas_rot[:, 0] -
+                        pos_gas_rot[:, 0]*vel_gas_rot[:, 2],
+                        pos_gas_rot[:, 0]*vel_gas_rot[:, 1] -
+                        pos_gas_rot[:, 1]*vel_gas_rot[:, 0]))
+
+    L_part = np.concatenate((L_gas, L_dark, L_star), axis=1)
 
     # Componente en el plano del momento angular de estrellas.
     Lr_star = np.sqrt(L_star[0, :]**2 + L_star[1, :]**2)
@@ -209,18 +138,23 @@ else:
     # Calculamos la energia cinetica de las partículas.
     k_star = 0.5*(star[:, 4]**2 + star[:, 5]**2 + star[:, 6]**2)
     k_dark = 0.5*(dark[:, 4]**2 + dark[:, 5]**2 + dark[:, 6]**2)
+    k_gas = 0.5*(gas_[:, 4]**2 + gas_[:, 5]**2 + gas_[:, 6]**2)
 
-    # Leemos los potenciales que guardamos en el archivo.
+    # Leemos los potenciales que guardamos en el archivo
+    # (notar q los files de potencial tienen dos columnas: ID y pot).
     path_potencial = '/home/vcristiani/doctorado/TNG_potenciales/potencial_'
 
     pot_star = np.loadtxt(path_potencial+'star_ID_'+str(ID[j])+'.dat')
     pot_dark = np.loadtxt(path_potencial+'dark_ID_'+str(ID[j])+'.dat')
+    pot_gas = np.loadtxt(path_potencial+'gas_ID_'+str(ID[j])+'.dat')
 
     # Calculamos la energia.
     E_tot_star = k_star - pot_star[:, 1]
     E_tot_dark = k_dark - pot_dark[:, 1]
+    E_tot_gas = k_gas - pot_gas[:, 1]
 
-    E_tot = np.concatenate((E_tot_dark, E_tot_star))
+    E_tot = np.concatenate((E_tot_gas, E_tot_dark, E_tot_star))
+    
 
 ###############################################################################
 # Acá hacemos un filtrado de las partículas que no vamos a usar en la

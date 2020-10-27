@@ -25,4 +25,3 @@ class test_Gaussian_mixture:
 
     def test_GMM_DU():
         ...
-    
