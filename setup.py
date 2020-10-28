@@ -71,7 +71,7 @@ def do_setup():
         author="Valeria Cristiani et al",
         author_email="valeria.cristiani@unc.edu.ar",
         url="https://github.com/vcristiani/galaxy-chop",
-        py_modules=["ez_setup"],
+        py_modules=["ez_setup", "galaxychop", "utils"],
         license="MIT",
         keywords="galaxy, dynamics",
         classifiers=(
