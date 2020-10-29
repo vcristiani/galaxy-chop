@@ -141,11 +141,6 @@ class Galaxy:
     # Componente en el plano del momento angular de las particulas.
     Lr = np.sqrt(L_part[0, :]**2 + L_part[1, :]**2)
 
-    # Calculamos la energia cinetica de las partículas.
-    k_star = 0.5 * (star[:, 4]**2 + star[:, 5]**2 + star[:, 6]**2)
-    k_dark = 0.5 * (dark[:, 4]**2 + dark[:, 5]**2 + dark[:, 6]**2)
-    k_gas = 0.5 * (gas_[:, 4]**2 + gas_[:, 5]**2 + gas_[:, 6]**2)
-
     # Leemos los potenciales que guardamos en el archivo
     # (notar q los files de potencial tienen dos columnas: ID y pot).
     path_potencial = '/home/vcristiani/doctorado/TNG_potenciales/potencial_'
@@ -154,12 +149,19 @@ class Galaxy:
     pot_dark = np.loadtxt(path_potencial + 'dark_ID_' + str(ID[j]) + '.dat')
     pot_gas = np.loadtxt(path_potencial + 'gas_ID_' + str(ID[j]) + '.dat')
 
-    # Calculamos la energia.
-    E_tot_star = k_star - pot_star[:, 1]
-    E_tot_dark = k_dark - pot_dark[:, 1]
-    E_tot_gas = k_gas - pot_gas[:, 1]
+    def energy(self, pot_star, pot_dark, pot_gas):
+        '''Calculation of kinetic and potencial energy of
+        dark matter, star and gas particles'''
 
-    E_tot = np.concatenate((E_tot_gas, E_tot_dark, E_tot_star))
+        k_dm = 0.5 * (self.vx_dm**2 + self.vy_dm**2 + self.vz_dm**2)
+        k_s = 0.5 * (self.vx_s**2 + self.vy_s**2 + self.vz_s**2)
+        k_g = 0.5 * (self.vx_g**2 + self.vy_g**2 + self.vz_g**2)
+
+        E_tot_dark = k_dm - self.pot_dark[:, 1]
+        E_tot_star = k_s - self.pot_star[:, 1]
+        E_tot_gas = k_g - self.pot_gas[:, 1]
+
+        return E_tot_star, E_tot_dark, E_tot_gas
 
 
 ###############################################################################
