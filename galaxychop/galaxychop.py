@@ -164,114 +164,149 @@ class Galaxy:
         return E_tot_star, E_tot_dark, E_tot_gas
 
 
-###############################################################################
-# Acá hacemos un filtrado de las partículas que no vamos a usar en la
-# descomposición dinamica.
+    def jcirc(self, E_tot_star, E_tot_dark, E_tot_gas, Jx, Jy, Jz, 
+              bin0=0.05, bin1=0.005):
+        """This method performs a filtering of the particles that are not 
+        going to be worked with in the dynamic decomposition and the J_circ 
+        is calculated.
+    Parameters
+    ----------
+    E_tot_star, E_tot_dark, E_tot_gas: `np.ndarray(n,1), np.ndarray(n,1),
+                                        np.ndarray(n,1)`
+        Specific kinetic and potential energy of stellar particles, gas and 
+        dark matter. Units: ???
+    Jx, Jy, Jzs: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+        Momento angular especifico de las particulas estelares, de gas 
+        y materia oscura. Units: ???
+    bin0, bin1: `float`
+        Bin sice of energy and angular momentum respectively. 
+        Default: bin0=0.05, bin1=0.005
 
-# Nos sacamos de encima las partículas que no están ligadas: E > 0.
-neg, = np.where(E_tot <= 0.)
-neg_star, = np.where(E_tot_star <= 0.)
+    Atributes
+    ---------
+    E_tot:
+    E:
+    L:
+    x,y:
+    J_circ:
 
-# Nos sacamos de encima las partículas con E = -inf.
-fin, = np.where(E_tot[neg] != -inf)
-fin_star, = np.where(E_tot_star[neg_star] != -inf)
+    """
 
-# Normalizamos las dos variables: E entre 0 y 1; L entre -1 y 1.
-E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
-L = L_part[2, :][neg][fin] / np.max(np.abs(L_part[2, :][neg][fin]))
+        E_tot = np.stack(E_tot_star, E_tot_dark, E_tot_gas)
 
-# Hacemos el bineado en energía y seleccionamos los valores de Jz con los que
-# calculamos el J_circ.
-aux0 = np.arange(-1., -0.1, 0.05)
-aux1 = np.arange(-0.1, 0., 0.005)
+        # Remove the particles that are not bound: E > 0.
+        neg, = np.where(E_tot <= 0.)
+        neg_star, = np.where(E_tot_star <= 0.)
 
-aux = np.concatenate((aux0, aux1), axis=0)
+        # Remove the particles with E = -inf.
+        fin, = np.where(E_tot[neg] != -inf)
+        fin_star, = np.where(E_tot_star[neg_star] != -inf)
 
-x = np.zeros(len(aux) + 1)
-y = np.zeros(len(aux) + 1)
+        # Normalize the two variables: E between 0 and 1; J between -1 and 1.
+        E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
+        L = L_part[2, :][neg][fin] / np.max(np.abs(L_part[2, :][neg][fin]))
 
-x[0] = -1.
-y[0] = np.abs(L[np.argmin(E)])
+        # Make the energy binning and select the Jz values with which we
+        # calculate the J_circ.
+        aux0 = np.arange(-1., -0.1, bin0)
+        aux1 = np.arange(-0.1, 0., bin1)
 
-for i in range(1, len(aux)):
-    mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
-    s = np.argsort(np.abs(L[mask]))
+        aux = np.concatenate((aux0, aux1), axis=0)
 
-    # Aca tenemos en cuenta si en los bines de energia hay o no particulas.
-    if len(s) != 0:
-        if len(s) == 1:
-            x[i] = E[mask][s]
-            y[i] = np.abs(L[mask][s])
-        else:
-            if (1. - (np.abs(L[mask][s][-2]) / np.abs(L[mask][s]
-                                                      [-1]))) >= 0.01:
-                x[i] = E[mask][s][-2]
-                y[i] = np.abs(L[mask][s][-2])
+        x = np.zeros(len(aux) + 1)
+        y = np.zeros(len(aux) + 1)
+
+        x[0] = -1.
+        y[0] = np.abs(L[np.argmin(E)])
+
+        for i in range(1, len(aux)):
+            mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
+            s = np.argsort(np.abs(L[mask]))
+
+            # We take into account whether or not there are particles in the
+            # energy bins.
+            if len(s) != 0:
+                if len(s) == 1:
+                    x[i] = E[mask][s]
+                    y[i] = np.abs(L[mask][s])
+                else:
+                    if (1. - (np.abs(L[mask][s][-2]) / np.abs(L[mask][s]
+                                                              [-1]))) >= 0.01:
+                        x[i] = E[mask][s][-2]
+                        y[i] = np.abs(L[mask][s][-2])
+                    else:
+                        x[i] = E[mask][s][-1]
+                        y[i] = np.abs(L[mask][s][-1])
             else:
-                x[i] = E[mask][s][-1]
-                y[i] = np.abs(L[mask][s][-1])
-    else:
-        pass
+                pass
 
-# Mascara para completar el ultimo bin, en caso de que no haya bines vacios.
-mask, = np.where(E > aux[len(aux) - 1])
+        # Mask to complete the last bin, in case there are no empty bins.
+        mask, = np.where(E > aux[len(aux) - 1])
 
-if len(mask) != 0:
-    x[len(aux)] = E[mask][np.abs(L[mask]).argmax()]
-    y[len(aux)] = np.abs(L[mask][np.abs(L[mask]).argmax()])
+        if len(mask) != 0:
+            x[len(aux)] = E[mask][np.abs(L[mask]).argmax()]
+            y[len(aux)] = np.abs(L[mask][np.abs(L[mask]).argmax()])
 
-# En el caso en que haya bines vacios, nos deshacemos de ellos.
-else:
-    i = len(np.where(y == 0)[0]) - 1
-    if i == 0:
-        x = x[:-1]
-        y = y[:-1]
-    else:
-        x = x[:-i]
-        y = y[:-i]
+        # In case there are empty bins, we get rid of them.
+        else:
+            i = len(np.where(y == 0)[0]) - 1
+            if i == 0:
+                x = x[:-1]
+                y = y[:-1]
+            else:
+                x = x[:-i]
+                y = y[:-i]
 
-# En caso de que algun bin intermedio no tenga puntos.
-zero, = np.where(x != 0.)
-x = x[zero]
-y = y[zero]
+        # In case some intermediate bin does not have points.
+        zero, = np.where(x != 0.)
+        x = x[zero]
+        y = y[zero]
+
+
+# Acá guardamos los puntos x y con lo que interpolamos J_circ (no se si es
+# necesario guardarlos)
 
 # Guardamos los puntos para calcular el J_circ.
-stack = np.column_stack((x, y))
-np.savetxt('/home/vcristiani/doctorado/TNG_envolventes/envolvente_ID_' + str
-           (ID) + '.dat', stack, fmt=['%18.14f', '%18.14f'])
+# stack = np.column_stack((x, y))
 
-# Hacemos la interpolación para calcular el J_circ.
-spl = InterpolatedUnivariateSpline(x, y, k=1)
+# np.savetxt('/home/vcristiani/doctorado/TNG_envolventes/envolvente_ID_' + str
+#           (ID) + '.dat', stack, fmt=['%18.14f', '%18.14f'])
 
-# Normalizamos E, Lz y Lr para las estrellas.
-E_star = E_tot_star[neg_star][fin_star] / np.abs(np.min(E_tot[neg][fin]))
-L_star_ = L_star[2, :][neg_star][fin_star] / np.max(np.abs(L_part[2, :]
-                                                           [neg][fin]))
-Lr_star_ = Lr_star[neg_star][fin_star] / np.max(np.abs(Lr[neg][fin]))
+        # We do the interpolation to calculate the J_circ.
+        J_circ = InterpolatedUnivariateSpline(x, y, k=1)
 
-# Calculamos el parametro de circularidad Lz/Lc.
-eps = L_star_ / spl(E_star)
+        return J_circ
 
-# Calculamos lo mismo para Lp/Lc.
-eps_r = Lr_star_ / spl(E_star)
+    def paramcirc(self, E_tot, E_tot_star, E_tot_dark, E_tot_gas, J_circ):
 
-# Ojo con esto, hay que ver que las particulas que estamos
-# sacando no sean significativas.
+        # Normalize E, Lz and Lr for the stars.
+        E_star = E_tot_star[neg_star][fin_star] / np.abs(np.min(E_tot[neg]
+                                                                [fin]))
+        L_star_ = L_star[2, :][neg_star][fin_star] / np.max(np.abs(L_part
+                                                            [2, :][neg][fin]))
+        Lr_star_ = Lr_star[neg_star][fin_star] / np.max(np.abs(Lr[neg][fin]))
 
-# Nos sacamos de encima las partículas que tengan circularidad < -1
-# y circularidad > 1.
-mask, = np.where((eps <= 1.) & (eps >= -1.))
+        # Calculate the circularity parameter Lz/Lc.
+        eps = L_star_ / J_circ(E_star)
 
-# ID de las particulas estelares limpias.
-ID_star = np.arange(0, len(star))[neg_star][fin_star][mask]
+        # Calculate the same for Lp/Lc.
+        eps_r = Lr_star_ / J_circ(E_star)
 
-# Guardamos ID, E y circularidad de las partículas estelares que nos interesan.
-indice = np.arange(0, len(ID_star))
-stack = np.column_stack((ID_star, E_star[mask], eps[mask],
-                         eps_r[mask], indice))
+        # Determine that the particles we are removing are not significant.
 
-np.savetxt('directori_file + name_file' + str(ID) + '.dat', stack,
-           fmt=['%10.0f', '%18.14f', '%18.14f', '%18.14f', '%10.0f'])
+        # We remove particles that have circularity < -1 and circularity > 1.
+        mask, = np.where((eps <= 1.) & (eps >= -1.))
+
+        # ID of the clean stellar particles.
+        ID_star = np.arange(0, len(star))[neg_star][fin_star][mask]
+
+        # Save ID, E and circularity of the stellar particles we are 
+        # interested in.
+        indice = np.arange(0, len(ID_star))
+        stack = np.column_stack((ID_star, E_star[mask], eps[mask],
+                                 eps_r[mask], indice))
+
+        return stack
 
 ###############################################################################
 # Método de descomposicion dinamica de Abadi + Energia.
