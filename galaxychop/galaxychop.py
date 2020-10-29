@@ -11,7 +11,7 @@
 
 import attr
 import numpy as np
-from aling import *
+from utils import aling, rot
 from scipy.interpolate import InterpolatedUnivariateSpline
 from sklearn.mixture import GaussianMixture
 import random
