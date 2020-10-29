@@ -144,20 +144,18 @@ class Galaxy:
     pot_gas = np.loadtxt(path_potencial+'gas_ID_'+str(ID[j])+'.dat')
 
     def energy(self, pot_star, pot_dark, pot_gas):
+        '''Calculation of kinetic and potencial energy of
+        dark matter, star and gas particles'''
 
-        '''Calculamos la energia cinetica y potencial y total'''
+        k_dm = 0.5 * (self.vx_dm**2 + self.vy_dm**2 + self.vz_dm**2)
+        k_s = 0.5 * (self.vx_s**2 + self.vy_s**2 + self.vz_s**2)
+        k_g = 0.5 * (self.vx_g**2 + self.vy_g**2 + self.vz_g**2)
 
-        k_s = 0.5*(self.vx_s**2 + self.vy_s**2 + self.vz_s**2)
-        k_dm = 0.5*(self.vx_dm**2 + self.vy_dm**2 + self.vz_dm**2)
-        k_g = 0.5*(self.vx_g**2 + self.vy_g**2 + self.vz_g**2)
-
-        E_tot_star = k_s - self.pot_star[:, 1]
         E_tot_dark = k_dm - self.pot_dark[:, 1]
+        E_tot_star = k_s - self.pot_star[:, 1]
         E_tot_gas = k_g - self.pot_gas[:, 1]
 
-        E_tot = np.concatenate((E_tot_gas, E_tot_dark, E_tot_star))
-
-        return E_tot, E_tot_star, E_tot_dark, E_tot_gas
+        return E_tot_star, E_tot_dark, E_tot_gas
 
 ###############################################################################
 # Acá hacemos un filtrado de las partículas que no vamos a usar en la
