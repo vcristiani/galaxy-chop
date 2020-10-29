@@ -98,7 +98,7 @@ class Galaxy:
     # Tambien obtenemos la matriz de rotacion, y rotamos dm y gas.
     pos_star_rot, vel_star_rot, A = aling(star[:, 0], star[:, 1:4],
                                           star[:, 4:7],
-                                          3.*R[j])
+                                          3. * R[j])
 
     pos_dark_rot = rot(dark[:, 1:4], A)
     vel_dark_rot = rot(dark[:, 4:7], A)
@@ -107,26 +107,32 @@ class Galaxy:
     vel_gas_rot = rot(gas_[:, 4:7], A)
 
     # Calculamos las componentes de momento angular de estrellas, gas y DM.
-    L_dark = np.asarray((pos_dark_rot[:, 1]*vel_dark_rot[:, 2] -
-                         pos_dark_rot[:, 2]*vel_dark_rot[:, 1],
-                         pos_dark_rot[:, 2]*vel_dark_rot[:, 0] -
-                         pos_dark_rot[:, 0]*vel_dark_rot[:, 2],
-                         pos_dark_rot[:, 0]*vel_dark_rot[:, 1] -
-                         pos_dark_rot[:, 1]*vel_dark_rot[:, 0]))
+    L_dark = np.asarray(
+        (pos_dark_rot[:, 1] * vel_dark_rot[:,
+         2] - pos_dark_rot[:, 2] * vel_dark_rot[:, 1],
+         pos_dark_rot[:, 2] * vel_dark_rot[:,
+         0] - pos_dark_rot[:, 0] * vel_dark_rot[:, 2],
+         pos_dark_rot[:, 0] * vel_dark_rot[:,
+         1] - pos_dark_rot[:, 1] * vel_dark_rot[:, 0])
+    )
 
-    L_star = np.asarray((pos_star_rot[:, 1]*vel_star_rot[:, 2] -
-                         pos_star_rot[:, 2]*vel_star_rot[:, 1],
-                         pos_star_rot[:, 2]*vel_star_rot[:, 0] -
-                         pos_star_rot[:, 0]*vel_star_rot[:, 2],
-                         pos_star_rot[:, 0]*vel_star_rot[:, 1] -
-                         pos_star_rot[:, 1]*vel_star_rot[:, 0]))
+    L_star = np.asarray(
+        (pos_star_rot[:, 1] * vel_star_rot[:,
+         2] - pos_star_rot[:, 2] * vel_star_rot[:, 1],
+         pos_star_rot[:, 2] * vel_star_rot[:,
+         0] - pos_star_rot[:, 0] * vel_star_rot[:, 2],
+         pos_star_rot[:, 0] * vel_star_rot[:,
+         1] - pos_star_rot[:, 1] * vel_star_rot[:, 0])
+    )
 
-    L_gas = np.asarray((pos_gas_rot[:, 1]*vel_gas_rot[:, 2] -
-                        pos_gas_rot[:, 2]*vel_gas_rot[:, 1],
-                        pos_gas_rot[:, 2]*vel_gas_rot[:, 0] -
-                        pos_gas_rot[:, 0]*vel_gas_rot[:, 2],
-                        pos_gas_rot[:, 0]*vel_gas_rot[:, 1] -
-                        pos_gas_rot[:, 1]*vel_gas_rot[:, 0]))
+    L_gas = np.asarray(
+        (pos_gas_rot[:, 1] * vel_gas_rot[:,
+         2] - pos_gas_rot[:, 2] * vel_gas_rot[:, 1],
+         pos_gas_rot[:, 2] * vel_gas_rot[:,
+         0] - pos_gas_rot[:, 0] * vel_gas_rot[:, 2],
+         pos_gas_rot[:, 0] * vel_gas_rot[:,
+         1] - pos_gas_rot[:, 1] * vel_gas_rot[:, 0])
+    )
 
     L_part = np.concatenate((L_gas, L_dark, L_star), axis=1)
 
@@ -139,9 +145,9 @@ class Galaxy:
     # (notar q los files de potencial tienen dos columnas: ID y pot).
     path_potencial = '/home/vcristiani/doctorado/TNG_potenciales/potencial_'
 
-    pot_star = np.loadtxt(path_potencial+'star_ID_'+str(ID[j])+'.dat')
-    pot_dark = np.loadtxt(path_potencial+'dark_ID_'+str(ID[j])+'.dat')
-    pot_gas = np.loadtxt(path_potencial+'gas_ID_'+str(ID[j])+'.dat')
+    pot_star = np.loadtxt(path_potencial + 'star_ID_' + str(ID[j]) + '.dat')
+    pot_dark = np.loadtxt(path_potencial + 'dark_ID_' + str(ID[j]) + '.dat')
+    pot_gas = np.loadtxt(path_potencial + 'gas_ID_' + str(ID[j]) + '.dat')
 
     def energy(self, pot_star, pot_dark, pot_gas):
         '''Calculation of kinetic and potencial energy of
@@ -157,6 +163,7 @@ class Galaxy:
 
         return E_tot_star, E_tot_dark, E_tot_gas
 
+
 ###############################################################################
 # Acá hacemos un filtrado de las partículas que no vamos a usar en la
 # descomposición dinamica.
@@ -170,8 +177,8 @@ fin, = np.where(E_tot[neg] != -inf)
 fin_star, = np.where(E_tot_star[neg_star] != -inf)
 
 # Normalizamos las dos variables: E entre 0 y 1; L entre -1 y 1.
-E = E_tot[neg][fin]/np.abs(np.min(E_tot[neg][fin]))
-L = L_part[2, :][neg][fin]/np.max(np.abs(L_part[2, :][neg][fin]))
+E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
+L = L_part[2, :][neg][fin] / np.max(np.abs(L_part[2, :][neg][fin]))
 
 # Hacemos el bineado en energía y seleccionamos los valores de Jz con los que
 # calculamos el J_circ.
@@ -180,14 +187,14 @@ aux1 = np.arange(-0.1, 0., 0.005)
 
 aux = np.concatenate((aux0, aux1), axis=0)
 
-x = np.zeros(len(aux)+1)
-y = np.zeros(len(aux)+1)
+x = np.zeros(len(aux) + 1)
+y = np.zeros(len(aux) + 1)
 
 x[0] = -1.
 y[0] = np.abs(L[np.argmin(E)])
 
 for i in range(1, len(aux)):
-    mask, = np.where((E <= aux[i]) & (E > aux[i-1]))
+    mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
     s = np.argsort(np.abs(L[mask]))
 
     # Aca tenemos en cuenta si en los bines de energia hay o no particulas.
@@ -196,7 +203,8 @@ for i in range(1, len(aux)):
             x[i] = E[mask][s]
             y[i] = np.abs(L[mask][s])
         else:
-            if (1.-(np.abs(L[mask][s][-2])/np.abs(L[mask][s][-1]))) >= 0.01:
+            if (1. - (np.abs(L[mask][s][-2]) / np.abs(L[mask][s]
+                                                      [-1]))) >= 0.01:
                 x[i] = E[mask][s][-2]
                 y[i] = np.abs(L[mask][s][-2])
             else:
@@ -206,7 +214,7 @@ for i in range(1, len(aux)):
         pass
 
 # Mascara para completar el ultimo bin, en caso de que no haya bines vacios.
-mask, = np.where(E > aux[len(aux)-1])
+mask, = np.where(E > aux[len(aux) - 1])
 
 if len(mask) != 0:
     x[len(aux)] = E[mask][np.abs(L[mask]).argmax()]
@@ -229,23 +237,23 @@ y = y[zero]
 
 # Guardamos los puntos para calcular el J_circ.
 stack = np.column_stack((x, y))
-np.savetxt('/home/vcristiani/doctorado/TNG_envolventes/envolvente_ID_'+str(ID)
-           + '.dat', stack, fmt=['%18.14f', '%18.14f'])
+np.savetxt('/home/vcristiani/doctorado/TNG_envolventes/envolvente_ID_' + str
+           (ID) + '.dat', stack, fmt=['%18.14f', '%18.14f'])
 
 # Hacemos la interpolación para calcular el J_circ.
 spl = InterpolatedUnivariateSpline(x, y, k=1)
 
 # Normalizamos E, Lz y Lr para las estrellas.
-E_star = E_tot_star[neg_star][fin_star]/np.abs(np.min(E_tot[neg][fin]))
-L_star_ = L_star[2, :][neg_star][fin_star]/np.max(np.abs(L_part[2, :]
-                                                         [neg][fin]))
-Lr_star_ = Lr_star[neg_star][fin_star]/np.max(np.abs(Lr[neg][fin]))
+E_star = E_tot_star[neg_star][fin_star] / np.abs(np.min(E_tot[neg][fin]))
+L_star_ = L_star[2, :][neg_star][fin_star] / np.max(np.abs(L_part[2, :]
+                                                           [neg][fin]))
+Lr_star_ = Lr_star[neg_star][fin_star] / np.max(np.abs(Lr[neg][fin]))
 
 # Calculamos el parametro de circularidad Lz/Lc.
-eps = L_star_/spl(E_star)
+eps = L_star_ / spl(E_star)
 
 # Calculamos lo mismo para Lp/Lc.
-eps_r = Lr_star_/spl(E_star)
+eps_r = Lr_star_ / spl(E_star)
 
 # Ojo con esto, hay que ver que las particulas que estamos
 # sacando no sean significativas.
@@ -262,7 +270,7 @@ indice = np.arange(0, len(ID_star))
 stack = np.column_stack((ID_star, E_star[mask], eps[mask],
                          eps_r[mask], indice))
 
-np.savetxt('directori_file + name_file'+str(ID)+'.dat', stack,
+np.savetxt('directori_file + name_file' + str(ID) + '.dat', stack,
            fmt=['%10.0f', '%18.14f', '%18.14f', '%18.14f', '%10.0f'])
 
 ###############################################################################
@@ -271,14 +279,14 @@ np.savetxt('directori_file + name_file'+str(ID)+'.dat', stack,
 
 # Leemos ID, E, circularidad, circularidad en el plano de las estrellas
 # de la galaxia e i.
-data = np.loadtxt('directori_file + name_file'+str(ID)+'.dat')
+data = np.loadtxt('directori_file + name_file' + str(ID) + '.dat')
 
 # Construimos el histograma del parametro de circularidad.
 n_bin = 100
 h = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[0]
 edges = np.round(np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1], 2)
-a_bin = edges[1]-edges[0]
-center = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1][:-1] + a_bin/2.
+a_bin = edges[1] - edges[0]
+center = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1][:-1] + a_bin / 2.
 cero, = np.where(edges == 0.)
 m = cero[0]
 
@@ -291,12 +299,13 @@ m = cero[0]
 
 n = {}
 
-for i in range(0, n_bin-1):
-    mask, = np.where((data[:, 2] >= edges[i]) & (data[:, 2] < edges[i+1]))
-    n['bin'+'%s' % i] = data[:, 4][mask]
+for i in range(0, n_bin - 1):
+    mask, = np.where((data[:, 2] >= edges[i]) & (data[:, 2] < edges[i + 1]))
+    n['bin' + '%s' % i] = data[:, 4][mask]
 
-mask, = np.where((data[:, 2] >= edges[n_bin-1]) & (data[:, 2] <= edges[n_bin]))
-n['bin'+'%s' % (len(center)-1)] = data[:, 4][mask]
+mask, = np.where((data[:, 2] >= edges[n_bin - 1]) & (data[:, 2] <= edges
+                                                     [n_bin]))
+n['bin' + '%s' % (len(center) - 1)] = data[:, 4][mask]
 
 # Seleccionamos las particulas que pertenecen al esferoide en función del
 # parámetro del circularidad y E.
@@ -304,83 +313,94 @@ np.random.seed(10)
 halo3 = {}
 
 for i in range(0, m):
-    halo3['bin'+'%s' % i] = n['bin'+'%s' % i]
+    halo3['bin' + '%s' % i] = n['bin' + '%s' % i]
 
-if len(h) >= 2*m:
+if len(h) >= 2 * m:
     lim_aux = 0
 else:
-    lim_aux = 2*m - len(h)
+    lim_aux = 2 * m - len(h)
 
 for i in range(lim_aux, m):
 
-    if len(n['bin'+'%s' % i]) >= len(n['bin'+'%s' % (2*m-1-i)]):
-        halo3['bin'+'%s' % (2*m-1-i)] = n['bin'+'%s' % (2*m-1-i)]
+    if len(n['bin' + '%s' % i]) >= len(n['bin' + '%s' % (2 * m - 1 - i)]):
+        halo3['bin' + '%s' % (2 * m - 1 - i)] = n['bin' + '%s' % (2 * m - 1 - i
+                                                                  )]
     else:
         nbin_E = 20
 
-        h0, b0 = np.histogram(data[np.int_(n['bin'+'%s' % i]), 1],
+        h0, b0 = np.histogram(data[np.int_(n['bin' + '%s' % i]), 1],
                               bins=nbin_E, range=(-1., 0.))
-        h1, b1 = np.histogram(data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 1],
-                              bins=nbin_E, range=(-1., 0.))
+        h1, b1 = np.histogram(data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                                   1], bins=nbin_E, range=(-1., 0.))
 
         aux0 = []
 
         for j in range(0, nbin_E):
             if h0[j] != 0:
                 if (h0[j] >= h1[j]):
-                    ll, = np.where((data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 1]
-                                    >= b1[j]) & (data[np.int_(n['bin'+'%s' %
-                                                 (2*m-1-i)]), 1] < b1[j+1]))
-                    aux1 = data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 4][ll]
+                    ll, = np.where(
+                        (data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                         1] >= b1[j]) & (
+                             data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                                  1] < b1[j + 1]
+                        )
+                    )
+                    aux1 = data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                                4][ll]
                     aux0 = np.concatenate((aux0, aux1), axis=None)
 
                 else:
-                    ll, = np.where((data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 1]
-                                    >= b1[j]) & (data[np.int_(n['bin'+'%s' %
-                                                 (2*m-1-i)]), 1] < b1[j+1]))
-                    aux1 = np.random.choice(data[np.int_(n['bin'+'%s' %
-                                            (2*m-1-i)]), 4][ll], h0[j],
-                                            replace=False)
+                    ll, = np.where(
+                        (data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                         1] >= b1[j]) & (
+                             data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
+                                  1] < b1[j + 1]
+                        )
+                    )
+                    aux1 = np.random.choice(
+                        data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]), 4]
+                        [ll], h0[j], replace=False
+                    )
                     aux0 = np.concatenate((aux0, aux1), axis=None)
             else:
                 aux1 = []
                 aux0 = np.concatenate((aux0, aux1), axis=None)
 
-        halo3['bin'+'%s' % (2*m-1-i)] = aux0
+        halo3['bin' + '%s' % (2 * m - 1 - i)] = aux0
 
 # Al resto de las particulas las asignamos al disco.
 disco3 = n.copy()
 
 for i in range(0, m):
-    disco3['bin'+'%s' % i] = []
+    disco3['bin' + '%s' % i] = []
 # Dejamos vacios los bines que sólo tienen particulas del HALO.
 
 x = set()
 y = set()
 
-if len(h) >= 2*m:
+if len(h) >= 2 * m:
     lim = m
 else:
-    lim = len(h)-m
+    lim = len(h) - m
 
 for i in range(lim, len(halo3)):
-    x = set(halo3['bin'+'%s' % i])
-    y = set(n['bin'+'%s' % i])
+    x = set(halo3['bin' + '%s' % i])
+    y = set(n['bin' + '%s' % i])
     y -= x
     y = np.array(list(y))
-    disco3['bin'+'%s' % i] = y
+    disco3['bin' + '%s' % i] = y
 
 # Guardamos los indices de las particulas
 # que pertenecen al esferoide y al disco,
 # que estan en el archivo cirularidad_y_L_ID_str(ID).dat.
 esf_ = []
 for i in range(len(halo3)):
-    esf_ = np.concatenate((esf_, halo3['bin'+'%s' % (i)]))
+    esf_ = np.concatenate((esf_, halo3['bin' + '%s' % (i)]))
 esf_ = np.int_(esf_)
 
 disk_ = []
 for i in range(len(disco3)):
-    disk_ = np.concatenate((disk_, disco3['bin'+'%s' % (i)]))
+    disk_ = np.concatenate((disk_, disco3['bin' + '%s' % (i)]))
 disk_ = np.int_(disk_)
 
 
@@ -394,14 +414,18 @@ disco = np.int_(data[disk_, 0])
 # para cada una de las componentes.
 # Estos inidices sirven para hacer la identificacion
 # de a que componente pertenece cada estrella.
-np.savetxt(path+'dir_file+esf_ID_'+str(ID)+'.dat', esferoide, fmt=['%10.0f'])
-np.savetxt(path+'dir_file+dsk_ID_'+str(ID)+'.dat', disco, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+esf_ID_' + str(ID) + '.dat',
+           esferoide, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+dsk_ID_' + str(ID) + '.dat',
+           disco, fmt=['%10.0f'])
 
 # Guardamos los indices de los parametros de circularidad
 # para cada una de las componentes.
 # Esto es para hacer el plot del histograma de circularidades.
-np.savetxt(path+'dir_file+circ_esf_ID_'+str(ID)+'.dat', esf_, fmt=['%10.0f'])
-np.savetxt(path+'dir_file+circ_dsk_ID_'+str(ID)+'.dat', disk_, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+circ_esf_ID_' + str(ID) + '.dat',
+           esf_, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+circ_dsk_ID_' + str(ID) + '.dat',
+           disk_, fmt=['%10.0f'])
 
 
 ###############################################################################
@@ -411,14 +435,14 @@ np.savetxt(path+'dir_file+circ_dsk_ID_'+str(ID)+'.dat', disk_, fmt=['%10.0f'])
 # Leemos ID, E, circularidad, circularidad
 # en el plano de las estrellas de la galaxia e i.
 
-data = np.loadtxt('dir_file + file_name '+str(ID)+'.dat')
+data = np.loadtxt('dir_file + file_name ' + str(ID) + '.dat')
 
 # Construimos el histograma del parametro de circularidad.
 n_bin = 100
 h = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[0]
 edges = np.round(np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1], 2)
-a_bin = edges[1]-edges[0]
-center = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1][:-1] + a_bin/2.
+a_bin = edges[1] - edges[0]
+center = np.histogram(data[:, 2], n_bin, range=(-1., 1.))[1][:-1] + a_bin / 2.
 cero, = np.where(edges == 0.)
 m = cero[0]
 
@@ -431,12 +455,13 @@ m = cero[0]
 
 n = {}
 
-for i in range(0, n_bin-1):
+for i in range(0, n_bin - 1):
     mask, = np.where((data[:, 2] >= edges[i]) & (data[:, 2] < edges[i + 1]))
-    n['bin'+'%s' % i] = data[:, 4][mask]
+    n['bin' + '%s' % i] = data[:, 4][mask]
 
-mask, = np.where((data[:, 2] >= edges[n_bin-1]) & (data[:, 2] <= edges[n_bin]))
-n['bin'+'%s' % (len(center)-1)] = data[:, 4][mask]
+mask, = np.where((data[:, 2] >= edges[n_bin - 1]) & (data[:, 2] <= edges[n_bin]
+                                                     ))
+n['bin' + '%s' % (len(center) - 1)] = data[:, 4][mask]
 
 # Seleccionamos las particulas que pertenecen al esferoide en función del
 # parámetro del circularidad y E.
@@ -444,19 +469,21 @@ np.random.seed(10)
 halo3 = {}
 
 for i in range(0, m):
-    halo3['bin'+'%s' % i] = n['bin'+'%s' % i]
+    halo3['bin' + '%s' % i] = n['bin' + '%s' % i]
 
-if len(h) >= 2*m:
+if len(h) >= 2 * m:
     lim_aux = 0
 else:
-    lim_aux = 2*m - len(h)
+    lim_aux = 2 * m - len(h)
 
 for i in range(lim_aux, m):
 
-    if len(n['bin'+'%s' % i]) >= len(n['bin'+'%s' % (2*m-1-i)]):
+    if len(n['bin' + '%s' % i]) >= len(n['bin' + '%s' % (2 * m - 1 - i)]):
         # Si la cant de particulas en el bin contrarrotante es mayor
         # que en el bin corrotante,
-        halo3['bin'+'%s' % (2*m-1-i)] = n['bin'+'%s' % (2*m-1-i)]
+        halo3['bin' + '%s' % (2 * m - 1 - i)] = n[
+            'bin' + '%s' % (2 * m - 1 - i)
+        ]
         # Entonces todas pertenecen al esferoide
     else:
 
@@ -473,17 +500,23 @@ for i in range(lim_aux, m):
 
         # Indices de las celdas correspondientes a
         # las particulas de los bines contra-rotantes.
-        xx_contra = np.int_(((data[np.int_(n['bin'+'%s' % i]), 1]-xmin) /
-                            (xmax-xmin)) * nbin_E)
-        yy_contra = np.int_(((data[np.int_(n['bin'+'%s' % i]), 3]-ymin) /
-                            (ymax-ymin)) * nbin_eps_r)
+        xx_contra = np.int_(((data[np.int_(
+            n['bin' + '%s' % i]), 1] - xmin) / (xmax - xmin)) * nbin_E
+        )
+        yy_contra = np.int_(((data[np.int_(
+            n['bin' + '%s' % i]), 3] - ymin) / (ymax - ymin)) * nbin_eps_r
+        )
 
         # Indices de las celdas correspondientes a
         # las particulas de los bines co-rotantes.
-        xx_co = np.int_(((data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 1]-xmin) /
-                        (xmax-xmin)) * nbin_E)
-        yy_co = np.int_(((data[np.int_(n['bin'+'%s' % (2*m-1-i)]), 3]-ymin) /
-                        (ymax-ymin)) * nbin_eps_r)
+        xx_co = np.int_(((data[np.int_(
+            n['bin' + '%s' % (2 * m - 1 - i)]), 1] - xmin) / (xmax - xmin)
+        ) * nbin_E
+        )
+        yy_co = np.int_(((data[np.int_(
+            n['bin' + '%s' % (2 * m - 1 - i)]), 3] - ymin) / (ymax - ymin)
+        ) * nbin_eps_r
+        )
 
         aux0 = []
         for indx in range(0, nbin_E):
@@ -506,7 +539,7 @@ for i in range(lim_aux, m):
                         # El nro particulas con ese rango de valor de E y eps_r
                         # en el bin corotante de eps es menor o igual que
                         # en el contrarotante, luego se seleccionan todas.
-                        aux1 = data[np.int_(n['bin'+'%s' % (2*m-1-i)]),
+                        aux1 = data[np.int_(n['bin' + '%s' % (2 * m - 1 - i)]),
                                     4][mask_indx_co][mask_indy_co]
                         aux0 = np.hstack((aux0, aux1))
 
@@ -514,49 +547,51 @@ for i in range(lim_aux, m):
                         # El nro particulas con ese rango de valor de E y eps_r
                         # en el bin corotante de eps es mayor que en el
                         # contrarotante, luego se seleccionan algunas random.
-                        aux1 = np.random.choice(data[np.int_(n['bin'+'%s' %
-                                                (2*m-1-i)]), 4][mask_indx_co]
-                                                [mask_indy_co], len(mask_indy),
-                                                replace=False)
+                        aux1 = np.random.choice(
+                            data[np.int_(
+                                n['bin' + '%s' % (2 * m - 1 - i)]), 4]
+                            [mask_indx_co][mask_indy_co],
+                            len(mask_indy), replace=False
+                        )
                         aux0 = np.hstack((aux0, aux1))
 
 ###############################################################################
 
-        halo3['bin'+'%s' % (2*m-1-i)] = aux0
+        halo3['bin' + '%s' % (2 * m - 1 - i)] = aux0
 
 # Al resto de las particulas las asignamos al disco.
 disco3 = n.copy()
 
 for i in range(0, m):
-    disco3['bin'+'%s' % i] = []
+    disco3['bin' + '%s' % i] = []
     # Dejamos vacios los bines que sólo tienen particulas del HALO.
 
 x = set()
 y = set()
 
-if len(h) >= 2*m:
+if len(h) >= 2 * m:
     lim = m
 else:
-    lim = len(h)-m
+    lim = len(h) - m
 
 for i in range(lim, len(halo3)):
-    x = set(halo3['bin'+'%s' % i])
-    y = set(n['bin'+'%s' % i])
+    x = set(halo3['bin' + '%s' % i])
+    y = set(n['bin' + '%s' % i])
     y -= x
     y = np.array(list(y))
-    disco3['bin'+'%s' % i] = y
+    disco3['bin' + '%s' % i] = y
 
 # Guardamos los indices de las particulas que
 # pertenecen al esferoide y al disco,
 # que estan en el archivo cirularidad_y_L_ID_str(ID).dat.
 esf_ = []
 for i in range(len(halo3)):
-    esf_ = np.concatenate((esf_, halo3['bin'+'%s' % (i)]))
+    esf_ = np.concatenate((esf_, halo3['bin' + '%s' % (i)]))
 esf_ = np.int_(esf_)
 
 disk_ = []
 for i in range(len(disco3)):
-    disk_ = np.concatenate((disk_, disco3['bin'+'%s' % (i)]))
+    disk_ = np.concatenate((disk_, disco3['bin' + '%s' % (i)]))
 disk_ = np.int_(disk_)
 
 # Para obtener posiciones, masas y velocidades
@@ -567,24 +602,24 @@ disco = np.int_(data[disk_, 0])
 
 # Guardamos los indices de las particulas estelares
 # para cada una de las componentes.
-np.savetxt(path+'dir_file+esf_ID_'+str(ID) +
-           '_con_jp.dat', esferoide, fmt=['%10.0f'])
-np.savetxt(path+'dir_file+dsk_ID_'+str(ID) +
-           '_con_jp.dat', disco, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+esf_ID_' + str(ID) + '_con_jp.dat', esferoide,
+           fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+dsk_ID_' + str(ID) + '_con_jp.dat', disco,
+           fmt=['%10.0f'])
 
 # Guardamos los indices de los parametros de circularidad
 # para cada una de las componentes:
-np.savetxt(path+'dir_file+circularidad_esf_ID_'+str(ID) +
-           '_con_jp.dat', esf_, fmt=['%10.0f'])
-np.savetxt(path+'dir_file+circularidad_dsk_ID_'+str(ID) +
-           '_con_jp.dat', disk_, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+circularidad_esf_ID_' + str(ID) + '_con_jp.dat',
+           esf_, fmt=['%10.0f'])
+np.savetxt(path + 'dir_file+circularidad_dsk_ID_' + str(ID) + '_con_jp.dat',
+           disk_, fmt=['%10.0f'])
 
 
 ###############################################################################
 # Método de descomposicion dinamica de Obreja
 ###############################################################################
 
-np.loadtxt('dir_file + file_name'+str(ID[ind])+'.dat')
+np.loadtxt('dir_file + file_name' + str(ID[ind]) + '.dat')
 X_train = data[:, 1:4]
 
 # Aplicamos el GMM.
@@ -613,8 +648,10 @@ else:
     esf = pro_1[:, 0]
 
 # Guardamos los pesos de la descomposicion dinamica.
-np.savetxt(path+'desc_dina/gmm2_esf_ID'+str(ID)+'.dat', esf, fmt=['%12.8f'])
-np.savetxt(path+'desc_dina/gmm2_dsk_ID'+str(ID)+'.dat', dsk, fmt=['%12.8f'])
+np.savetxt(path + 'desc_dina/gmm2_esf_ID' + str(ID) + '.dat', esf,
+           fmt=['%12.8f'])
+np.savetxt(path + 'desc_dina/gmm2_dsk_ID' + str(ID) + '.dat', dsk,
+           fmt=['%12.8f'])
 
 
 ###############################################################################
@@ -629,7 +666,7 @@ random.seed(2**32 - 1)
 comp = np.arange(2, 16)
 BIC_med = np.zeros(len(comp))
 
-data = np.loadtxt('dir_file + file_name'+str(ID)+'.dat')
+data = np.loadtxt('dir_file + file_name' + str(ID) + '.dat')
 X_train = data[:, 1:4]
 
 # Acá vamos de decidir cuantas componentes vamos a
@@ -642,9 +679,9 @@ for i in range(0, len(comp)):
 
     clf_1 = GaussianMixture(n_components=n_comp, n_init=1)
     clf_1.fit(X_train)
-    BIC_med[i] = clf_1.bic(X_train)/len(X_train)
+    BIC_med[i] = clf_1.bic(X_train) / len(X_train)
 
-BIC_min = np.sum(BIC_med[-5:])/5.
+BIC_min = np.sum(BIC_med[-5:]) / 5.
 delta_BIC = BIC_med - BIC_min
 
 C_BIC = 0.1
@@ -676,7 +713,9 @@ for i in range(0, n_comp):
         esf = esf + pro_1[:, i]
 
 # Guardamos los pesos de la descomposicion dinamica.
-np.savetxt(path+'dir_file+du_esf_ID_'+str(ID)+'.dat', esf, fmt=['%12.8f'])
-np.savetxt(path+'dir_file+du_dsk_ID_'+str(ID)+'.dat', dsk, fmt=['%12.8f'])
-np.savetxt(path+'dir_file+du_nro_de_componentes.dat',
+np.savetxt(path + 'dir_file+du_esf_ID_' + str(ID) + '.dat', esf,
+           fmt=['%12.8f'])
+np.savetxt(path + 'dir_file+du_dsk_ID_' + str(ID) + '.dat', dsk,
+           fmt=['%12.8f'])
+np.savetxt(path + 'dir_file+du_nro_de_componentes.dat',
            numero_de_componentes_du, fmt=['%18.f', '%12.f'])
