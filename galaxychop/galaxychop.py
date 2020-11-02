@@ -90,7 +90,7 @@ class Galaxy:
 
     components_s = attr.ib(default=None)
     components_g = attr.ib(default=None)
-    metadata = attr.ib()
+    metadata = attr.ib(default=None)
 
 
     def energy(self, pot_star, pot_dark, pot_gas):
