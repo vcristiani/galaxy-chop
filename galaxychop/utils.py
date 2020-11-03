@@ -1,4 +1,8 @@
 import numpy as np
+import dask
+import dask.array as da
+
+G = 4.299e4
 
 
 def _get_rot_matrix(m, pos, vel, r_corte=None):
@@ -33,23 +37,23 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     jy = m * (pos[:, 2] * vel[:, 0] - pos[:, 0] * vel[:, 2])
     jz = m * (pos[:, 0] * vel[:, 1] - pos[:, 1] * vel[:, 0])
 
-    r = np.sqrt(pos[:, 0]**2 + pos[:, 1]**2 + pos[:, 2]**2)
+    r = np.sqrt(pos[:, 0] ** 2 + pos[:, 1] ** 2 + pos[:, 2] ** 2)
 
     if r_corte is not None:
         mask = np.where(r < r_corte)
     else:
-        mask = np.repeat(True, len(r)),
+        mask = (np.repeat(True, len(r)),)
 
     rjx = np.sum(jx[mask])
     rjy = np.sum(jy[mask])
     rjz = np.sum(jz[mask])
 
-    rjp = np.sqrt(rjx**2 + rjy**2)
-    rj = np.sqrt(rjx**2 + rjy**2 + rjz**2)
+    rjp = np.sqrt(rjx ** 2 + rjy ** 2)
+    rj = np.sqrt(rjx ** 2 + rjy ** 2 + rjz ** 2)
 
     e1x = rjy / rjp
     e1y = -rjx / rjp
-    e1z = 0.
+    e1z = 0.0
 
     e2x = rjx * rjz / (rjp * rj)
     e2y = rjy * rjz / (rjp * rj)
@@ -59,15 +63,9 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     e3y = rjy / rj
     e3z = rjz / rj
 
-    A = np.asarray(
-        (
-            [e1x, e1y, e1z],
-            [e2x, e2y, e2z],
-            [e3x, e3y, e3z]
-        )
-    )
+    A = np.asarray(([e1x, e1y, e1z], [e2x, e2y, e2z], [e3x, e3y, e3z]))
 
-    return(A)
+    return A
 
 
 def aling(m, pos, vel, r_corte):
@@ -106,4 +104,34 @@ def aling(m, pos, vel, r_corte):
 
     return pos_rot.T, vel_rot.T
 
-###################################################################
+
+@dask.delayed
+def potential_dask(self, x, y, z, m, eps=0.1):
+    """This calculates the specific gravitational potential energy of
+    particles.
+
+    Parameters
+    ----------
+    x, y, z: `np.ndarray`, shape(n,1)
+        Positions of particles.
+    m:  `np.ndarray`, shape(n,1)
+        Masses of particles.
+    eps: `float`, optional
+        Softening parameter.
+
+    Returns
+    -------
+    Specific potential energy of particles
+    """
+
+    dist = np.sqrt(np.square(x - x.reshape(-1, 1))
+                   + np.square(y - y.reshape(-1, 1))
+                   + np.square(z - z.reshape(-1, 1))
+                   + np.square(eps))
+
+    np.fill_diagonal(dist, 0.0)
+
+    flt = dist != 0
+    mdist = da.divide(m, dist, where=flt)
+
+    return mdist.sum(axis=1) * G
