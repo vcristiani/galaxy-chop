@@ -106,7 +106,7 @@ def aling(m, pos, vel, r_corte):
 
 
 @dask.delayed
-def potential_dask(self, x, y, z, m, eps=0.1):
+def _potential_dask(x, y, z, m, eps=0.1):
     """This calculates the specific gravitational potential energy of
     particles.
 
@@ -135,3 +135,10 @@ def potential_dask(self, x, y, z, m, eps=0.1):
     mdist = da.divide(m, dist, where=flt)
 
     return mdist.sum(axis=1) * G
+
+
+def potential(x, y, z, m, eps=0.1):
+
+    pot = _potential_dask(x, y, z, m, eps=0.1)
+
+    return np.asarray(pot.compute())
