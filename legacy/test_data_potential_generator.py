@@ -1,6 +1,7 @@
 import numpy as np
 from tests.test_input import solid_disk
 
+
 def save_data(N_part=100):
 
     """
