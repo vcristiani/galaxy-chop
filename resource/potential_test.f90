@@ -4,9 +4,9 @@ program potencial
     implicit none
     
     integer, parameter   :: n = 100
-    real, dimension(:), allocatable   :: x, y, z, m, ep
-    real, parameter      :: G = 4.299e+4, eps=0.1
-    real                 :: dist
+    real*8, dimension(:), allocatable   :: x, y, z, m, ep
+    real*8, parameter      :: G = 4.299e+4, eps=0.1
+    real*8                 :: dist
     integer              :: i, j
     
     
@@ -41,7 +41,7 @@ program potencial
     !======================================================================
     
     !-------------escribo los potenciales de las particulas---------------------
-    open(30, file='../tests/test_data/fpotential_test.dat', status='new')
+    open(30, file='../tests/test_data/fpotential_test.dat', status='unknown')
     do i = 1,n
             write(30,*) ep(i)
     end do
