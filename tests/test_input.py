@@ -265,10 +265,10 @@ def test_invert_zaxis(disc_zrotation):
     np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)
 
 
-@pytest.mark.xfail
+#  @pytest.mark.xfail
 def test_daskpotential(disc_particles):
     dpotential = utils.potential(*disc_particles)
     fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
     print(list(dpotential))
     print(list(fpotential))
-    np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(dpotential, fpotential, rtol=1e-6, atol=1e-4)

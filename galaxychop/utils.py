@@ -132,7 +132,7 @@ def _potential_dask(x, y, z, m, eps=0.1):
     np.fill_diagonal(dist, 0.0)
 
     flt = dist != 0
-    mdist = da.divide(m, dist, where=flt)
+    mdist = da.divide(m, dist.astype(np.float32), where=flt)
 
     return mdist.sum(axis=1) * G
 
