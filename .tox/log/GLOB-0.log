@@ -1,6 +1,6 @@
 action: GLOB, msg: packaging
 cwd: /home/ornela/PYTHON/galaxy-chop
-cmd: /home/ornela/.virtualenvs/galaxy-env/bin/python setup.py sdist --formats=zip --dist-dir /home/ornela/PYTHON/galaxy-chop/.tox/dist
+cmd: /home/ornela/.virtualenvs/galaxy-env/bin/python setup.py sdist --formats=zip --dist-dir .tox/dist
 Warning: 'classifiers' should be a list, got type 'tuple'
 ['galaxychop']
 running sdist
@@ -30,8 +30,7 @@ copying galaxychop.egg-info/dependency_links.txt -> galaxychop-0.1.0/galaxychop.
 copying galaxychop.egg-info/requires.txt -> galaxychop-0.1.0/galaxychop.egg-info
 copying galaxychop.egg-info/top_level.txt -> galaxychop-0.1.0/galaxychop.egg-info
 Writing galaxychop-0.1.0/setup.cfg
-creating /home/ornela/PYTHON/galaxy-chop/.tox/dist
-creating '/home/ornela/PYTHON/galaxy-chop/.tox/dist/galaxychop-0.1.0.zip' and adding 'galaxychop-0.1.0' to it
+creating '.tox/dist/galaxychop-0.1.0.zip' and adding 'galaxychop-0.1.0' to it
 adding 'galaxychop-0.1.0'
 adding 'galaxychop-0.1.0/galaxychop.egg-info'
 adding 'galaxychop-0.1.0/galaxychop'
