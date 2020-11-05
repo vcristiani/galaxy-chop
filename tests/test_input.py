@@ -16,64 +16,10 @@ from galaxychop import utils
 # =============================================================================
 # Random state
 # =============================================================================
-# Fix the random state
-seed = 42
-random = np.random.RandomState(seed=seed)
-
+random = np.random.RandomState(seed=42)
 # =============================================================================
 # Defining utility functions for mocking data
 # =============================================================================
-
-
-def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
-    """
-    Creates a set of particles that belong to a rigid body rotating disk,
-    sampling particles from a flat annulus, with maximum radius and minimum
-    radius `(rmax, rmin)` and thickness iqual to 1.
-
-    The angular velocity `omega` is used to set an angular rotation around
-    `z` axis. The function delivers mass vector (set to identical unity mass),
-    the positions and velocities as `(N_part, 3)` arrays.
-
-    Parameters
-    ----------
-    N_part : `int`
-        The total number of particles to obtain
-    rmax : `float`
-        The maximum radius of the disk
-    rmin : `float`
-        The minimum radius of the disk
-    omega : `float`
-        Angular velocity of the
-
-    Returns
-    -------
-    mass : `np.ndarray`, shape = N_part, 1
-        Masses per particle, identically 1 for all.
-    pos : `np.ndarray`, shape = N_part, 3
-        Positions of particles
-    vel : `np.ndarray`, shape = N_part, 3
-        Velocities of particles
-    """
-
-    random = np.random.RandomState(seed=seed)
-
-    r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
-    phi0 = 2 * np.pi * random.random_sample(size=N_part)
-    mass = 1. * np.ones_like(r)
-
-    x = r * np.cos(phi0)
-    y = r * np.sin(phi0)
-    z = 1 * random.random_sample(size=N_part) - 0.5
-
-    xdot = -1 * omega * r * np.sin(phi0)
-    ydot = omega * r * np.cos(phi0)
-    zdot = np.zeros_like(xdot)
-
-    pos = np.array([x, y, z]).T
-    vel = np.array([xdot, ydot, zdot]).T
-
-    return mass, pos, vel
 
 
 def rot_matrix_xaxis(theta=0):
@@ -211,14 +157,39 @@ def save_data(N_part=100):
 # =============================================================================
 
 @pytest.fixture(scope="session")
-def disc_zero_angle():
+def solid_disk():
+    def make(N_part=100, rmax=30, rmin=5, omega=10, seed=42):
+
+        random = np.random.RandomState(seed=seed)
+
+        r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
+        phi0 = 2 * np.pi * random.random_sample(size=N_part)
+        mass = 1. * np.ones_like(r)
+
+        x = r * np.cos(phi0)
+        y = r * np.sin(phi0)
+        z = 1 * random.random_sample(size=N_part) - 0.5
+
+        xdot = -1 * omega * r * np.sin(phi0)
+        ydot = omega * r * np.cos(phi0)
+        zdot = np.zeros_like(xdot)
+
+        pos = np.array([x, y, z]).T
+        vel = np.array([xdot, ydot, zdot]).T
+
+        return mass, pos, vel
+    return make
+
+
+@pytest.fixture(scope="session")
+def disc_zero_angle(solid_disk):
     mass, pos, vel = solid_disk(N_part=1000)
 
     return mass, pos, vel
 
 
 @pytest.fixture(scope="session")
-def disc_xrotation():
+def disc_xrotation(solid_disk):
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_xaxis(theta=0.3 * np.pi * random.random())
 
@@ -226,7 +197,7 @@ def disc_xrotation():
 
 
 @pytest.fixture(scope="session")
-def disc_yrotation():
+def disc_yrotation(solid_disk):
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
@@ -234,7 +205,7 @@ def disc_yrotation():
 
 
 @pytest.fixture(scope="session")
-def disc_zrotation():
+def disc_zrotation(solid_disk):
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_zaxis(theta=0.3 * np.pi * random.random())
 
@@ -242,7 +213,7 @@ def disc_zrotation():
 
 
 @pytest.fixture(scope="session")
-def disc_particles():
+def disc_particles(solid_disk):
     mass, pos, vel = solid_disk(N_part=100)
     return pos[:, 0], pos[:, 1], pos[:, 2], mass
 
@@ -297,5 +268,6 @@ def test_invert_zaxis(disc_zrotation):
 def test_daskpotential(disc_particles):
     dpotential = utils.potential(*disc_particles)
     fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
-
+    print(list(dpotential))
+    print(list(fpotential))
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
