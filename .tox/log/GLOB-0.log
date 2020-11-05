@@ -1,0 +1,51 @@
+action: GLOB, msg: packaging
+cwd: /home/ornela/PYTHON/galaxy-chop
+cmd: /home/ornela/.virtualenvs/galaxy-env/bin/python setup.py sdist --formats=zip --dist-dir /home/ornela/PYTHON/galaxy-chop/.tox/dist
+Warning: 'classifiers' should be a list, got type 'tuple'
+['galaxychop']
+running sdist
+running egg_info
+writing galaxychop.egg-info/PKG-INFO
+writing dependency_links to galaxychop.egg-info/dependency_links.txt
+writing requirements to galaxychop.egg-info/requires.txt
+writing top-level names to galaxychop.egg-info/top_level.txt
+file galaxychop.py (for module galaxychop) not found
+file utils.py (for module utils) not found
+reading manifest file 'galaxychop.egg-info/SOURCES.txt'
+writing manifest file 'galaxychop.egg-info/SOURCES.txt'
+running check
+creating galaxychop-0.1.0
+creating galaxychop-0.1.0/galaxychop
+creating galaxychop-0.1.0/galaxychop.egg-info
+copying files to galaxychop-0.1.0...
+copying README.md -> galaxychop-0.1.0
+copying ez_setup.py -> galaxychop-0.1.0
+copying setup.py -> galaxychop-0.1.0
+copying galaxychop/__init__.py -> galaxychop-0.1.0/galaxychop
+copying galaxychop/galaxychop.py -> galaxychop-0.1.0/galaxychop
+copying galaxychop/utils.py -> galaxychop-0.1.0/galaxychop
+copying galaxychop.egg-info/PKG-INFO -> galaxychop-0.1.0/galaxychop.egg-info
+copying galaxychop.egg-info/SOURCES.txt -> galaxychop-0.1.0/galaxychop.egg-info
+copying galaxychop.egg-info/dependency_links.txt -> galaxychop-0.1.0/galaxychop.egg-info
+copying galaxychop.egg-info/requires.txt -> galaxychop-0.1.0/galaxychop.egg-info
+copying galaxychop.egg-info/top_level.txt -> galaxychop-0.1.0/galaxychop.egg-info
+Writing galaxychop-0.1.0/setup.cfg
+creating /home/ornela/PYTHON/galaxy-chop/.tox/dist
+creating '/home/ornela/PYTHON/galaxy-chop/.tox/dist/galaxychop-0.1.0.zip' and adding 'galaxychop-0.1.0' to it
+adding 'galaxychop-0.1.0'
+adding 'galaxychop-0.1.0/galaxychop.egg-info'
+adding 'galaxychop-0.1.0/galaxychop'
+adding 'galaxychop-0.1.0/setup.py'
+adding 'galaxychop-0.1.0/README.md'
+adding 'galaxychop-0.1.0/setup.cfg'
+adding 'galaxychop-0.1.0/ez_setup.py'
+adding 'galaxychop-0.1.0/PKG-INFO'
+adding 'galaxychop-0.1.0/galaxychop.egg-info/SOURCES.txt'
+adding 'galaxychop-0.1.0/galaxychop.egg-info/dependency_links.txt'
+adding 'galaxychop-0.1.0/galaxychop.egg-info/PKG-INFO'
+adding 'galaxychop-0.1.0/galaxychop.egg-info/requires.txt'
+adding 'galaxychop-0.1.0/galaxychop.egg-info/top_level.txt'
+adding 'galaxychop-0.1.0/galaxychop/__init__.py'
+adding 'galaxychop-0.1.0/galaxychop/galaxychop.py'
+adding 'galaxychop-0.1.0/galaxychop/utils.py'
+removing 'galaxychop-0.1.0' (and everything under it)

@@ -102,7 +102,7 @@ def disc_particles():
 def test_daskpotential(disc_particles):
     dpotential = utils.potential(*disc_particles)
     #fpotential = read_data()
-    fpotential = np.loadtxt('test_data/fpotential_test.dat')
+    fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
 
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
     

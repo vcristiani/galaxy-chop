@@ -17,7 +17,8 @@ from galaxychop import utils
 # Random state
 # =============================================================================
 # Fix the random state
-random = np.random.RandomState(seed=42)
+seed = 42
+random = np.random.RandomState(seed=seed)
 
 # =============================================================================
 # Defining utility functions for mocking data
@@ -54,6 +55,9 @@ def solid_disk(N_part=100, rmax=30, rmin=5, omega=10):
     vel : `np.ndarray`, shape = N_part, 3
         Velocities of particles
     """
+
+    random = np.random.RandomState(seed=seed)
+
     r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
     phi0 = 2 * np.pi * random.random_sample(size=N_part)
     mass = 1. * np.ones_like(r)
@@ -172,39 +176,75 @@ def rotate(pos, vel, matrix):
     return pos_rot, vel_rot
 
 
+def save_data(N_part=100):
+
+    """
+    Save a file with mock particles in a solid disk created with
+    `solid_disk` function to run potentials with `potential_test.f90`
+    to validate the potential function with dask
+
+    Parameters
+    ----------
+    N_part : `int`
+        The total number of particles to obtain
+
+    Returns
+    -------
+    File named  `mock_particles.dat` on the folder tests/test_data
+    with 4 columns and N_part rows. From left to right:
+    x, y, z : Positions
+    mass : Masses
+    """
+
+    mass, pos, vel = solid_disk(N_part)
+    data = np.ndarray([len(mass), 4])
+    data[:, 0] = pos[:, 0]
+    data[:, 1] = pos[:, 1]
+    data[:, 2] = pos[:, 2]
+    data[:, 3] = mass
+
+    np.savetxt('test_data/mock_particles.dat', data, fmt='%12.6f')
+
+
 # =============================================================================
 # Fixtures
 # =============================================================================
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def disc_zero_angle():
-    m, pos, vel = solid_disk(N_part=1000)
+    mass, pos, vel = solid_disk(N_part=1000)
 
-    return m, pos, vel
+    return mass, pos, vel
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def disc_xrotation():
-    m, pos, vel = solid_disk(N_part=1000)
+    mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_xaxis(theta=0.3 * np.pi * random.random())
 
-    return m, pos @ a, vel @ a, a
+    return mass, pos @ a, vel @ a, a
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def disc_yrotation():
-    m, pos, vel = solid_disk(N_part=1000)
+    mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
-    return m, pos @ a, vel @ a, a
+    return mass, pos @ a, vel @ a, a
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def disc_zrotation():
-    m, pos, vel = solid_disk(N_part=1000)
+    mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_zaxis(theta=0.3 * np.pi * random.random())
 
-    return m, pos @ a, vel @ a, a
+    return mass, pos @ a, vel @ a, a
+
+
+@pytest.fixture(scope="session")
+def disc_particles():
+    mass, pos, vel = solid_disk(N_part=100)
+    return pos[:, 0], pos[:, 1], pos[:, 2], mass
 
 # =============================================================================
 # TESTS
@@ -252,3 +292,10 @@ def test_invert_zaxis(disc_zrotation):
     np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-4, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-4, atol=1e-3)
     np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)
+
+
+def test_daskpotential(disc_particles):
+    dpotential = utils.potential(*disc_particles)
+    fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
+
+    np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
