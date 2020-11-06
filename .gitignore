@@ -2,4 +2,7 @@
 *ipynb_checkpoints
 *.cache
 galaxychop.egg*
+*.tox
+*.cov
+*.coverage
 
