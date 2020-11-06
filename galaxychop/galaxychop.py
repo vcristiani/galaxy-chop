@@ -97,6 +97,7 @@ class Galaxy:
     components_g = attr.ib(default=None)
     metadata = attr.ib(default=None)
 
+
     def energy(self, eps=0):
         '''Calculation of kinetic and potencial energy of
         dark matter, star and gas particles'''
