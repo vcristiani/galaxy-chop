@@ -24,7 +24,6 @@ import subprocess
 import platform
 import textwrap
 import contextlib
-import warnings
 
 from distutils import log
 
@@ -246,6 +245,8 @@ def has_powershell():
         except Exception:
             return False
     return True
+
+
 download_file_powershell.viable = has_powershell
 
 
@@ -262,6 +263,8 @@ def has_curl():
         except Exception:
             return False
     return True
+
+
 download_file_curl.viable = has_curl
 
 
@@ -278,6 +281,8 @@ def has_wget():
         except Exception:
             return False
     return True
+
+
 download_file_wget.viable = has_wget
 
 
@@ -293,6 +298,8 @@ def download_file_insecure(url, target):
     # Write all the data in one block to avoid creating a partial file.
     with open(target, "wb") as dst:
         dst.write(data)
+
+
 download_file_insecure.viable = lambda: True
 
 
@@ -385,6 +392,7 @@ def main():
     options = _parse_args()
     archive = download_setuptools(**_download_args(options))
     return _install(archive, _build_install_args(options))
+
 
 if __name__ == '__main__':
     sys.exit(main())

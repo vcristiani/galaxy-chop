@@ -29,20 +29,20 @@ end do
 !$OMP PRIVATE(i,j,dist)
 !$OMP DO SCHEDULE(DYNAMIC)
 do i = 1, n
-        ep(i) = 0.
-        do j = 1, n
-                if (i /= j) then
-                
-                        dist = sqrt((x(i)-x(j))**2 + (y(i)-y(j))**2 + (z(i)-z(j))**2)
-                        ep(i) = ep(i) + m(j)/dist
-                        
-                end if
-        end do
-        ep(i) = ep(i)*G
+    ep(i) = 0.
+    do j = 1, n
+        if (i /= j) then
+
+            dist = sqrt((x(i)-x(j))**2 + (y(i)-y(j))**2 + (z(i)-z(j))**2)
+            ep(i) = ep(i) + m(j)/dist
+
+        end if
+    end do
+    ep(i) = ep(i)*G
 end do
 !$OMP END DO
 !$OMP END PARALLEL
- 
+
 !======================================================================
 
 !-------------escribo los potenciales de las particulas---------------------
