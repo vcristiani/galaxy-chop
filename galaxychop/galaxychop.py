@@ -12,6 +12,7 @@
 import attr
 import numpy as np
 from galaxychop import utils
+from astropy import units as u
 # from scipy.interpolate import InterpolatedUnivariateSpline
 # from sklearn.mixture import GaussianMixture
 # import random
@@ -22,7 +23,13 @@ import dask.array as da
 # CONSTANTS
 # #####################################################
 
-G = 4.299e+4
+G = 4.299e-6 * u.kpc * (u.km/u.s) ** 2 / u.M_sun
+
+
+#######################################################
+# UNITS CHANGING
+#######################################################
+
 
 # #####################################################
 # GALAXY CLASS
@@ -31,6 +38,7 @@ G = 4.299e+4
 
 @attr.s(frozen=False)
 class Galaxy:
+
     """This class builds a galaxy object from the masses, positions, and
     velocities of the particles (stars, dark matter, and gas).
     Parameters
@@ -40,19 +48,25 @@ class Galaxy:
     vx_s, vy_s, vz_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Star velocities. Units: km/s
     m_s: `np.ndarray(n,1)`
-        Star masses. Units 1e10 M_sun
+        Star masses. Units M_sun
+    eps_s: `np.float()`
+        Softening radius of star particles. Units: kpc
     x_dm, y_dm, z_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter positions. Units: kpc
     vx_dm, vy_dm, vz_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter velocities. Units: km/s
     m_dm: `np.ndarray(n,1)`
-        Dark matter masses. Units 1e10 M_sun
+        Dark matter masses. Units M_sun
+    eps_dm: `np.float()`
+        Softening radius of dark matter particles. Units: kpc
     x_g, y_g, z_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas positions. Units: kpc
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas velocities. Units: km/s
     m_g: `np.ndarray(n,1)`
-        Gas masses. Units 1e10 M_sun
+        Gas masses. Units M_sun
+    eps_g: `np.float()`
+        Softening radius of gas particles. Units: kpc
     components_s: `np.ndarray(n_star,1)`
         This indicates the component to which the stellar particle is assigned.
         This is chosen as the most probable component.
@@ -65,29 +79,32 @@ class Galaxy:
     ---------
     """
 
-    x_s = attr.ib()
-    y_s = attr.ib()
-    z_s = attr.ib()
-    vx_s = attr.ib()
-    vy_s = attr.ib()
-    vz_s = attr.ib()
-    m_s = attr.ib()
+    x_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    y_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    z_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vx_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vy_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vz_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    m_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    eps_s = attr.ib(validator=attr.validators.instance_of(u.Quantity))
 
-    x_dm = attr.ib()
-    y_dm = attr.ib()
-    z_dm = attr.ib()
-    vx_dm = attr.ib()
-    vy_dm = attr.ib()
-    vz_dm = attr.ib()
-    m_dm = attr.ib()
+    x_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    y_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    z_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vx_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vy_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vz_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    m_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    eps_dm = attr.ib(validator=attr.validators.instance_of(u.Quantity))
 
-    x_g = attr.ib()
-    y_g = attr.ib()
-    z_g = attr.ib()
-    vx_g = attr.ib()
-    vy_g = attr.ib()
-    vz_g = attr.ib()
-    m_g = attr.ib()
+    x_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    y_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    z_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vx_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vy_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    vz_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    m_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
+    eps_g = attr.ib(validator=attr.validators.instance_of(u.Quantity))
 
     E_tot_dark = attr.ib(default=None)
     E_tot_star = attr.ib(default=None)
@@ -98,13 +115,14 @@ class Galaxy:
     metadata = attr.ib(default=None)
 
     def energy(self, eps=0):
+
         '''Calculation of kinetic and potencial energy of
         dark matter, star and gas particles'''
 
-        x = np.hstack((self.x_s, self.x_dm, self.x_g))
-        y = np.hstack((self.y_s, self.y_dm, self.y_g))
-        z = np.hstack((self.z_s, self.z_dm, self.z_g))
-        m = np.hstack((self.m_s, self.m_dm, self.m_g))
+        x = np.hstack((self.x_s, self.x_dm, self.x_g)).to(u.kpc)
+        y = np.hstack((self.y_s, self.y_dm, self.y_g)).to(u.kpc)
+        z = np.hstack((self.z_s, self.z_dm, self.z_g)).to(u.kpc)
+        m = np.hstack((self.m_s, self.m_dm, self.m_g)).to(u.M_sun)
 
         a = utils.potential_dask(da.asarray(x, chunks=100),
                                  da.asarray(y, chunks=100),
@@ -118,9 +136,17 @@ class Galaxy:
         pot_dark = pot[len(self.m_s):len(self.m_s) + len(self.m_dm)]
         pot_gas = pot[len(self.m_s) + len(self.m_dm):]
 
-        k_dm = 0.5 * (self.vx_dm**2 + self.vy_dm**2 + self.vz_dm**2)
-        k_s = 0.5 * (self.vx_s**2 + self.vy_s**2 + self.vz_s**2)
-        k_g = 0.5 * (self.vx_g**2 + self.vy_g**2 + self.vz_g**2)
+        k_dm = 0.5 * (self.vx_dm.to(u.km/u.s)**2 +
+                      self.vy_dm.to(u.km/u.s)**2 +
+                      self.vz_dm.to(u.km/u.s)**2)
+
+        k_s = 0.5 * (self.vx_s.to(u.km/u.s)**2 +
+                     self.vy_s.to(u.km/u.s)**2 +
+                     self.vz_s.to(u.km/u.s)**2)
+
+        k_g = 0.5 * (self.vx_g.to(u.km/u.s)**2 +
+                     self.vy_g.to(u.km/u.s)**2 +
+                     self.vz_g.to(u.km/u.s)**2)
 
         E_tot_dark = k_dm - pot_dark
         E_tot_star = k_s - pot_star
