@@ -23,7 +23,7 @@ import dask.array as da
 # CONSTANTS
 # #####################################################
 
-G = 4.299e-6 * u.kpc * (u.km/u.s) ** 2 / u.M_sun
+G = 4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun
 
 
 #######################################################
@@ -114,15 +114,45 @@ class Galaxy:
     components_g = attr.ib(default=None)
     metadata = attr.ib(default=None)
 
+    def __change_units__(self, *args, **kwargs):
+        def new_method(self, *args, **kwargs):
+            self.x_s = self.x_s.to(u.kpc)
+            self.y_s = self.y_s.to(u.kpc)
+            self.z_s = self.z_s.to(u.kpc)
+            self.vx_s = self.vx_s.to(u.km / u.s)
+            self.vy_s = self.vy_s.to(u.km / u.s)
+            self.vz_s = self.vz_s.to(u.km / u.s)
+            self.m_s = self.m_s.to(u.M_sum)
+            self.eps_s = self.eps_s.to(u.kpc)
+
+            self.x_dm = self.x_dm.to(u.kpc)
+            self.y_dm = self.y_dm.to(u.kpc)
+            self.z_dm = self.z_dm.to(u.kpc)
+            self.vx_dm = self.vx_dm.to(u.km / u.s)
+            self.vy_dm = self.vy_dm.to(u.km / u.s)
+            self.vz_dm = self.vz_dm.to(u.km / u.s)
+            self.m_dm = self.m_dm.to(u.M_sum)
+            self.eps_dm = self.eps_dm.to(u.kpc)
+
+            self.x_g = self.x_g.to(u.kpc)
+            self.y_g = self.y_g.to(u.kpc)
+            self.z_g = self.z_g.to(u.kpc)
+            self.vx_g = self.vx_g.to(u.km / u.s)
+            self.vy_g = self.vy_g.to(u.km / u.s)
+            self.vz_g = self.vz_g.to(u.km / u.s)
+            self.m_g = self.m_g.to(u.M_sum)
+            self.eps_g = self.eps_g.to(u.kpc)
+
+    @__change_units__
     def energy(self, eps=0):
 
         '''Calculation of kinetic and potencial energy of
         dark matter, star and gas particles'''
 
-        x = np.hstack((self.x_s, self.x_dm, self.x_g)).to(u.kpc)
-        y = np.hstack((self.y_s, self.y_dm, self.y_g)).to(u.kpc)
-        z = np.hstack((self.z_s, self.z_dm, self.z_g)).to(u.kpc)
-        m = np.hstack((self.m_s, self.m_dm, self.m_g)).to(u.M_sun)
+        x = np.hstack((self.x_s, self.x_dm, self.x_g))
+        y = np.hstack((self.y_s, self.y_dm, self.y_g))
+        z = np.hstack((self.z_s, self.z_dm, self.z_g))
+        m = np.hstack((self.m_s, self.m_dm, self.m_g))
 
         a = utils.potential_dask(da.asarray(x, chunks=100),
                                  da.asarray(y, chunks=100),
@@ -136,17 +166,9 @@ class Galaxy:
         pot_dark = pot[len(self.m_s):len(self.m_s) + len(self.m_dm)]
         pot_gas = pot[len(self.m_s) + len(self.m_dm):]
 
-        k_dm = 0.5 * (self.vx_dm.to(u.km/u.s)**2 +
-                      self.vy_dm.to(u.km/u.s)**2 +
-                      self.vz_dm.to(u.km/u.s)**2)
-
-        k_s = 0.5 * (self.vx_s.to(u.km/u.s)**2 +
-                     self.vy_s.to(u.km/u.s)**2 +
-                     self.vz_s.to(u.km/u.s)**2)
-
-        k_g = 0.5 * (self.vx_g.to(u.km/u.s)**2 +
-                     self.vy_g.to(u.km/u.s)**2 +
-                     self.vz_g.to(u.km/u.s)**2)
+        k_dm = 0.5 * (self.vx_dm**2 + self.vy_dm**2 + self.vz_dm**2)
+        k_s = 0.5 * (self.vx_s**2 + self.vy_s**2 + self.vz_s**2)
+        k_g = 0.5 * (self.vx_g**2 + self.vy_g**2 + self.vz_g**2)
 
         E_tot_dark = k_dm - pot_dark
         E_tot_star = k_s - pot_star
