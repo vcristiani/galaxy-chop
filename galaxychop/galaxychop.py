@@ -143,6 +143,9 @@ class Galaxy:
             self.m_g = self.m_g.to(u.M_sum)
             self.eps_g = self.eps_g.to(u.kpc)
 
+            return self
+        return new_method
+
     @__change_units__
     def energy(self, eps=0):
 
