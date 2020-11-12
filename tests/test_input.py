@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
-
 # This file is part of the Galaxy-Chop Project
 # License: MIT
+
+"""Test imput data."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
 import pytest
-
 import numpy as np
-
 from galaxychop import utils
 
 # =============================================================================
 # Random state
 # =============================================================================
+
 random = np.random.RandomState(seed=42)
+
 # =============================================================================
 # Defining utility functions for mocking data
 # =============================================================================
@@ -35,7 +36,6 @@ def rot_matrix_xaxis(theta=0):
     -------
     A : `np.ndarray`
         Rotation matrix, with shape (3, 3)
-
     """
     A = np.array(
         [
@@ -59,7 +59,6 @@ def rot_matrix_yaxis(theta=0):
     -------
     A : `np.ndarray`
         Rotation matrix, with shape (3, 3)
-
     """
     A = np.array(
         [
@@ -83,7 +82,6 @@ def rot_matrix_zaxis(theta=0):
     -------
     A : `np.ndarray`
         Rotation matrix, with shape (3, 3)
-
     """
     A = np.array(
         [
@@ -97,6 +95,8 @@ def rot_matrix_zaxis(theta=0):
 
 def rotate(pos, vel, matrix):
     """
+    Rotate.
+
     Apply the rotation `matrix` to a set of particles positions `pos` and
     velocities `vel`
 
@@ -123,9 +123,10 @@ def rotate(pos, vel, matrix):
 
 
 def save_data(N_part=100):
-
     """
-    Save a file with mock particles in a solid disk created with
+    Save data.
+
+    This function saves a file with mock particles in a solid disk created with
     `solid_disk` function to run potentials with `potential_test.f90`
     to validate the potential function with dask
 
@@ -141,7 +142,6 @@ def save_data(N_part=100):
     x, y, z : Positions
     mass : Masses
     """
-
     mass, pos, vel = solid_disk(N_part)
     data = np.ndarray([len(mass), 4])
     data[:, 0] = pos[:, 0]
@@ -158,6 +158,11 @@ def save_data(N_part=100):
 
 @pytest.fixture(scope="session")
 def solid_disk():
+    """Mock solid disk.
+
+    Creates a mock solid disc of particles with masses
+    and velocities.
+    """
     def make(N_part=100, rmax=30, rmin=5, omega=10, seed=42):
 
         random = np.random.RandomState(seed=seed)
@@ -183,13 +188,14 @@ def solid_disk():
 
 @pytest.fixture(scope="session")
 def disc_zero_angle(solid_disk):
+    """Disc with no angle of inclination."""
     mass, pos, vel = solid_disk(N_part=1000)
-
     return mass, pos, vel
 
 
 @pytest.fixture(scope="session")
 def disc_xrotation(solid_disk):
+    """Disc rotated over x axis."""
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_xaxis(theta=0.3 * np.pi * random.random())
 
@@ -198,6 +204,7 @@ def disc_xrotation(solid_disk):
 
 @pytest.fixture(scope="session")
 def disc_yrotation(solid_disk):
+    """Disc rotated over y axis."""
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
@@ -206,6 +213,7 @@ def disc_yrotation(solid_disk):
 
 @pytest.fixture(scope="session")
 def disc_zrotation(solid_disk):
+    """Disc rotated over z axis."""
     mass, pos, vel = solid_disk(N_part=1000)
     a = rot_matrix_zaxis(theta=0.3 * np.pi * random.random())
 
@@ -214,6 +222,7 @@ def disc_zrotation(solid_disk):
 
 @pytest.fixture(scope="session")
 def disc_particles(solid_disk):
+    """Solid disc without velocities."""
     mass, pos, vel = solid_disk(N_part=100)
     return pos[:, 0], pos[:, 1], pos[:, 2], mass
 
@@ -223,6 +232,7 @@ def disc_particles(solid_disk):
 
 
 def test_getrotmat0(disc_zero_angle):
+    """Test rotation matrix 1."""
     gxchA = utils._get_rot_matrix(*disc_zero_angle)
 
     np.testing.assert_allclose(1., gxchA[2, 2], rtol=1e-4, atol=1e-3)
@@ -233,6 +243,7 @@ def test_getrotmat0(disc_zero_angle):
 
 
 def test_invert_xaxis(disc_xrotation):
+    """Test rotation matrix 2."""
     m, pos, vel, a = disc_xrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
@@ -244,6 +255,7 @@ def test_invert_xaxis(disc_xrotation):
 
 
 def test_invert_yaxis(disc_yrotation):
+    """Test rotation matrix 3."""
     m, pos, vel, a = disc_yrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
@@ -255,6 +267,7 @@ def test_invert_yaxis(disc_yrotation):
 
 
 def test_invert_zaxis(disc_zrotation):
+    """Test rotation matrix 4."""
     m, pos, vel, a = disc_zrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
@@ -267,8 +280,7 @@ def test_invert_zaxis(disc_zrotation):
 
 @pytest.mark.xfail
 def test_daskpotential(disc_particles):
+    """Test potential function."""
     dpotential = utils.potential(*disc_particles)
     fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
-    print(list(dpotential))
-    print(list(fpotential))
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)

@@ -1,26 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 # =============================================================================
 # DOCS
 # =============================================================================
 
-"""This file is for distribute galaxychop
-"""
+"""This file is for distribute galaxychop."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
-
 import sys
 import os
 import setuptools
-
 from ez_setup import use_setuptools
 
 use_setuptools()
-
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -85,7 +80,6 @@ def do_setup():
             "Operating System :: OS Independent",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: Implementation :: CPython",

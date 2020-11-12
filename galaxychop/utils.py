@@ -1,3 +1,5 @@
+"""Utilities module."""
+
 import numpy as np
 import dask
 import dask.array as da
@@ -9,11 +11,12 @@ G = G.to_value()
 
 def _get_rot_matrix(m, pos, vel, r_corte=None):
     """
+    Rotation matrix calculation.
+
     Calculates the rotation matrix that aligns the TOTAL
-    agular momentum of the particles with the z-axis. The
-    positions, velocities and masses of the particles are
-    used. Optionally, only particles within a cutting
-    radius `(r_corte)` can be used.
+    agular momentum of the particles with the z-axis.
+    The positions, velocities and masses of the particles are used.
+    Optionally, only particles within a cutting radius `(r_corte)` can be used.
 
     Parameters
     ----------
@@ -34,7 +37,6 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     A : `np.ndarray`, shape(3,3)
         Rotation matrix.
     """
-
     jx = m * (pos[:, 1] * vel[:, 2] - pos[:, 2] * vel[:, 1])
     jy = m * (pos[:, 2] * vel[:, 0] - pos[:, 0] * vel[:, 2])
     jz = m * (pos[:, 0] * vel[:, 1] - pos[:, 1] * vel[:, 0])
@@ -71,13 +73,13 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
 
 
 def aling(m, pos, vel, r_corte):
-    """This rotates the positions, speeds and angular
-    moments of the particles so that the total angular
-    moment coincides with the z-axis.
+    """
+    Aling the galaxy.
 
+    Rotate the positions, speeds and angular moments of the
+    particles so that the total angular moment coincides with the z-axis.
     Optionally, only particles within a cutting radius
-    `(r_corte)` can be used to calculate the rotation
-    matrix.
+    `(r_corte)` can be used to calculate the rotation matrix.
 
     Parameters
     ----------
@@ -109,8 +111,8 @@ def aling(m, pos, vel, r_corte):
 
 @dask.delayed
 def _potential_dask(x, y, z, m, eps):
-    """This calculates the specific gravitational potential energy of
-    particles.
+    """
+    Calculate the specific gravitational potential energy of particles.
 
     Parameters
     ----------
@@ -125,7 +127,6 @@ def _potential_dask(x, y, z, m, eps):
     -------
     Specific potential energy of particles
     """
-
     dist = np.sqrt(np.square(x - x.reshape(-1, 1))
                    + np.square(y - y.reshape(-1, 1))
                    + np.square(z - z.reshape(-1, 1))
@@ -140,7 +141,6 @@ def _potential_dask(x, y, z, m, eps):
 
 
 def potential(x, y, z, m, eps=0.):
-
+    """Compute de potential energy."""
     pot = _potential_dask(x, y, z, m, eps)
-
     return np.asarray(pot.compute())

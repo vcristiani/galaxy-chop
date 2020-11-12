@@ -1,9 +1,10 @@
-# This file is part of the
-# galxy-chop project (https://github.com/vcristiani/galaxy-chop).
+# This file is part of
+# the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
 # Copyright (c) 2020, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+"""Module galaxy-chop."""
 
 # #####################################################
 # IMPORTS
@@ -13,11 +14,10 @@ import attr
 import numpy as np
 from galaxychop import utils
 from astropy import units as u
+import dask.array as da
 # from scipy.interpolate import InterpolatedUnivariateSpline
 # from sklearn.mixture import GaussianMixture
 # import random
-
-import dask.array as da
 
 # #####################################################
 # CONSTANTS
@@ -26,7 +26,6 @@ import dask.array as da
 G = 4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun
 G = G.to_value()
 
-
 # #####################################################
 # GALAXY CLASS
 # #####################################################
@@ -34,9 +33,12 @@ G = G.to_value()
 
 @attr.s(frozen=False)
 class Galaxy:
+    """
+    Galaxy class.
 
-    """This class builds a galaxy object from the masses, positions, and
+    Build a galaxy object from the masses, positions, and
     velocities of the particles (stars, dark matter, and gas).
+
     Parameters
     ----------
     x_s, y_s, z_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
@@ -45,7 +47,7 @@ class Galaxy:
         Star velocities. Units: km/s
     m_s: `np.ndarray(n,1)`
         Star masses. Units M_sun
-    eps_s: `np.float()` Default value = 0.
+    eps_s: `np.float()` Default value = 0
         Softening radius of star particles. Units: kpc.
     x_dm, y_dm, z_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter positions. Units: kpc
@@ -53,16 +55,16 @@ class Galaxy:
         Dark matter velocities. Units: km/s
     m_dm: `np.ndarray(n,1)`
         Dark matter masses. Units M_sun
-    eps_dm: `np.float()` Default value = 0.
-        Softening radius of dark matter particles. Units: kpc.
+    eps_dm: `np.float()` Default value = 0
+        Softening radius of dark matter particles. Units: kpc
     x_g, y_g, z_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas positions. Units: kpc
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas velocities. Units: km/s
     m_g: `np.ndarray(n,1)`
         Gas masses. Units M_sun
-    eps_g: `np.float()` Default value = 0.
-        Softening radius of gas particles. Units: kpc.
+    eps_g: `np.float()` Default value = 0
+        Softening radius of gas particles. Units: kpc
     Etot_s: `np.ndarray(n,1)`
         Total energy of star particles. Units: kg(km/s)**2
     Etot_dm: `np.ndarray(n,1)`
@@ -70,13 +72,14 @@ class Galaxy:
     Etot_g: `np.ndarray(n,1)`
         Total energy of gas particles. Units: kg(km/s)**2
     components_s: `np.ndarray(n_star,1)`
-        This indicates the component to which the stellar particle is assigned.
-        This is chosen as the most probable component.
+        Indicate the component to which the stellar particle is assigned.
+        Is chosen as the most probable component.
         `n_star` is the number of stellar particles.
     components_g: `np.ndarray(n_gas,1)`
-        This indicates the component to which the gas particle is assigned.
-        This is chosen as the most probable component.
-        `n_gas` is the number of gas particles.
+        Indicate the component to which the gas particle is assigned.
+        Is chosen as the most probable component
+        `n_gas` is the number of gas particles
+
     Atributes
     ---------
     """
@@ -121,6 +124,11 @@ class Galaxy:
     metadata = attr.ib(default=None)
 
     def __change_units_to_array__(f):
+        """
+        Decorate methods.
+
+        Change units and transform astropy Quantity to numpy array.
+        """
         def new_method(self, *args, **kwargs):
             self.x_s = self.x_s.to_value(u.kpc)
             self.y_s = self.y_s.to_value(u.kpc)
@@ -154,10 +162,12 @@ class Galaxy:
 
     @__change_units_to_array__
     def energy(self):
+        """
+        Energy calculation.
 
-        '''Calculation of kinetic and potencial energy of
-        dark matter, star and gas particles'''
-
+        Calculate kinetic and potencial energy of dark matter,
+        star and gas particles.
+        """
         x = np.hstack((self.x_s, self.x_dm, self.x_g))
         y = np.hstack((self.y_s, self.y_dm, self.y_g))
         z = np.hstack((self.z_s, self.z_dm, self.z_g))
