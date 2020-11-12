@@ -1,5 +1,5 @@
 # This file is part of the
-#   galxy-chop project (https://github.com/vcristiani/galaxy-chop).
+# galxy-chop project (https://github.com/vcristiani/galaxy-chop).
 # Copyright (c) 2020, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
@@ -128,7 +128,7 @@ class Galaxy:
             self.vx_s = self.vx_s.to_value(u.km / u.s)
             self.vy_s = self.vy_s.to_value(u.km / u.s)
             self.vz_s = self.vz_s.to_value(u.km / u.s)
-            self.m_s = self.m_s.to_value(u.M_sum)
+            self.m_s = self.m_s.to_value(u.M_sun)
             self.eps_s = self.eps_s.to_value(u.kpc)
 
             self.x_dm = self.x_dm.to_value(u.kpc)
@@ -137,7 +137,7 @@ class Galaxy:
             self.vx_dm = self.vx_dm.to_value(u.km / u.s)
             self.vy_dm = self.vy_dm.to_value(u.km / u.s)
             self.vz_dm = self.vz_dm.to_value(u.km / u.s)
-            self.m_dm = self.m_dm.to_value(u.M_sum)
+            self.m_dm = self.m_dm.to_value(u.M_sun)
             self.eps_dm = self.eps_dm.to_value(u.kpc)
 
             self.x_g = self.x_g.to_value(u.kpc)
@@ -146,7 +146,7 @@ class Galaxy:
             self.vx_g = self.vx_g.to_value(u.km / u.s)
             self.vy_g = self.vy_g.to_value(u.km / u.s)
             self.vz_g = self.vz_g.to_value(u.km / u.s)
-            self.m_g = self.m_g.to_value(u.M_sum)
+            self.m_g = self.m_g.to_value(u.M_sun)
             self.eps_g = self.eps_g.to_value(u.kpc)
 
             return f(self, *args, **kwargs)
@@ -164,13 +164,11 @@ class Galaxy:
         m = np.hstack((self.m_s, self.m_dm, self.m_g))
         eps = np.max(self.eps_dm, self.eps_s, self.eps_s)
 
-        a = utils.potential(da.asarray(x, chunks=100),
-                            da.asarray(y, chunks=100),
-                            da.asarray(z, chunks=100),
-                            da.asarray(m, chunks=100),
-                            da.asarray(eps))
-
-        pot = a.compute()
+        pot = utils.potential(da.asarray(x, chunks=100),
+                              da.asarray(y, chunks=100),
+                              da.asarray(z, chunks=100),
+                              da.asarray(m, chunks=100),
+                              da.asarray(eps))
 
         pot_star = pot[:len(self.m_s)]
         pot_dark = pot[len(self.m_s):len(self.m_s) + len(self.m_dm)]
