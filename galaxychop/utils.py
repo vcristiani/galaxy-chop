@@ -1,8 +1,10 @@
 import numpy as np
 import dask
 import dask.array as da
+import astropy.units as u
 
-G = 4.299e4
+G = 4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun
+G = G.to_value()
 
 
 def _get_rot_matrix(m, pos, vel, r_corte=None):
@@ -106,7 +108,7 @@ def aling(m, pos, vel, r_corte):
 
 
 @dask.delayed
-def _potential_dask(x, y, z, m, eps=0.1):
+def _potential_dask(x, y, z, m, eps):
     """This calculates the specific gravitational potential energy of
     particles.
 
@@ -137,8 +139,8 @@ def _potential_dask(x, y, z, m, eps=0.1):
     return mdist.sum(axis=1) * G
 
 
-def potential(x, y, z, m, eps=0.1):
+def potential(x, y, z, m, eps=0.):
 
-    pot = _potential_dask(x, y, z, m, eps=0.1)
+    pot = _potential_dask(x, y, z, m, eps)
 
     return np.asarray(pot.compute())
