@@ -72,7 +72,7 @@ def do_setup():
         py_modules=["ez_setup", "galaxychop", "utils"],
         license="MIT",
         keywords="galaxy, dynamics",
-        classifiers=(
+        classifiers=[
             "Development Status :: 1 - Beta",
             "Intended Audience :: Education",
             "Intended Audience :: Science/Research",
@@ -84,7 +84,7 @@ def do_setup():
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: Implementation :: CPython",
             "Topic :: Scientific/Engineering",
-        ),
+        ],
         packages=setuptools.find_packages(),  # exclude=['test*']),
         install_requires=REQUIREMENTS,
     )
