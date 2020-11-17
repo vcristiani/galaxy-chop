@@ -172,7 +172,7 @@ class Galaxy:
         y = np.hstack((self.y_s, self.y_dm, self.y_g))
         z = np.hstack((self.z_s, self.z_dm, self.z_g))
         m = np.hstack((self.m_s, self.m_dm, self.m_g))
-        eps = np.max([self.eps_dm, self.eps_s, self.eps_s])
+        eps = np.max([self.eps_dm, self.eps_s, self.eps_g])
 
         pot = utils.potential(da.asarray(x, chunks=100),
                               da.asarray(y, chunks=100),
