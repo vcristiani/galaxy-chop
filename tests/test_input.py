@@ -396,9 +396,9 @@ def test_k_energy(disc_particles_all):
         pos_d,
         vel_d,
     ) = disc_particles_all
-    k_s = 0.5 * (pos_s[:, 0] ** 2 + pos_s[:, 1] ** 2 + pos_s[:, 2] ** 2)
-    k_d = 0.5 * (pos_d[:, 0] ** 2 + pos_d[:, 1] ** 2 + pos_d[:, 2] ** 2)
-    k_g = 0.5 * (pos_g[:, 0] ** 2 + pos_g[:, 1] ** 2 + pos_g[:, 2] ** 2)
+    k_s = 0.5 * (vel_s[:, 0] ** 2 + vel_s[:, 1] ** 2 + vel_s[:, 2] ** 2)
+    k_d = 0.5 * (vel_d[:, 0] ** 2 + vel_d[:, 1] ** 2 + vel_d[:, 2] ** 2)
+    k_g = 0.5 * (vel_g[:, 0] ** 2 + vel_g[:, 1] ** 2 + vel_g[:, 2] ** 2)
     assert (k_s >= 0).all()
     assert (k_d >= 0).all()
     assert (k_g >= 0).all()
@@ -507,3 +507,90 @@ def test_type_enrgy(disc_particles_all):
     assert isinstance(k_s, (float, np.float, np.ndarray))
     assert isinstance(k_d, (float, np.float, np.ndarray))
     assert isinstance(k_g, (float, np.float, np.ndarray))
+
+
+# @pytest.mark.xfail
+def test_center_existence(disc_particles_all):
+    """Test center existence and uniqueness."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+
+    gx_c = utils._center(
+        pos_s[:, 0],
+        pos_s[:, 1],
+        pos_s[:, 2],
+        pos_d[:, 0],
+        pos_d[:, 1],
+        pos_d[:, 2],
+        pos_g[:, 0],
+        pos_d[:, 1],
+        pos_d[:, 2],
+        mass_s,
+        mass_g,
+        mass_d
+    )
+
+    x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
+    y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
+    z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
+
+    pos_gal = np.vstack((x_gal, y_gal, z_gal))
+
+    assert len(np.where(~pos_gal.any(axis=0))) == 1
+
+
+@pytest.mark.xfail
+def test_angular_momentum_outputs(disc_particles_all):
+    """Test object."""
+    (
+        mass_s,
+        mass_g,
+        pos_g,
+        pos_s,
+        vel_s,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0],
+        pos_s[:, 1],
+        pos_s[:, 2],
+        vel_s[:, 0],
+        vel_s[:, 1],
+        vel_s[:, 2],
+        mass_s,
+        pos_d[:, 0],
+        pos_d[:, 1],
+        pos_d[:, 2],
+        vel_d[:, 0],
+        vel_d[:, 1],
+        vel_d[:, 2],
+        mass_d,
+        pos_g[:, 0],
+        pos_g[:, 1],
+        pos_g[:, 2],
+        vel_g[:, 0],
+        vel_g[:, 1],
+        vel_g[:, 2],
+        mass_g,
+    )
+    J_part_t, Jr_star_t, Jr_t = g.angular_momentum()
+    # assert isinstance(J_part, (float, np.float, np.ndarray))
+    # assert isinstance(Jr_star, (float, np.float, np.ndarray))
+    # assert isinstance(Jr, (float, np.float, np.ndarray))
+    # assert J_part_t.shape ==
+    # # (3, len(pos_s[:, 0]) + len(pos_g[:, 0]) + len(pos_d[:, 0]))
+    # np.testing.assert_equal(Jr_star.size, pos_s.shape[1])
+    # np.testing.assert_equal(Jr.size, pos_s.shape[1] +
+    # # pos_g.shape[1], pos_d.shape[1])
