@@ -127,10 +127,12 @@ def _potential_dask(x, y, z, m, eps):
     -------
     Specific potential energy of particles
     """
-    dist = np.sqrt(np.square(x - x.reshape(-1, 1))
-                   + np.square(y - y.reshape(-1, 1))
-                   + np.square(z - z.reshape(-1, 1))
-                   + np.square(eps))
+    dist = np.sqrt(
+        np.square(x - x.reshape(-1, 1))
+        + np.square(y - y.reshape(-1, 1))
+        + np.square(z - z.reshape(-1, 1))
+        + np.square(eps)
+    )
 
     np.fill_diagonal(dist, 0.0)
 
@@ -140,7 +142,7 @@ def _potential_dask(x, y, z, m, eps):
     return mdist.sum(axis=1) * G
 
 
-def potential(x, y, z, m, eps=0.):
+def potential(x, y, z, m, eps=0.0):
     """Compute de potential energy."""
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())

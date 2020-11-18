@@ -5,4 +5,8 @@ galaxychop.egg*
 *.tox
 *.cov
 *.coverage
+<<<<<<< HEAD
 legacy/units_test.ipynb
+=======
+legacy/units_test.ipynb
+>>>>>>> units
