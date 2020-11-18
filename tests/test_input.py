@@ -339,6 +339,7 @@ def test_daskpotential(disc_particles):
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
 
 
+@pytest.mark.xfail
 def test_energy_method(disc_particles_all):
     """Test energy method."""
     (

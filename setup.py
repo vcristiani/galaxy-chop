@@ -44,7 +44,8 @@ REQUIREMENTS = [
     "scipy >= 1.0",
     "scikit-learn",
     "dask[array]",
-    "astropy"
+    "astropy",
+    "uttrs"
 ]
 
 # =============================================================================

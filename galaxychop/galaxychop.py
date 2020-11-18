@@ -200,4 +200,3 @@ class Galaxy:
         return (Etot_dm * u.Msun * (u.km / u.s) ** 2,)
         Etot_s * u.Msun * (u.km / u.s) ** 2,
         Etot_g * u.Msun * (u.km / u.s) ** 2
-
