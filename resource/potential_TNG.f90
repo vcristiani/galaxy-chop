@@ -25,13 +25,13 @@ open(99, file='/home/vcristiani/doctorado/control.dat', status='new')
 
 do k=1,1644
         read(90,*) nro_de_ID
-        
+
         !------------- leo la cantidad de partículas de cada tipo ---------------------
-        
+
         write(c1,'(A,A)') trim(t1), trim(t2)
         write(c1,'(A,A)') trim(c1), trim(nro_de_ID)
         write(c1,'(A,A)') trim(c1), trim(dat)
-        
+
         open(20, file=trim(c1), status='old')
         read(20,*) n_gas, n_dark, n_star
          close(20)
@@ -47,7 +47,7 @@ do k=1,1644
                 write(c1,'(A,A)') trim(c1), trim(gas)
                 write(c1,'(A,A)') trim(c1), trim(nro_de_ID)
                 write(c1,'(A,A)') trim(c1), trim(dat)
-        
+
                 open(30, file=trim(c1), status='old')
                 do i=1, n_gas
                         read(30,*) ID(i), x(i), y(i), z(i), m(i)
@@ -104,14 +104,14 @@ do k=1,1644
         !======================================================================
 
         !-------------escribo los potenciales de las particulas---------------------
-        
+
         if (n_gas /= 0) then
 
                 write(c1,'(A,A)') trim(t1), trim(t4)
                 write(c1,'(A,A)') trim(c1), trim(gas)
                 write(c1,'(A,A)') trim(c1), trim(nro_de_ID)
                 write(c1,'(A,A)') trim(c1), trim(dat)
-        
+
                 open(60, file=trim(c1), status='new')
                 do i = 1,n_gas
                         write(60,*) ID(i),ep(i)
@@ -146,7 +146,7 @@ do k=1,1644
                 write(80,*) ID(i),ep(i)
         end do
          close(80)
- 
+
         deallocate(ID, x, y, z, m, ep)
 
         write(99,*) k, nro_de_ID

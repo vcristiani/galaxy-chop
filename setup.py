@@ -1,26 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 # =============================================================================
 # DOCS
 # =============================================================================
 
-"""This file is for distribute galaxychop
-"""
+"""This file is for distribute galaxychop."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
-
 import sys
 import os
 import setuptools
-
 from ez_setup import use_setuptools
 
 use_setuptools()
-
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -48,7 +43,8 @@ REQUIREMENTS = [
     "numpy >= 1.13.2",
     "scipy >= 1.0",
     "scikit-learn",
-    "dask[array]"
+    "dask[array]",
+    "astropy"
 ]
 
 # =============================================================================
@@ -76,7 +72,7 @@ def do_setup():
         py_modules=["ez_setup", "galaxychop", "utils"],
         license="MIT",
         keywords="galaxy, dynamics",
-        classifiers=(
+        classifiers=[
             "Development Status :: 1 - Beta",
             "Intended Audience :: Education",
             "Intended Audience :: Science/Research",
@@ -84,12 +80,11 @@ def do_setup():
             "Operating System :: OS Independent",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: Implementation :: CPython",
             "Topic :: Scientific/Engineering",
-        ),
+        ],
         packages=setuptools.find_packages(),  # exclude=['test*']),
         install_requires=REQUIREMENTS,
     )

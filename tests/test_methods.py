@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-
 # This file is part of the Galaxy-Chop Project
 # License: MIT
+
+"""Test dynamical decomposition methods."""
 
 # =============================================================================
 # IMPORTS
@@ -17,11 +18,3 @@
 # =============================================================================
 # TESTS
 # =============================================================================
-
-class test_Gaussian_mixture:
-
-    def test_GMM():
-        ...
-
-    def test_GMM_DU():
-        ...
