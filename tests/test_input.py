@@ -149,12 +149,13 @@ def save_data(N_part=100):
     data[:, 2] = pos[:, 2]
     data[:, 3] = mass
 
-    np.savetxt('test_data/mock_particles.dat', data, fmt='%12.6f')
+    np.savetxt("test_data/mock_particles.dat", data, fmt="%12.6f")
 
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture(scope="session")
 def solid_disk():
@@ -163,13 +164,14 @@ def solid_disk():
     Creates a mock solid disc of particles with masses
     and velocities.
     """
+
     def make(N_part=100, rmax=30, rmin=5, omega=10, seed=42):
 
         random = np.random.RandomState(seed=seed)
 
         r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
         phi0 = 2 * np.pi * random.random_sample(size=N_part)
-        mass = 1. * np.ones_like(r)
+        mass = 1.0 * np.ones_like(r)
 
         x = r * np.cos(phi0)
         y = r * np.sin(phi0)
@@ -183,6 +185,7 @@ def solid_disk():
         vel = np.array([xdot, ydot, zdot]).T
 
         return mass, pos, vel
+
     return make
 
 
@@ -226,6 +229,7 @@ def disc_particles(solid_disk):
     mass, pos, vel = solid_disk(N_part=100)
     return pos[:, 0], pos[:, 1], pos[:, 2], mass
 
+
 # =============================================================================
 # TESTS
 # =============================================================================
@@ -235,11 +239,11 @@ def test_getrotmat0(disc_zero_angle):
     """Test rotation matrix 1."""
     gxchA = utils._get_rot_matrix(*disc_zero_angle)
 
-    np.testing.assert_allclose(1., gxchA[2, 2], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(1.0, gxchA[2, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 1], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 0], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[1, 2], rtol=1e-4, atol=1e-3)
 
 
 def test_invert_xaxis(disc_xrotation):
@@ -247,11 +251,11 @@ def test_invert_xaxis(disc_xrotation):
     m, pos, vel, a = disc_xrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    np.testing.assert_allclose(1., gxchA[0, 0], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[0, 1], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[1, 0], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(1.0, gxchA[0, 0], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 2], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[1, 0], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 0], rtol=1e-3, atol=1e-3)
 
 
 def test_invert_yaxis(disc_yrotation):
@@ -259,11 +263,11 @@ def test_invert_yaxis(disc_yrotation):
     m, pos, vel, a = disc_yrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    np.testing.assert_allclose(0., gxchA[0, 0], rtol=1e-3, atol=1e-2)
-    np.testing.assert_allclose(1., gxchA[0, 1], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[1, 1], rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 0], rtol=1e-3, atol=1e-2)
+    np.testing.assert_allclose(1.0, gxchA[0, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 2], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[1, 1], rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 1], rtol=1e-3, atol=1e-3)
 
 
 def test_invert_zaxis(disc_zrotation):
@@ -271,16 +275,16 @@ def test_invert_zaxis(disc_zrotation):
     m, pos, vel, a = disc_zrotation
     gxchA = utils._get_rot_matrix(m, pos, vel)
 
-    np.testing.assert_allclose(1., gxchA[2, 2], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 1], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[2, 0], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[0, 2], rtol=1e-4, atol=1e-3)
-    np.testing.assert_allclose(0., gxchA[1, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(1.0, gxchA[2, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 1], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[2, 0], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[0, 2], rtol=1e-4, atol=1e-3)
+    np.testing.assert_allclose(0.0, gxchA[1, 2], rtol=1e-4, atol=1e-3)
 
 
 @pytest.mark.xfail
 def test_daskpotential(disc_particles):
     """Test potential function."""
     dpotential = utils.potential(*disc_particles)
-    fpotential = np.loadtxt('tests/test_data/fpotential_test.dat')
+    fpotential = np.loadtxt("tests/test_data/fpotential_test.dat")
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
