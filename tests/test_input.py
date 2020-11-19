@@ -277,11 +277,11 @@ def halo_particles(mock_dm_halo):
     vel_dm = random.random_sample(size=(100, 3))
 
     return mass_dm, pos_dm, vel_dm
- 
+
 
 @pytest.fixture(scope="session")
 def mock_galaxy(disc_particles_all, halo_particles):
-    """Mock galaxy"""
+    """Mock galaxy."""
     (mass_s, pos_s, vel_s,
      mass_g, pos_g, vel_g) = disc_particles_all
 
@@ -311,7 +311,7 @@ def mock_galaxy(disc_particles_all, halo_particles):
         m_g=mass_g * u.M_sun,
     )
 
-    return g    
+    return g
 
 # =============================================================================
 # TESTS
@@ -371,6 +371,7 @@ def test_daskpotential(disc_particles):
     dpotential = utils.potential(*disc_particles)
     fpotential = np.loadtxt("tests/test_data/fpotential_test.dat")
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
+
 
 @pytest.mark.xfail
 def test_energy_method(disc_particles_all, halo_particles):
@@ -437,7 +438,7 @@ def test_k_energy(disc_particles_all, halo_particles):
     k_s = 0.5 * (pos_s[:, 0] ** 2 + pos_s[:, 1] ** 2 + pos_s[:, 2] ** 2)
     k_dm = 0.5 * (pos_dm[:, 0] ** 2 + pos_dm[:, 1] ** 2 + pos_dm[:, 2] ** 2)
     k_g = 0.5 * (pos_g[:, 0] ** 2 + pos_g[:, 1] ** 2 + pos_g[:, 2] ** 2)
-    
+
     assert (k_s >= 0).all()
     assert (k_dm >= 0).all()
     assert (k_g >= 0).all()
@@ -471,7 +472,7 @@ def test_total_enrgy(mock_galaxy):
     g = mock_galaxy
 
     E_tot_dark, E_tot_star, E_tot_gas = g.energy()
-    
+
     ii, = np.where(E_tot_star.value < 0)
     perc = len(ii) / len(E_tot_star.value)
 
@@ -492,7 +493,7 @@ def test_type_enrgy(disc_particles_all, halo_particles):
     p_s = utils.potential(x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2],
                           m=mass_s)
     p_dm = utils.potential(x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2],
-                          m=mass_dm)
+                           m=mass_dm)
     p_g = utils.potential(x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2],
                           m=mass_g)
     assert isinstance(p_s, (float, np.float, np.ndarray))
