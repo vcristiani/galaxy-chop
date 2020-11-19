@@ -118,17 +118,13 @@ class Galaxy:
     eps_dm = uttr.ib(default=0., unit=u.kpc)
     eps_g = uttr.ib(default=0., unit=u.kpc)
 
-    Etot_dm = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
-    Etot_s = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
-    Etot_g = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
-
-    to_array = uttr.array_accessor()
+    arr_ = uttr.array_accessor()
 
     # components_s = attr.ib(default=None)
     # components_g = attr.ib(default=None)
     # metadata = attr.ib(default=None)
 
-
+    @property
     def energy(self):
         """
         Energy calculation.
@@ -136,38 +132,37 @@ class Galaxy:
         Calculate kinetic and potential energy of dark matter,
         star and gas particles.
         """
+        x_s = self.arr_.x_s
+        y_s = self.arr_.y_s
+        z_s = self.arr_.z_s
 
-        x_s = self.to_array.x_s
-        y_s = self.to_array.y_s
-        z_s = self.to_array.z_s
+        x_g = self.arr_.x_g
+        y_g = self.arr_.y_g
+        z_g = self.arr_.z_g
 
-        x_g = self.to_array.x_g
-        y_g = self.to_array.y_g
-        z_g = self.to_array.z_g
+        x_dm = self.arr_.x_dm
+        y_dm = self.arr_.y_dm
+        z_dm = self.arr_.z_dm
 
-        x_dm = self.to_array.x_dm
-        y_dm = self.to_array.y_dm
-        z_dm = self.to_array.z_dm
+        m_s = self.arr_.m_s
+        m_g = self.arr_.m_g
+        m_dm = self.arr_.m_dm
 
-        m_s = self.to_array.m_s
-        m_g = self.to_array.m_g
-        m_dm = self.to_array.m_dm
+        eps_s = self.arr_.eps_s
+        eps_g = self.arr_.eps_g
+        eps_dm = self.arr_.eps_dm
 
-        eps_s = self.to_array.eps_s
-        eps_g = self.to_array.eps_g
-        eps_dm = self.to_array.eps_dm
+        vx_s = self.arr_.x_s
+        vy_s = self.arr_.y_s
+        vz_s = self.arr_.z_s
 
-        vx_s = self.to_array.x_s
-        vy_s = self.to_array.y_s
-        vz_s = self.to_array.z_s
+        vx_g = self.arr_.x_g
+        vy_g = self.arr_.y_g
+        vz_g = self.arr_.z_g
 
-        vx_g = self.to_array.x_g
-        vy_g = self.to_array.y_g
-        vz_g = self.to_array.z_g
-
-        vx_dm = self.to_array.x_dm
-        vy_dm = self.to_array.y_dm
-        vz_dm = self.to_array.z_dm
+        vx_dm = self.arr_.x_dm
+        vy_dm = self.arr_.y_dm
+        vz_dm = self.arr_.z_dm
 
         x = np.hstack((x_s, x_dm, x_g))
         y = np.hstack((y_s, y_dm, y_g))
@@ -195,15 +190,11 @@ class Galaxy:
         Etot_s = k_s - pot_s
         Etot_g = k_g - pot_g
 
-        setattr(self, "Etot_dm", Etot_dm * u.Msun * (u.km / u.s) ** 2)
-        setattr(self, "Etot_s", Etot_s * u.Msun * (u.km / u.s) ** 2)
-        setattr(self, "Etot_g", Etot_g * u.Msun * (u.km / u.s) ** 2)
-
         return (Etot_dm * u.Msun * (u.km / u.s)**2,
                 Etot_s * u.Msun * (u.km / u.s)**2,
                 Etot_g * u.Msun * (u.km / u.s)**2)
 
-      
+    @property
     def jcirc(self, bin0=0.05, bin1=0.005):
         """
         Circular angular momentum.
@@ -211,7 +202,7 @@ class Galaxy:
         Calculation of the dots to build the function of the circular
         angular momentum.
         """
-        if np.all(getattr(self, "Etot_dm")) == (None):
+        if np.all(self.Etot_dm) == (None):
             self.energy()
 
         E_tot = np.hstack((self.Etot_s, self.Etot_dm, self.Etot_g))
@@ -291,8 +282,9 @@ class Galaxy:
 
         return x, y
 
+    @property
     def paramcirc(self):
-        """Circulars parameters calculation."""
+        """Circular parameters calculation."""
         if np.all(getattr(self, "Etot_dm")) == (None):
             self.energy()
 
@@ -337,4 +329,3 @@ class Galaxy:
         mask, = np.where((eps <= 1.0) & (eps >= -1.0))
 
         return E_star[mask], eps[mask], eps_r[mask]
-

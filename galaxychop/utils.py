@@ -5,8 +5,7 @@ import dask
 import dask.array as da
 import astropy.units as u
 
-G = 4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun
-G = G.to_value()
+G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
 
 
 def _get_rot_matrix(m, pos, vel, r_corte=None):
