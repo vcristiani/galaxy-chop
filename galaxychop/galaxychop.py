@@ -119,6 +119,10 @@ class Galaxy:
     Etot_s = attr.ib(default=None)
     Etot_g = attr.ib(default=None)
     pot_dark = attr.ib(default=None)
+    J_part = attr.ib(default=None)
+    J_star = attr.ib(default=None)
+    Jr_star = attr.ib(default=None)
+    Jr = attr.ib(default=None)
 
     components_s = attr.ib(default=None)
     components_g = attr.ib(default=None)
@@ -193,9 +197,9 @@ class Galaxy:
         E_tot_star = k_s - pot_star
         E_tot_gas = k_g - pot_gas
 
-        setattr(self, "E_tot_dark", E_tot_dark)
-        setattr(self, "E_tot_star", E_tot_star)
-        setattr(self, "E_tot_gas", E_tot_gas)
+        setattr(self, "Etot_dm", E_tot_dark)
+        setattr(self, "Etot_s", E_tot_star)
+        setattr(self, "Etot_g", E_tot_gas)
         setattr(self, "pot_dark", pot_dark)
 
         return E_tot_dark, E_tot_star, E_tot_gas
@@ -299,5 +303,6 @@ class Galaxy:
         setattr(self, "J_part", J_part)
         setattr(self, "Jr_star", Jr_star)
         setattr(self, "Jr", Jr)
+        setattr(self, "J_star", J_star)
 
-        return J_part, Jr_star, Jr
+        return J_part, Jr_star, Jr, J_star
