@@ -5,4 +5,4 @@ galaxychop.egg*
 *.tox
 *.cov
 *.coverage
-
+legacy/units_test.ipynb
