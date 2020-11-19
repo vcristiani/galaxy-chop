@@ -397,9 +397,9 @@ def test_k_energy(disc_particles_all):
         pos_d,
         vel_d,
     ) = disc_particles_all
-    k_s = 0.5 * (pos_s[:, 0] ** 2 + pos_s[:, 1] ** 2 + pos_s[:, 2] ** 2)
-    k_d = 0.5 * (pos_d[:, 0] ** 2 + pos_d[:, 1] ** 2 + pos_d[:, 2] ** 2)
-    k_g = 0.5 * (pos_g[:, 0] ** 2 + pos_g[:, 1] ** 2 + pos_g[:, 2] ** 2)
+    k_s = 0.5 * (vel_s[:, 0] ** 2 + vel_s[:, 1] ** 2 + vel_s[:, 2] ** 2)
+    k_d = 0.5 * (vel_d[:, 0] ** 2 + vel_d[:, 1] ** 2 + vel_d[:, 2] ** 2)
+    k_g = 0.5 * (vel_g[:, 0] ** 2 + vel_g[:, 1] ** 2 + vel_g[:, 2] ** 2)
     assert (k_s >= 0).all()
     assert (k_d >= 0).all()
     assert (k_g >= 0).all()
@@ -508,3 +508,258 @@ def test_type_enrgy(disc_particles_all):
     assert isinstance(k_s, (float, np.float, np.ndarray))
     assert isinstance(k_d, (float, np.float, np.ndarray))
     assert isinstance(k_g, (float, np.float, np.ndarray))
+
+
+# @pytest.mark.xfail
+def test_center_existence(disc_particles_all):
+    """Test center existence and uniqueness."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+
+    gx_c = utils._center(
+        pos_s[:, 0],
+        pos_s[:, 1],
+        pos_s[:, 2],
+        pos_d[:, 0],
+        pos_d[:, 1],
+        pos_d[:, 2],
+        pos_g[:, 0],
+        pos_g[:, 1],
+        pos_g[:, 2],
+        mass_s,
+        mass_g,
+        mass_d
+    )
+
+    x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
+    y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
+    z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
+
+    pos_gal = np.vstack((x_gal, y_gal, z_gal))
+
+    assert len(np.where(~pos_gal.any(axis=0))) == 1
+
+
+# @pytest.mark.xfail
+# def test_angular_momentum_outputs(disc_particles_all):
+#    """Test object."""
+#    (
+#        mass_s,
+#        pos_s,
+#        vel_s,
+#        mass_g,
+#        pos_g,
+#        vel_g,
+#        mass_d,
+#        pos_d,
+#        vel_d,
+#    ) = disc_particles_all
+#
+#    g = galaxychop.Galaxy(
+#        pos_s[:, 0] * u.kpc,
+#        pos_s[:, 1] * u.kpc,
+#        pos_s[:, 2] * u.kpc,
+#        vel_s[:, 0] * (u.km / u.s),
+#        vel_s[:, 1] * (u.km / u.s),
+#        vel_s[:, 2] * (u.km / u.s),
+#        mass_s * u.M_sun,
+#        pos_d[:, 0] * u.kpc,
+#        pos_d[:, 1] * u.kpc,
+#        pos_d[:, 2] * u.kpc,
+#        vel_d[:, 0] * (u.km / u.s),
+#        vel_d[:, 1] * (u.km / u.s),
+#        vel_d[:, 2] * (u.km / u.s),
+#        mass_d * u.M_sun,
+#        pos_g[:, 0] * u.kpc,
+#        pos_g[:, 1] * u.kpc,
+#        pos_g[:, 2] * u.kpc,
+#        vel_g[:, 0] * (u.km / u.s),
+#        vel_g[:, 1] * (u.km / u.s),
+#        vel_g[:, 2] * (u.km / u.s),
+#        mass_g * u.M_sun,
+#    )
+#
+#    g.x_s = g.x_s.to_value(u.kpc)
+#    g.y_s = g.y_s.to_value(u.kpc)
+#    g.z_s = g.z_s.to_value(u.kpc)
+#    g.vx_s = g.vx_s.to_value(u.km / u.s)
+#    g.vy_s = g.vy_s.to_value(u.km / u.s)
+#    g.vz_s = g.vz_s.to_value(u.km / u.s)
+#    g.m_s = g.m_s.to_value(u.M_sun)
+#
+#    g.x_dm = g.x_dm.to_value(u.kpc)
+#    g.y_dm = g.y_dm.to_value(u.kpc)
+#    g.z_dm = g.z_dm.to_value(u.kpc)
+#    g.vx_dm = g.vx_dm.to_value(u.km / u.s)
+#    g.vy_dm = g.vy_dm.to_value(u.km / u.s)
+#    g.vz_dm = g.vz_dm.to_value(u.km / u.s)
+#    g.m_dm = g.m_dm.to_value(u.M_sun)
+#
+#    g.x_g = g.x_g.to_value(u.kpc)
+#    g.y_g = g.y_g.to_value(u.kpc)
+#    g.z_g = g.z_g.to_value(u.kpc)
+#    g.vx_g = g.vx_g.to_value(u.km / u.s)
+#    g.vy_g = g.vy_g.to_value(u.km / u.s)
+#    g.vz_g = g.vz_g.to_value(u.km / u.s)
+#    g.m_g = g.m_g.to_value(u.M_sun)
+#
+#    J_part_t, Jr_star_t, Jr_t = g.angular_momentum()
+#    assert isinstance(J_part_t, (float, np.float, np.ndarray))
+#    assert isinstance(Jr_star_t, (float, np.float, np.ndarray))
+#    assert isinstance(Jr_t, (float, np.float, np.ndarray))
+#    assert J_part_t.shape == (3, len(pos_s[:, 0]) + len(pos_g[:, 0])
+#                              + len(pos_d[:, 0]))
+
+
+def test_jcirc_E_tot_len(disc_particles_all):
+    """Check the E_tot array len."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    E_tot_dark, E_tot_star, E_tot_gas = g.energy()
+    E_tot = np.hstack((E_tot_star, E_tot_dark, E_tot_gas))
+    tot_len = len(E_tot_dark) + len(E_tot_star) + len(E_tot_gas)
+    assert (len(E_tot) == tot_len)
+
+
+def test_jcirc_x_y_len(disc_particles_all):
+    """Check the x and y array len."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    g.Etot_dm = (random.random(50) * (-100))
+    g.Etot_s = (random.random(50) * (-100))
+    g.Etot_g = (random.random(50) * (-100))
+
+    Jx = random.random(150)
+    Jy = random.random(150)
+    Jz = random.random(150)
+    g.J_part = (np.vstack((Jx, Jy, Jz))) * 100
+
+    x, y = g.jcirc()
+    assert (len(x) == len(y))
+
+
+def test_param_circ_eps_one_minus_one(disc_particles_all):
+    """Check is the eps range."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    g.Etot_dm = (random.random(300) * (-100))
+    g.Etot_s = (random.random(300) * (-100))
+    g.Etot_g = (random.random(300) * (-100))
+
+    Jx = random.random(900)
+    Jy = random.random(900)
+    Jz = random.random(900)
+
+    g.J_star = np.vstack((Jx, Jy, Jz))
+    g.J_part = np.vstack((Jx, Jy, Jz))
+    g.Jr_star = random.random(600)
+    g.Jr = random.random(900)
+    g.jcirc()
+    E_star, eps, eps_r = g.paramcirc()
+    assert (eps <= 1).all()
+    assert (eps >= -1).all()
