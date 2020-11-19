@@ -506,34 +506,27 @@ def test_type_energy(disc_particles_all, halo_particles):
     assert isinstance(k_g, (float, np.float, np.ndarray))
 
 
-# @pytest.mark.xfail
+@pytest.mark.xfail
 def test_center_existence(disc_particles_all):
     """Test center existence and uniqueness."""
-    (
-        mass_s,
-        pos_s,
-        vel_s,
-        mass_g,
-        pos_g,
-        vel_g,
-        mass_d,
-        pos_d,
-        vel_d,
-    ) = disc_particles_all
+    (mass_s, pos_s, vel_s,
+     mass_g, pos_g, vel_g) = disc_particles_all
+
+    mass_dm, pos_dm, vel_dm = halo_particles
 
     gx_c = utils._center(
         pos_s[:, 0],
         pos_s[:, 1],
         pos_s[:, 2],
-        pos_d[:, 0],
-        pos_d[:, 1],
-        pos_d[:, 2],
+        pos_dm[:, 0],
+        pos_dm[:, 1],
+        pos_dm[:, 2],
         pos_g[:, 0],
         pos_g[:, 1],
         pos_g[:, 2],
         mass_s,
         mass_g,
-        mass_d
+        mass_dm
     )
 
     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
@@ -545,75 +538,17 @@ def test_center_existence(disc_particles_all):
     assert len(np.where(~pos_gal.any(axis=0))) == 1
 
 
-# @pytest.mark.xfail
-# def test_angular_momentum_outputs(disc_particles_all):
-#    """Test object."""
-#    (
-#        mass_s,
-#        pos_s,
-#        vel_s,
-#        mass_g,
-#        pos_g,
-#        vel_g,
-#        mass_d,
-#        pos_d,
-#        vel_d,
-#    ) = disc_particles_all
-#
-#    g = galaxychop.Galaxy(
-#        pos_s[:, 0] * u.kpc,
-#        pos_s[:, 1] * u.kpc,
-#        pos_s[:, 2] * u.kpc,
-#        vel_s[:, 0] * (u.km / u.s),
-#        vel_s[:, 1] * (u.km / u.s),
-#        vel_s[:, 2] * (u.km / u.s),
-#        mass_s * u.M_sun,
-#        pos_d[:, 0] * u.kpc,
-#        pos_d[:, 1] * u.kpc,
-#        pos_d[:, 2] * u.kpc,
-#        vel_d[:, 0] * (u.km / u.s),
-#        vel_d[:, 1] * (u.km / u.s),
-#        vel_d[:, 2] * (u.km / u.s),
-#        mass_d * u.M_sun,
-#        pos_g[:, 0] * u.kpc,
-#        pos_g[:, 1] * u.kpc,
-#        pos_g[:, 2] * u.kpc,
-#        vel_g[:, 0] * (u.km / u.s),
-#        vel_g[:, 1] * (u.km / u.s),
-#        vel_g[:, 2] * (u.km / u.s),
-#        mass_g * u.M_sun,
-#    )
-#
-#    g.x_s = g.x_s.to_value(u.kpc)
-#    g.y_s = g.y_s.to_value(u.kpc)
-#    g.z_s = g.z_s.to_value(u.kpc)
-#    g.vx_s = g.vx_s.to_value(u.km / u.s)
-#    g.vy_s = g.vy_s.to_value(u.km / u.s)
-#    g.vz_s = g.vz_s.to_value(u.km / u.s)
-#    g.m_s = g.m_s.to_value(u.M_sun)
-#
-#    g.x_dm = g.x_dm.to_value(u.kpc)
-#    g.y_dm = g.y_dm.to_value(u.kpc)
-#    g.z_dm = g.z_dm.to_value(u.kpc)
-#    g.vx_dm = g.vx_dm.to_value(u.km / u.s)
-#    g.vy_dm = g.vy_dm.to_value(u.km / u.s)
-#    g.vz_dm = g.vz_dm.to_value(u.km / u.s)
-#    g.m_dm = g.m_dm.to_value(u.M_sun)
-#
-#    g.x_g = g.x_g.to_value(u.kpc)
-#    g.y_g = g.y_g.to_value(u.kpc)
-#    g.z_g = g.z_g.to_value(u.kpc)
-#    g.vx_g = g.vx_g.to_value(u.km / u.s)
-#    g.vy_g = g.vy_g.to_value(u.km / u.s)
-#    g.vz_g = g.vz_g.to_value(u.km / u.s)
-#    g.m_g = g.m_g.to_value(u.M_sun)
-#
-#    J_part_t, Jr_star_t, Jr_t = g.angular_momentum()
-#    assert isinstance(J_part_t, (float, np.float, np.ndarray))
-#    assert isinstance(Jr_star_t, (float, np.float, np.ndarray))
-#    assert isinstance(Jr_t, (float, np.float, np.ndarray))
-#    assert J_part_t.shape == (3, len(pos_s[:, 0]) + len(pos_g[:, 0])
-#                              + len(pos_d[:, 0]))
+@pytest.mark.xfail
+def test_angular_momentum_outputs(mock_galaxy):
+    """Test object."""
+    g = mock_galaxy
+
+    J_part_t, Jr_star_t, Jr_t = g.angular_momentum
+    assert isinstance(J_part_t, (float, np.float, np.ndarray))
+    assert isinstance(Jr_star_t, (float, np.float, np.ndarray))
+    assert isinstance(Jr_t, (float, np.float, np.ndarray))
+    assert J_part_t.shape == (3, len(g.x_s) + len(g.x_g)
+                              + len(g.x_dm))
 
 
 def test_jcirc_E_tot_len(mock_galaxy):
