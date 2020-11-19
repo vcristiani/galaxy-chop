@@ -187,3 +187,50 @@ def potential(x, y, z, m, eps=0.0):
     """Compute de potential energy."""
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
+
+
+def _center(
+    x_s,
+    y_s,
+    z_s,
+    x_dm,
+    y_dm,
+    z_dm,
+    x_g,
+    y_g,
+    z_g,
+    m_s,
+    m_g,
+    m_dm,
+    eps_dm=0,
+    eps_s=0,
+    eps_g=0
+):
+    """Centers the particles."""
+    x = np.hstack((x_s, x_dm, x_g))
+    y = np.hstack((y_s, y_dm, y_g))
+    z = np.hstack((z_s, z_dm, z_g))
+    m = np.hstack((m_s, m_dm, m_g))
+    eps = np.max([eps_dm, eps_s, eps_g])
+
+    pot = potential(da.asarray(x, chunks=100),
+                    da.asarray(y, chunks=100),
+                    da.asarray(z, chunks=100),
+                    da.asarray(m, chunks=100),
+                    da.asarray(eps))
+
+    pot_dark = pot[len(m_s):len(m_s) + len(m_dm)]
+
+    x_s = x_s - x_dm[pot_dark.argmax()]
+    y_s = y_s - y_dm[pot_dark.argmax()]
+    z_s = z_s - z_dm[pot_dark.argmax()]
+
+    x_dm = x_dm - x_dm[pot_dark.argmax()]
+    y_dm = y_dm - y_dm[pot_dark.argmax()]
+    z_dm = z_dm - z_dm[pot_dark.argmax()]
+
+    x_g = x_g - x_dm[pot_dark.argmax()]
+    y_g = y_g - y_dm[pot_dark.argmax()]
+    z_g = z_g - z_dm[pot_dark.argmax()]
+
+    return x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g
