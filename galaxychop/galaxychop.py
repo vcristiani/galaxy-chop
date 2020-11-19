@@ -15,7 +15,7 @@ import numpy as np
 from galaxychop import utils
 from astropy import units as u
 import dask.array as da
-# from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.interpolate import InterpolatedUnivariateSpline
 # from sklearn.mixture import GaussianMixture
 # import random
 
@@ -119,6 +119,11 @@ class Galaxy:
     Etot_s = attr.ib(default=None)
     Etot_g = attr.ib(default=None)
 
+    J_part = attr.ib(default=None)
+    J_star = attr.ib(default=None)
+    Jr_star = attr.ib(default=None)
+    Jr = attr.ib(default=None)
+
     components_s = attr.ib(default=None)
     components_g = attr.ib(default=None)
     metadata = attr.ib(default=None)
@@ -192,8 +197,142 @@ class Galaxy:
         E_tot_star = k_s - pot_star
         E_tot_gas = k_g - pot_gas
 
-        setattr(self, "E_tot_dark", E_tot_dark)
-        setattr(self, "E_tot_star", E_tot_star)
-        setattr(self, "E_tot_gas", E_tot_gas)
+        setattr(self, "Etot_dm", E_tot_dark)
+        setattr(self, "Etot_s", E_tot_star)
+        setattr(self, "Etot_g", E_tot_gas)
 
         return E_tot_dark, E_tot_star, E_tot_gas
+
+    def jcirc(self, bin0=0.05, bin1=0.005):
+        """
+        Circular angular momentum.
+
+        Calculation of the dots to build the function of the circular
+        angular momentum.
+        """
+        if np.all(getattr(self, "Etot_dm")) == (None):
+            self.energy()
+
+        E_tot = np.hstack((self.Etot_s, self.Etot_dm, self.Etot_g))
+
+        # Remove the particles that are not bound: E > 0.
+        (neg,) = np.where(E_tot <= 0.0)
+        (neg_star,) = np.where(self.Etot_s <= 0.0)
+
+        # Remove the particles with E = -inf.
+        (fin,) = np.where(E_tot[neg] != -np.inf)
+        (fin_star,) = np.where(self.Etot_s[neg_star] != -np.inf)
+
+        # Normalize the two variables: E between 0 and 1; J between -1 and 1.
+        E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
+        J = self.J_part[2, :][neg][fin] / np.max(np.abs(self.J_part
+                                                        [2, :][neg][fin]))
+
+        # Make the energy binning and select the Jz values with which we
+        # calculate the J_circ.
+        aux0 = np.arange(-1.0, -0.1, bin0)
+        aux1 = np.arange(-0.1, 0.0, bin1)
+
+        aux = np.concatenate((aux0, aux1), axis=0)
+
+        x = np.zeros(len(aux) + 1)
+        y = np.zeros(len(aux) + 1)
+
+        x[0] = -1.0
+        y[0] = np.abs(J[np.argmin(E)])
+
+        for i in range(1, len(aux)):
+            (mask,) = np.where((E <= aux[i]) & (E > aux[i - 1]))
+            s = np.argsort(np.abs(J[mask]))
+
+            # We take into account whether or not there are particles in the
+            # energy bins.
+            if len(s) != 0:
+                if len(s) == 1:
+                    x[i] = E[mask][s]
+                    y[i] = np.abs(J[mask][s])
+                else:
+                    if (
+                        1.0 - (np.abs(J[mask][s][-2]) / np.abs(J[mask][s][-1]))
+                    ) >= 0.01:
+                        x[i] = E[mask][s][-2]
+                        y[i] = np.abs(J[mask][s][-2])
+                    else:
+                        x[i] = E[mask][s][-1]
+                        y[i] = np.abs(J[mask][s][-1])
+            else:
+                pass
+
+        # Mask to complete the last bin, in case there are no empty bins.
+        (mask,) = np.where(E > aux[len(aux) - 1])
+
+        if len(mask) != 0:
+            x[len(aux)] = E[mask][np.abs(J[mask]).argmax()]
+            y[len(aux)] = np.abs(J[mask][np.abs(J[mask]).argmax()])
+
+        # In case there are empty bins, we get rid of them.
+        else:
+            i = len(np.where(y == 0)[0]) - 1
+            if i == 0:
+                x = x[:-1]
+                y = y[:-1]
+            else:
+                x = x[:-i]
+                y = y[:-i]
+
+        # In case some intermediate bin does not have points.
+        (zero,) = np.where(x != 0.0)
+        x = x[zero]
+        y = y[zero]
+
+        setattr(self, "x", x)
+        setattr(self, "y", y)
+
+        return x, y
+
+    def paramcirc(self):
+        """Circulars parameters calculation."""
+        if np.all(getattr(self, "Etot_dm")) == (None):
+            self.energy()
+
+        if np.all(getattr(self, "x")) == (None):
+            self.jcirc()
+
+        E_tot = np.hstack((self.Etot_s, self.Etot_dm, self.Etot_g))
+
+        # Remove the particles that are not bound: E > 0.
+        (neg,) = np.where(E_tot <= 0.0)
+        (neg_star,) = np.where(self.Etot_s <= 0.0)
+
+        # Remove the particles with E = -inf.
+        (fin,) = np.where(E_tot[neg] != -np.inf)
+        (fin_star,) = np.where(self.Etot_s[neg_star] != -np.inf)
+
+        # Normalize E, Lz and Lr for the stars.
+        E_star = self.Etot_s[neg_star][fin_star] / np.abs(np.min(
+            E_tot[neg][fin])
+        )
+
+        J_star_ = self.J_star[2, :][neg_star][fin_star] / np.max(
+            np.abs(self.J_part[2, :][neg][fin])
+        )
+
+        Jr_star_ = self.Jr_star[neg_star][fin_star] / np.max(np.abs(
+            self.Jr[neg][fin])
+        )
+
+        # We do the interpolation to calculate the J_circ.
+        spl = InterpolatedUnivariateSpline(self.x, self.y, k=1)
+
+        # Calculate the circularity parameter Lz/Lc.
+        eps = J_star_ / spl(E_star)
+
+        # Calculate the same for Lp/Lc.
+        eps_r = Jr_star_ / spl(E_star)
+
+        # Determine that the particles we are removing are not significant.
+
+        # We remove particles that have circularity < -1 and circularity > 1.
+        mask, = np.where((eps <= 1.0) & (eps >= -1.0))
+
+        return E_star[mask], eps[mask], eps_r[mask]

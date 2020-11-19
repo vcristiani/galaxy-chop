@@ -507,3 +507,148 @@ def test_type_enrgy(disc_particles_all):
     assert isinstance(k_s, (float, np.float, np.ndarray))
     assert isinstance(k_d, (float, np.float, np.ndarray))
     assert isinstance(k_g, (float, np.float, np.ndarray))
+
+
+def test_jcirc_E_tot_len(disc_particles_all):
+    """Check the E_tot array len."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    E_tot_dark, E_tot_star, E_tot_gas = g.energy()
+    E_tot = np.hstack((E_tot_star, E_tot_dark, E_tot_gas))
+    tot_len = len(E_tot_dark) + len(E_tot_star) + len(E_tot_gas)
+    assert (len(E_tot) == tot_len)
+
+
+def test_jcirc_x_y_len(disc_particles_all):
+    """Check the x and y array len."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    g.Etot_dm = (random.random(50) * (-100))
+    g.Etot_s = (random.random(50) * (-100))
+    g.Etot_g = (random.random(50) * (-100))
+
+    Jx = random.random(150)
+    Jy = random.random(150)
+    Jz = random.random(150)
+    g.J_part = (np.vstack((Jx, Jy, Jz))) * 100
+
+    x, y = g.jcirc()
+    assert (len(x) == len(y))
+
+
+def test_param_circ_eps_one_minus_one(disc_particles_all):
+    """Check is the eps range."""
+    (
+        mass_s,
+        pos_s,
+        vel_s,
+        mass_g,
+        pos_g,
+        vel_g,
+        mass_d,
+        pos_d,
+        vel_d,
+    ) = disc_particles_all
+    g = galaxychop.Galaxy(
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * u.km / u.s,
+        vel_s[:, 1] * u.km / u.s,
+        vel_s[:, 2] * u.km / u.s,
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * u.km / u.s,
+        vel_d[:, 1] * u.km / u.s,
+        vel_d[:, 2] * u.km / u.s,
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * u.km / u.s,
+        vel_g[:, 1] * u.km / u.s,
+        vel_g[:, 2] * u.km / u.s,
+        mass_g * u.M_sun,
+    )
+    g.Etot_dm = (random.random(300) * (-100))
+    g.Etot_s = (random.random(300) * (-100))
+    g.Etot_g = (random.random(300) * (-100))
+
+    Jx = random.random(900)
+    Jy = random.random(900)
+    Jz = random.random(900)
+
+    g.J_star = np.vstack((Jx, Jy, Jz))
+    g.J_part = np.vstack((Jx, Jy, Jz))
+    g.Jr_star = random.random(600)
+    g.Jr = random.random(900)
+    g.jcirc()
+    E_star, eps, eps_r = g.paramcirc()
+    assert (eps <= 1).all()
+    assert (eps >= -1).all()
