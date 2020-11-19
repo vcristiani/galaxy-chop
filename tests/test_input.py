@@ -548,49 +548,71 @@ def test_center_existence(disc_particles_all):
     assert len(np.where(~pos_gal.any(axis=0))) == 1
 
 
-@pytest.mark.xfail
 def test_angular_momentum_outputs(disc_particles_all):
     """Test object."""
     (
         mass_s,
-        mass_g,
-        pos_g,
         pos_s,
         vel_s,
+        mass_g,
+        pos_g,
         vel_g,
         mass_d,
         pos_d,
         vel_d,
     ) = disc_particles_all
+
     g = galaxychop.Galaxy(
-        pos_s[:, 0],
-        pos_s[:, 1],
-        pos_s[:, 2],
-        vel_s[:, 0],
-        vel_s[:, 1],
-        vel_s[:, 2],
-        mass_s,
-        pos_d[:, 0],
-        pos_d[:, 1],
-        pos_d[:, 2],
-        vel_d[:, 0],
-        vel_d[:, 1],
-        vel_d[:, 2],
-        mass_d,
-        pos_g[:, 0],
-        pos_g[:, 1],
-        pos_g[:, 2],
-        vel_g[:, 0],
-        vel_g[:, 1],
-        vel_g[:, 2],
-        mass_g,
+        pos_s[:, 0] * u.kpc,
+        pos_s[:, 1] * u.kpc,
+        pos_s[:, 2] * u.kpc,
+        vel_s[:, 0] * (u.km / u.s),
+        vel_s[:, 1] * (u.km / u.s),
+        vel_s[:, 2] * (u.km / u.s),
+        mass_s * u.M_sun,
+        pos_d[:, 0] * u.kpc,
+        pos_d[:, 1] * u.kpc,
+        pos_d[:, 2] * u.kpc,
+        vel_d[:, 0] * (u.km / u.s),
+        vel_d[:, 1] * (u.km / u.s),
+        vel_d[:, 2] * (u.km / u.s),
+        mass_d * u.M_sun,
+        pos_g[:, 0] * u.kpc,
+        pos_g[:, 1] * u.kpc,
+        pos_g[:, 2] * u.kpc,
+        vel_g[:, 0] * (u.km / u.s),
+        vel_g[:, 1] * (u.km / u.s),
+        vel_g[:, 2] * (u.km / u.s),
+        mass_g * u.M_sun,
     )
+
+    g.x_s = g.x_s.to_value(u.kpc)
+    g.y_s = g.y_s.to_value(u.kpc)
+    g.z_s = g.z_s.to_value(u.kpc)
+    g.vx_s = g.vx_s.to_value(u.km / u.s)
+    g.vy_s = g.vy_s.to_value(u.km / u.s)
+    g.vz_s = g.vz_s.to_value(u.km / u.s)
+    g.m_s = g.m_s.to_value(u.M_sun)
+
+    g.x_dm = g.x_dm.to_value(u.kpc)
+    g.y_dm = g.y_dm.to_value(u.kpc)
+    g.z_dm = g.z_dm.to_value(u.kpc)
+    g.vx_dm = g.vx_dm.to_value(u.km / u.s)
+    g.vy_dm = g.vy_dm.to_value(u.km / u.s)
+    g.vz_dm = g.vz_dm.to_value(u.km / u.s)
+    g.m_dm = g.m_dm.to_value(u.M_sun)
+
+    g.x_g = g.x_g.to_value(u.kpc)
+    g.y_g = g.y_g.to_value(u.kpc)
+    g.z_g = g.z_g.to_value(u.kpc)
+    g.vx_g = g.vx_g.to_value(u.km / u.s)
+    g.vy_g = g.vy_g.to_value(u.km / u.s)
+    g.vz_g = g.vz_g.to_value(u.km / u.s)
+    g.m_g = g.m_g.to_value(u.M_sun)
+
     J_part_t, Jr_star_t, Jr_t = g.angular_momentum()
-    # assert isinstance(J_part, (float, np.float, np.ndarray))
-    # assert isinstance(Jr_star, (float, np.float, np.ndarray))
-    # assert isinstance(Jr, (float, np.float, np.ndarray))
-    # assert J_part_t.shape ==
-    # # (3, len(pos_s[:, 0]) + len(pos_g[:, 0]) + len(pos_d[:, 0]))
-    # np.testing.assert_equal(Jr_star.size, pos_s.shape[1])
-    # np.testing.assert_equal(Jr.size, pos_s.shape[1] +
-    # # pos_g.shape[1], pos_d.shape[1])
+    assert isinstance(J_part_t, (float, np.float, np.ndarray))
+    assert isinstance(Jr_star_t, (float, np.float, np.ndarray))
+    assert isinstance(Jr_t, (float, np.float, np.ndarray))
+    assert J_part_t.shape == (3, len(pos_s[:, 0]) + len(pos_g[:, 0])
+                              + len(pos_d[:, 0]))
