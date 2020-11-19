@@ -114,13 +114,13 @@ class Galaxy:
     vz_g = uttr.ib(unit=(u.km / u.s))
     m_g = uttr.ib(unit=u.Msun)
 
-    eps_s = uttr.ib(default=0, unit=u.kpc)
-    eps_dm = uttr.ib(default=0.0, unit=u.kpc)
-    eps_g = uttr.ib(default=0.0, unit=u.kpc)
+    eps_s = uttr.ib(default=0., unit=u.kpc)
+    eps_dm = uttr.ib(default=0., unit=u.kpc)
+    eps_g = uttr.ib(default=0., unit=u.kpc)
 
-    Etot_dm = uttr.ib(default=None, unit=(u.Msun * (u.km / u.s) ** 2))
-    Etot_s = uttr.ib(default=None, unit=(u.Msun * (u.km / u.s) ** 2))
-    Etot_g = uttr.ib(default=None, unit=(u.Msun * (u.km / u.s) ** 2))
+    Etot_dm = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
+    Etot_s = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
+    Etot_g = uttr.ib(default=0., unit=(u.Msun * (u.km / u.s)**2))
 
     to_array = uttr.array_accessor()
 
@@ -197,6 +197,6 @@ class Galaxy:
         setattr(self, "Etot_s", Etot_s * u.Msun * (u.km / u.s) ** 2)
         setattr(self, "Etot_g", Etot_g * u.Msun * (u.km / u.s) ** 2)
 
-        return (Etot_dm * u.Msun * (u.km / u.s) ** 2,)
-        Etot_s * u.Msun * (u.km / u.s) ** 2,
-        Etot_g * u.Msun * (u.km / u.s) ** 2
+        return (Etot_dm * u.Msun * (u.km / u.s)**2,
+                Etot_s * u.Msun * (u.km / u.s)**2,
+                Etot_g * u.Msun * (u.km / u.s)**2)
