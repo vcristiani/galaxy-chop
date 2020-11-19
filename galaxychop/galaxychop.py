@@ -188,11 +188,9 @@ class Galaxy:
         Etot_s = k_s - pot_s
         Etot_g = k_g - pot_g
 
-        return (
-            Etot_dm * u.Msun * (u.km / u.s) ** 2,
-            Etot_s * u.Msun * (u.km / u.s) ** 2,
-            Etot_g * u.Msun * (u.km / u.s) ** 2,
-        )
+        return (Etot_dm * u.Msun * (u.km / u.s) ** 2,
+                Etot_s * u.Msun * (u.km / u.s) ** 2,
+                Etot_g * u.Msun * (u.km / u.s) ** 2)
 
     @property
     def angular_momentum(self, r_corte=None):

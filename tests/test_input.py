@@ -373,6 +373,18 @@ def test_daskpotential(disc_particles):
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
 
 
+def test_output_galaxy_properties(mock_galaxy):
+    """Test output of properties."""
+    g = mock_galaxy
+
+    assert isinstance(g.energy[0], u.Quantity)
+    assert isinstance(g.energy[1], u.Quantity)
+    assert isinstance(g.energy[2], u.Quantity)
+# assert isinstance(g.angular_momentum, u.Quantity)
+# assert isinstance(g.jcirc, u.Quantity)
+# assert isinstance(g.paramcirc, u.Quantity)
+
+
 @pytest.mark.xfail
 def test_energy_method(disc_particles_all, halo_particles):
     """Test energy method."""
