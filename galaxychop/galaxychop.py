@@ -197,9 +197,9 @@ class Galaxy:
         E_tot_star = k_s - pot_star
         E_tot_gas = k_g - pot_gas
 
-        setattr(self, "E_tot_dark", E_tot_dark)
-        setattr(self, "E_tot_star", E_tot_star)
-        setattr(self, "E_tot_gas", E_tot_gas)
+        setattr(self, "Etot_dm", E_tot_dark)
+        setattr(self, "Etot_s", E_tot_star)
+        setattr(self, "Etot_g", E_tot_gas)
 
         return E_tot_dark, E_tot_star, E_tot_gas
 
