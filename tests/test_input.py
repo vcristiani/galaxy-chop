@@ -380,7 +380,10 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g.energy[0], u.Quantity)
     assert isinstance(g.energy[1], u.Quantity)
     assert isinstance(g.energy[2], u.Quantity)
-# assert isinstance(g.angular_momentum, u.Quantity)
+    assert isinstance(g.angular_momentum[0], u.Quantity)
+    assert isinstance(g.angular_momentum[1], u.Quantity)
+    assert isinstance(g.angular_momentum[2], u.Quantity)
+    assert isinstance(g.angular_momentum[3], u.Quantity)
 # assert isinstance(g.jcirc, u.Quantity)
 # assert isinstance(g.paramcirc, u.Quantity)
 
@@ -479,7 +482,7 @@ def test_stars_and_gas_pot_energy(disc_particles_all):
 
 
 @pytest.mark.xfail
-def test_total_enrgy(mock_galaxy):
+def test_total_energy(mock_galaxy):
     """Test total energy."""
     g = mock_galaxy
 
@@ -518,8 +521,7 @@ def test_type_energy(disc_particles_all, halo_particles):
     assert isinstance(k_g, (float, np.float, np.ndarray))
 
 
-@pytest.mark.xfail
-def test_center_existence(disc_particles_all):
+def test_center_existence(disc_particles_all, halo_particles):
     """Test center existence and uniqueness."""
     (mass_s, pos_s, vel_s,
      mass_g, pos_g, vel_g) = disc_particles_all
@@ -550,17 +552,14 @@ def test_center_existence(disc_particles_all):
     assert len(np.where(~pos_gal.any(axis=0))) == 1
 
 
-@pytest.mark.xfail
 def test_angular_momentum_outputs(mock_galaxy):
     """Test object."""
     g = mock_galaxy
 
-    J_part_t, Jr_star_t, Jr_t = g.angular_momentum
-    assert isinstance(J_part_t, (float, np.float, np.ndarray))
-    assert isinstance(Jr_star_t, (float, np.float, np.ndarray))
-    assert isinstance(Jr_t, (float, np.float, np.ndarray))
-    assert J_part_t.shape == (3, len(g.x_s) + len(g.x_g)
-                              + len(g.x_dm))
+    J_part, Jr_star, Jr, J_star = g.angular_momentum
+
+    longitude = len(g.x_s) + len(g.x_g) + len(g.x_dm)
+    assert np.shape(J_part.value) == (3, longitude)
 
 
 def test_jcirc_E_tot_len(mock_galaxy):

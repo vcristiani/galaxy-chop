@@ -188,9 +188,9 @@ class Galaxy:
         Etot_s = k_s - pot_s
         Etot_g = k_g - pot_g
 
-        return (Etot_dm * u.Msun * (u.km / u.s) ** 2,
-                Etot_s * u.Msun * (u.km / u.s) ** 2,
-                Etot_g * u.Msun * (u.km / u.s) ** 2)
+        return (Etot_dm * (u.km / u.s) ** 2,
+                Etot_s * (u.km / u.s) ** 2,
+                Etot_g * (u.km / u.s) ** 2)
 
     @property
     def angular_momentum(self, r_corte=None):
@@ -201,99 +201,82 @@ class Galaxy:
         then calculates angular momentum of dark matter, star and
         gas particles.
         """
-        x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g = utils._center(
-            self.x_s,
-            self.y_s,
-            self.z_s,
-            self.x_dm,
-            self.y_dm,
-            self.z_dm,
-            self.x_g,
-            self.y_g,
-            self.z_g,
-            self.m_s,
-            self.m_g,
-            self.m_dm,
-        )
+        x_s = self.arr_.x_s
+        y_s = self.arr_.y_s
+        z_s = self.arr_.z_s
+
+        x_g = self.arr_.x_g
+        y_g = self.arr_.y_g
+        z_g = self.arr_.z_g
+
+        x_dm = self.arr_.x_dm
+        y_dm = self.arr_.y_dm
+        z_dm = self.arr_.z_dm
+
+        m_s = self.arr_.m_s
+        m_g = self.arr_.m_g
+        m_dm = self.arr_.m_dm
+
+        vx_s = self.arr_.x_s
+        vy_s = self.arr_.y_s
+        vz_s = self.arr_.z_s
+
+        vx_g = self.arr_.x_g
+        vy_g = self.arr_.y_g
+        vz_g = self.arr_.z_g
+
+        vx_dm = self.arr_.x_dm
+        vy_dm = self.arr_.y_dm
+        vz_dm = self.arr_.z_dm
 
         (
-            pos_rot_s_x,
-            pos_rot_s_y,
-            pos_rot_s_z,
-            vel_rot_s_x,
-            vel_rot_s_y,
-            vel_rot_s_z,
-            pos_rot_dm_x,
-            pos_rot_dm_y,
-            pos_rot_dm_z,
-            vel_rot_dm_x,
-            vel_rot_dm_y,
-            vel_rot_dm_z,
-            pos_rot_g_x,
-            pos_rot_g_y,
-            pos_rot_g_z,
-            vel_rot_g_x,
-            vel_rot_g_y,
-            vel_rot_g_z,
-        ) = utils.aling(
-            self.m_s,
-            x_s,
-            y_s,
-            z_s,
-            self.vx_s,
-            self.vy_s,
-            self.vz_s,
-            x_dm,
-            y_dm,
-            z_dm,
-            self.vx_dm,
-            self.vy_dm,
-            self.vz_dm,
-            x_g,
-            y_g,
-            z_g,
-            self.vx_g,
-            self.vy_g,
-            self.vz_g,
-            5,
-        )
+            xs, ys, zs,
+            xdm, ydm, zdm,
+            xg, yg, zg) = utils._center(x_s, y_s, z_s,
+                                        x_dm, y_dm, z_dm,
+                                        x_g, y_g, z_g,
+                                        m_s, m_g, m_dm)
 
-        J_dark = np.asarray(
-            (
-                pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
-                pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
-                pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x,
-            )
-        )
+        (
+            pos_rot_s_x, pos_rot_s_y, pos_rot_s_z,
+            vel_rot_s_x, vel_rot_s_y, vel_rot_s_z,
+            pos_rot_dm_x, pos_rot_dm_y, pos_rot_dm_z,
+            vel_rot_dm_x, vel_rot_dm_y, vel_rot_dm_z,
+            pos_rot_g_x, pos_rot_g_y, pos_rot_g_z,
+            vel_rot_g_x, vel_rot_g_y, vel_rot_g_z,
+            ) = utils.aling(m_s, xs, ys, zs,
+                            vx_s, vy_s, vz_s,
+                            xdm, ydm, zdm,
+                            vx_dm, vy_dm, vz_dm,
+                            xg, yg, zg,
+                            vx_g, vy_g, vz_g,
+                            r_corte=5)
 
-        J_star = np.asarray(
-            (
-                pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
-                pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
-                pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x,
-            )
-        )
+        J_dark = np.array(
+            [pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
+             pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
+             pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x])
 
-        J_gas = np.asarray(
-            (
-                pos_rot_g_y * vel_rot_g_z - pos_rot_g_z * vel_rot_g_y,
-                pos_rot_g_z * vel_rot_g_x - pos_rot_g_x * vel_rot_g_z,
-                pos_rot_g_x * vel_rot_g_y - pos_rot_g_y * vel_rot_g_x,
-            )
-        )
+        J_star = np.array(
+            [pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
+             pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
+             pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x])
 
-        J_part = np.concatenate((J_gas, J_dark, J_star), axis=1)
+        J_gas = np.array(
+            [pos_rot_g_y * vel_rot_g_z - pos_rot_g_z * vel_rot_g_y,
+             pos_rot_g_z * vel_rot_g_x - pos_rot_g_x * vel_rot_g_z,
+             pos_rot_g_x * vel_rot_g_y - pos_rot_g_y * vel_rot_g_x])
+
+        J_part = np.concatenate([J_gas, J_dark, J_star], axis=1)
 
         Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
 
         Jr = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
 
-        setattr(self, "J_part", J_part)
-        setattr(self, "Jr_star", Jr_star)
-        setattr(self, "Jr", Jr)
-        setattr(self, "J_star", J_star)
-
-        return J_part, Jr_star, Jr, J_star
+        return (J_part * u.kpc * u.km / u.s,
+                Jr_star * u.kpc * u.km / u.s,
+                Jr * u.kpc * u.km / u.s,
+                J_star * u.kpc * u.km / u.s)
 
     @property
     def jcirc(self, bin0=0.05, bin1=0.005):
