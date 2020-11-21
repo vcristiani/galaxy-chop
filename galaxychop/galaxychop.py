@@ -116,6 +116,14 @@ class Galaxy:
     eps_dm = uttr.ib(default=0.0, unit=u.kpc)
     eps_g = uttr.ib(default=0.0, unit=u.kpc)
 
+    J_part = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+    Jr_star = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+    Jr = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+    J_star = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+
+    x = attr.ib(default=None)
+    y = attr.ib(default=None)
+
     arr_ = uttr.array_accessor()
 
     # components_s = attr.ib(default=None)
@@ -192,7 +200,6 @@ class Galaxy:
                 Etot_s * (u.km / u.s) ** 2,
                 Etot_g * (u.km / u.s) ** 2)
 
-    @property
     def angular_momentum(self, r_corte=None):
         """
         Angular Momentum.
@@ -273,12 +280,17 @@ class Galaxy:
 
         Jr = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
 
-        return (J_part * u.kpc * u.km / u.s,
-                Jr_star * u.kpc * u.km / u.s,
-                Jr * u.kpc * u.km / u.s,
-                J_star * u.kpc * u.km / u.s)
+        new = attr.asdict(self, recurse=False)
+        del new["arr_"]
+        new.update(
+            J_part=J_part * u.kpc * u.km / u.s,
+            Jr_star=Jr_star * u.kpc * u.km / u.s,
+            Jr=Jr * u.kpc * u.km / u.s,
+            J_star=J_star * u.kpc * u.km / u.s
+        )
 
-    @property
+        return Galaxy(**new)
+
     def jcirc(self, bin0=0.05, bin1=0.005):
         """
         Circular angular momentum.
@@ -286,25 +298,31 @@ class Galaxy:
         Calculation of the dots to build the function of the circular
         angular momentum.
         """
-        if np.all(self.Etot_dm) == (None):
-            self.energy()
 
-        E_tot = np.hstack((self.Etot_s, self.Etot_dm, self.Etot_g))
+        E_tot = np.hstack((
+            self.energy[1].value,
+            self.energy[0].value,
+            self.energy[2].value
+        ))
 
         # Remove the particles that are not bound: E > 0.
         (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(self.Etot_s <= 0.0)
+        (neg_star,) = np.where(self.energy[1].value <= 0.0)
 
         # Remove the particles with E = -inf.
         (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(self.Etot_s[neg_star] != -np.inf)
+        (fin_star,) = np.where(self.energy[1].value[neg_star] != -np.inf)
 
         # Normalize the two variables: E between 0 and 1; J between -1 and 1.
         E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
-        # agregue esto porque es muy largo y no quiere andar (ARREGLAR!)
-        algo = self.J_part[2, :][neg][fin]
-        coso = np.max(np.abs(self.J_part[2, :][neg][fin]))
-        J = algo / coso
+
+        up = self.angular_momentum().arr_.J_part[2, :][neg][fin]
+
+        down = np.max(
+            np.abs(self.angular_momentum().arr_.J_part[2, :][neg][fin])
+        )
+
+        J = up / down
 
         # Make the energy binning and select the Jz values with which we
         # calculate the J_circ.
@@ -363,45 +381,48 @@ class Galaxy:
         x = x[zero]
         y = y[zero]
 
-        setattr(self, "x", x)
-        setattr(self, "y", y)
+        new = attr.asdict(self, recurse=False)
+        del new["arr_"]
+        new.update(x=x * (u.km / u.s) ** 2, y=y * u.kpc * u.km / u.s)
 
-        return x, y
+        return Galaxy(**new)
 
     @property
     def paramcirc(self):
         """Circular parameters calculation."""
-        if np.all(getattr(self, "Etot_dm")) == (None):
-            self.energy()
 
-        if np.all(getattr(self, "x")) == (None):
-            self.jcirc()
-
-        E_tot = np.hstack((self.Etot_s, self.Etot_dm, self.Etot_g))
+        E_tot = np.hstack((
+            self.energy[1].value,
+            self.energy[0].value,
+            self.energy[2].value
+        ))
 
         # Remove the particles that are not bound: E > 0.
         (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(self.Etot_s <= 0.0)
+        (neg_star,) = np.where(self.energy[1].value <= 0.0)
 
         # Remove the particles with E = -inf.
         (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(self.Etot_s[neg_star] != -np.inf)
+        (fin_star,) = np.where(self.energy[1].value[neg_star] != -np.inf)
 
         # Normalize E, Lz and Lr for the stars.
-        algo2 = self.Etot_s[neg_star][fin_star]
-        coso2 = np.abs(np.min(E_tot[neg][fin]))
-        E_star = algo2 / coso2
+        up1 = self.energy[1].value[neg_star][fin_star]
+        down1 = np.abs(np.min(E_tot[neg][fin]))
+        E_star = up1 / down1
 
-        J_star_ = self.J_star[2, :][neg_star][fin_star] / np.max(
-            np.abs(self.J_part[2, :][neg][fin])
+        up2 = self.angular_momentum().arr_.J_star[2, :][neg_star][fin_star]
+        down2 = np.max(
+            np.abs(self.angular_momentum().arr_.J_part[2, :][neg][fin])
         )
 
-        algo3 = self.Jr_star[neg_star][fin_star]
-        coso3 = np.max(np.abs(self.Jr[neg][fin]))
-        Jr_star_ = algo3 / coso3
+        J_star_ = up2 / down2
+
+        up3 = self.angular_momentum().arr_.Jr_star[neg_star][fin_star]
+        down3 = np.max(np.abs(self.angular_momentum().arr_.Jr[neg][fin]))
+        Jr_star_ = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
-        spl = InterpolatedUnivariateSpline(self.x, self.y, k=1)
+        spl = InterpolatedUnivariateSpline(self.jcirc().x, self.jcirc().y, k=1)
 
         # Calculate the circularity parameter Lz/Lc.
         eps = J_star_ / spl(E_star)
@@ -414,4 +435,6 @@ class Galaxy:
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        return E_star[mask], eps[mask], eps_r[mask]
+        return (E_star[mask] * (u.km / u.s) ** 2,
+                eps[mask],
+                eps_r[mask])
