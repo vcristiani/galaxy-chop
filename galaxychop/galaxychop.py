@@ -121,8 +121,8 @@ class Galaxy:
     Jr = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
     J_star = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
 
-    x = attr.ib(default=None)
-    y = attr.ib(default=None)
+    x = uttr.ib(default=0.0, unit=(u.km / u.s) ** 2)
+    y = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
 
     arr_ = uttr.array_accessor()
 
@@ -420,7 +420,9 @@ class Galaxy:
         Jr_star_ = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
-        spl = InterpolatedUnivariateSpline(self.jcirc().x, self.jcirc().y, k=1)
+        spl = InterpolatedUnivariateSpline(self.jcirc().arr_.x,
+                                           self.jcirc().arr_.y,
+                                           k=1)
 
         # Calculate the circularity parameter Lz/Lc.
         eps = J_star_ / spl(E_star)
@@ -433,6 +435,8 @@ class Galaxy:
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        return (E_star[mask] * (u.km / u.s) ** 2,
-                eps[mask],
-                eps_r[mask])
+        E_star = E_star[mask]
+        eps = eps[mask]
+        eps_r = eps_r[mask]
+
+        return (E_star * (u.km / u.s) ** 2, eps, eps_r)
