@@ -376,14 +376,15 @@ def test_daskpotential(disc_particles):
 def test_output_galaxy_properties(mock_galaxy):
     """Test output of properties."""
     g = mock_galaxy
+    g_test = g.angular_momentum()
 
     assert isinstance(g.energy[0], u.Quantity)
     assert isinstance(g.energy[1], u.Quantity)
     assert isinstance(g.energy[2], u.Quantity)
-    assert isinstance(g.angular_momentum[0], u.Quantity)
-    assert isinstance(g.angular_momentum[1], u.Quantity)
-    assert isinstance(g.angular_momentum[2], u.Quantity)
-    assert isinstance(g.angular_momentum[3], u.Quantity)
+    assert isinstance(g_test.J_part, u.Quantity)
+    assert isinstance(g_test.Jr_star, u.Quantity)
+    assert isinstance(g_test.Jr, u.Quantity)
+    assert isinstance(g_test.J_star, u.Quantity)
 # assert isinstance(g.jcirc, u.Quantity)
 # assert isinstance(g.paramcirc, u.Quantity)
 
@@ -555,11 +556,10 @@ def test_center_existence(disc_particles_all, halo_particles):
 def test_angular_momentum_outputs(mock_galaxy):
     """Test object."""
     g = mock_galaxy
-
-    J_part, Jr_star, Jr, J_star = g.angular_momentum
+    g_test = g.angular_momentum()
 
     longitude = len(g.x_s) + len(g.x_g) + len(g.x_dm)
-    assert np.shape(J_part.value) == (3, longitude)
+    assert np.shape(g_test.J_part.value) == (3, longitude)
 
 
 def test_jcirc_E_tot_len(mock_galaxy):

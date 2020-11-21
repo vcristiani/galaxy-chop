@@ -298,7 +298,6 @@ class Galaxy:
         Calculation of the dots to build the function of the circular
         angular momentum.
         """
-
         E_tot = np.hstack((
             self.energy[1].value,
             self.energy[0].value,
@@ -390,7 +389,6 @@ class Galaxy:
     @property
     def paramcirc(self):
         """Circular parameters calculation."""
-
         E_tot = np.hstack((
             self.energy[1].value,
             self.energy[0].value,
