@@ -1,0 +1,9 @@
+include LICENSE.txt
+include README.md
+
+recursive-exclude docs *
+recursive-include legacy *
+recursive-include resource *
+recursive-exclude tests *
+
+exclude tox.ini
