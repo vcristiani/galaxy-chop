@@ -1,5 +1,6 @@
 include LICENSE.txt
 include README.md
+include *.py
 
 recursive-exclude docs *
 recursive-include legacy *
