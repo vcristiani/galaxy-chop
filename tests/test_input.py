@@ -314,6 +314,39 @@ def mock_galaxy(disc_particles_all, halo_particles):
 
     return g
 
+
+@pytest.fixture(scope="session")
+def mock_real_galaxy():
+    """Mock real galaxy."""
+    dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
+    s = np.loadtxt(path.abspath(path.curdir) + "/legacy/star.dat")
+    g = np.loadtxt(path.abspath(path.curdir) + "/legacy/gas_.dat")
+    gal = galaxychop.Galaxy(
+        x_s=s[:, 1] * u.kpc,
+        y_s=s[:, 2] * u.kpc,
+        z_s=s[:, 3] * u.kpc,
+        vx_s=s[:, 4] * (u.km / u.s),
+        vy_s=s[:, 5] * (u.km / u.s),
+        vz_s=s[:, 6] * (u.km / u.s),
+        m_s=s[:, 0] * u.M_sun,
+        x_dm=dm[:, 1] * u.kpc,
+        y_dm=dm[:, 2] * u.kpc,
+        z_dm=dm[:, 3] * u.kpc,
+        vx_dm=dm[:, 4] * (u.km / u.s),
+        vy_dm=dm[:, 5] * (u.km / u.s),
+        vz_dm=dm[:, 6] * (u.km / u.s),
+        m_dm=dm[:, 0] * u.M_sun,
+        x_g=g[:, 1] * u.kpc,
+        y_g=g[:, 2] * u.kpc,
+        z_g=g[:, 3] * u.kpc,
+        vx_g=g[:, 4] * (u.km / u.s),
+        vy_g=g[:, 5] * (u.km / u.s),
+        vz_g=g[:, 6] * (u.km / u.s),
+        m_g=g[:, 0] * u.M_sun,
+    )
+
+    return gal
+
 # =============================================================================
 # TESTS
 # =============================================================================
@@ -575,34 +608,9 @@ def test_jcirc_E_tot_len(mock_galaxy):
     assert (len(E_tot) == tot_len)
 
 
-def test_jcirc_x_y_len():
+def test_jcirc_x_y_len(mock_real_galaxy):
     """Check the x and y array len."""
-    dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
-    s = np.loadtxt(path.abspath(path.curdir) + "/legacy/star.dat")
-    g = np.loadtxt(path.abspath(path.curdir) + "/legacy/gas_.dat")
-    gal = galaxychop.Galaxy(
-        x_s=s[:, 1] * u.kpc,
-        y_s=s[:, 2] * u.kpc,
-        z_s=s[:, 3] * u.kpc,
-        vx_s=s[:, 4] * (u.km / u.s),
-        vy_s=s[:, 5] * (u.km / u.s),
-        vz_s=s[:, 6] * (u.km / u.s),
-        m_s=s[:, 0] * u.M_sun,
-        x_dm=dm[:, 1] * u.kpc,
-        y_dm=dm[:, 2] * u.kpc,
-        z_dm=dm[:, 3] * u.kpc,
-        vx_dm=dm[:, 4] * (u.km / u.s),
-        vy_dm=dm[:, 5] * (u.km / u.s),
-        vz_dm=dm[:, 6] * (u.km / u.s),
-        m_dm=dm[:, 0] * u.M_sun,
-        x_g=g[:, 1] * u.kpc,
-        y_g=g[:, 2] * u.kpc,
-        z_g=g[:, 3] * u.kpc,
-        vx_g=g[:, 4] * (u.km / u.s),
-        vy_g=g[:, 5] * (u.km / u.s),
-        vz_g=g[:, 6] * (u.km / u.s),
-        m_g=g[:, 0] * u.M_sun,
-    )
+    gal = mock_real_galaxy
 
     g_test = gal.jcirc()
 
@@ -610,34 +618,9 @@ def test_jcirc_x_y_len():
 
 
 @pytest.mark.xfail
-def test_param_circ_eps_one_minus_one():
+def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     """Check is the eps range."""
-    dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
-    s = np.loadtxt(path.abspath(path.curdir) + "/legacy/star.dat")
-    g = np.loadtxt(path.abspath(path.curdir) + "/legacy/gas_.dat")
-    gal = galaxychop.Galaxy(
-        x_s=s[:, 1] * u.kpc,
-        y_s=s[:, 2] * u.kpc,
-        z_s=s[:, 3] * u.kpc,
-        vx_s=s[:, 4] * (u.km / u.s),
-        vy_s=s[:, 5] * (u.km / u.s),
-        vz_s=s[:, 6] * (u.km / u.s),
-        m_s=s[:, 0] * u.M_sun,
-        x_dm=dm[:, 1] * u.kpc,
-        y_dm=dm[:, 2] * u.kpc,
-        z_dm=dm[:, 3] * u.kpc,
-        vx_dm=dm[:, 4] * (u.km / u.s),
-        vy_dm=dm[:, 5] * (u.km / u.s),
-        vz_dm=dm[:, 6] * (u.km / u.s),
-        m_dm=dm[:, 0] * u.M_sun,
-        x_g=g[:, 1] * u.kpc,
-        y_g=g[:, 2] * u.kpc,
-        z_g=g[:, 3] * u.kpc,
-        vx_g=g[:, 4] * (u.km / u.s),
-        vy_g=g[:, 5] * (u.km / u.s),
-        vz_g=g[:, 6] * (u.km / u.s),
-        m_g=g[:, 0] * u.M_sun,
-    )
+    gal = mock_real_galaxy
 
     E_star, eps, eps_r = gal.paramcirc
     assert (eps <= 1.).any()
