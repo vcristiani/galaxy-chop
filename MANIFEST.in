@@ -3,8 +3,8 @@ include README.md
 include *.py
 
 recursive-exclude docs *
-recursive-include legacy *
-recursive-include resource *
+recursive-exclude legacy *
+recursive-exclude resource *
 recursive-exclude tests *
 
 exclude tox.ini
