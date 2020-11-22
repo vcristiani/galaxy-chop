@@ -189,8 +189,8 @@ def potential(x, y, z, m, eps=0.0):
     return np.asarray(pot.compute())
 
 
-def _center(x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g,
-            m_s, m_g, m_dm, eps_dm=0, eps_s=0, eps_g=0):
+def center(x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g,
+           m_s, m_g, m_dm, eps_dm=0, eps_s=0, eps_g=0):
     """Centers the particles."""
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
