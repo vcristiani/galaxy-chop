@@ -112,17 +112,17 @@ class Galaxy:
     vz_g = uttr.ib(unit=(u.km / u.s))
     m_g = uttr.ib(unit=u.Msun)
 
-    eps_s = uttr.ib(default=0.0, unit=u.kpc)
-    eps_dm = uttr.ib(default=0.0, unit=u.kpc)
-    eps_g = uttr.ib(default=0.0, unit=u.kpc)
+    eps_s = uttr.ib(default=0., unit=u.kpc)
+    eps_dm = uttr.ib(default=0., unit=u.kpc)
+    eps_g = uttr.ib(default=0., unit=u.kpc)
 
-    J_part = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
-    Jr_star = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
-    Jr = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
-    J_star = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+    J_part = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
+    Jr_star = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
+    Jr = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
+    J_star = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
 
-    x = uttr.ib(default=0.0, unit=(u.km / u.s) ** 2)
-    y = uttr.ib(default=0.0, unit=u.kpc * u.km / u.s)
+    x = uttr.ib(default=0., unit=(u.km / u.s) ** 2)
+    y = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
 
     arr_ = uttr.array_accessor()
 
@@ -236,28 +236,54 @@ class Galaxy:
         vy_dm = self.arr_.y_dm
         vz_dm = self.arr_.z_dm
 
-        (
-            xs, ys, zs,
-            xdm, ydm, zdm,
-            xg, yg, zg) = utils._center(x_s, y_s, z_s,
-                                        x_dm, y_dm, z_dm,
-                                        x_g, y_g, z_g,
-                                        m_s, m_g, m_dm)
+        center_pos = utils.center(x_s, y_s, z_s,
+                                  x_dm, y_dm, z_dm,
+                                  x_g, y_g, z_g,
+                                  m_s, m_g, m_dm)
 
-        (
-            pos_rot_s_x, pos_rot_s_y, pos_rot_s_z,
-            vel_rot_s_x, vel_rot_s_y, vel_rot_s_z,
-            pos_rot_dm_x, pos_rot_dm_y, pos_rot_dm_z,
-            vel_rot_dm_x, vel_rot_dm_y, vel_rot_dm_z,
-            pos_rot_g_x, pos_rot_g_y, pos_rot_g_z,
-            vel_rot_g_x, vel_rot_g_y, vel_rot_g_z,
-            ) = utils.aling(m_s, xs, ys, zs,
-                            vx_s, vy_s, vz_s,
-                            xdm, ydm, zdm,
-                            vx_dm, vy_dm, vz_dm,
-                            xg, yg, zg,
-                            vx_g, vy_g, vz_g,
-                            r_corte=5)
+        xs = center_pos[0]
+        ys = center_pos[1]
+        zs = center_pos[2]
+
+        xdm = center_pos[3]
+        ydm = center_pos[4]
+        zdm = center_pos[5]
+
+        xg = center_pos[6]
+        yg = center_pos[7]
+        zg = center_pos[8]
+
+        rotate = utils.aling(m_s, xs, ys, zs,
+                             vx_s, vy_s, vz_s,
+                             xdm, ydm, zdm,
+                             vx_dm, vy_dm, vz_dm,
+                             xg, yg, zg,
+                             vx_g, vy_g, vz_g,
+                             r_corte=r_corte)
+
+        pos_rot_s_x = rotate[0]
+        pos_rot_s_y = rotate[1]
+        pos_rot_s_z = rotate[2]
+
+        vel_rot_s_x = rotate[3]
+        vel_rot_s_y = rotate[4]
+        vel_rot_s_z = rotate[5]
+
+        pos_rot_dm_x = rotate[6]
+        pos_rot_dm_y = rotate[7]
+        pos_rot_dm_z = rotate[8]
+
+        vel_rot_dm_x = rotate[9]
+        vel_rot_dm_y = rotate[10]
+        vel_rot_dm_z = rotate[11]
+
+        pos_rot_g_x = rotate[12]
+        pos_rot_g_y = rotate[13]
+        pos_rot_g_z = rotate[14]
+
+        vel_rot_g_x = rotate[15]
+        vel_rot_g_y = rotate[16]
+        vel_rot_g_z = rotate[17]
 
         J_dark = np.array(
             [pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
@@ -298,37 +324,33 @@ class Galaxy:
         Calculation of the dots to build the function of the circular
         angular momentum.
         """
-        E_tot = np.hstack((
-            self.energy[1].value,
-            self.energy[0].value,
-            self.energy[2].value
-        ))
+        Etot_dm = self.energy[0].value
+        Etot_s = self.energy[1].value
+        Etot_g = self.energy[2].value
+
+        E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
 
         # Remove the particles that are not bound: E > 0.
-        (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(self.energy[1].value <= 0.0)
+        neg, = np.where(E_tot <= 0.0)
+        neg_star, = np.where(Etot_dm <= 0.0)
 
         # Remove the particles with E = -inf.
-        (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(self.energy[1].value[neg_star] != -np.inf)
+        fin, = np.where(E_tot[neg] != -np.inf)
+        fin_star, = np.where(Etot_s[neg_star] != -np.inf)
 
         # Normalize the two variables: E between 0 and 1; J between -1 and 1.
         E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
 
-        up = self.angular_momentum().arr_.J_part[2, :][neg][fin]
+        aux = self.angular_momentum().arr_.J_part[2, :][neg][fin]
 
-        down = np.max(
-            np.abs(self.angular_momentum().arr_.J_part[2, :][neg][fin])
-        )
-
-        J = up / down
+        J = aux / np.max(np.abs(aux))
 
         # Make the energy binning and select the Jz values with which we
         # calculate the J_circ.
         aux0 = np.arange(-1.0, -0.1, bin0)
         aux1 = np.arange(-0.1, 0.0, bin1)
 
-        aux = np.concatenate((aux0, aux1), axis=0)
+        aux = np.concatenate([aux0, aux1], axis=0)
 
         x = np.zeros(len(aux) + 1)
         y = np.zeros(len(aux) + 1)
@@ -337,7 +359,7 @@ class Galaxy:
         y[0] = np.abs(J[np.argmin(E)])
 
         for i in range(1, len(aux)):
-            (mask,) = np.where((E <= aux[i]) & (E > aux[i - 1]))
+            mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
             s = np.argsort(np.abs(J[mask]))
 
             # We take into account whether or not there are particles in the
@@ -359,7 +381,7 @@ class Galaxy:
                 pass
 
         # Mask to complete the last bin, in case there are no empty bins.
-        (mask,) = np.where(E > aux[len(aux) - 1])
+        mask, = np.where(E > aux[len(aux) - 1])
 
         if len(mask) != 0:
             x[len(aux)] = E[mask][np.abs(J[mask]).argmax()]
@@ -376,7 +398,7 @@ class Galaxy:
                 y = y[:-i]
 
         # In case some intermediate bin does not have points.
-        (zero,) = np.where(x != 0.0)
+        zero, = np.where(x != 0.0)
         x = x[zero]
         y = y[zero]
 
@@ -389,34 +411,33 @@ class Galaxy:
     @property
     def paramcirc(self):
         """Circular parameters calculation."""
-        E_tot = np.hstack((
-            self.energy[1].value,
-            self.energy[0].value,
-            self.energy[2].value
-        ))
+        Etot_dm = self.energy[0].value
+        Etot_s = self.energy[1].value
+        Etot_g = self.energy[2].value
+
+        E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
 
         # Remove the particles that are not bound: E > 0.
-        (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(self.energy[1].value <= 0.0)
+        neg, = np.where(E_tot <= 0.0)
+        neg_star, = np.where(Etot_s <= 0.0)
 
         # Remove the particles with E = -inf.
-        (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(self.energy[1].value[neg_star] != -np.inf)
+        fin, = np.where(E_tot[neg] != -np.inf)
+        fin_star, = np.where(Etot_s[neg_star] != -np.inf)
 
         # Normalize E, Lz and Lr for the stars.
-        up1 = self.energy[1].value[neg_star][fin_star]
+        up1 = Etot_s[neg_star][fin_star]
         down1 = np.abs(np.min(E_tot[neg][fin]))
         E_star = up1 / down1
 
-        up2 = self.angular_momentum().arr_.J_star[2, :][neg_star][fin_star]
-        down2 = np.max(
-            np.abs(self.angular_momentum().arr_.J_part[2, :][neg][fin])
-        )
+        ang_momentum = self.angular_momentum().arr_
+        up2 = ang_momentum.J_star[2, :][neg_star][fin_star]
+        down2 = np.max(np.abs(ang_momentum.J_part[2, :][neg][fin]))
 
         J_star_ = up2 / down2
 
-        up3 = self.angular_momentum().arr_.Jr_star[neg_star][fin_star]
-        down3 = np.max(np.abs(self.angular_momentum().arr_.Jr[neg][fin]))
+        up3 = ang_momentum.Jr_star[neg_star][fin_star]
+        down3 = np.max(np.abs(ang_momentum.Jr[neg][fin]))
         Jr_star_ = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
@@ -433,10 +454,12 @@ class Galaxy:
         # Determine that the particles we are removing are not significant.
 
         # We remove particles that have circularity < -1 and circularity > 1.
-        (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
+        mask, = np.where((eps <= 1.0) & (eps >= -1.0))
 
         E_star = E_star[mask]
         eps = eps[mask]
         eps_r = eps_r[mask]
 
-        return (E_star * (u.km / u.s) ** 2, eps, eps_r)
+        return (E_star * (u.km / u.s) ** 2,
+                u.Quantity(eps),
+                u.Quantity(eps_r))

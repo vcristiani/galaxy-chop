@@ -168,7 +168,7 @@ def solid_disk():
     and velocities.
     """
 
-    def make(N_part=100, rmax=30, rmin=5, omega=10, seed=42):
+    def make(N_part=100, rmax=30, rmin=2, omega=10, seed=42):
 
         random = np.random.RandomState(seed=seed)
 
@@ -200,11 +200,12 @@ def mock_dm_halo():
     and velocities.
     """
 
-    def make(N_part=100, rmax=30, rmin=5, omega=10, seed=55):
+    def make(N_part=100, rmax=100, seed=55):
 
         random = np.random.RandomState(seed=seed)
 
-        r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
+        r = random.random_sample(size=N_part)*rmax
+
         cos_t = random.random_sample(size=N_part) * 2.0 - 1
         phi0 = 2 * np.pi * random.random_sample(size=N_part)
         sin_t = np.sqrt(1 - cos_t ** 2)
@@ -221,14 +222,14 @@ def mock_dm_halo():
     return make
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_zero_angle(solid_disk):
     """Disc with no angle of inclination."""
     mass, pos, vel = solid_disk(N_part=1000)
     return mass, pos, vel
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_xrotation(solid_disk):
     """Disc rotated over x axis."""
     mass, pos, vel = solid_disk(N_part=1000)
@@ -237,7 +238,7 @@ def disc_xrotation(solid_disk):
     return mass, pos @ a, vel @ a, a
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_yrotation(solid_disk):
     """Disc rotated over y axis."""
     mass, pos, vel = solid_disk(N_part=1000)
@@ -246,7 +247,7 @@ def disc_yrotation(solid_disk):
     return mass, pos @ a, vel @ a, a
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_zrotation(solid_disk):
     """Disc rotated over z axis."""
     mass, pos, vel = solid_disk(N_part=1000)
@@ -255,14 +256,14 @@ def disc_zrotation(solid_disk):
     return mass, pos @ a, vel @ a, a
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_particles(solid_disk):
     """Solid disc without velocities."""
     mass, pos, vel = solid_disk(N_part=100)
     return pos[:, 0], pos[:, 1], pos[:, 2], mass
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def disc_particles_all(solid_disk):
     """Solid disc wit velocities."""
     mass_s, pos_s, vel_s = solid_disk(N_part=100)
@@ -271,7 +272,7 @@ def disc_particles_all(solid_disk):
     return mass_s, pos_s, vel_s, mass_g, pos_g, vel_g
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def halo_particles(mock_dm_halo):
     """Spherical mock halo."""
     mass_dm, pos_dm = mock_dm_halo(N_part=100)
@@ -280,7 +281,7 @@ def halo_particles(mock_dm_halo):
     return mass_dm, pos_dm, vel_dm
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def mock_galaxy(disc_particles_all, halo_particles):
     """Mock galaxy."""
     (mass_s, pos_s, vel_s,
@@ -315,7 +316,7 @@ def mock_galaxy(disc_particles_all, halo_particles):
     return g
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def mock_real_galaxy():
     """Mock real galaxy."""
     dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
@@ -419,8 +420,11 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g_test.Jr_star, u.Quantity)
     assert isinstance(g_test.Jr, u.Quantity)
     assert isinstance(g_test.J_star, u.Quantity)
-# assert isinstance(g.jcirc, u.Quantity)
-# assert isinstance(g.paramcirc, u.Quantity)
+#    assert isinstance(g.jcirc().x, u.Quantity)
+#    assert isinstance(g.jcirc().y, u.Quantity)
+#    assert isinstance(g.paramcirc[0], u.Quantity)
+#    assert isinstance(g.paramcirc[1], u.Quantity)
+#    assert isinstance(g.paramcirc[2], u.Quantity)
 
 
 @pytest.mark.xfail
@@ -512,14 +516,15 @@ def test_stars_and_gas_pot_energy(disc_particles_all):
                           m=mass_g)
     p_s = utils.potential(x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2],
                           m=mass_s)
+
     assert (p_g > 0).all()
     assert (p_s > 0).all()
 
 
 @pytest.mark.xfail
-def test_total_energy(mock_galaxy):
+def test_total_energy(mock_real_galaxy):
     """Test total energy."""
-    g = mock_galaxy
+    g = mock_real_galaxy
 
     E_tot_dark, E_tot_star, E_tot_gas = g.energy
 
@@ -527,7 +532,9 @@ def test_total_energy(mock_galaxy):
     perc = len(ii) / len(E_tot_star.value)
 
     assert perc > 0.9
-    assert (E_tot_star.value < 0).any()
+    assert (E_tot_star.value < 0.).any()
+    assert (E_tot_dark.value < 0.).any()
+    assert (E_tot_gas.value < 0.).any()
 
 
 def test_type_energy(disc_particles_all, halo_particles):
@@ -563,7 +570,7 @@ def test_center_existence(disc_particles_all, halo_particles):
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
-    gx_c = utils._center(
+    gx_c = utils.center(
         pos_s[:, 0],
         pos_s[:, 1],
         pos_s[:, 2],
