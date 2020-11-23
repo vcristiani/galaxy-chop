@@ -118,9 +118,9 @@ class Galaxy:
     vz_g = uttr.ib(unit=(u.km / u.s))
     m_g = uttr.ib(unit=u.Msun)
 
-    eps_s = uttr.ib(default=0.0, unit=u.kpc)
-    eps_dm = uttr.ib(default=0.0, unit=u.kpc)
-    eps_g = uttr.ib(default=0.0, unit=u.kpc)
+    eps_s = uttr.ib(default=0., unit=u.kpc)
+    eps_dm = uttr.ib(default=0., unit=u.kpc)
+    eps_g = uttr.ib(default=0., unit=u.kpc)
 
     J_part = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
     Jr_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
@@ -372,7 +372,7 @@ class Galaxy:
         y[0] = np.abs(J[np.argmin(E)])
 
         for i in range(1, len(aux)):
-            (mask,) = np.where((E <= aux[i]) & (E > aux[i - 1]))
+            mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
             s = np.argsort(np.abs(J[mask]))
 
             # We take into account whether or not there are particles in the
@@ -394,7 +394,7 @@ class Galaxy:
                 pass
 
         # Mask to complete the last bin, in case there are no empty bins.
-        (mask,) = np.where(E > aux[len(aux) - 1])
+        mask, = np.where(E > aux[len(aux) - 1])
 
         if len(mask) != 0:
             x[len(aux)] = E[mask][np.abs(J[mask]).argmax()]
@@ -411,7 +411,7 @@ class Galaxy:
                 y = y[:-i]
 
         # In case some intermediate bin does not have points.
-        (zero,) = np.where(x != 0.0)
+        zero, = np.where(x != 0.0)
         x = x[zero]
         y = y[zero]
 
@@ -472,7 +472,7 @@ class Galaxy:
         # Determine that the particles we are removing are not significant.
 
         # We remove particles that have circularity < -1 and circularity > 1.
-        (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
+        mask, = np.where((eps <= 1.0) & (eps >= -1.0))
 
         E_star_ = u.Quantity(E_star[mask], (u.km / u.s) ** 2)
         eps_ = u.Quantity(eps[mask])

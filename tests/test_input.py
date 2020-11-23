@@ -531,7 +531,6 @@ def test_stars_and_gas_pot_energy(disc_particles_all):
     assert (p_g > 0).all()
     assert (p_s > 0).all()
 
-
 def test_total_energy(mock_real_galaxy):
     """Test total energy."""
     g = mock_real_galaxy
@@ -545,7 +544,6 @@ def test_total_energy(mock_real_galaxy):
     assert (E_tot_star.value < 0.0).any()
     assert (E_tot_dark.value < 0.0).any()
     assert (E_tot_gas.value < 0.0).any()
-
 
 def test_type_energy(disc_particles_all, halo_particles):
     """Checks the object."""
