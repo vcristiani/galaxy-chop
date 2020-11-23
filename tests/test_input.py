@@ -8,12 +8,16 @@
 # IMPORTS
 # =============================================================================
 
-import pytest
-import numpy as np
-from galaxychop import utils
-from galaxychop import galaxychop
-import astropy.units as u
 from os import path
+
+import astropy.units as u
+
+from galaxychop import galaxychop
+from galaxychop import utils
+
+import numpy as np
+
+import pytest
 
 # =============================================================================
 # Random state
@@ -174,7 +178,7 @@ def solid_disk():
 
         r = (rmax - rmin) * random.random_sample(size=N_part) + rmin
         phi0 = 2 * np.pi * random.random_sample(size=N_part)
-        mass = 1.0 * np.ones_like(r)
+        mass = 1.0e8 * np.ones_like(r)
 
         x = r * np.cos(phi0)
         y = r * np.sin(phi0)
@@ -194,22 +198,23 @@ def solid_disk():
 
 @pytest.fixture(scope="session")
 def mock_dm_halo():
-    """Mock Dark Matter Halo.
+    """
+    Mock Dark Matter Halo.
 
     Creates a mock DM Halo of particles with masses
     and velocities.
     """
 
-    def make(N_part=100, rmax=100, seed=55):
+    def make(N_part=1000, rmax=100, seed=55):
 
         random = np.random.RandomState(seed=seed)
 
-        r = random.random_sample(size=N_part)*rmax
+        r = random.random_sample(size=N_part) * rmax
 
         cos_t = random.random_sample(size=N_part) * 2.0 - 1
         phi0 = 2 * np.pi * random.random_sample(size=N_part)
         sin_t = np.sqrt(1 - cos_t ** 2)
-        mass = 1.0 * np.ones_like(r)
+        mass = 1.0e10 * np.ones_like(r)
 
         x = r * sin_t * np.cos(phi0)
         y = r * sin_t * np.sin(phi0)
@@ -284,8 +289,7 @@ def halo_particles(mock_dm_halo):
 @pytest.fixture
 def mock_galaxy(disc_particles_all, halo_particles):
     """Mock galaxy."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
@@ -329,24 +333,25 @@ def mock_real_galaxy():
         vx_s=s[:, 4] * (u.km / u.s),
         vy_s=s[:, 5] * (u.km / u.s),
         vz_s=s[:, 6] * (u.km / u.s),
-        m_s=s[:, 0] * u.M_sun,
+        m_s=s[:, 0] * 1e10 * u.M_sun,
         x_dm=dm[:, 1] * u.kpc,
         y_dm=dm[:, 2] * u.kpc,
         z_dm=dm[:, 3] * u.kpc,
         vx_dm=dm[:, 4] * (u.km / u.s),
         vy_dm=dm[:, 5] * (u.km / u.s),
         vz_dm=dm[:, 6] * (u.km / u.s),
-        m_dm=dm[:, 0] * u.M_sun,
+        m_dm=dm[:, 0] * 1e10 * u.M_sun,
         x_g=g[:, 1] * u.kpc,
         y_g=g[:, 2] * u.kpc,
         z_g=g[:, 3] * u.kpc,
         vx_g=g[:, 4] * (u.km / u.s),
         vy_g=g[:, 5] * (u.km / u.s),
         vz_g=g[:, 6] * (u.km / u.s),
-        m_g=g[:, 0] * u.M_sun,
+        m_g=g[:, 0] * 1e10 * u.M_sun,
     )
 
     return gal
+
 
 # =============================================================================
 # TESTS
@@ -420,18 +425,17 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g_test.Jr_star, u.Quantity)
     assert isinstance(g_test.Jr, u.Quantity)
     assert isinstance(g_test.J_star, u.Quantity)
-#    assert isinstance(g.jcirc().x, u.Quantity)
-#    assert isinstance(g.jcirc().y, u.Quantity)
-#    assert isinstance(g.paramcirc[0], u.Quantity)
-#    assert isinstance(g.paramcirc[1], u.Quantity)
-#    assert isinstance(g.paramcirc[2], u.Quantity)
+    assert isinstance(g.jcirc().x, u.Quantity)
+    assert isinstance(g.jcirc().y, u.Quantity)
+    assert isinstance(g.paramcirc[0], u.Quantity)
+    assert isinstance(g.paramcirc[1], u.Quantity)
+    assert isinstance(g.paramcirc[2], u.Quantity)
 
 
 @pytest.mark.xfail
 def test_energy_method(disc_particles_all, halo_particles):
     """Test energy method."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
@@ -465,27 +469,32 @@ def test_energy_method(disc_particles_all, halo_particles):
     k_dm = 0.5 * (vel_dm[:, 0] ** 2 + vel_dm[:, 1] ** 2 + vel_dm[:, 2] ** 2)
     k_g = 0.5 * (vel_g[:, 0] ** 2 + vel_g[:, 1] ** 2 + vel_g[:, 2] ** 2)
 
-    pot_s = utils.potential(x=pos_s[:, 0], y=pos_s[:, 1],
-                            z=pos_s[:, 2], m=mass_s)
+    pot_s = utils.potential(
+        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
+    )
 
-    pot_dm = utils.potential(x=pos_dm[:, 0], y=pos_dm[:, 1],
-                             z=pos_dm[:, 2], m=mass_dm)
+    pot_dm = utils.potential(
+        x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2], m=mass_dm
+    )
 
-    pot_g = utils.potential(x=pos_g[:, 0], y=pos_g[:, 1],
-                            z=pos_g[:, 2], m=mass_g)
+    pot_g = utils.potential(
+        x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
+    )
 
-    np.testing.assert_allclose(E_tot_s.value, k_s - pot_s,
-                               rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(E_tot_dm.value, k_dm - pot_dm,
-                               rtol=1e-3, atol=1e-3)
-    np.testing.assert_allclose(E_tot_g.value, k_g - pot_g,
-                               rtol=1e-3, atol=1e-3)
+    np.testing.assert_allclose(
+        E_tot_s.value, k_s - pot_s, rtol=1e-3, atol=1e-3
+    )
+    np.testing.assert_allclose(
+        E_tot_dm.value, k_dm - pot_dm, rtol=1e-3, atol=1e-3
+    )
+    np.testing.assert_allclose(
+        E_tot_g.value, k_g - pot_g, rtol=1e-3, atol=1e-3
+    )
 
 
 def test_k_energy(disc_particles_all, halo_particles):
     """Test kinetic energy."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
@@ -502,45 +511,45 @@ def test_dm_pot_energy(halo_particles):
     """Test potential energy DM."""
     mass_dm, pos_dm, vel_dm = halo_particles
 
-    p_s = utils.potential(x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2],
-                          m=mass_dm)
+    p_s = utils.potential(
+        x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2], m=mass_dm
+    )
     assert (p_s > 0).all()
 
 
 def test_stars_and_gas_pot_energy(disc_particles_all):
     """Test potential energy STAR and GAS."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    p_g = utils.potential(x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2],
-                          m=mass_g)
-    p_s = utils.potential(x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2],
-                          m=mass_s)
+    p_g = utils.potential(
+        x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
+    )
+    p_s = utils.potential(
+        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
+    )
 
     assert (p_g > 0).all()
     assert (p_s > 0).all()
 
 
-@pytest.mark.xfail
 def test_total_energy(mock_real_galaxy):
     """Test total energy."""
     g = mock_real_galaxy
 
     E_tot_dark, E_tot_star, E_tot_gas = g.energy
 
-    ii, = np.where(E_tot_star.value < 0)
+    (ii,) = np.where(E_tot_star.value < 0)
     perc = len(ii) / len(E_tot_star.value)
 
-    assert perc > 0.9
-    assert (E_tot_star.value < 0.).any()
-    assert (E_tot_dark.value < 0.).any()
-    assert (E_tot_gas.value < 0.).any()
+    assert perc > 0.95
+    assert (E_tot_star.value < 0.0).any()
+    assert (E_tot_dark.value < 0.0).any()
+    assert (E_tot_gas.value < 0.0).any()
 
 
 def test_type_energy(disc_particles_all, halo_particles):
     """Checks the object."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
@@ -548,12 +557,15 @@ def test_type_energy(disc_particles_all, halo_particles):
     k_dm = 0.5 * (vel_dm[:, 0] ** 2 + vel_dm[:, 1] ** 2 + vel_dm[:, 2] ** 2)
     k_g = 0.5 * (vel_g[:, 0] ** 2 + vel_g[:, 1] ** 2 + vel_g[:, 2] ** 2)
 
-    p_s = utils.potential(x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2],
-                          m=mass_s)
-    p_dm = utils.potential(x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2],
-                           m=mass_dm)
-    p_g = utils.potential(x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2],
-                          m=mass_g)
+    p_s = utils.potential(
+        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
+    )
+    p_dm = utils.potential(
+        x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2], m=mass_dm
+    )
+    p_g = utils.potential(
+        x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
+    )
 
     assert isinstance(p_s, (float, np.float, np.ndarray))
     assert isinstance(p_dm, (float, np.float, np.ndarray))
@@ -565,8 +577,7 @@ def test_type_energy(disc_particles_all, halo_particles):
 
 def test_center_existence(disc_particles_all, halo_particles):
     """Test center existence and uniqueness."""
-    (mass_s, pos_s, vel_s,
-     mass_g, pos_g, vel_g) = disc_particles_all
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
@@ -582,7 +593,7 @@ def test_center_existence(disc_particles_all, halo_particles):
         pos_g[:, 2],
         mass_s,
         mass_g,
-        mass_dm
+        mass_dm,
     )
 
     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
@@ -612,16 +623,17 @@ def test_jcirc_E_tot_len(mock_galaxy):
     E_tot = np.hstack((E_tot_s.value, E_tot_dm.value, E_tot_g.value))
     tot_len = len(E_tot_dm) + len(E_tot_s) + len(E_tot_g)
 
-    assert (len(E_tot) == tot_len)
+    assert len(E_tot) == tot_len
 
 
+@pytest.mark.xfail
 def test_jcirc_x_y_len(mock_real_galaxy):
     """Check the x and y array len."""
     gal = mock_real_galaxy
 
     g_test = gal.jcirc()
 
-    assert (len(g_test.x) == len(g_test.y))
+    assert len(g_test.x) == len(g_test.y)
 
 
 @pytest.mark.xfail
@@ -630,5 +642,5 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     gal = mock_real_galaxy
 
     E_star, eps, eps_r = gal.paramcirc
-    assert (eps <= 1.).any()
-    assert (eps >= -1.).any()
+    assert (eps <= 1.0).any()
+    assert (eps >= -1.0).any()

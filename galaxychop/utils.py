@@ -1,9 +1,10 @@
 """Utilities module."""
+import astropy.units as u
 
-import numpy as np
 import dask
 import dask.array as da
-import astropy.units as u
+
+import numpy as np
 
 G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
 
@@ -43,7 +44,7 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     r = np.sqrt(pos[:, 0] ** 2 + pos[:, 1] ** 2 + pos[:, 2] ** 2)
 
     if r_corte is not None:
-        mask, = np.where(r < r_corte)
+        (mask,) = np.where(r < r_corte)
     else:
         mask = np.repeat(True, len(r))
 
@@ -71,9 +72,28 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     return A
 
 
-def aling(m_s, x_s, y_s, z_s, vx_s, vy_s, vz_s,
-          x_dm, y_dm, z_dm, vx_dm, vy_dm, vz_dm,
-          x_g, y_g, z_g, vx_g, vy_g, vz_g, r_corte):
+def aling(
+    m_s,
+    x_s,
+    y_s,
+    z_s,
+    vx_s,
+    vy_s,
+    vz_s,
+    x_dm,
+    y_dm,
+    z_dm,
+    vx_dm,
+    vy_dm,
+    vz_dm,
+    x_g,
+    y_g,
+    z_g,
+    vx_g,
+    vy_g,
+    vz_g,
+    r_corte,
+):
     """
     Aling the galaxy.
 
@@ -141,12 +161,24 @@ def aling(m_s, x_s, y_s, z_s, vx_s, vy_s, vz_s,
     vel_rot_g = np.dot(A, vel.T)
 
     return (
-        pos_rot_s.T[:, 0], pos_rot_s.T[:, 1], pos_rot_s.T[:, 2],
-        vel_rot_s.T[:, 0], vel_rot_s.T[:, 1], vel_rot_s.T[:, 2],
-        pos_rot_dm.T[:, 0], pos_rot_dm.T[:, 1], pos_rot_dm.T[:, 2],
-        vel_rot_dm.T[:, 0], vel_rot_dm.T[:, 1], vel_rot_dm.T[:, 2],
-        pos_rot_g.T[:, 0], pos_rot_g.T[:, 1], pos_rot_g.T[:, 2],
-        vel_rot_g.T[:, 0], vel_rot_g.T[:, 1], vel_rot_g.T[:, 2]
+        pos_rot_s.T[:, 0],
+        pos_rot_s.T[:, 1],
+        pos_rot_s.T[:, 2],
+        vel_rot_s.T[:, 0],
+        vel_rot_s.T[:, 1],
+        vel_rot_s.T[:, 2],
+        pos_rot_dm.T[:, 0],
+        pos_rot_dm.T[:, 1],
+        pos_rot_dm.T[:, 2],
+        vel_rot_dm.T[:, 0],
+        vel_rot_dm.T[:, 1],
+        vel_rot_dm.T[:, 2],
+        pos_rot_g.T[:, 0],
+        pos_rot_g.T[:, 1],
+        pos_rot_g.T[:, 2],
+        vel_rot_g.T[:, 0],
+        vel_rot_g.T[:, 1],
+        vel_rot_g.T[:, 2],
     )
 
 
@@ -189,8 +221,23 @@ def potential(x, y, z, m, eps=0.0):
     return np.asarray(pot.compute())
 
 
-def center(x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g,
-           m_s, m_g, m_dm, eps_dm=0, eps_s=0, eps_g=0):
+def center(
+    x_s,
+    y_s,
+    z_s,
+    x_dm,
+    y_dm,
+    z_dm,
+    x_g,
+    y_g,
+    z_g,
+    m_s,
+    m_g,
+    m_dm,
+    eps_dm=0,
+    eps_s=0,
+    eps_g=0,
+):
     """Centers the particles."""
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
@@ -198,13 +245,17 @@ def center(x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g,
     m = np.hstack((m_s, m_dm, m_g))
     eps = np.max([eps_dm, eps_s, eps_g])
 
-    pot = potential(da.asarray(x, chunks=100),
-                    da.asarray(y, chunks=100),
-                    da.asarray(z, chunks=100),
-                    da.asarray(m, chunks=100),
-                    da.asarray(eps))
+    pot = potential(
+        da.asarray(x, chunks=100),
+        da.asarray(y, chunks=100),
+        da.asarray(z, chunks=100),
+        da.asarray(m, chunks=100),
+        da.asarray(eps),
+    )
 
-    pot_dark = pot[len(m_s):len(m_s) + len(m_dm)]
+    num_s = len(m_s)
+    num = len(m_s) + len(m_dm)
+    pot_dark = pot[num_s:num]
 
     x_s = x_s - x_dm[pot_dark.argmax()]
     y_s = y_s - y_dm[pot_dark.argmax()]

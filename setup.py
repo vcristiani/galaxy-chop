@@ -10,10 +10,13 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import sys
 import os
-import setuptools
+import sys
+
 from ez_setup import use_setuptools
+
+import setuptools
+
 
 use_setuptools()
 
@@ -45,9 +48,8 @@ REQUIREMENTS = [
     "scikit-learn",
     "dask[array]",
     "astropy",
-    "uttrs"
+    "uttrs",
 ]
-
 # =============================================================================
 # DESCRIPTION
 # =============================================================================
