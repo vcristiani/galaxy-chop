@@ -10,13 +10,19 @@
 # IMPORTS
 # #####################################################
 
-import attr
-import numpy as np
-from galaxychop import utils
 from astropy import units as u
+
+import attr
+
 import dask.array as da
+
+from galaxychop import utils
+
+import numpy as np
+
+# from scipy.interpolate import InterpolatedUnivariateSpline
+
 import uttr
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 # from sklearn.mixture import GaussianMixture
 # import random
@@ -112,17 +118,17 @@ class Galaxy:
     vz_g = uttr.ib(unit=(u.km / u.s))
     m_g = uttr.ib(unit=u.Msun)
 
-    eps_s = uttr.ib(default=0., unit=u.kpc)
-    eps_dm = uttr.ib(default=0., unit=u.kpc)
-    eps_g = uttr.ib(default=0., unit=u.kpc)
+    eps_s = uttr.ib(default=0.0, unit=u.kpc)
+    eps_dm = uttr.ib(default=0.0, unit=u.kpc)
+    eps_g = uttr.ib(default=0.0, unit=u.kpc)
 
-    J_part = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
-    Jr_star = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
-    Jr = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
-    J_star = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
+    J_part = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    Jr_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    Jr = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    J_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
 
-    x = uttr.ib(default=0., unit=(u.km / u.s) ** 2)
-    y = uttr.ib(default=0., unit=(u.kpc * u.km / u.s))
+    x = uttr.ib(default=0.0, unit=(u.km / u.s) ** 2)
+    y = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
 
     arr_ = uttr.array_accessor()
 
@@ -184,21 +190,22 @@ class Galaxy:
             da.asarray(eps),
         )
 
-        pot_s = pot[: len(m_s)]
-        pot_dm = pot[len(m_s):len(m_s) + len(m_dm)]
-        pot_g = pot[len(m_s) + len(m_dm):]
+        num_s = len(m_s)
+        num = len(m_s) + len(m_dm)
+
+        pot_s = pot[:num_s]
+        pot_dm = pot[num_s:num]
+        pot_g = pot[num:]
 
         k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
         k_s = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
         k_g = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
 
-        Etot_dm = k_dm - pot_dm
-        Etot_s = k_s - pot_s
-        Etot_g = k_g - pot_g
+        Etot_dm = (k_dm - pot_dm) * (u.km / u.s) ** 2
+        Etot_s = (k_s - pot_s) * (u.km / u.s) ** 2
+        Etot_g = (k_g - pot_g) * (u.km / u.s) ** 2
 
-        return (Etot_dm * (u.km / u.s) ** 2,
-                Etot_s * (u.km / u.s) ** 2,
-                Etot_g * (u.km / u.s) ** 2)
+        return (Etot_dm, Etot_s, Etot_g)
 
     def angular_momentum(self, r_corte=None):
         """
@@ -236,69 +243,75 @@ class Galaxy:
         vy_dm = self.arr_.y_dm
         vz_dm = self.arr_.z_dm
 
-        center_pos = utils.center(x_s, y_s, z_s,
-                                  x_dm, y_dm, z_dm,
-                                  x_g, y_g, z_g,
-                                  m_s, m_g, m_dm)
+        xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
+            x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g, m_s, m_g, m_dm
+        )
 
-        xs = center_pos[0]
-        ys = center_pos[1]
-        zs = center_pos[2]
-
-        xdm = center_pos[3]
-        ydm = center_pos[4]
-        zdm = center_pos[5]
-
-        xg = center_pos[6]
-        yg = center_pos[7]
-        zg = center_pos[8]
-
-        rotate = utils.aling(m_s, xs, ys, zs,
-                             vx_s, vy_s, vz_s,
-                             xdm, ydm, zdm,
-                             vx_dm, vy_dm, vz_dm,
-                             xg, yg, zg,
-                             vx_g, vy_g, vz_g,
-                             r_corte=r_corte)
-
-        pos_rot_s_x = rotate[0]
-        pos_rot_s_y = rotate[1]
-        pos_rot_s_z = rotate[2]
-
-        vel_rot_s_x = rotate[3]
-        vel_rot_s_y = rotate[4]
-        vel_rot_s_z = rotate[5]
-
-        pos_rot_dm_x = rotate[6]
-        pos_rot_dm_y = rotate[7]
-        pos_rot_dm_z = rotate[8]
-
-        vel_rot_dm_x = rotate[9]
-        vel_rot_dm_y = rotate[10]
-        vel_rot_dm_z = rotate[11]
-
-        pos_rot_g_x = rotate[12]
-        pos_rot_g_y = rotate[13]
-        pos_rot_g_z = rotate[14]
-
-        vel_rot_g_x = rotate[15]
-        vel_rot_g_y = rotate[16]
-        vel_rot_g_z = rotate[17]
+        (
+            pos_rot_s_x,
+            pos_rot_s_y,
+            pos_rot_s_z,
+            vel_rot_s_x,
+            vel_rot_s_y,
+            vel_rot_s_z,
+            pos_rot_dm_x,
+            pos_rot_dm_y,
+            pos_rot_dm_z,
+            vel_rot_dm_x,
+            vel_rot_dm_y,
+            vel_rot_dm_z,
+            pos_rot_g_x,
+            pos_rot_g_y,
+            pos_rot_g_z,
+            vel_rot_g_x,
+            vel_rot_g_y,
+            vel_rot_g_z,
+        ) = utils.aling(
+            m_s,
+            xs,
+            ys,
+            zs,
+            vx_s,
+            vy_s,
+            vz_s,
+            xdm,
+            ydm,
+            zdm,
+            vx_dm,
+            vy_dm,
+            vz_dm,
+            xg,
+            yg,
+            zg,
+            vx_g,
+            vy_g,
+            vz_g,
+            r_corte=r_corte,
+        )
 
         J_dark = np.array(
-            [pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
-             pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
-             pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x])
+            [
+                pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
+                pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
+                pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x,
+            ]
+        )
 
         J_star = np.array(
-            [pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
-             pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
-             pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x])
+            [
+                pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
+                pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
+                pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x,
+            ]
+        )
 
         J_gas = np.array(
-            [pos_rot_g_y * vel_rot_g_z - pos_rot_g_z * vel_rot_g_y,
-             pos_rot_g_z * vel_rot_g_x - pos_rot_g_x * vel_rot_g_z,
-             pos_rot_g_x * vel_rot_g_y - pos_rot_g_y * vel_rot_g_x])
+            [
+                pos_rot_g_y * vel_rot_g_z - pos_rot_g_z * vel_rot_g_y,
+                pos_rot_g_z * vel_rot_g_x - pos_rot_g_x * vel_rot_g_z,
+                pos_rot_g_x * vel_rot_g_y - pos_rot_g_y * vel_rot_g_x,
+            ]
+        )
 
         J_part = np.concatenate([J_gas, J_dark, J_star], axis=1)
 
@@ -312,7 +325,7 @@ class Galaxy:
             J_part=J_part * u.kpc * u.km / u.s,
             Jr_star=Jr_star * u.kpc * u.km / u.s,
             Jr=Jr * u.kpc * u.km / u.s,
-            J_star=J_star * u.kpc * u.km / u.s
+            J_star=J_star * u.kpc * u.km / u.s,
         )
 
         return Galaxy(**new)
@@ -331,19 +344,19 @@ class Galaxy:
         E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
 
         # Remove the particles that are not bound: E > 0.
-        neg, = np.where(E_tot <= 0.0)
-        neg_star, = np.where(Etot_dm <= 0.0)
+        (neg,) = np.where(E_tot <= 0.0)
+        (neg_star,) = np.where(Etot_dm <= 0.0)
 
         # Remove the particles with E = -inf.
-        fin, = np.where(E_tot[neg] != -np.inf)
-        fin_star, = np.where(Etot_s[neg_star] != -np.inf)
+        (fin,) = np.where(E_tot[neg] != -np.inf)
+        (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)
 
         # Normalize the two variables: E between 0 and 1; J between -1 and 1.
         E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
 
-        aux = self.angular_momentum().arr_.J_part[2, :][neg][fin]
+        kk = self.angular_momentum().arr_.J_part[2, :][neg][fin]
 
-        J = aux / np.max(np.abs(aux))
+        J = kk / np.max(np.abs(kk))
 
         # Make the energy binning and select the Jz values with which we
         # calculate the J_circ.
@@ -359,7 +372,7 @@ class Galaxy:
         y[0] = np.abs(J[np.argmin(E)])
 
         for i in range(1, len(aux)):
-            mask, = np.where((E <= aux[i]) & (E > aux[i - 1]))
+            (mask,) = np.where((E <= aux[i]) & (E > aux[i - 1]))
             s = np.argsort(np.abs(J[mask]))
 
             # We take into account whether or not there are particles in the
@@ -381,7 +394,7 @@ class Galaxy:
                 pass
 
         # Mask to complete the last bin, in case there are no empty bins.
-        mask, = np.where(E > aux[len(aux) - 1])
+        (mask,) = np.where(E > aux[len(aux) - 1])
 
         if len(mask) != 0:
             x[len(aux)] = E[mask][np.abs(J[mask]).argmax()]
@@ -398,7 +411,7 @@ class Galaxy:
                 y = y[:-i]
 
         # In case some intermediate bin does not have points.
-        zero, = np.where(x != 0.0)
+        (zero,) = np.where(x != 0.0)
         x = x[zero]
         y = y[zero]
 
@@ -418,12 +431,12 @@ class Galaxy:
         E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
 
         # Remove the particles that are not bound: E > 0.
-        neg, = np.where(E_tot <= 0.0)
-        neg_star, = np.where(Etot_s <= 0.0)
+        (neg,) = np.where(E_tot <= 0.0)
+        (neg_star,) = np.where(Etot_s <= 0.0)
 
         # Remove the particles with E = -inf.
-        fin, = np.where(E_tot[neg] != -np.inf)
-        fin_star, = np.where(Etot_s[neg_star] != -np.inf)
+        (fin,) = np.where(E_tot[neg] != -np.inf)
+        (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)
 
         # Normalize E, Lz and Lr for the stars.
         up1 = Etot_s[neg_star][fin_star]
@@ -441,25 +454,28 @@ class Galaxy:
         Jr_star_ = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
-        spl = InterpolatedUnivariateSpline(self.jcirc().arr_.x,
-                                           self.jcirc().arr_.y,
-                                           k=1)
+        # spl = InterpolatedUnivariateSpline(
+        #    self.jcirc().arr_.x,
+        #    self.jcirc().arr_.y,
+        #    k=1,
+        # )
 
         # Calculate the circularity parameter Lz/Lc.
-        eps = J_star_ / spl(E_star)
+        # eps = J_star_ / spl(E_star)
+        jcir = self.jcirc().arr_
+        eps = J_star_ / np.interp(E_star, jcir.x, jcir.y)
 
         # Calculate the same for Lp/Lc.
-        eps_r = Jr_star_ / spl(E_star)
+        # eps_r = Jr_star_ / spl(E_star)
+        eps_r = Jr_star_ / np.interp(E_star, jcir.x, jcir.y)
 
         # Determine that the particles we are removing are not significant.
 
         # We remove particles that have circularity < -1 and circularity > 1.
-        mask, = np.where((eps <= 1.0) & (eps >= -1.0))
+        (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        E_star = E_star[mask]
-        eps = eps[mask]
-        eps_r = eps_r[mask]
+        E_star_ = u.Quantity(E_star[mask], (u.km / u.s) ** 2)
+        eps_ = u.Quantity(eps[mask])
+        eps_r_ = u.Quantity(eps_r[mask])
 
-        return (E_star * (u.km / u.s) ** 2,
-                u.Quantity(eps),
-                u.Quantity(eps_r))
+        return E_star_, eps_, eps_r_

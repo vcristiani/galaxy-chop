@@ -8,3 +8,4 @@ recursive-exclude resource *
 recursive-exclude tests *
 
 exclude tox.ini
+exclude pyproject.toml
