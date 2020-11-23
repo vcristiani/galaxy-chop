@@ -266,7 +266,7 @@ class Galaxy:
             vel_rot_g_x,
             vel_rot_g_y,
             vel_rot_g_z,
-        ) = utils.aling(
+        ) = utils.align(
             m_s,
             xs,
             ys,

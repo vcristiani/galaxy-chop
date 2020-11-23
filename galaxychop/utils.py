@@ -72,7 +72,7 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
     return A
 
 
-def aling(
+def align(
     m_s,
     x_s,
     y_s,
@@ -95,7 +95,7 @@ def aling(
     r_corte,
 ):
     """
-    Aling the galaxy.
+    Align the galaxy.
 
     Rotate the positions, speeds and angular moments of the
     particles so that the total angular moment coincides with the z-axis.
