@@ -12,6 +12,8 @@ from os import path
 
 import astropy.units as u
 
+import dask.array as da
+
 from galaxychop import galaxychop
 from galaxychop import utils
 
@@ -300,21 +302,21 @@ def mock_galaxy(disc_particles_all, halo_particles):
         vx_s=vel_s[:, 0] * (u.km / u.s),
         vy_s=vel_s[:, 1] * (u.km / u.s),
         vz_s=vel_s[:, 2] * (u.km / u.s),
-        m_s=mass_s * u.M_sun,
+        m_s=mass_s * 1e10 * u.M_sun,
         x_dm=pos_dm[:, 0] * u.kpc,
         y_dm=pos_dm[:, 1] * u.kpc,
         z_dm=pos_dm[:, 2] * u.kpc,
         vx_dm=vel_dm[:, 0] * (u.km / u.s),
         vy_dm=vel_dm[:, 1] * (u.km / u.s),
         vz_dm=vel_dm[:, 2] * (u.km / u.s),
-        m_dm=mass_dm * u.M_sun,
+        m_dm=mass_dm * 1e10 * u.M_sun,
         x_g=pos_g[:, 0] * u.kpc,
         y_g=pos_g[:, 1] * u.kpc,
         z_g=pos_g[:, 2] * u.kpc,
         vx_g=vel_g[:, 0] * (u.km / u.s),
         vy_g=vel_g[:, 1] * (u.km / u.s),
         vz_g=vel_g[:, 2] * (u.km / u.s),
-        m_g=mass_g * u.M_sun,
+        m_g=mass_g * 1e10 * u.M_sun,
     )
 
     return g
@@ -432,54 +434,78 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g.paramcirc[2], u.Quantity)
 
 
-@pytest.mark.xfail
-def test_energy_method(disc_particles_all, halo_particles):
+def test_energy_method(mock_galaxy):
     """Test energy method."""
-    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
-
-    mass_dm, pos_dm, vel_dm = halo_particles
-
-    g = galaxychop.Galaxy(
-        x_s=pos_s[:, 0] * u.kpc,
-        y_s=pos_s[:, 1] * u.kpc,
-        z_s=pos_s[:, 2] * u.kpc,
-        vx_s=vel_s[:, 0] * (u.km / u.s),
-        vy_s=vel_s[:, 1] * (u.km / u.s),
-        vz_s=vel_s[:, 2] * (u.km / u.s),
-        m_s=mass_s * u.M_sun,
-        x_dm=pos_dm[:, 0] * u.kpc,
-        y_dm=pos_dm[:, 1] * u.kpc,
-        z_dm=pos_dm[:, 2] * u.kpc,
-        vx_dm=vel_dm[:, 0] * (u.km / u.s),
-        vy_dm=vel_dm[:, 1] * (u.km / u.s),
-        vz_dm=vel_dm[:, 2] * (u.km / u.s),
-        m_dm=mass_dm * u.M_sun,
-        x_g=pos_g[:, 0] * u.kpc,
-        y_g=pos_g[:, 1] * u.kpc,
-        z_g=pos_g[:, 2] * u.kpc,
-        vx_g=vel_g[:, 0] * (u.km / u.s),
-        vy_g=vel_g[:, 1] * (u.km / u.s),
-        vz_g=vel_g[:, 2] * (u.km / u.s),
-        m_g=mass_g * u.M_sun,
-    )
+    g = mock_galaxy
 
     E_tot_dm, E_tot_s, E_tot_g = g.energy
 
-    k_s = 0.5 * (vel_s[:, 0] ** 2 + vel_s[:, 1] ** 2 + vel_s[:, 2] ** 2)
-    k_dm = 0.5 * (vel_dm[:, 0] ** 2 + vel_dm[:, 1] ** 2 + vel_dm[:, 2] ** 2)
-    k_g = 0.5 * (vel_g[:, 0] ** 2 + vel_g[:, 1] ** 2 + vel_g[:, 2] ** 2)
+    k_s = 0.5 * (g.vx_s.value ** 2 + g.vy_s.value ** 2 + g.vz_s.value ** 2)
+    k_dm = 0.5 * (g.vx_dm.value ** 2 + g.vy_dm.value ** 2 + g.vz_dm.value ** 2)
+    k_g = 0.5 * (g.vx_g.value ** 2 + g.vy_g.value ** 2 + g.vz_g.value ** 2)
 
-    pot_s = utils.potential(
-        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
+    x = np.hstack((g.x_s.value, g.x_dm.value, g.x_g.value))
+    y = np.hstack((g.y_s.value, g.y_dm.value, g.y_g.value))
+    z = np.hstack((g.z_s.value, g.z_dm.value, g.z_g.value))
+    m = np.hstack((g.m_s.value, g.m_dm.value, g.m_g.value))
+
+    pot = utils.potential(
+        da.asarray(x, chunks=100),
+        da.asarray(y, chunks=100),
+        da.asarray(z, chunks=100),
+        da.asarray(m, chunks=100),
+    )
+    num_s = len(g.m_s.value)
+    num = len(g.m_s.value) + len(g.m_dm.value)
+
+    pot_s = pot[:num_s]
+    pot_dm = pot[num_s:num]
+    pot_g = pot[num:]
+
+    np.testing.assert_allclose(
+        E_tot_s.value, k_s - pot_s, rtol=1e-3, atol=1e-3
+    )
+    np.testing.assert_allclose(
+        E_tot_dm.value, k_dm - pot_dm, rtol=1e-3, atol=1e-3
+    )
+    np.testing.assert_allclose(
+        E_tot_g.value, k_g - pot_g, rtol=1e-3, atol=1e-3
     )
 
-    pot_dm = utils.potential(
-        x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2], m=mass_dm
+
+def test_energy_method_real_galaxy(mock_real_galaxy):
+    """Test energy method."""
+    gal = mock_real_galaxy
+
+    E_tot_dm, E_tot_s, E_tot_g = gal.energy
+
+    k_s = 0.5 * (
+        gal.vx_s.value ** 2 + gal.vy_s.value ** 2 + gal.vz_s.value ** 2
+    )
+    k_dm = 0.5 * (
+        gal.vx_dm.value ** 2 + gal.vy_dm.value ** 2 + gal.vz_dm.value ** 2
+    )
+    k_g = 0.5 * (
+        gal.vx_g.value ** 2 + gal.vy_g.value ** 2 + gal.vz_g.value ** 2
     )
 
-    pot_g = utils.potential(
-        x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
+    x = np.hstack((gal.x_s.value, gal.x_dm.value, gal.x_g.value))
+    y = np.hstack((gal.y_s.value, gal.y_dm.value, gal.y_g.value))
+    z = np.hstack((gal.z_s.value, gal.z_dm.value, gal.z_g.value))
+    m = np.hstack((gal.m_s.value, gal.m_dm.value, gal.m_g.value))
+
+    pot = utils.potential(
+        da.asarray(x, chunks=100),
+        da.asarray(y, chunks=100),
+        da.asarray(z, chunks=100),
+        da.asarray(m, chunks=100),
     )
+    num_s = len(gal.m_s.value)
+    num = len(gal.m_s.value) + len(gal.m_dm.value)
+
+    pot_s = pot[:num_s]
+    pot_dm = pot[num_s:num]
+    pot_g = pot[num:]
 
     np.testing.assert_allclose(
         E_tot_s.value, k_s - pot_s, rtol=1e-3, atol=1e-3
@@ -538,10 +564,16 @@ def test_total_energy(mock_real_galaxy):
 
     E_tot_dark, E_tot_star, E_tot_gas = g.energy
 
-    (ii,) = np.where(E_tot_star.value < 0)
-    perc = len(ii) / len(E_tot_star.value)
+    (ii_s,) = np.where(E_tot_star.value < 0)
+    perc_s = len(ii_s) / len(E_tot_star.value)
+    #    (ii_dm,) = np.where(E_tot_dark.value < 0)
+    #    perc_dm = len(ii_dm) / len(E_tot_dark.value)
+    #    (ii_g,) = np.where(E_tot_gas.value < 0)
+    #    perc_g = len(ii_g) / len(E_tot_gas.value)
 
-    assert perc > 0.95
+    assert perc_s > 0.95
+    #    assert perc_dm > 0.5
+    #    assert perc_g > 0.5
     assert (E_tot_star.value < 0.0).any()
     assert (E_tot_dark.value < 0.0).any()
     assert (E_tot_gas.value < 0.0).any()
