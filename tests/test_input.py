@@ -302,21 +302,21 @@ def mock_galaxy(disc_particles_all, halo_particles):
         vx_s=vel_s[:, 0] * (u.km / u.s),
         vy_s=vel_s[:, 1] * (u.km / u.s),
         vz_s=vel_s[:, 2] * (u.km / u.s),
-        m_s=mass_s * 1e10 * u.M_sun,
+        m_s=mass_s * u.M_sun,
         x_dm=pos_dm[:, 0] * u.kpc,
         y_dm=pos_dm[:, 1] * u.kpc,
         z_dm=pos_dm[:, 2] * u.kpc,
         vx_dm=vel_dm[:, 0] * (u.km / u.s),
         vy_dm=vel_dm[:, 1] * (u.km / u.s),
         vz_dm=vel_dm[:, 2] * (u.km / u.s),
-        m_dm=mass_dm * 1e10 * u.M_sun,
+        m_dm=mass_dm * u.M_sun,
         x_g=pos_g[:, 0] * u.kpc,
         y_g=pos_g[:, 1] * u.kpc,
         z_g=pos_g[:, 2] * u.kpc,
         vx_g=vel_g[:, 0] * (u.km / u.s),
         vy_g=vel_g[:, 1] * (u.km / u.s),
         vz_g=vel_g[:, 2] * (u.km / u.s),
-        m_g=mass_g * 1e10 * u.M_sun,
+        m_g=mass_g * u.M_sun,
     )
 
     return g
@@ -444,10 +444,10 @@ def test_energy_method(mock_galaxy):
     k_dm = 0.5 * (g.vx_dm.value ** 2 + g.vy_dm.value ** 2 + g.vz_dm.value ** 2)
     k_g = 0.5 * (g.vx_g.value ** 2 + g.vy_g.value ** 2 + g.vz_g.value ** 2)
 
-    x = np.hstack((g.x_s.value, g.x_dm.value, g.x_g.value))
-    y = np.hstack((g.y_s.value, g.y_dm.value, g.y_g.value))
-    z = np.hstack((g.z_s.value, g.z_dm.value, g.z_g.value))
-    m = np.hstack((g.m_s.value, g.m_dm.value, g.m_g.value))
+    x = np.hstack((g.arr_.x_s, g.arr_.x_dm, g.arr_.x_g))
+    y = np.hstack((g.arr_.y_s, g.arr_.y_dm, g.arr_.y_g))
+    z = np.hstack((g.arr_.z_s, g.arr_.z_dm, g.arr_.z_g))
+    m = np.hstack((g.arr_.m_s, g.arr_.m_dm, g.arr_.m_g))
 
     pot = utils.potential(
         da.asarray(x, chunks=100),
@@ -489,10 +489,10 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
         gal.vx_g.value ** 2 + gal.vy_g.value ** 2 + gal.vz_g.value ** 2
     )
 
-    x = np.hstack((gal.x_s.value, gal.x_dm.value, gal.x_g.value))
-    y = np.hstack((gal.y_s.value, gal.y_dm.value, gal.y_g.value))
-    z = np.hstack((gal.z_s.value, gal.z_dm.value, gal.z_g.value))
-    m = np.hstack((gal.m_s.value, gal.m_dm.value, gal.m_g.value))
+    x = np.hstack((gal.arr_.x_s, gal.arr_.x_dm, gal.arr_.x_g))
+    y = np.hstack((gal.arr_.y_s, gal.arr_.y_dm, gal.arr_.y_g))
+    z = np.hstack((gal.arr_.z_s, gal.arr_.z_dm, gal.arr_.z_g))
+    m = np.hstack((gal.arr_.m_s, gal.arr_.m_dm, gal.arr_.m_g))
 
     pot = utils.potential(
         da.asarray(x, chunks=100),
