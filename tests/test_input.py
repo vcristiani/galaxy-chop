@@ -440,9 +440,9 @@ def test_energy_method(mock_galaxy):
 
     E_tot_dm, E_tot_s, E_tot_g = g.energy
 
-    k_s = 0.5 * (g.vx_s.value ** 2 + g.vy_s.value ** 2 + g.vz_s.value ** 2)
-    k_dm = 0.5 * (g.vx_dm.value ** 2 + g.vy_dm.value ** 2 + g.vz_dm.value ** 2)
-    k_g = 0.5 * (g.vx_g.value ** 2 + g.vy_g.value ** 2 + g.vz_g.value ** 2)
+    k_s = 0.5 * (g.arr_.vx_s ** 2 + g.arr_.vy_s ** 2 + g.arr_.vz_s ** 2)
+    k_dm = 0.5 * (g.arr_.vx_dm ** 2 + g.arr_.vy_dm ** 2 + g.arr_.vz_dm ** 2)
+    k_g = 0.5 * (g.arr_.vx_g ** 2 + g.arr_.vy_g ** 2 + g.arr_.vz_g ** 2)
 
     x = np.hstack((g.arr_.x_s, g.arr_.x_dm, g.arr_.x_g))
     y = np.hstack((g.arr_.y_s, g.arr_.y_dm, g.arr_.y_g))
@@ -455,8 +455,8 @@ def test_energy_method(mock_galaxy):
         da.asarray(z, chunks=100),
         da.asarray(m, chunks=100),
     )
-    num_s = len(g.m_s.value)
-    num = len(g.m_s.value) + len(g.m_dm.value)
+    num_s = len(g.arr_.m_s)
+    num = len(g.arr_.m_s) + len(g.arr_.m_dm)
 
     pot_s = pot[:num_s]
     pot_dm = pot[num_s:num]
@@ -480,13 +480,13 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
     E_tot_dm, E_tot_s, E_tot_g = gal.energy
 
     k_s = 0.5 * (
-        gal.vx_s.value ** 2 + gal.vy_s.value ** 2 + gal.vz_s.value ** 2
+        gal.arr_.vx_s ** 2 + gal.vy_s ** 2 + gal.arr_.vz_s ** 2
     )
     k_dm = 0.5 * (
-        gal.vx_dm.value ** 2 + gal.vy_dm.value ** 2 + gal.vz_dm.value ** 2
+        gal.arr_.vx_dm ** 2 + gal.arr_.vy_dm ** 2 + gal.arr_.vz_dm ** 2
     )
     k_g = 0.5 * (
-        gal.vx_g.value ** 2 + gal.vy_g.value ** 2 + gal.vz_g.value ** 2
+        gal.arr_.vx_g ** 2 + gal.arr_.vy_g ** 2 + gal.arr_.vz_g ** 2
     )
 
     x = np.hstack((gal.arr_.x_s, gal.arr_.x_dm, gal.arr_.x_g))
@@ -500,8 +500,8 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
         da.asarray(z, chunks=100),
         da.asarray(m, chunks=100),
     )
-    num_s = len(gal.m_s.value)
-    num = len(gal.m_s.value) + len(gal.m_dm.value)
+    num_s = len(gal.arr_.m_s)
+    num = len(gal.arr_.m_s) + len(gal.arr_.m_dm)
 
     pot_s = pot[:num_s]
     pot_dm = pot[num_s:num]
