@@ -164,17 +164,17 @@ class Galaxy:
         eps_g = self.arr_.eps_g
         eps_dm = self.arr_.eps_dm
 
-        vx_s = self.arr_.x_s
-        vy_s = self.arr_.y_s
-        vz_s = self.arr_.z_s
+        vx_s = self.arr_.vx_s
+        vy_s = self.arr_.vy_s
+        vz_s = self.arr_.vz_s
 
-        vx_g = self.arr_.x_g
-        vy_g = self.arr_.y_g
-        vz_g = self.arr_.z_g
+        vx_g = self.arr_.vx_g
+        vy_g = self.arr_.vy_g
+        vz_g = self.arr_.vz_g
 
-        vx_dm = self.arr_.x_dm
-        vy_dm = self.arr_.y_dm
-        vz_dm = self.arr_.z_dm
+        vx_dm = self.arr_.vx_dm
+        vy_dm = self.arr_.vy_dm
+        vz_dm = self.arr_.vz_dm
 
         x = np.hstack((x_s, x_dm, x_g))
         y = np.hstack((y_s, y_dm, y_g))
@@ -231,17 +231,17 @@ class Galaxy:
         m_g = self.arr_.m_g
         m_dm = self.arr_.m_dm
 
-        vx_s = self.arr_.x_s
-        vy_s = self.arr_.y_s
-        vz_s = self.arr_.z_s
+        vx_s = self.arr_.vx_s
+        vy_s = self.arr_.vy_s
+        vz_s = self.arr_.vz_s
 
-        vx_g = self.arr_.x_g
-        vy_g = self.arr_.y_g
-        vz_g = self.arr_.z_g
+        vx_g = self.arr_.vx_g
+        vy_g = self.arr_.vy_g
+        vz_g = self.arr_.vz_g
 
-        vx_dm = self.arr_.x_dm
-        vy_dm = self.arr_.y_dm
-        vz_dm = self.arr_.z_dm
+        vx_dm = self.arr_.vx_dm
+        vy_dm = self.arr_.vy_dm
+        vz_dm = self.arr_.vz_dm
 
         xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
             x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g, m_s, m_g, m_dm
