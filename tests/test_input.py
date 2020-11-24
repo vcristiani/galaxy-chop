@@ -479,15 +479,11 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
 
     E_tot_dm, E_tot_s, E_tot_g = gal.energy
 
-    k_s = 0.5 * (
-        gal.arr_.vx_s ** 2 + gal.arr_.vy_s ** 2 + gal.arr_.vz_s ** 2
-    )
+    k_s = 0.5 * (gal.arr_.vx_s ** 2 + gal.arr_.vy_s ** 2 + gal.arr_.vz_s ** 2)
     k_dm = 0.5 * (
         gal.arr_.vx_dm ** 2 + gal.arr_.vy_dm ** 2 + gal.arr_.vz_dm ** 2
     )
-    k_g = 0.5 * (
-        gal.arr_.vx_g ** 2 + gal.arr_.vy_g ** 2 + gal.arr_.vz_g ** 2
-    )
+    k_g = 0.5 * (gal.arr_.vx_g ** 2 + gal.arr_.vy_g ** 2 + gal.arr_.vz_g ** 2)
 
     x = np.hstack((gal.arr_.x_s, gal.arr_.x_dm, gal.arr_.x_g))
     y = np.hstack((gal.arr_.y_s, gal.arr_.y_dm, gal.arr_.y_g))
