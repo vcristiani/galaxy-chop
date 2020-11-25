@@ -41,7 +41,7 @@ G = 4.299e-6
 # #####################################################
 
 
-@attr.s(frozen=False)
+@attr.s(frozen=True)
 class Galaxy:
     """
     Galaxy class.
