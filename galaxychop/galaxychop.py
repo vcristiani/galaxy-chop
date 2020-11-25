@@ -345,18 +345,18 @@ class Galaxy:
 
         # Remove the particles that are not bound: E > 0.
         (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(Etot_dm <= 0.0)
+        (neg_star,) = np.where(Etot_s <= 0.0)
 
         # Remove the particles with E = -inf.
         (fin,) = np.where(E_tot[neg] != -np.inf)
         (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)
 
-        # Normalize the two variables: E between 0 and 1; J between -1 and 1.
+        # Normalize the two variables: E between 0 and 1; Jz between -1 and 1.
         E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
 
         kk = self.angular_momentum().arr_.J_part[2, :][neg][fin]
 
-        J = kk / np.max(np.abs(kk))
+        Jz = kk / np.max(np.abs(kk))
 
         # Make the energy binning and select the Jz values with which we
         # calculate the J_circ.
@@ -369,27 +369,28 @@ class Galaxy:
         y = np.zeros(len(aux) + 1)
 
         x[0] = -1.0
-        y[0] = np.abs(J[np.argmin(E)])
+        y[0] = np.abs(Jz[np.argmin(E)])
 
         for i in range(1, len(aux)):
             (mask,) = np.where((E <= aux[i]) & (E > aux[i - 1]))
-            s = np.argsort(np.abs(J[mask]))
+            s = np.argsort(np.abs(Jz[mask]))
 
             # We take into account whether or not there are particles in the
             # energy bins.
             if len(s) != 0:
                 if len(s) == 1:
                     x[i] = E[mask][s]
-                    y[i] = np.abs(J[mask][s])
+                    y[i] = np.abs(Jz[mask][s])
                 else:
                     if (
-                        1.0 - (np.abs(J[mask][s][-2]) / np.abs(J[mask][s][-1]))
+                        1.0
+                        - (np.abs(Jz[mask][s][-2]) / np.abs(Jz[mask][s][-1]))
                     ) >= 0.01:
                         x[i] = E[mask][s][-2]
-                        y[i] = np.abs(J[mask][s][-2])
+                        y[i] = np.abs(Jz[mask][s][-2])
                     else:
                         x[i] = E[mask][s][-1]
-                        y[i] = np.abs(J[mask][s][-1])
+                        y[i] = np.abs(Jz[mask][s][-1])
             else:
                 pass
 
@@ -397,8 +398,8 @@ class Galaxy:
         (mask,) = np.where(E > aux[len(aux) - 1])
 
         if len(mask) != 0:
-            x[len(aux)] = E[mask][np.abs(J[mask]).argmax()]
-            y[len(aux)] = np.abs(J[mask][np.abs(J[mask]).argmax()])
+            x[len(aux)] = E[mask][np.abs(Jz[mask]).argmax()]
+            y[len(aux)] = np.abs(Jz[mask][np.abs(Jz[mask]).argmax()])
 
         # In case there are empty bins, we get rid of them.
         else:
@@ -447,11 +448,11 @@ class Galaxy:
         up2 = ang_momentum.J_star[2, :][neg_star][fin_star]
         down2 = np.max(np.abs(ang_momentum.J_part[2, :][neg][fin]))
 
-        J_star_ = up2 / down2
+        Jz_star_norm = up2 / down2
 
         up3 = ang_momentum.Jr_star[neg_star][fin_star]
         down3 = np.max(np.abs(ang_momentum.Jr[neg][fin]))
-        Jr_star_ = up3 / down3
+        Jr_star_norm = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
         # spl = InterpolatedUnivariateSpline(
@@ -463,11 +464,11 @@ class Galaxy:
         # Calculate the circularity parameter Lz/Lc.
         # eps = J_star_ / spl(E_star)
         jcir = self.jcirc().arr_
-        eps = J_star_ / np.interp(E_star, jcir.x, jcir.y)
+        eps = Jz_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
         # Calculate the same for Lp/Lc.
         # eps_r = Jr_star_ / spl(E_star)
-        eps_r = Jr_star_ / np.interp(E_star, jcir.x, jcir.y)
+        eps_r = Jr_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
         # Determine that the particles we are removing are not significant.
 

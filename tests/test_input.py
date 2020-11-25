@@ -654,17 +654,15 @@ def test_jcirc_E_tot_len(mock_galaxy):
     assert len(E_tot) == tot_len
 
 
-@pytest.mark.xfail
 def test_jcirc_x_y_len(mock_real_galaxy):
     """Check the x and y array len."""
     gal = mock_real_galaxy
 
-    g_test = gal.jcirc()
+    g_test = gal.jcirc().arr_
 
     assert len(g_test.x) == len(g_test.y)
 
 
-@pytest.mark.xfail
 def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     """Check is the eps range."""
     gal = mock_real_galaxy
