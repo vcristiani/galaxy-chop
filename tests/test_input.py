@@ -164,6 +164,69 @@ def save_data(N_part=100):
 # =============================================================================
 # Fixtures
 # =============================================================================
+@pytest.fixture
+def galaxy_params():
+    """
+    Galaxy parameter for test.
+
+    This return a function of a dictionary with random params of a Galaxy
+    object
+    """
+
+    def make(seed, stars, gas, dm):
+
+        random = np.random.default_rng(seed=seed)
+
+        x_s = random.random(stars)
+        y_s = random.random(stars)
+        z_s = random.random(stars)
+        vx_s = random.random(stars)
+        vy_s = random.random(stars)
+        vz_s = random.random(stars)
+        m_s = random.random(stars)
+
+        x_g = random.random(gas)
+        y_g = random.random(gas)
+        z_g = random.random(gas)
+        vx_g = random.random(gas)
+        vy_g = random.random(gas)
+        vz_g = random.random(gas)
+        m_g = random.random(gas)
+
+        x_dm = random.random(dm)
+        y_dm = random.random(dm)
+        z_dm = random.random(dm)
+        vx_dm = random.random(dm)
+        vy_dm = random.random(dm)
+        vz_dm = random.random(dm)
+        m_dm = random.random(dm)
+
+        params = {
+            "x_s": x_s,
+            "y_s": y_s,
+            "z_s": z_s,
+            "vx_s": vx_s,
+            "vy_s": vy_s,
+            "vz_s": vz_s,
+            "m_s": m_s,
+            "x_dm": x_dm,
+            "y_dm": y_dm,
+            "z_dm": z_dm,
+            "vx_dm": vx_dm,
+            "vy_dm": vy_dm,
+            "vz_dm": vz_dm,
+            "m_dm": m_dm,
+            "x_g": x_g,
+            "y_g": y_g,
+            "z_g": z_g,
+            "vx_g": vx_g,
+            "vy_g": vy_g,
+            "vz_g": vz_g,
+            "m_g": m_g,
+        }
+        return params
+
+    return make
 
 
 @pytest.fixture(scope="session")
@@ -358,6 +421,38 @@ def mock_real_galaxy():
 # =============================================================================
 # TESTS
 # =============================================================================
+param_list = [
+    "x_s",
+    "y_s",
+    "z_s",
+    "vx_s",
+    "vy_s",
+    "vz_s",
+    "m_s",
+    "x_g",
+    "y_g",
+    "z_g",
+    "vx_g",
+    "vy_g",
+    "vz_g",
+    "m_g",
+    "x_dm",
+    "y_dm",
+    "z_dm",
+    "vx_dm",
+    "vy_dm",
+    "vz_dm",
+    "m_dm",
+]
+
+
+@pytest.mark.parametrize("shorten", param_list)
+def test_same_size_inputs(shorten, galaxy_params):
+    """Test of inputs lengths."""
+    params = galaxy_params(seed=42, stars=10, gas=20, dm=30)
+    params[shorten] = params[shorten][:-1]
+    with pytest.raises(ValueError):
+        galaxychop.Galaxy(**params)
 
 
 def test_getrotmat0(disc_zero_angle):

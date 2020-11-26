@@ -136,6 +136,55 @@ class Galaxy:
     # components_g = attr.ib(default=None)
     # metadata = attr.ib(default=None)
 
+    def __attrs_post_init__(self):
+        """
+        Units length validator.
+
+        This method determine that the length of the different particles
+        families are the same.
+        """
+        length_s = np.array(
+            [
+                len(self.arr_.y_s),
+                len(self.arr_.z_s),
+                len(self.arr_.vx_s),
+                len(self.arr_.vy_s),
+                len(self.arr_.vz_s),
+                len(self.arr_.m_s),
+            ]
+        )
+
+        if np.any(len(self.arr_.x_s) != length_s):
+            raise ValueError("Stars inputs must have the same length")
+
+        length_dm = np.array(
+            [
+                len(self.arr_.y_dm),
+                len(self.arr_.z_dm),
+                len(self.arr_.vx_dm),
+                len(self.arr_.vy_dm),
+                len(self.arr_.vz_dm),
+                len(self.arr_.m_dm),
+            ]
+        )
+
+        if np.any(len(self.arr_.x_dm) != length_dm):
+            raise ValueError("Dark matter inputs must have the same length")
+
+        length_g = np.array(
+            [
+                len(self.arr_.y_g),
+                len(self.arr_.z_g),
+                len(self.arr_.vx_g),
+                len(self.arr_.vy_g),
+                len(self.arr_.vz_g),
+                len(self.arr_.m_g),
+            ]
+        )
+
+        if np.any(len(self.arr_.x_g) != length_g):
+            raise ValueError("Gas inputs must have the same length")
+
     @property
     def energy(self):
         """
