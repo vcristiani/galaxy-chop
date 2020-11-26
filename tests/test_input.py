@@ -14,7 +14,7 @@ import astropy.units as u
 
 import dask.array as da
 
-from galaxychop import galaxychop
+from galaxychop import core
 from galaxychop import utils
 
 import numpy as np
@@ -358,7 +358,7 @@ def mock_galaxy(disc_particles_all, halo_particles):
 
     mass_dm, pos_dm, vel_dm = halo_particles
 
-    g = galaxychop.Galaxy(
+    g = core.Galaxy(
         x_s=pos_s[:, 0] * u.kpc,
         y_s=pos_s[:, 1] * u.kpc,
         z_s=pos_s[:, 2] * u.kpc,
@@ -391,7 +391,7 @@ def mock_real_galaxy():
     dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
     s = np.loadtxt(path.abspath(path.curdir) + "/legacy/star.dat")
     g = np.loadtxt(path.abspath(path.curdir) + "/legacy/gas_.dat")
-    gal = galaxychop.Galaxy(
+    gal = core.Galaxy(
         x_s=s[:, 1] * u.kpc,
         y_s=s[:, 2] * u.kpc,
         z_s=s[:, 3] * u.kpc,
@@ -452,7 +452,7 @@ def test_same_size_inputs(shorten, galaxy_params):
     params = galaxy_params(seed=42, stars=10, gas=20, dm=30)
     params[shorten] = params[shorten][:-1]
     with pytest.raises(ValueError):
-        galaxychop.Galaxy(**params)
+        core.Galaxy(**params)
 
 
 def test_getrotmat0(disc_zero_angle):
