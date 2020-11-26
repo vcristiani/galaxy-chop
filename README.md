@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.com/vcristiani/galaxy-chop.svg?branch=master)](https://travis-ci.com/vcristiani/galaxy-chop)
 [![https://github.com/leliel12/diseno_sci_sfw](https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00)](https://github.com/leliel12/diseno_sci_sfw)
 
+![logo](https://github.com/vcristiani/galaxy-chop/blob/master/docs/galaxychop_logo.png)
+
 # Welcome to `galaxy-chop`
 
 `galaxy-chop` is a package where you can find the most used methods for galaxy dynamical decomposition.
