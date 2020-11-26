@@ -187,20 +187,108 @@ class Galaxy:
         if np.any(len(self.arr_.x_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
 
-    def values(self):
-        """2D converter."""
-        arr = np.vstack(
-            (
-                np.hstack((self.arr_.x_s, self.arr_.x_g, self.arr_.x_dm)),
-                np.hstack((self.arr_.y_s, self.arr_.y_g, self.arr_.y_dm)),
-                np.hstack((self.arr_.z_s, self.arr_.z_g, self.arr_.z_dm)),
-                np.hstack((self.arr_.vx_s, self.arr_.vx_g, self.arr_.vx_dm)),
-                np.hstack((self.arr_.vy_s, self.arr_.vy_g, self.arr_.vy_dm)),
-                np.hstack((self.arr_.vz_s, self.arr_.vz_g, self.arr_.vz_dm)),
-                np.hstack((self.arr_.m_s, self.arr_.m_g, self.arr_.m_dm)),
+    def values(self, star=True, gas=True, dm=True):
+        """
+        2D and 1D imputs converter.
+
+        Builds two arrays, one 2D listing all the parameters of each
+        particle and one 1D showing whether the particle is a star,
+        gas or dark matter.
+
+        Parameters
+        ----------
+        star = True or Flase. Default = False
+            Indicates if the stars particles are going to be use to
+            build the array
+        gas = True or Flase. Default = False
+            Indicates if the gas particles are going to be use to
+            build the array
+        dm = True or Flase. Default = False
+            Indicates if the dm particles are going to be use to
+            build the array
+
+        Return
+        ------
+        X = 'np.ndarray(n,7)'
+            2D array where each file it is a diferen particle and
+            each colum it is a parameter of the particles (x,y,z,vx,vy,vz,m)
+        y = 'np.ndarray(n)'
+            1D array where is identified the nature of each particle
+            0 = star, 1 = gas and 2 = dark mather
+        """
+        arr_ = self.arr_
+
+        if star:
+            n_s = len(arr_.x_s)
+
+            arr_s = np.hstack(
+                (
+                    arr_.x_s.T,
+                    arr_.y_s.T,
+                    arr_.z_s.T,
+                    arr_.vx_s.T,
+                    arr_.vy_s.T,
+                    arr_.vz_s.T,
+                    arr_.m_s.T,
+                )
             )
-        )
-        return arr.T
+
+            arr2_s = np.zeros(n_s)
+
+        else:
+            n_s = 0
+            arr_s = []
+            arr2_s = []
+
+        if gas:
+            n_g = len(arr_.x_g)
+
+            arr_g = np.hstack(
+                (
+                    arr_.x_g.T,
+                    arr_.y_g.T,
+                    arr_.z_g.T,
+                    arr_.vx_g.T,
+                    arr_.vy_g.T,
+                    arr_.vz_g.T,
+                    arr_.m_g.T,
+                )
+            )
+
+            arr2_g = np.ones(n_g)
+
+        else:
+            n_g = 0
+            arr_g = []
+            arr2_g = []
+
+        if dm:
+            n_dm = len(arr_.x_dm)
+
+            arr_dm = np.hstack(
+                (
+                    arr_.x_dm.T,
+                    arr_.y_dm.T,
+                    arr_.z_dm.T,
+                    arr_.vx_dm.T,
+                    arr_.vy_dm.T,
+                    arr_.vz_dm.T,
+                    arr_.m_dm.T,
+                )
+            )
+
+            arr2_dm = np.full(n_dm, 2)
+
+        else:
+            n_dm = 0
+            arr_dm = []
+            arr2_dm = []
+
+        X = np.hstack((arr_s, arr_g, arr_dm))
+        X = X.reshape((n_s + n_g + n_dm), 7)
+        y = np.hstack((arr2_s, arr2_g, arr2_dm))
+
+        return X, y
 
     @property
     def energy(self):
