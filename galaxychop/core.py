@@ -22,6 +22,8 @@ import numpy as np
 
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
+from sklearn.base import ClusterMixin
+
 import uttr
 
 # from sklearn.mixture import GaussianMixture
@@ -544,3 +546,34 @@ class Galaxy:
         eps_r_ = u.Quantity(eps_r[mask])
 
         return E_star_, eps_, eps_r_
+
+
+# #####################################################
+# GCDecomposeMixin CLASS
+# #####################################################
+
+
+class GCDecomposeMixin:
+    """Galaxy chop decompose mixin class."""
+
+    def decompose(self, galaxy):
+        """Decompose method."""
+        if not isinstance(galaxy, Galaxy):
+            found = type(galaxy)
+            raise TypeError(
+                f"'galaxy' must be a core.Galaxy instance. Found {found}"
+            )
+
+        X = galaxy.values()
+        return self.fit_transform(X)
+
+
+# #####################################################
+# GCClusterMixin CLASS
+# #####################################################
+
+
+class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
+    """Galaxy chop cluster mixin class."""
+
+    pass
