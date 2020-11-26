@@ -185,6 +185,21 @@ class Galaxy:
         if np.any(len(self.arr_.x_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
 
+    def values(self):
+        """2D converter."""
+        arr = np.vstack(
+            (
+                np.hstack((self.arr_.x_s, self.arr_.x_g, self.arr_.x_dm)),
+                np.hstack((self.arr_.y_s, self.arr_.y_g, self.arr_.y_dm)),
+                np.hstack((self.arr_.z_s, self.arr_.z_g, self.arr_.z_dm)),
+                np.hstack((self.arr_.vx_s, self.arr_.vx_g, self.arr_.vx_dm)),
+                np.hstack((self.arr_.vy_s, self.arr_.vy_g, self.arr_.vy_dm)),
+                np.hstack((self.arr_.vz_s, self.arr_.vz_g, self.arr_.vz_dm)),
+                np.hstack((self.arr_.m_s, self.arr_.m_g, self.arr_.m_dm)),
+            )
+        )
+        return arr.T
+
     @property
     def energy(self):
         """
