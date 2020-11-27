@@ -218,75 +218,65 @@ class Galaxy:
         """
         arr_ = self.arr_
 
+        X = np.empty((0, 7))
+        y = np.empty(0, int)
+
         if star:
             n_s = len(arr_.x_s)
 
-            arr_s = np.hstack(
+            X_s = np.hstack(
                 (
-                    arr_.x_s.T,
-                    arr_.y_s.T,
-                    arr_.z_s.T,
-                    arr_.vx_s.T,
-                    arr_.vy_s.T,
-                    arr_.vz_s.T,
-                    arr_.m_s.T,
+                    arr_.x_s.reshape(n_s, 1),
+                    arr_.y_s.reshape(n_s, 1),
+                    arr_.z_s.reshape(n_s, 1),
+                    arr_.vx_s.reshape(n_s, 1),
+                    arr_.vy_s.reshape(n_s, 1),
+                    arr_.vz_s.reshape(n_s, 1),
+                    arr_.m_s.reshape(n_s, 1),
                 )
             )
+            y_s = np.zeros(n_s)
 
-            arr2_s = np.zeros(n_s)
-
-        else:
-            n_s = 0
-            arr_s = []
-            arr2_s = []
+            X = np.vstack((X, X_s))
+            y = np.hstack((y, y_s))
 
         if gas:
             n_g = len(arr_.x_g)
 
-            arr_g = np.hstack(
+            X_g = np.hstack(
                 (
-                    arr_.x_g.T,
-                    arr_.y_g.T,
-                    arr_.z_g.T,
-                    arr_.vx_g.T,
-                    arr_.vy_g.T,
-                    arr_.vz_g.T,
-                    arr_.m_g.T,
+                    arr_.x_g.reshape(n_g, 1),
+                    arr_.y_g.reshape(n_g, 1),
+                    arr_.z_g.reshape(n_g, 1),
+                    arr_.vx_g.reshape(n_g, 1),
+                    arr_.vy_g.reshape(n_g, 1),
+                    arr_.vz_g.reshape(n_g, 1),
+                    arr_.m_g.reshape(n_g, 1),
                 )
             )
+            y_g = np.zeros(n_g)
 
-            arr2_g = np.ones(n_g)
-
-        else:
-            n_g = 0
-            arr_g = []
-            arr2_g = []
+            X = np.vstack((X, X_g))
+            y = np.hstack((y, y_g))
 
         if dm:
             n_dm = len(arr_.x_dm)
 
-            arr_dm = np.hstack(
+            X_dm = np.hstack(
                 (
-                    arr_.x_dm.T,
-                    arr_.y_dm.T,
-                    arr_.z_dm.T,
-                    arr_.vx_dm.T,
-                    arr_.vy_dm.T,
-                    arr_.vz_dm.T,
-                    arr_.m_dm.T,
+                    arr_.x_dm.reshape(n_dm, 1),
+                    arr_.y_dm.reshape(n_dm, 1),
+                    arr_.z_dm.reshape(n_dm, 1),
+                    arr_.vx_dm.reshape(n_dm, 1),
+                    arr_.vy_dm.reshape(n_dm, 1),
+                    arr_.vz_dm.reshape(n_dm, 1),
+                    arr_.m_dm.reshape(n_dm, 1),
                 )
             )
+            y_dm = np.zeros(n_dm)
 
-            arr2_dm = np.full(n_dm, 2)
-
-        else:
-            n_dm = 0
-            arr_dm = []
-            arr2_dm = []
-
-        X = np.hstack((arr_s, arr_g, arr_dm))
-        X = X.reshape((n_s + n_g + n_dm), 7)
-        y = np.hstack((arr2_s, arr2_g, arr2_dm))
+            X = np.vstack((X, X_dm))
+            y = np.hstack((y, y_dm))
 
         return X, y
 

@@ -768,7 +768,7 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
 
 
 @pytest.mark.parametrize(
-    "stars,gas,dm,ss,gg,dd",
+    "stars_number, gas_number, dm_number, stars , gas, dm",
     [
         (1, 1, 1, True, True, True),
         (10, 20, 30, True, False, False),
@@ -777,18 +777,23 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
         (3, 83, 24, True, True, False),
         (28, 43, 94, False, True, True),
         (382, 8321, 834, True, False, True),
+        (32, 821, 84, False, False, False),
     ],
 )
-def test_values_len(stars, gas, dm, ss, gg, dd, galaxy_params):
+def test_values_len(
+    stars_number, gas_number, dm_number, stars, gas, dm, galaxy_params
+):
     """Test the lengths of 2D and 1D array of value mehods."""
-    params = galaxy_params(seed=42, stars=stars, gas=gas, dm=dm)
+    params = galaxy_params(
+        seed=42, stars=stars_number, gas=gas_number, dm=dm_number
+    )
     g = core.Galaxy(**params)
 
-    X, y = g.values(star=ss, gas=gg, dm=dd)
+    X, y = g.values(star=stars, gas=gas, dm=dm)
 
-    first = stars if ss else 0
-    second = gas if gg else 0
-    third = dm if dd else 0
+    first = stars_number if stars else 0
+    second = gas_number if gas else 0
+    third = dm_number if dm else 0
 
     length = first + second + third
 
