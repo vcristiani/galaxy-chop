@@ -23,35 +23,36 @@ import pytest
 # TESTS
 # =============================================================================
 
-param_list = [
-    "x_s",
-    "y_s",
-    "z_s",
-    "vx_s",
-    "vy_s",
-    "vz_s",
-    "m_s",
-    "x_g",
-    "y_g",
-    "z_g",
-    "vx_g",
-    "vy_g",
-    "vz_g",
-    "m_g",
-    "x_dm",
-    "y_dm",
-    "z_dm",
-    "vx_dm",
-    "vy_dm",
-    "vz_dm",
-    "m_dm",
-]
 
-
-@pytest.mark.parametrize("shorten", param_list)
-def test_same_size_inputs(shorten, galaxy_params):
+@pytest.mark.parametrize(
+    "shorten",
+    [
+        "x_s",
+        "y_s",
+        "z_s",
+        "vx_s",
+        "vy_s",
+        "vz_s",
+        "m_s",
+        "x_g",
+        "y_g",
+        "z_g",
+        "vx_g",
+        "vy_g",
+        "vz_g",
+        "m_g",
+        "x_dm",
+        "y_dm",
+        "z_dm",
+        "vx_dm",
+        "vy_dm",
+        "vz_dm",
+        "m_dm",
+    ],
+)
+def test_same_size_inputs(shorten, random_galaxy_params):
     """Test of inputs lengths."""
-    params = galaxy_params(seed=42, stars=10, gas=20, dm=30)
+    params = random_galaxy_params(seed=42, stars=10, gas=20, dm=30)
     params[shorten] = params[shorten][:-1]
     with pytest.raises(ValueError):
         core.Galaxy(**params)
@@ -328,10 +329,10 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     ],
 )
 def test_values_len(
-    stars_number, gas_number, dm_number, stars, gas, dm, galaxy_params
+    stars_number, gas_number, dm_number, stars, gas, dm, random_galaxy_params
 ):
     """Test the lengths of 2D and 1D array of value mehods."""
-    params = galaxy_params(
+    params = random_galaxy_params(
         seed=42, stars=stars_number, gas=gas_number, dm=dm_number
     )
     g = core.Galaxy(**params)

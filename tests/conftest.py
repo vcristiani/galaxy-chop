@@ -162,7 +162,7 @@ def save_data(N_part=100):
 # Fixtures
 # =============================================================================
 @pytest.fixture
-def galaxy_params():
+def random_galaxy_params():
     """
     Galaxy parameter for test.
 
