@@ -2,7 +2,7 @@
 # This file is part of the Galaxy-Chop Project
 # License: MIT
 
-"""Test imput data."""
+"""Test input data."""
 
 # =============================================================================
 # IMPORTS
