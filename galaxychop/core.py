@@ -491,6 +491,12 @@ class Galaxy:
         (neg,) = np.where(E_tot <= 0.0)
         (neg_star,) = np.where(Etot_s <= 0.0)
 
+        if len(neg) == 0:
+            raise ValueError("All Energy values are positive")
+
+        if len(neg_star) == 0:
+            raise ValueError("All Stellar Energy values are positive")
+
         # Remove the particles with E = -inf.
         (fin,) = np.where(E_tot[neg] != -np.inf)
         (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)

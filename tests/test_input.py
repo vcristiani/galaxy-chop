@@ -386,6 +386,40 @@ def mock_galaxy(disc_particles_all, halo_particles):
 
 
 @pytest.fixture
+def mock_bad_galaxy(disc_particles_all, halo_particles):
+    """Mock bad galaxy."""
+    (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
+
+    mass_dm, pos_dm, vel_dm = halo_particles
+
+    g_bad = core.Galaxy(
+        x_s=pos_s[:, 0] * u.kpc,
+        y_s=pos_s[:, 1] * u.kpc,
+        z_s=pos_s[:, 2] * u.kpc,
+        vx_s=vel_s[:, 0] * 1000 * (u.km / u.s),
+        vy_s=vel_s[:, 1] * 1000 * (u.km / u.s),
+        vz_s=vel_s[:, 2] * 1000 * (u.km / u.s),
+        m_s=mass_s * 1 / 1000 * u.M_sun,
+        x_dm=pos_dm[:, 0] * u.kpc,
+        y_dm=pos_dm[:, 1] * u.kpc,
+        z_dm=pos_dm[:, 2] * u.kpc,
+        vx_dm=vel_dm[:, 0] * 1000 * (u.km / u.s),
+        vy_dm=vel_dm[:, 1] * 1000 * (u.km / u.s),
+        vz_dm=vel_dm[:, 2] * 1000 * (u.km / u.s),
+        m_dm=mass_dm * 1 / 1000 * u.M_sun,
+        x_g=pos_g[:, 0] * u.kpc,
+        y_g=pos_g[:, 1] * u.kpc,
+        z_g=pos_g[:, 2] * u.kpc,
+        vx_g=vel_g[:, 0] * 1000 * (u.km / u.s),
+        vy_g=vel_g[:, 1] * 1000 * (u.km / u.s),
+        vz_g=vel_g[:, 2] * 1000 * (u.km / u.s),
+        m_g=mass_g * 1 / 1000 * u.M_sun,
+    )
+
+    return g_bad
+
+
+@pytest.fixture
 def mock_real_galaxy():
     """Mock real galaxy."""
     dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
@@ -760,11 +794,19 @@ def test_jcirc_x_y_len(mock_real_galaxy):
 
 def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     """Check is the eps range."""
-    gal = mock_real_galaxy
+    g = mock_real_galaxy
 
-    E_star, eps, eps_r = gal.paramcirc
+    E_star, eps, eps_r = g.paramcirc
     assert (eps <= 1.0).any()
     assert (eps >= -1.0).any()
+
+
+def test_jcirc_zero_len_mask_value_error(mock_bad_galaxy):
+    """Check is the eps range."""
+    g = mock_bad_galaxy
+
+    with pytest.raises(ValueError):
+        g.jcirc()
 
 
 @pytest.mark.parametrize(
