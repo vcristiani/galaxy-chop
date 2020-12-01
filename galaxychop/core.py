@@ -23,8 +23,8 @@ import numpy as np
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
 from sklearn.base import ClusterMixin
-
 from sklearn.cluster import KMeans
+
 
 import uttr
 
@@ -666,5 +666,5 @@ class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
 
 class GCKmeans(GCClusterMixin, KMeans):
     """Galaxy chop KMean class."""
-    
+
     pass
