@@ -23,6 +23,8 @@ import numpy as np
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
 from sklearn.base import ClusterMixin
+from sklearn.cluster import KMeans
+
 
 import uttr
 
@@ -642,8 +644,8 @@ class GCDecomposeMixin:
                 f"'galaxy' must be a core.Galaxy instance. Found {found}"
             )
 
-        X = galaxy.values()
-        return self.fit_transform(X)
+        X, y = galaxy.values()
+        return self.fit_transform(X, y)
 
 
 # #####################################################
@@ -653,5 +655,16 @@ class GCDecomposeMixin:
 
 class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
     """Galaxy chop cluster mixin class."""
+
+    pass
+
+
+# #####################################################
+# GCClusterMixin CLASS
+# #####################################################
+
+
+class GCKmeans(GCClusterMixin, KMeans):
+    """Galaxy chop KMean class."""
 
     pass

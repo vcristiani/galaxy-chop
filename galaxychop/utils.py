@@ -140,6 +140,9 @@ def align(
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Rotated velocities of the gas particles.
     """
+    if (r_corte is not None) and (r_corte <= 0.0):
+        raise ValueError("r_corte must not be lower than 0.")
+
     pos = np.vstack((x_s, y_s, z_s)).T
     vel = np.vstack((vx_s, vy_s, vz_s)).T
 
