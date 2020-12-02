@@ -11,6 +11,8 @@ from galaxychop import core
 
 import numpy as np
 
+import pytest
+
 from sklearn.cluster import KMeans
 
 # =============================================================================
@@ -30,3 +32,11 @@ def test_GCKmeans(mock_galaxy):
     expected = kmeans.fit_transform(X, y)
 
     np.testing.assert_array_equal(result, expected)
+
+
+@pytest.mark.parametrize(
+    "type_values", [("string", np.random.rand(1), np.inf, np.nan)]
+)
+def test_type_error_GCDecomposeMixin_class(type_values):
+    with pytest.raises(TypeError):
+        core.GCDecomposeMixin(type_values)
