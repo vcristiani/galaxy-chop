@@ -52,7 +52,7 @@ import pytest
 )
 def test_same_size_inputs(shorten, random_galaxy_params):
     """Test of inputs lengths."""
-    params = random_galaxy_params(seed=42, stars=10, gas=20, dm=30)
+    params = random_galaxy_params(stars=10, gas=20, dm=30, seed=42)
     params[shorten] = params[shorten][:-1]
     with pytest.raises(ValueError):
         core.Galaxy(**params)
@@ -161,7 +161,7 @@ def test_k_energy(disc_particles_all, halo_particles):
     """Test kinetic energy."""
     (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    mass_dm, pos_dm, vel_dm = halo_particles
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     k_s = 0.5 * (vel_s[:, 0] ** 2 + vel_s[:, 1] ** 2 + vel_s[:, 2] ** 2)
     k_dm = 0.5 * (vel_dm[:, 0] ** 2 + vel_dm[:, 1] ** 2 + vel_dm[:, 2] ** 2)
@@ -174,7 +174,7 @@ def test_k_energy(disc_particles_all, halo_particles):
 
 def test_dm_pot_energy(halo_particles):
     """Test potential energy DM."""
-    mass_dm, pos_dm, vel_dm = halo_particles
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     p_s = utils.potential(
         x=pos_dm[:, 0], y=pos_dm[:, 1], z=pos_dm[:, 2], m=mass_dm
@@ -222,7 +222,7 @@ def test_type_energy(disc_particles_all, halo_particles):
     """Checks the object."""
     (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    mass_dm, pos_dm, vel_dm = halo_particles
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     k_s = 0.5 * (vel_s[:, 0] ** 2 + vel_s[:, 1] ** 2 + vel_s[:, 2] ** 2)
     k_dm = 0.5 * (vel_dm[:, 0] ** 2 + vel_dm[:, 1] ** 2 + vel_dm[:, 2] ** 2)
@@ -250,7 +250,7 @@ def test_center_existence(disc_particles_all, halo_particles):
     """Test center existence and uniqueness."""
     (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    mass_dm, pos_dm, vel_dm = halo_particles
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     gx_c = utils.center(
         pos_s[:, 0],
@@ -333,7 +333,7 @@ def test_values_len(
 ):
     """Test the lengths of 2D and 1D array of value mehods."""
     params = random_galaxy_params(
-        seed=42, stars=stars_number, gas=gas_number, dm=dm_number
+        stars=stars_number, gas=gas_number, dm=dm_number, seed=42
     )
     g = core.Galaxy(**params)
 

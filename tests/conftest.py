@@ -18,11 +18,6 @@ import numpy as np
 
 import pytest
 
-# =============================================================================
-# Random state
-# =============================================================================
-
-random = np.random.RandomState(seed=42)
 
 # =============================================================================
 # Defining utility functions for mocking data
@@ -170,7 +165,7 @@ def random_galaxy_params():
     object
     """
 
-    def make(seed, stars, gas, dm):
+    def make(stars, gas, dm, seed):
 
         random = np.random.default_rng(seed=seed)
 
@@ -300,6 +295,7 @@ def disc_zero_angle(solid_disk):
 def disc_xrotation(solid_disk):
     """Disc rotated over x axis."""
     mass, pos, vel = solid_disk(N_part=1000)
+    random = np.random.RandomState(seed=42)
     a = rot_matrix_xaxis(theta=0.3 * np.pi * random.random())
 
     return mass, pos @ a, vel @ a, a
@@ -309,6 +305,7 @@ def disc_xrotation(solid_disk):
 def disc_yrotation(solid_disk):
     """Disc rotated over y axis."""
     mass, pos, vel = solid_disk(N_part=1000)
+    random = np.random.RandomState(seed=42)
     a = rot_matrix_yaxis(theta=0.3 * np.pi * random.random())
 
     return mass, pos @ a, vel @ a, a
@@ -318,6 +315,7 @@ def disc_yrotation(solid_disk):
 def disc_zrotation(solid_disk):
     """Disc rotated over z axis."""
     mass, pos, vel = solid_disk(N_part=1000)
+    random = np.random.RandomState(seed=42)
     a = rot_matrix_zaxis(theta=0.3 * np.pi * random.random())
 
     return mass, pos @ a, vel @ a, a
@@ -339,13 +337,18 @@ def disc_particles_all(solid_disk):
     return mass_s, pos_s, vel_s, mass_g, pos_g, vel_g
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def halo_particles(mock_dm_halo):
     """Spherical mock halo."""
-    mass_dm, pos_dm = mock_dm_halo(N_part=100)
-    vel_dm = random.random_sample(size=(100, 3))
 
-    return mass_dm, pos_dm, vel_dm
+    def make(N_part=100, seed=None):
+        random = np.random.RandomState(seed=seed)
+        mass_dm, pos_dm = mock_dm_halo(N_part=N_part)
+        vel_dm = random.random_sample(size=(N_part, 3))
+
+        return mass_dm, pos_dm, vel_dm
+
+    return make
 
 
 @pytest.fixture
@@ -353,7 +356,7 @@ def mock_galaxy(disc_particles_all, halo_particles):
     """Mock galaxy."""
     (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    mass_dm, pos_dm, vel_dm = halo_particles
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     g = core.Galaxy(
         x_s=pos_s[:, 0] * u.kpc,
