@@ -8,7 +8,7 @@
 # IMPORTS
 # =============================================================================
 
-from os import path
+import os
 
 import astropy.units as u
 
@@ -385,9 +385,12 @@ def mock_galaxy(disc_particles_all, halo_particles):
 @pytest.fixture
 def mock_real_galaxy():
     """Mock real galaxy."""
-    dm = np.loadtxt(path.abspath(path.curdir) + "/legacy/dark.dat")
-    s = np.loadtxt(path.abspath(path.curdir) + "/legacy/star.dat")
-    g = np.loadtxt(path.abspath(path.curdir) + "/legacy/gas_.dat")
+    PATH = os.path.abspath(os.path.dirname("tests/conftests.py"))
+    TEST_DATA_PATH = PATH + "/test_data"
+
+    dm = np.loadtxt(TEST_DATA_PATH + "/real/dark.dat")
+    s = np.loadtxt(TEST_DATA_PATH + "/real/star.dat")
+    g = np.loadtxt(TEST_DATA_PATH + "/real/gas_.dat")
     gal = core.Galaxy(
         x_s=s[:, 1] * u.kpc,
         y_s=s[:, 2] * u.kpc,
