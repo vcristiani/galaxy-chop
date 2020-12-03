@@ -7,7 +7,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-from galaxychop import core
+from galaxychop import models
 
 import numpy as np
 
@@ -24,7 +24,7 @@ def test_GCKmeans(mock_galaxy):
     """ Test GCKmeans."""
     gal = mock_galaxy
 
-    gckmeans = core.GCKmeans(n_clusters=5, random_state=0)
+    gckmeans = models.GCKmeans(n_clusters=5, random_state=0)
     result = gckmeans.decompose(gal)
 
     kmeans = KMeans(n_clusters=5, random_state=0)
@@ -39,4 +39,4 @@ def test_GCKmeans(mock_galaxy):
 )
 def test_type_error_GCDecomposeMixin_class(type_values):
     with pytest.raises(TypeError):
-        core.GCDecomposeMixin(type_values)
+        models.GCDecomposeMixin(type_values)
