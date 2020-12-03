@@ -79,12 +79,18 @@ class Galaxy:
         Gas masses. Units M_sun
     eps_g: `np.float()` Default value = 0
         Softening radius of gas particles. Units: kpc
-    Etot_s: `np.ndarray(n,1)`
-        Total energy of star particles. Units: kg(km/s)**2
-    Etot_dm: `np.ndarray(n,1)`
-        Total energy of dark matter particles. Units: kg(km/s)**2
-    Etot_g: `np.ndarray(n,1)`
-        Total energy of gas particles. Units: kg(km/s)**2
+    J_part: `np.ndarray(n,3)`
+        Angular momentum for gas, dark matter and stars. Units: kpc*km/s
+    Jr_star: `np.ndarray(n,1)`
+        Module of the angular momentum for stars. Units: kpc*km/s
+    Jr: `np.ndarray(n,1)`
+        Module of the angular momentum for gas. Units: kpc*km/s
+    J_star: `np.ndarray(n,1)`
+        Angular momentum for stars. Units: kpc*km/s
+    x: `quantity`
+        Normalized energy. Units (km/s)**2
+    y: `quantity`
+        z component of the normalized angular momentum. Units: kpc*km/s
     components_s: `np.ndarray(n_star,1)`
         Indicate the component to which the stellar particle is assigned.
         Is chosen as the most probable component.
@@ -289,6 +295,11 @@ class Galaxy:
 
         Calculate kinetic and potencial energy of dark matter,
         star and gas particles.
+
+        Returns
+        -------
+        tuple : quantitys
+            total energy of dark matter, stars and gas in that order.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -357,9 +368,19 @@ class Galaxy:
         """
         Angular Momentum.
 
-        Centers the particles with respect to the one with lower potential
-        then calculates angular momentum of dark matter, star and
+        Centers the particles with respect to the one with lower potential,
+        then calculates angular momentum of dark matter, stars and
         gas particles.
+
+        Parameters
+        ----------
+        r_corte : int
+
+        Returns
+        -------
+        gx : galaxy object
+            new instanced galaxy with all particles centered respect to the
+            least energy one and the addition of J_part, J_star, Jr.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -482,6 +503,31 @@ class Galaxy:
 
         Calculation of the dots to build the function of the circular
         angular momentum.
+
+        Parameters
+        ----------
+        bin0 : float, default=0.05
+            Size of the energy bin of the inner part of the galaxy, in the
+            range of (-1, -0.1) of the normalized energy.
+
+        bin1 : float, default=0.005
+            Size of the energy bin of the outer part of the galaxy, in the
+            range of (-0.1, 0) of the normalized energy.
+
+        Returns
+        -------
+        gx : galaxy object
+            new instanced galaxy with x (normalized energy) and
+            y (z component of the normalized angular momentum).
+            See section Notes for more details.
+
+        Notes
+        -----
+        The x and y values are calculated from the binning in the normalized
+        energy. It is selected in each bin the particle with the highest
+        value of z component of standardized angular momentum and is assigned
+        its standardized energy value to x and its component value z angular
+        momentum normalized to y.
         """
         Etot_dm = self.energy[0].value
         Etot_s = self.energy[1].value
@@ -570,7 +616,21 @@ class Galaxy:
 
     @property
     def paramcirc(self):
-        """Circular parameters calculation."""
+        """
+        Circular parameters calculation.
+
+        Return
+        ------
+        tuple : quantitys
+            normalized energy of the stars, J_z/J_circ, J_p/J_circ.
+
+        Notes
+        -----
+        J_z : z-component of normalized angular momentum.
+        J_circ : circular angular momentum.
+        J_p : module of the projection on the xy plane of the normalized
+        angular momentum.
+        """
         Etot_dm = self.energy[0].value
         Etot_s = self.energy[1].value
         Etot_g = self.energy[2].value
