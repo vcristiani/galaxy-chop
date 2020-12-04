@@ -20,9 +20,9 @@ from sklearn.cluster import KMeans
 # =============================================================================
 
 
-def test_GCKmeans(mock_galaxy):
+def test_GCKmeans(mock_real_galaxy):
     """ Test GCKmeans."""
-    gal = mock_galaxy
+    gal = mock_real_galaxy
 
     gckmeans = core.GCKmeans(n_clusters=5, random_state=0)
     result = gckmeans.decompose(gal)

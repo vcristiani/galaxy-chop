@@ -315,35 +315,17 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     assert (eps >= -1.0).any()
 
 
-@pytest.mark.parametrize(
-    "stars_number, gas_number, dm_number, stars , gas, dm",
-    [
-        (1, 1, 1, True, True, True),
-        (10, 20, 30, True, False, False),
-        (300, 183, 2934, False, True, False),
-        (30, 18, 293, False, False, True),
-        (3, 83, 24, True, True, False),
-        (28, 43, 94, False, True, True),
-        (382, 8321, 834, True, False, True),
-        (32, 821, 84, False, False, False),
-    ],
-)
-def test_values_len(
-    stars_number, gas_number, dm_number, stars, gas, dm, random_galaxy_params
-):
+@pytest.mark.parametrize("stars", [(True), (False)])
+def test_values_len(stars, mock_real_galaxy):
     """Test the lengths of 2D and 1D array of value mehods."""
-    params = random_galaxy_params(
-        stars=stars_number, gas=gas_number, dm=dm_number, seed=42
-    )
-    g = core.Galaxy(**params)
 
-    X, y = g.values(star=stars, gas=gas, dm=dm)
+    g = mock_real_galaxy
 
-    first = stars_number if stars else 0
-    second = gas_number if gas else 0
-    third = dm_number if dm else 0
+    X, y = g.values(star=stars)
 
-    length = first + second + third
+    first = len(g.x_s) if stars else 0
 
-    assert X.shape == (length, 7)
+    length = first
+
+    assert X.shape == (length, 3)
     assert y.shape == (length,)
