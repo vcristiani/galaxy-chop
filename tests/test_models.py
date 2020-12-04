@@ -1,6 +1,8 @@
-# -*- coding: utf-8 -*-
-# This file is part of the Galaxy-Chop Project
+# This file is part of
+# the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
+# Copyright (c) 2020, Valeria Cristiani
 # License: MIT
+# Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
 """Test dynamical decomposition methods."""
 
@@ -40,3 +42,6 @@ def test_GCKmeans(mock_galaxy):
 def test_type_error_GCDecomposeMixin_class(type_values):
     with pytest.raises(TypeError):
         models.GCDecomposeMixin(type_values)
+
+
+
