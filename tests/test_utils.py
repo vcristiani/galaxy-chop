@@ -66,10 +66,10 @@ def test_invert_zaxis(disc_zrotation):
     np.testing.assert_allclose(0.0, gxchA[1, 2], rtol=1e-4, atol=1e-3)
 
 
-def test_rcorte_value(mock_galaxy):
-    """Test of r_corte value."""
+def test_rcut_value(mock_galaxy):
+    """Test of r_cut value."""
     with pytest.raises(ValueError):
-        mock_galaxy.angular_momentum(r_corte=-1)
+        mock_galaxy.angular_momentum(r_cut=-1)
 
 
 @pytest.mark.xfail

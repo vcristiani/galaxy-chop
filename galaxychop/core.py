@@ -320,7 +320,7 @@ class Galaxy:
 
         return (Etot_dm, Etot_s, Etot_g)
 
-    def angular_momentum(self, r_corte=None):
+    def angular_momentum(self, r_cut=None):
         """
         Specific Angular Momentum.
 
@@ -330,7 +330,7 @@ class Galaxy:
 
         Parameters
         ----------
-        r_corte : int
+        r_cut : int
 
         Returns
         -------
@@ -409,7 +409,7 @@ class Galaxy:
             vx_g,
             vy_g,
             vz_g,
-            r_corte=r_corte,
+            r_cut=r_cut,
         )
 
         J_dark = np.array(
