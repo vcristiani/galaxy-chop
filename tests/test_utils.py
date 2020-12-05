@@ -7,12 +7,21 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+from pathlib import Path
 
 from galaxychop import utils
 
 import numpy as np
 
 import pytest
+
+
+# =============================================================================
+# PATHS
+# =============================================================================
+
+PATH = Path()
+TEST_DATA_PATH = PATH / "tests" / "test_data"
 
 # =============================================================================
 # TESTS
@@ -76,5 +85,5 @@ def test_rcut_value(mock_galaxy):
 def test_daskpotential(disc_particles):
     """Test potential function."""
     dpotential = utils.potential(*disc_particles)
-    fpotential = np.loadtxt("tests/test_data/fpotential_test.dat")
+    fpotential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
