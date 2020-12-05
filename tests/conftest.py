@@ -8,7 +8,7 @@
 # IMPORTS
 # =============================================================================
 
-import os
+from pathlib import Path
 
 import astropy.units as u
 
@@ -18,6 +18,14 @@ import numpy as np
 
 import pytest
 
+
+# =============================================================================
+# PATHS
+# =============================================================================
+
+PATH = Path()
+TEST_DATA_PATH = PATH / "tests" / "test_data"
+TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 
 # =============================================================================
 # Defining utility functions for mocking data
@@ -388,12 +396,10 @@ def mock_galaxy(disc_particles_all, halo_particles):
 @pytest.fixture
 def mock_real_galaxy():
     """Mock real galaxy."""
-    PATH = os.path.abspath(os.path.dirname(__file__))
-    TEST_DATA_PATH = os.path.join(PATH, "test_data", "real")
 
-    dm = np.loadtxt(os.path.join(TEST_DATA_PATH, "dark.dat"))
-    s = np.loadtxt(os.path.join(TEST_DATA_PATH, "star.dat"))
-    g = np.loadtxt(os.path.join(TEST_DATA_PATH, "gas_.dat"))
+    dm = np.loadtxt(TEST_DATA_REAL_PATH / "dark.dat")
+    s = np.loadtxt(TEST_DATA_REAL_PATH / "star.dat")
+    g = np.loadtxt(TEST_DATA_REAL_PATH / "gas_.dat")
     gal = core.Galaxy(
         x_s=s[:, 1] * u.kpc,
         y_s=s[:, 2] * u.kpc,
