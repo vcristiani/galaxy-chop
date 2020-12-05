@@ -23,8 +23,10 @@ import pytest
 # PATHS
 # =============================================================================
 
-PATH = Path()
+PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+
 TEST_DATA_PATH = PATH / "tests" / "test_data"
+
 TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 
 # =============================================================================
