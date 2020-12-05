@@ -7,6 +7,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import os
 from pathlib import Path
 
 from galaxychop import utils
@@ -20,8 +21,8 @@ import pytest
 # PATHS
 # =============================================================================
 
-PATH = Path()
-TEST_DATA_PATH = PATH / "tests" / "test_data"
+PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+TEST_DATA_PATH = PATH / "test_data"
 
 # =============================================================================
 # TESTS
