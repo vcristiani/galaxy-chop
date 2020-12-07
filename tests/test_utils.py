@@ -9,12 +9,22 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import os
+from pathlib import Path
 
 from galaxychop import utils
 
 import numpy as np
 
 import pytest
+
+
+# =============================================================================
+# PATHS
+# =============================================================================
+
+PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+TEST_DATA_PATH = PATH / "test_data"
 
 # =============================================================================
 # TESTS
@@ -68,15 +78,15 @@ def test_invert_zaxis(disc_zrotation):
     np.testing.assert_allclose(0.0, gxchA[1, 2], rtol=1e-4, atol=1e-3)
 
 
-def test_rcorte_value(mock_galaxy):
-    """Test of r_corte value."""
+def test_rcut_value(mock_galaxy):
+    """Test of r_cut value."""
     with pytest.raises(ValueError):
-        mock_galaxy.angular_momentum(r_corte=-1)
+        mock_galaxy.angular_momentum(r_cut=-1)
 
 
 @pytest.mark.xfail
 def test_daskpotential(disc_particles):
     """Test potential function."""
     dpotential = utils.potential(*disc_particles)
-    fpotential = np.loadtxt("tests/test_data/fpotential_test.dat")
+    fpotential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
     np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)

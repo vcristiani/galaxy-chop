@@ -10,54 +10,9 @@
 # IMPORTS
 # #####################################################
 
-from galaxychop import core
+from galaxychop.sklearn_models import GCClusterMixin
 
 import numpy as np
-
-from sklearn.base import ClusterMixin
-from sklearn.cluster import KMeans
-
-# #####################################################
-# GCDecomposeMixin CLASS
-# #####################################################
-
-
-class GCDecomposeMixin:
-    """Galaxy chop decompose mixin class."""
-
-    def decompose(self, galaxy):
-        """Decompose method."""
-        if not isinstance(galaxy, core.Galaxy):
-            found = type(galaxy)
-            raise TypeError(
-                f"'galaxy' must be a core.Galaxy instance. Found {found}"
-            )
-
-        X, y = galaxy.values()
-        return self.fit_transform(X, y)
-
-
-# #####################################################
-# GCClusterMixin CLASS
-# #####################################################
-
-
-class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
-    """Galaxy chop cluster mixin class."""
-
-    pass
-
-
-# #####################################################
-# GCKmeans CLASS
-# #####################################################
-
-
-class GCKmeans(GCClusterMixin, KMeans):
-    """Galaxy chop KMean class."""
-
-    pass
-
 
 # #####################################################
 # GCAbadi CLASS

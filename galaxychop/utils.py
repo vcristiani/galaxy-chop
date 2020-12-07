@@ -15,14 +15,14 @@ import numpy as np
 G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
 
 
-def _get_rot_matrix(m, pos, vel, r_corte=None):
+def _get_rot_matrix(m, pos, vel, r_cut=None):
     """
     Rotation matrix calculation.
 
     Calculates the rotation matrix that aligns the TOTAL
     agular momentum of the particles with the z-axis.
     The positions, velocities and masses of the particles are used.
-    Optionally, only particles within a cutting radius `(r_corte)` can be used.
+    Optionally, only particles within a cutting radius `(r_cut)` can be used.
 
     Parameters
     ----------
@@ -32,11 +32,11 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
         Positions of particles.
     vel : `np.ndarray`, shape(n,3)
         Velocities of particles.
-    r_corte : `float`, optional
+    r_cut : `float`, optional
         The default is ``None``; if provided, it must be
         positive and the rotation matrix `A` is calculated
         from the particles with radii smaller than
-        r_corte.
+        r_cut.
 
     Returns
     -------
@@ -49,8 +49,8 @@ def _get_rot_matrix(m, pos, vel, r_corte=None):
 
     r = np.sqrt(pos[:, 0] ** 2 + pos[:, 1] ** 2 + pos[:, 2] ** 2)
 
-    if r_corte is not None:
-        (mask,) = np.where(r < r_corte)
+    if r_cut is not None:
+        (mask,) = np.where(r < r_cut)
     else:
         mask = np.repeat(True, len(r))
 
@@ -98,7 +98,7 @@ def align(
     vx_g,
     vy_g,
     vz_g,
-    r_corte,
+    r_cut,
 ):
     """
     Align the galaxy.
@@ -106,7 +106,7 @@ def align(
     Rotate the positions, speeds and angular moments of the
     particles so that the total angular moment coincides with the z-axis.
     Optionally, only particles within a cutting radius
-    `(r_corte)` can be used to calculate the rotation matrix.
+    `(r_cut)` can be used to calculate the rotation matrix.
 
     Parameters
     ----------
@@ -125,10 +125,10 @@ def align(
         Gas positions.
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas velocities.
-    r_corte : `float`, optional
+    r_cut : `float`, optional
         The default is ``None``; if provided, it must be
         positive and the rotation matrix `A` is calculated
-        from the particles with radii smaller than r_corte.
+        from the particles with radii smaller than r_cut.
 
     Returns
     -------
@@ -146,13 +146,13 @@ def align(
     vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Rotated velocities of the gas particles.
     """
-    if (r_corte is not None) and (r_corte <= 0.0):
-        raise ValueError("r_corte must not be lower than 0.")
+    if (r_cut is not None) and (r_cut <= 0.0):
+        raise ValueError("r_cut must not be lower than 0.")
 
     pos = np.vstack((x_s, y_s, z_s)).T
     vel = np.vstack((vx_s, vy_s, vz_s)).T
 
-    A = _get_rot_matrix(m_s, pos, vel, r_corte)
+    A = _get_rot_matrix(m_s, pos, vel, r_cut)
 
     pos_rot_s = np.dot(A, pos.T)
     vel_rot_s = np.dot(A, vel.T)

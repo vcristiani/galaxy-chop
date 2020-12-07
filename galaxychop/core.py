@@ -24,8 +24,6 @@ import numpy as np
 
 import uttr
 
-# from sklearn.mixture import GaussianMixture
-# import random
 
 # #####################################################
 # CONSTANTS
@@ -191,7 +189,7 @@ class Galaxy:
         if np.any(len(self.arr_.x_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
 
-    def values(self, star=True, gas=True, dm=True):
+    def values(self, star=True):
         """
         2D and 1D imputs converter.
 
@@ -215,28 +213,22 @@ class Galaxy:
         ------
         X = 'np.ndarray(n,7)'
             2D array where each file it is a diferen particle and
-            each colum it is a parameter of the particles (x,y,z,vx,vy,vz,m)
+            each colum it is a parameter of the particles (E_star, eps, eps_r)
         y = 'np.ndarray(n)'
             1D array where is identified the nature of each particle
             0 = star, 1 = gas and 2 = dark mather
         """
-        arr_ = self.arr_
-
-        X = np.empty((0, 7))
+        X = np.empty((0, 3))
         y = np.empty(0, int)
 
         if star:
-            n_s = len(arr_.x_s)
+            n_s = len(self.paramcirc[1])
 
             X_s = np.hstack(
                 (
-                    arr_.x_s.reshape(n_s, 1),
-                    arr_.y_s.reshape(n_s, 1),
-                    arr_.z_s.reshape(n_s, 1),
-                    arr_.vx_s.reshape(n_s, 1),
-                    arr_.vy_s.reshape(n_s, 1),
-                    arr_.vz_s.reshape(n_s, 1),
-                    arr_.m_s.reshape(n_s, 1),
+                    self.paramcirc[0].reshape(n_s, 1),
+                    self.paramcirc[1].reshape(n_s, 1),
+                    self.paramcirc[2].reshape(n_s, 1),
                 )
             )
             y_s = np.zeros(n_s)
@@ -244,58 +236,20 @@ class Galaxy:
             X = np.vstack((X, X_s))
             y = np.hstack((y, y_s))
 
-        if gas:
-            n_g = len(arr_.x_g)
-
-            X_g = np.hstack(
-                (
-                    arr_.x_g.reshape(n_g, 1),
-                    arr_.y_g.reshape(n_g, 1),
-                    arr_.z_g.reshape(n_g, 1),
-                    arr_.vx_g.reshape(n_g, 1),
-                    arr_.vy_g.reshape(n_g, 1),
-                    arr_.vz_g.reshape(n_g, 1),
-                    arr_.m_g.reshape(n_g, 1),
-                )
-            )
-            y_g = np.zeros(n_g)
-
-            X = np.vstack((X, X_g))
-            y = np.hstack((y, y_g))
-
-        if dm:
-            n_dm = len(arr_.x_dm)
-
-            X_dm = np.hstack(
-                (
-                    arr_.x_dm.reshape(n_dm, 1),
-                    arr_.y_dm.reshape(n_dm, 1),
-                    arr_.z_dm.reshape(n_dm, 1),
-                    arr_.vx_dm.reshape(n_dm, 1),
-                    arr_.vy_dm.reshape(n_dm, 1),
-                    arr_.vz_dm.reshape(n_dm, 1),
-                    arr_.m_dm.reshape(n_dm, 1),
-                )
-            )
-            y_dm = np.zeros(n_dm)
-
-            X = np.vstack((X, X_dm))
-            y = np.hstack((y, y_dm))
-
         return X, y
 
     @property
     def energy(self):
         """
-        Energy calculation.
+        Specific energy calculation.
 
-        Calculate kinetic and potencial energy of dark matter,
-        star and gas particles.
+        Calculate the specific kinetic and specific potencial energy
+        of dark matter, star and gas particles.
 
         Returns
         -------
         tuple : quantitys
-            total energy of dark matter, stars and gas in that order.
+            specific energy of dark matter, stars and gas in that order.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -360,23 +314,23 @@ class Galaxy:
 
         return (Etot_dm, Etot_s, Etot_g)
 
-    def angular_momentum(self, r_corte=None):
+    def angular_momentum(self, r_cut=None):
         """
-        Angular Momentum.
+        Specific Angular Momentum.
 
-        Centers the particles with respect to the one with lower potential,
-        then calculates angular momentum of dark matter, stars and
-        gas particles.
+        Centers the particles with respect to the one with lower specific
+        potential, then calculates specific  angular momentum of
+        dark matter, stars and gas particles.
 
         Parameters
         ----------
-        r_corte : int
+        r_cut : int
 
         Returns
         -------
         gx : galaxy object
             new instanced galaxy with all particles centered respect to the
-            least energy one and the addition of J_part, J_star, Jr.
+            lowest specific energy one and the addition of J_part, J_star, Jr.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -449,7 +403,7 @@ class Galaxy:
             vx_g,
             vy_g,
             vz_g,
-            r_corte=r_corte,
+            r_cut=r_cut,
         )
 
         J_dark = np.array(
@@ -503,27 +457,26 @@ class Galaxy:
         Parameters
         ----------
         bin0 : float, default=0.05
-            Size of the energy bin of the inner part of the galaxy, in the
-            range of (-1, -0.1) of the normalized energy.
-
+            Size of the specific energy bin of the inner part of the galaxy,
+            in the range of (-1, -0.1) of the normalized energy.
         bin1 : float, default=0.005
-            Size of the energy bin of the outer part of the galaxy, in the
-            range of (-0.1, 0) of the normalized energy.
+            Size of the specific energy bin of the outer part of the galaxy,
+            in the range of (-0.1, 0) of the normalized energy.
 
         Returns
         -------
         gx : galaxy object
-            new instanced galaxy with x (normalized energy) and
-            y (z component of the normalized angular momentum).
+            new instanced galaxy with x (normalized specific energy) and
+            y (z component of the normalized specific angular momentum).
             See section Notes for more details.
 
         Notes
         -----
         The x and y values are calculated from the binning in the normalized
-        energy. It is selected in each bin the particle with the highest
-        value of z component of standardized angular momentum and is assigned
-        its standardized energy value to x and its component value z angular
-        momentum normalized to y.
+        specific energy. It is selected in each bin the particle with the
+        highest value of z component of standardized specific angular momentum
+        and is assigned its standardized specific energy value to x and its
+        component value z specific angular momentum normalized to y.
         """
         Etot_dm = self.energy[0].value
         Etot_s = self.energy[1].value
@@ -546,8 +499,8 @@ class Galaxy:
 
         Jz = kk / np.max(np.abs(kk))
 
-        # Make the energy binning and select the Jz values with which we
-        # calculate the J_circ.
+        # Make the specific energy binning and select the Jz values with
+        # which we calculate the J_circ.
         aux0 = np.arange(-1.0, -0.1, bin0)
         aux1 = np.arange(-0.1, 0.0, bin1)
 
@@ -564,7 +517,7 @@ class Galaxy:
             s = np.argsort(np.abs(Jz[mask]))
 
             # We take into account whether or not there are particles in the
-            # energy bins.
+            # specific energy bins.
             if len(s) != 0:
                 if len(s) == 1:
                     x[i] = E[mask][s]
@@ -618,14 +571,14 @@ class Galaxy:
         Return
         ------
         tuple : quantitys
-            normalized energy of the stars, J_z/J_circ, J_p/J_circ.
+            normalized specific energy of the stars, J_z/J_circ, J_p/J_circ.
 
         Notes
         -----
-        J_z : z-component of normalized angular momentum.
-        J_circ : circular angular momentum.
+        J_z : z-component of normalized specific angular momentum.
+        J_circ : circular specific angular momentum.
         J_p : module of the projection on the xy plane of the normalized
-        angular momentum.
+        specific angular momentum.
         """
         Etot_dm = self.energy[0].value
         Etot_s = self.energy[1].value
@@ -672,12 +625,10 @@ class Galaxy:
         # eps_r = Jr_star_ / spl(E_star)
         eps_r = Jr_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
-        # Determine that the particles we are removing are not significant.
-
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        E_star_ = u.Quantity(E_star[mask], (u.km / u.s) ** 2)
+        E_star_ = u.Quantity(E_star[mask])
         eps_ = u.Quantity(eps[mask])
         eps_r_ = u.Quantity(eps_r[mask])
 
