@@ -14,12 +14,15 @@ from galaxychop.sklearn_models import GCClusterMixin
 
 import numpy as np
 
+from sklearn.base import TransformerMixin
+
+
 # #####################################################
 # GCAbadi CLASS
 # #####################################################
 
 
-class GCAbadi(GCClusterMixin):
+class GCAbadi(GCClusterMixin, TransformerMixin):
     """Galaxy chop Abadi class."""
 
     def __init__(self, n_bin=100):
@@ -47,17 +50,19 @@ class GCAbadi(GCClusterMixin):
             Fitted estimator.
         """
         # Construimos el histograma del parametro de circularidad.
-        h = np.histogram(X, self.n_bin, range=(-1.0, 1.0))[0]
-        edges = np.round(np.histogram(X, self.n_bin, range=(-1.0, 1.0))[1], 2)
+        h = np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[0]
+        edges = np.round(
+            np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[1], 2
+        )
         a_bin = edges[1] - edges[0]
         center = (
-            np.histogram(X, self.n_bin, range=(-1.0, 1.0))[1][:-1]
+            np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[1][:-1]
             + a_bin / 2.0
         )
         (cero,) = np.where(edges == 0.0)
         m = cero[0]
 
-        X_ind = np.arange(len(X))
+        X_ind = np.arange(len(X[:, 1]))
 
         # Creamos un diccionario: n={} donde vamos a guardar
         # los ID de las particulas que cumplan
@@ -69,11 +74,13 @@ class GCAbadi(GCClusterMixin):
         n = {}
 
         for i in range(0, self.n_bin - 1):
-            (mask,) = np.where((X >= edges[i]) & (X < edges[i + 1]))
+            (mask,) = np.where(
+                (X[:, 1] >= edges[i]) & (X[:, 1] < edges[i + 1])
+            )
             n["bin" + "%s" % i] = X_ind[mask]
 
         (mask,) = np.where(
-            (X >= edges[self.n_bin - 1]) & (X <= edges[self.n_bin])
+            (X[:, 1] >= edges[self.n_bin - 1]) & (X[:, 1] <= edges[self.n_bin])
         )
         n["bin" + "%s" % (len(center) - 1)] = X_ind[mask]
 
@@ -146,4 +153,48 @@ class GCAbadi(GCClusterMixin):
         labels[disk_] = 1
         self.labels_ = labels
 
+        return self
+
+    def fit_predict(self, X, y=None, sample_weight=None):
+        """Predict cluster index for each sample.
+
+        Convenience method; equivalent to calling fit(X) followed by
+        predict(X).
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            New data to transform.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        sample_weight : array-like of shape (n_samples,), default=None
+            The weights for each observation in X. If None, all observations
+            are assigned equal weight.
+
+        Returns
+        -------
+        labels : ndarray of shape (n_samples,)
+            Index of the cluster each sample belongs to.
+        """
+        return self.fit(X, sample_weight=sample_weight).labels_
+
+    def transform(self, X, y=None):
+        """Transform X to a cluster-distance space.
+
+        In the new space, each dimension is the distance to the cluster
+        centers.  Note that even if X is sparse, the array returned by
+        `transform` will typically be dense.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            New data to transform.
+
+        Returns
+        -------
+        X_new : ndarray of shape (n_samples, n_clusters)
+            X transformed in the new space.
+        """
         return self
