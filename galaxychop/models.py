@@ -78,7 +78,7 @@ class GCAbadi(GCClusterMixin):
         n["bin" + "%s" % (len(center) - 1)] = X_ind[mask]
 
         # Seleccionamos las particulas que pertenecen al esferoide en
-        # función del parámetro del circularidad y E.
+        # función del parámetro del circularidad.
         np.random.seed(10)
         sph = {}
 

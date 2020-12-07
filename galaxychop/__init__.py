@@ -32,3 +32,7 @@ from .models import *  # noqa
 from .sklearn_models import *  # noqa
 
 from .utils import *  # noqa
+
+from .models import *  # noqa
+
+from .sklearn_models import *  # noqa
