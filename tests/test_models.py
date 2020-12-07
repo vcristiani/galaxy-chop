@@ -22,7 +22,6 @@ from sklearn.cluster import KMeans
 # =============================================================================
 
 
-@pytest.mark.xfail
 def test_GCKmeans(mock_real_galaxy):
     """ Test GCKmeans."""
     gal = mock_real_galaxy
