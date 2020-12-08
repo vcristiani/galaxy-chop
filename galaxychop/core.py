@@ -22,14 +22,8 @@ import numpy as np
 
 # from scipy.interpolate import InterpolatedUnivariateSpline
 
-from sklearn.base import ClusterMixin
-from sklearn.cluster import KMeans
-
-
 import uttr
 
-# from sklearn.mixture import GaussianMixture
-# import random
 
 # #####################################################
 # CONSTANTS
@@ -55,47 +49,47 @@ class Galaxy:
 
     Parameters
     ----------
-    x_s, y_s, z_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_s, y_s, z_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Star positions. Units: kpc
-    vx_s, vy_s, vz_s: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_s, vy_s, vz_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Star velocities. Units: km/s
-    m_s: `np.ndarray(n,1)`
+    m_s : `np.ndarray(n,1)`
         Star masses. Units M_sun
-    eps_s: `np.float()` Default value = 0
+    eps_s : `np.float()` Default value = 0
         Softening radius of star particles. Units: kpc.
-    x_dm, y_dm, z_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_dm, y_dm, z_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter positions. Units: kpc
-    vx_dm, vy_dm, vz_dm: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_dm, vy_dm, vz_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Dark matter velocities. Units: km/s
-    m_dm: `np.ndarray(n,1)`
+    m_dm : `np.ndarray(n,1)`
         Dark matter masses. Units M_sun
-    eps_dm: `np.float()` Default value = 0
+    eps_dm : `np.float()` Default value = 0
         Softening radius of dark matter particles. Units: kpc
-    x_g, y_g, z_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_g, y_g, z_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas positions. Units: kpc
-    vx_g, vy_g, vz_g: `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_g, vy_g, vz_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
         Gas velocities. Units: km/s
-    m_g: `np.ndarray(n,1)`
+    m_g : `np.ndarray(n,1)`
         Gas masses. Units M_sun
-    eps_g: `np.float()` Default value = 0
+    eps_g : `np.float()` Default value = 0
         Softening radius of gas particles. Units: kpc
-    J_part: `np.ndarray(n,3)`
+    J_part : `np.ndarray(n,3)`
         Angular momentum for gas, dark matter and stars. Units: kpc*km/s
-    Jr_star: `np.ndarray(n,1)`
+    Jr_star : `np.ndarray(n,1)`
         Module of the angular momentum for stars. Units: kpc*km/s
-    Jr: `np.ndarray(n,1)`
+    Jr : `np.ndarray(n,1)`
         Module of the angular momentum for gas. Units: kpc*km/s
-    J_star: `np.ndarray(n,1)`
+    J_star : `np.ndarray(n,1)`
         Angular momentum for stars. Units: kpc*km/s
-    x: `quantity`
+    x : `Quantity`
         Normalized energy. Units (km/s)**2
-    y: `quantity`
+    y : `Quantity`
         z component of the normalized angular momentum. Units: kpc*km/s
-    components_s: `np.ndarray(n_star,1)`
+    components_s : `np.ndarray(n_star,1)`
         Indicate the component to which the stellar particle is assigned.
         Is chosen as the most probable component.
         `n_star` is the number of stellar particles.
-    components_g: `np.ndarray(n_gas,1)`
+    components_g : `np.ndarray(n_gas,1)`
         Indicate the component to which the gas particle is assigned.
         Is chosen as the most probable component
         `n_gas` is the number of gas particles
@@ -205,24 +199,24 @@ class Galaxy:
 
         Parameters
         ----------
-        star = True or Flase. Default = False
+        star : bool, default=False
             Indicates if the stars particles are going to be use to
             build the array
-        gas = True or Flase. Default = False
+        gas : bool, default=False
             Indicates if the gas particles are going to be use to
             build the array
-        dm = True or Flase. Default = False
-            Indicates if the dm particles are going to be use to
+        dm : bool, default=False
+            Indicates if the dark matter particles are going to be use to
             build the array
 
         Return
         ------
-        X = 'np.ndarray(n,7)'
+        X : `np.ndarray(n,7)`
             2D array where each file it is a diferen particle and
-            each colum it is a parameter of the particles (E_star, eps, eps_r)
-        y = 'np.ndarray(n)'
+            each column it is a parameter of the particles (E_star, eps, eps_r)
+        y : `np.ndarray(n)`
             1D array where is identified the nature of each particle
-            0 = star, 1 = gas and 2 = dark mather
+            0=star, 1=gas and 2=dark matter
         """
         X = np.empty((0, 3))
         y = np.empty(0, int)
@@ -249,13 +243,13 @@ class Galaxy:
         """
         Specific energy calculation.
 
-        Calculate the specific kinetic and specific potencial energy
+        Calculate the specific kinetic and potencial energy
         of dark matter, star and gas particles.
 
         Returns
         -------
-        tuple : quantitys
-            specific energy of dark matter, stars and gas in that order.
+        tuple : 'Quantity'
+            Specific energy of dark matter, stars and gas in that order.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -322,7 +316,7 @@ class Galaxy:
 
     def angular_momentum(self, r_cut=None):
         """
-        Specific Angular Momentum.
+        Specific angular momentum.
 
         Centers the particles with respect to the one with lower specific
         potential, then calculates specific  angular momentum of
@@ -334,8 +328,8 @@ class Galaxy:
 
         Returns
         -------
-        gx : galaxy object
-            new instanced galaxy with all particles centered respect to the
+        gx : `galaxy object`
+            New instanced galaxy with all particles centered respect to the
             lowest specific energy one and the addition of J_part, J_star, Jr.
         """
         x_s = self.arr_.x_s
@@ -465,25 +459,25 @@ class Galaxy:
         bin0 : float, default=0.05
             Size of the specific energy bin of the inner part of the galaxy,
             in the range of (-1, -0.1) of the normalized energy.
-
         bin1 : float, default=0.005
             Size of the specific energy bin of the outer part of the galaxy,
             in the range of (-0.1, 0) of the normalized energy.
 
         Returns
         -------
-        gx : galaxy object
+        gx : `galaxy object`
             new instanced galaxy with x (normalized specific energy) and
             y (z component of the normalized specific angular momentum).
             See section Notes for more details.
 
         Notes
         -----
-        The x and y values are calculated from the binning in the normalized
-        specific energy. It is selected in each bin the particle with the
-        highest value of z component of standardized specific angular momentum
-        and is assigned its standardized specific energy value to x and its
-        component value z specific angular momentum normalized to y.
+            The x and y values are calculated from the binning in the
+            normalized specific energy. In each bin, the particle with the
+            highest value of z component of standardized specific angular
+            momentum is selected, and its value of normalized specific energy
+            is assigned to x and its value of the z component of the normalized
+            specific angular momentum to y.
         """
         Etot_dm = self.energy[0].value
         Etot_s = self.energy[1].value
@@ -506,8 +500,8 @@ class Galaxy:
 
         Jz = kk / np.max(np.abs(kk))
 
-        # Make the specific energy binning and select the Jz values with
-        # which we calculate the J_circ.
+        # Build the specific energy binning and select the Jz values to
+        # calculate J_circ.
         aux0 = np.arange(-1.0, -0.1, bin0)
         aux1 = np.arange(-0.1, 0.0, bin1)
 
@@ -577,8 +571,8 @@ class Galaxy:
 
         Return
         ------
-        tuple : quantitys
-            normalized specific energy of the stars, J_z/J_circ, J_p/J_circ.
+        tuple : Quantity
+            Normalized specific energy of the stars, J_z/J_circ, J_p/J_circ.
 
         Notes
         -----
@@ -640,45 +634,3 @@ class Galaxy:
         eps_r_ = u.Quantity(eps_r[mask])
 
         return E_star_, eps_, eps_r_
-
-
-# #####################################################
-# GCDecomposeMixin CLASS
-# #####################################################
-
-
-class GCDecomposeMixin:
-    """Galaxy chop decompose mixin class."""
-
-    def decompose(self, galaxy):
-        """Decompose method."""
-        if not isinstance(galaxy, Galaxy):
-            found = type(galaxy)
-            raise TypeError(
-                f"'galaxy' must be a core.Galaxy instance. Found {found}"
-            )
-
-        X, y = galaxy.values()
-        return self.fit_transform(X, y)
-
-
-# #####################################################
-# GCClusterMixin CLASS
-# #####################################################
-
-
-class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
-    """Galaxy chop cluster mixin class."""
-
-    pass
-
-
-# #####################################################
-# GCClusterMixin CLASS
-# #####################################################
-
-
-class GCKmeans(GCClusterMixin, KMeans):
-    """Galaxy chop KMean class."""
-
-    pass

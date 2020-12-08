@@ -1,6 +1,8 @@
-# -*- coding: utf-8 -*-
-# This file is part of the Galaxy-Chop Project
+# This file is part of
+# the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
+# Copyright (c) 2020, Valeria Cristiani
 # License: MIT
+# Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
 """Fixtures input data."""
 
@@ -399,7 +401,6 @@ def mock_galaxy(disc_particles_all, halo_particles):
 @pytest.fixture
 def mock_real_galaxy():
     """Mock real galaxy."""
-
     dm = np.loadtxt(TEST_DATA_REAL_PATH / "dark.dat")
     s = np.loadtxt(TEST_DATA_REAL_PATH / "star.dat")
     g = np.loadtxt(TEST_DATA_REAL_PATH / "gas_.dat")
