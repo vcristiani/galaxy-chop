@@ -60,11 +60,34 @@ def test_same_size_inputs(shorten, random_galaxy_params):
         core.Galaxy(**params)
 
 
+@pytest.mark.xfail
+@pytest.mark.parametrize("potential", ["pot_s", "pot_dm", "pot_g"])
+def test_all_potentitial_inputs(potential,random_galaxy_params):
+    """Test of inputs lengths."""
+    nstr = 10
+    ngas = 20
+    ndrk = 30
+    seed = 42
+    random = np.random.RandomState(seed=seed)
+    pot = random.random_sample(size=nstr)
+    params = random_galaxy_params(stars=nstr, gas=ngas, dm=ndrk, seed=seed)
+    params[potential] = pot 
+    print(params)
+    with pytest.raises(ValueError):
+        core.Galaxy(**params)
+
+
 def test_output_galaxy_properties(mock_galaxy):
     """Test output of properties."""
     g = mock_galaxy
     g_test = g.angular_momentum()
 
+    assert isinstance(g.kinetic_energy[0], u.Quantity)
+    assert isinstance(g.kinetic_energy[1], u.Quantity)
+    assert isinstance(g.kinetic_energy[2], u.Quantity)
+    assert isinstance(g.potential_energy().pot_dm, u.Quantity)
+    assert isinstance(g.potential_energy().pot_s, u.Quantity)
+    assert isinstance(g.potential_energy().pot_g, u.Quantity)
     assert isinstance(g.energy[0], u.Quantity)
     assert isinstance(g.energy[1], u.Quantity)
     assert isinstance(g.energy[2], u.Quantity)
