@@ -11,7 +11,7 @@
 """
 GalaxyChop.
 
-Implementation of a few galaxy dinamic decomposition methods.
+Implementation of a few galaxy dynamic decomposition methods.
 """
 
 # =============================================================================

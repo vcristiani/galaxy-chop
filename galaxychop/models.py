@@ -49,7 +49,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         self
             Fitted estimator.
         """
-        # Construimos el histograma del parametro de circularidad.
+        # Building the histogram of the circularity parameter.
         h = np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[0]
         edges = np.round(
             np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[1], 2
@@ -64,13 +64,9 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
 
         X_ind = np.arange(len(X[:, 1]))
 
-        # Creamos un diccionario: n={} donde vamos a guardar
-        # los ID de las particulas que cumplan
-        # con las restricciones que le ponemos a la máscara.
-
-        # Así luego podemos tener control
-        # sobre cuales son las partículas que se seleccionan.
-
+        # Building a dictionary: n={} where the IDs of the particles
+        # that satisfy the restrictions given by the mask will be stored.
+        # So we can then have control over which particles are selected.
         n = {}
 
         for i in range(0, self.n_bin - 1):
@@ -84,8 +80,8 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         )
         n["bin" + "%s" % (len(center) - 1)] = X_ind[mask]
 
-        # Seleccionamos las particulas que pertenecen al esferoide en
-        # función del parámetro del circularidad.
+        # Selection of the particles that belong to the spheroid according to
+        # the circularity parameter.
         np.random.seed(10)
         sph = {}
 
@@ -112,12 +108,11 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
                     replace=False,
                 )
 
-        # Al resto de las particulas las asignamos al disco.
+        # The rest of the particles are assigned to the disk.
         dsk = n.copy()
 
         for i in range(0, m):
-            # Dejamos vacios los bines que sólo tienen particulas
-            # del ESFEROIDE.
+            # Bins with only spheroid particles are left empty.
             dsk["bin" + "%s" % i] = []
 
         x = set()
@@ -135,9 +130,8 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
             y = np.array(list(y))
             dsk["bin" + "%s" % i] = y
 
-        # Guardamos los indices de las particulas
-        # que pertenecen al esferoide y al disco,
-        # que estan en el archivo cirularidad_y_L_ID_str(ID).dat.
+        # The indexes of the particles belonging to the spheroid and the disk
+        # are saved.
         esf_ = []
         for i in range(len(sph)):
             esf_ = np.concatenate((esf_, sph["bin" + "%s" % (i)]))
@@ -181,11 +175,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         return self.fit(X, sample_weight=sample_weight).labels_
 
     def transform(self, X, y=None):
-        """Transform X to a cluster-distance space.
-
-        In the new space, each dimension is the distance to the cluster
-        centers.  Note that even if X is sparse, the array returned by
-        `transform` will typically be dense.
+        """Transform method.
 
         Parameters
         ----------
@@ -195,6 +185,6 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         Returns
         -------
         X_new : ndarray of shape (n_samples, n_clusters)
-            X transformed in the new space.
+            X transformed.
         """
         return self
