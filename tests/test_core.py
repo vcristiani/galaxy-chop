@@ -62,7 +62,7 @@ def test_same_size_inputs(shorten, random_galaxy_params):
 
 @pytest.mark.xfail
 @pytest.mark.parametrize("potential", ["pot_s", "pot_dm", "pot_g"])
-def test_all_potentitial_inputs(potential,random_galaxy_params):
+def test_all_potentitial_inputs(potential, random_galaxy_params):
     """Test of inputs lengths."""
     nstr = 10
     ngas = 20
@@ -71,7 +71,7 @@ def test_all_potentitial_inputs(potential,random_galaxy_params):
     random = np.random.RandomState(seed=seed)
     pot = random.random_sample(size=nstr)
     params = random_galaxy_params(stars=nstr, gas=ngas, dm=ndrk, seed=seed)
-    params[potential] = pot 
+    params[potential] = pot
     print(params)
     with pytest.raises(ValueError):
         core.Galaxy(**params)
