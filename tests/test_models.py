@@ -47,9 +47,9 @@ def test_type_error_GCDecomposeMixin_class(type_values):
         sklearn_models.GCDecomposeMixin(type_values)
 
 
-def test_GCAbadi_len(mock_galaxy):
+def test_GCAbadi_len(mock_real_galaxy):
     """Test the lengths of labels."""
-    gal = mock_galaxy
+    gal = mock_real_galaxy
     X, y = gal.values()
     abadi = models.GCAbadi()
     abadi.decompose(gal)
@@ -58,9 +58,9 @@ def test_GCAbadi_len(mock_galaxy):
     assert np.shape(X) == (longitude, 3)
 
 
-def test_GCAbadi_outputs(mock_galaxy):
+def test_GCAbadi_outputs(mock_real_galaxy):
     """Test output of GCAbadi model."""
-    gal = mock_galaxy
+    gal = mock_real_galaxy
     abadi = models.GCAbadi()
     abadi.decompose(gal)
 
