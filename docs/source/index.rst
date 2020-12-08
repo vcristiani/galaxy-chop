@@ -9,7 +9,12 @@ Welcome to galaxy-chop's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   api/modules.rst
 
+.. image:: .. /galaxychop_logo.png
+	:scale: 40
+	
 `galaxy-chop` is a Python code that tackles the dynamical decomposition problem
 by utilizing clustering techniques in phase space for stellar galactic 
 components.

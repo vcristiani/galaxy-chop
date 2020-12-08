@@ -6,3 +6,4 @@ galaxychop.egg*
 *.cov
 *.coverage
 legacy/units_test.ipynb
+docs/build/
