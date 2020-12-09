@@ -43,7 +43,7 @@ with open(galaxychop_INIT_PATH, "r") as f:
 # =============================================================================
 
 REQUIREMENTS = [
-    "numpy >= 1.13.2",
+    "numpy >= 1.13.3",
     "scipy >= 1.0",
     "scikit-learn",
     "dask[array]",
@@ -72,7 +72,7 @@ def do_setup():
         author="Valeria Cristiani et al",
         author_email="valeria.cristiani@unc.edu.ar",
         url="https://github.com/vcristiani/galaxy-chop",
-        py_modules=["ez_setup", "galaxychop", "utils"],
+        py_modules=["ez_setup", "core", "utils"],
         license="MIT",
         keywords="galaxy, dynamics",
         classifiers=[
