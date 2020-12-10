@@ -161,10 +161,18 @@ class Galaxy:
 
     def __attrs_post_init__(self):
         """
+        Validate attrs with units.
+
         Units length validator.
 
         This method determine that the length of the different particles
         families are the same.
+
+        Potential energy input validator.
+
+        This method determine the validation of input of the specific
+        potential energy.
+
         """
         if np.all(self.arr_.pot_s) != 0.0:
             length_s = np.array(
