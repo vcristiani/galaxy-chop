@@ -60,8 +60,14 @@ def test_same_size_inputs(shorten, random_galaxy_params):
         core.Galaxy(**params)
 
 
-
-@pytest.mark.parametrize("pot_name, npart", [("pot_s", 10), ("pot_g", 20), ("pot_dm", 30)])
+@pytest.mark.parametrize(
+    "pot_name, npart",
+    [
+        ("pot_s", 10),
+        ("pot_g", 20),
+        ("pot_dm", 30),
+    ],
+)
 def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
     """Test of potential inputs."""
     seed = 42
@@ -339,7 +345,6 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
 @pytest.mark.parametrize("stars", [(True), (False)])
 def test_values_len(stars, mock_real_galaxy):
     """Test the lengths of 2D and 1D array of value mehods."""
-
     g = mock_real_galaxy
 
     X, y = g.values(star=stars)

@@ -227,7 +227,7 @@ class Galaxy:
 
         if np.any(len(self.arr_.x_dm) != length_dm):
             raise ValueError("Dark matter inputs must have the same length")
-        
+
         if np.all(self.arr_.pot_s) != 0.0:
             length_g = np.array(
                 [
