@@ -49,42 +49,57 @@ class Galaxy:
 
     Parameters
     ----------
-    x_s, y_s, z_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Star positions. Units: kpc
-    vx_s, vy_s, vz_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Star velocities. Units: km/s
-    m_s : `np.ndarray(n,1)`
-        Star masses. Units M_sun
-    eps_s : `np.float()` Default value = 0
-        Softening radius of star particles. Units: kpc.
-    x_dm, y_dm, z_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Dark matter positions. Units: kpc
-    vx_dm, vy_dm, vz_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Dark matter velocities. Units: km/s
-    m_dm : `np.ndarray(n,1)`
-        Dark matter masses. Units M_sun
-    eps_dm : `np.float()` Default value = 0
-        Softening radius of dark matter particles. Units: kpc
-    x_g, y_g, z_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Gas positions. Units: kpc
-    vx_g, vy_g, vz_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Gas velocities. Units: km/s
-    m_g : `np.ndarray(n,1)`
-        Gas masses. Units M_sun
-    eps_g : `np.float()` Default value = 0
-        Softening radius of gas particles. Units: kpc
-    J_part : `np.ndarray(n,3)`
-        Angular momentum for gas, dark matter and stars. Units: kpc*km/s
-    Jr_star : `np.ndarray(n,1)`
-        Module of the angular momentum for stars. Units: kpc*km/s
-    Jr : `np.ndarray(n,1)`
-        Module of the angular momentum for gas. Units: kpc*km/s
-    J_star : `np.ndarray(n,1)`
-        Angular momentum for stars. Units: kpc*km/s
+    x_s, y_s, z_s : `Quantity`
+        Star positions. Shape: (n_s,1). Default unit: kpc.
+    vx_s, vy_s, vz_s : `Quantity`
+        Star velocities. Shape: (n_s,1). Default unit: km/s.
+    m_s : `Quantity`
+        Star masses. Shape: (n_s,1). Default unit: M_sun
+    eps_s : `Quantity` Default value = 0
+        Softening radius of star particles. Shape: (1,). Default unit: kpc.
+    pot_s : `Quantity` Default value = 0
+        Specific potential energy of star particles.
+        Shape: (n_s,1). Default unit: (km/s)**2.
+    x_dm, y_dm, z_dm :  `Quantity`
+        Dark matter positions. Shape: (n_dm,1). Default unit: kpc.
+    vx_dm, vy_dm, vz_dm : `Quantity`
+        Dark matter velocities. Shape: (n_dm,1). Default unit: km/s.
+    m_dm : `Quantity`
+        Dark matter masses. Shape: (n_dm,1). Default unit: M_sun
+    eps_dm : `Quantity` Default value = 0
+        Softening radius of dark matter particles.
+        Shape: (1,). Default unit: kpc.
+    pot_dm : `Quantity` Default value = 0
+        Specific potential energy of dark matter particles.
+        Shape: (n_dm,1). Default unit: (km/s)**2.
+    x_g, y_g, z_g :  `Quantity`
+        Gas positions. Shape: (n_g,1). Default unit: kpc.
+    vx_g, vy_g, vz_g : `Quantity`
+        Gas velocities. Shape: (n_g,1). Default unit: km/s.
+    m_g : `Quantity`
+        Gas masses. Shape: (n_g,1). Default unit: M_sun
+    eps_g : `Quantity` Default value = 0
+        Softening radius of gas particles. Shape: (1,). Default unit: kpc.
+    pot_g : `Quantity` Default value = 0
+        Specific potential energy of gas particles.
+        Shape: (n_g,1). Default unit: (km/s)**2.
+    J_part : `Quantity`
+        Angular momentum for gas, dark matter and stars.
+        Shape: (n,3). Default units: kpc*km/s
+    Jr_star : `Quantity`
+        Absolute value of the angular momentum for stars.
+        Shape: (n_s,1). Default unit: kpc*km/s
+    Jr : `Quantity`
+        Absolute value of total the angular momentum in the xy plane.
+        Shape: (n,1). Default unit: kpc*km/s
+    J_star : `Quantity`
+        Angular momentum for stars.
+        Shape: (n_s,1). Default unit: kpc*km/s
     x : `Quantity`
-        Normalized energy. Units (km/s)**2
+        Normalized energy. Default unit: (km/s)**2
     y : `Quantity`
-        z component of the normalized angular momentum. Units: kpc*km/s
+        z component of the normalized angular momentum.
+        Default units: kpc*km/s
     components_s : `np.ndarray(n_star,1)`
         Indicate the component to which the stellar particle is assigned.
         Is chosen as the most probable component.
@@ -126,13 +141,17 @@ class Galaxy:
     eps_dm = uttr.ib(default=0.0, unit=u.kpc)
     eps_g = uttr.ib(default=0.0, unit=u.kpc)
 
-    J_part = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    Jr_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    Jr = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    J_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    pot_dm = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
+    pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
+    pot_g = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
 
-    x = uttr.ib(default=0.0, unit=(u.km / u.s) ** 2)
-    y = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+
+    x = uttr.ib(default=None, unit=(u.km / u.s) ** 2)
+    y = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
 
     arr_ = uttr.array_accessor()
 
@@ -142,52 +161,121 @@ class Galaxy:
 
     def __attrs_post_init__(self):
         """
+        Validate attrs with units.
+
         Units length validator.
 
         This method determine that the length of the different particles
         families are the same.
+
+        Potential energy input validator.
+
+        This method determine the validation of input of the specific
+        potential energy.
+
         """
-        length_s = np.array(
-            [
-                len(self.arr_.y_s),
-                len(self.arr_.z_s),
-                len(self.arr_.vx_s),
-                len(self.arr_.vy_s),
-                len(self.arr_.vz_s),
-                len(self.arr_.m_s),
-            ]
-        )
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_s = np.array(
+                [
+                    len(self.arr_.y_s),
+                    len(self.arr_.z_s),
+                    len(self.arr_.vx_s),
+                    len(self.arr_.vy_s),
+                    len(self.arr_.vz_s),
+                    len(self.arr_.m_s),
+                    len(self.arr_.pot_s),
+                ]
+            )
+        else:
+            length_s = np.array(
+                [
+                    len(self.arr_.y_s),
+                    len(self.arr_.z_s),
+                    len(self.arr_.vx_s),
+                    len(self.arr_.vy_s),
+                    len(self.arr_.vz_s),
+                    len(self.arr_.m_s),
+                ]
+            )
 
         if np.any(len(self.arr_.x_s) != length_s):
             raise ValueError("Stars inputs must have the same length")
 
-        length_dm = np.array(
-            [
-                len(self.arr_.y_dm),
-                len(self.arr_.z_dm),
-                len(self.arr_.vx_dm),
-                len(self.arr_.vy_dm),
-                len(self.arr_.vz_dm),
-                len(self.arr_.m_dm),
-            ]
-        )
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_dm = np.array(
+                [
+                    len(self.arr_.y_dm),
+                    len(self.arr_.z_dm),
+                    len(self.arr_.vx_dm),
+                    len(self.arr_.vy_dm),
+                    len(self.arr_.vz_dm),
+                    len(self.arr_.m_dm),
+                    len(self.arr_.pot_dm),
+                ]
+            )
+        else:
+            length_dm = np.array(
+                [
+                    len(self.arr_.y_dm),
+                    len(self.arr_.z_dm),
+                    len(self.arr_.vx_dm),
+                    len(self.arr_.vy_dm),
+                    len(self.arr_.vz_dm),
+                    len(self.arr_.m_dm),
+                ]
+            )
 
         if np.any(len(self.arr_.x_dm) != length_dm):
             raise ValueError("Dark matter inputs must have the same length")
 
-        length_g = np.array(
-            [
-                len(self.arr_.y_g),
-                len(self.arr_.z_g),
-                len(self.arr_.vx_g),
-                len(self.arr_.vy_g),
-                len(self.arr_.vz_g),
-                len(self.arr_.m_g),
-            ]
-        )
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_g = np.array(
+                [
+                    len(self.arr_.y_g),
+                    len(self.arr_.z_g),
+                    len(self.arr_.vx_g),
+                    len(self.arr_.vy_g),
+                    len(self.arr_.vz_g),
+                    len(self.arr_.m_g),
+                    len(self.arr_.pot_g),
+                ]
+            )
+        else:
+            length_g = np.array(
+                [
+                    len(self.arr_.y_g),
+                    len(self.arr_.z_g),
+                    len(self.arr_.vx_g),
+                    len(self.arr_.vy_g),
+                    len(self.arr_.vz_g),
+                    len(self.arr_.m_g),
+                ]
+            )
 
         if np.any(len(self.arr_.x_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
+
+        # Potential energy input validator.
+        if np.any(self.arr_.pot_dm != 0.0) and (
+            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_g == 0.0)
+        ):
+            raise ValueError(
+                "Potential energy must be instanced for all type particles"
+            )
+
+        if np.any(self.arr_.pot_s != 0.0) and (
+            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_g == 0.0)
+        ):
+            raise ValueError(
+                "Potential energy must be instanced for all type particles"
+            )
+
+        if np.any(self.arr_.pot_g != 0.0) and (
+            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_dm == 0.0)
+        ):
+            raise ValueError(
+                "Potential energy must be instanced for all type particles"
+            )
 
     def values(self, star=True):
         """
@@ -239,17 +327,53 @@ class Galaxy:
         return X, y
 
     @property
-    def energy(self):
+    def kinetic_energy(self):
         """
-        Specific energy calculation.
+        Specific kinetic energy calculation.
 
-        Calculate the specific kinetic and potencial energy
+        Calculate the specific kinetic energy
         of dark matter, star and gas particles.
 
         Returns
         -------
         tuple : 'Quantity'
-            Specific energy of dark matter, stars and gas in that order.
+            Specific kinetic energy of dark matter, stars and
+            gas in this order.
+        """
+        vx_s = self.arr_.vx_s
+        vy_s = self.arr_.vy_s
+        vz_s = self.arr_.vz_s
+
+        vx_g = self.arr_.vx_g
+        vy_g = self.arr_.vy_g
+        vz_g = self.arr_.vz_g
+
+        vx_dm = self.arr_.vx_dm
+        vy_dm = self.arr_.vy_dm
+        vz_dm = self.arr_.vz_dm
+
+        k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
+        k_s = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
+        k_g = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
+
+        k_dm = k_dm * (u.km / u.s) ** 2
+        k_s = k_s * (u.km / u.s) ** 2
+        k_g = k_g * (u.km / u.s) ** 2
+
+        return (k_dm, k_s, k_g)
+
+    def potential_energy(self):
+        """
+        Specific potential energy calculation.
+
+        Calculate the specific potencial energy
+        of dark matter, star and gas particles.
+
+        Returns
+        -------
+        gx : `galaxy object`
+            New instanced galaxy specific potencial energy calculated for
+            dark matter, stars and gas.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -270,18 +394,6 @@ class Galaxy:
         eps_s = self.arr_.eps_s
         eps_g = self.arr_.eps_g
         eps_dm = self.arr_.eps_dm
-
-        vx_s = self.arr_.vx_s
-        vy_s = self.arr_.vy_s
-        vz_s = self.arr_.vz_s
-
-        vx_g = self.arr_.vx_g
-        vy_g = self.arr_.vy_g
-        vz_g = self.arr_.vz_g
-
-        vx_dm = self.arr_.vx_dm
-        vy_dm = self.arr_.vy_dm
-        vz_dm = self.arr_.vz_dm
 
         x = np.hstack((x_s, x_dm, x_g))
         y = np.hstack((y_s, y_dm, y_g))
@@ -304,13 +416,53 @@ class Galaxy:
         pot_dm = pot[num_s:num]
         pot_g = pot[num:]
 
-        k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
-        k_s = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
-        k_g = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
+        new = attr.asdict(self, recurse=False)
+        del new["arr_"]
+        new.update(
+            pot_dm=-pot_dm * (u.km / u.s) ** 2,
+            pot_s=-pot_s * (u.km / u.s) ** 2,
+            pot_g=-pot_g * (u.km / u.s) ** 2,
+        )
 
-        Etot_dm = (k_dm - pot_dm) * (u.km / u.s) ** 2
-        Etot_s = (k_s - pot_s) * (u.km / u.s) ** 2
-        Etot_g = (k_g - pot_g) * (u.km / u.s) ** 2
+        return Galaxy(**new)
+
+    @property
+    def energy(self):
+        """
+        Specific energy calculation.
+
+        Calculate the specific energy
+        of dark matter, star and gas particles.
+
+        Returns
+        -------
+        tuple : 'Quantity'
+            Specific energy of dark matter, stars and gas in that order.
+        """
+        potential = np.concatenate(
+            [
+                self.arr_.pot_s,
+                self.arr_.pot_dm,
+                self.arr_.pot_s,
+            ]
+        )
+
+        k_dm = self.kinetic_energy[0].value
+        k_s = self.kinetic_energy[1].value
+        k_g = self.kinetic_energy[2].value
+
+        if np.all(potential == 0.0):
+            pot_dm = self.potential_energy().arr_.pot_dm
+            pot_s = self.potential_energy().arr_.pot_s
+            pot_g = self.potential_energy().arr_.pot_g
+        else:
+            pot_dm = self.arr_.pot_dm
+            pot_s = self.arr_.pot_s
+            pot_g = self.arr_.pot_g
+
+        Etot_dm = (k_dm + pot_dm) * (u.km / u.s) ** 2
+        Etot_s = (k_s + pot_s) * (u.km / u.s) ** 2
+        Etot_g = (k_g + pot_g) * (u.km / u.s) ** 2
 
         return (Etot_dm, Etot_s, Etot_g)
 
@@ -466,7 +618,7 @@ class Galaxy:
         Returns
         -------
         gx : `galaxy object`
-            new instanced galaxy with x (normalized specific energy) and
+            New instanced galaxy with x (normalized specific energy) and
             y (z component of the normalized specific angular momentum).
             See section Notes for more details.
 

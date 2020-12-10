@@ -24,9 +24,8 @@ from sklearn.cluster import KMeans
 # =============================================================================
 
 
-@pytest.mark.xfail
 def test_GCKmeans(mock_real_galaxy):
-    """ Test GCKmeans."""
+    """Test GCKmeans."""
     gal = mock_real_galaxy
 
     gckmeans = sklearn_models.GCKmeans(n_clusters=5, random_state=0)
@@ -36,13 +35,20 @@ def test_GCKmeans(mock_real_galaxy):
     X, y = gal.values()
     expected = kmeans.fit_transform(X, y)
 
-    np.testing.assert_array_equal(result, expected)
+    np.testing.assert_allclose(result, expected, rtol=1e-9, atol=1e-06)
 
 
 @pytest.mark.parametrize(
-    "type_values", [("string", np.random.rand(1), np.inf, np.nan)]
+    "type_values",
+    [
+        "string",
+        np.random.rand(1),
+        np.inf,
+        np.nan,
+    ],
 )
 def test_type_error_GCDecomposeMixin_class(type_values):
+    """Test type error GCDecomposeMixin."""
     with pytest.raises(TypeError):
         sklearn_models.GCDecomposeMixin(type_values)
 

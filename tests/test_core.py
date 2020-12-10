@@ -60,11 +60,36 @@ def test_same_size_inputs(shorten, random_galaxy_params):
         core.Galaxy(**params)
 
 
+@pytest.mark.parametrize(
+    "pot_name, npart",
+    [
+        ("pot_s", 10),
+        ("pot_g", 20),
+        ("pot_dm", 30),
+    ],
+)
+def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
+    """Test of potential inputs."""
+    seed = 42
+    random = np.random.RandomState(seed=seed)
+    pot = random.random_sample(size=npart)
+    params = random_galaxy_params(stars=10, gas=20, dm=30, seed=42)
+    params[pot_name] = pot
+    with pytest.raises(ValueError):
+        core.Galaxy(**params)
+
+
 def test_output_galaxy_properties(mock_galaxy):
     """Test output of properties."""
     g = mock_galaxy
     g_test = g.angular_momentum()
 
+    assert isinstance(g.kinetic_energy[0], u.Quantity)
+    assert isinstance(g.kinetic_energy[1], u.Quantity)
+    assert isinstance(g.kinetic_energy[2], u.Quantity)
+    assert isinstance(g.potential_energy().pot_dm, u.Quantity)
+    assert isinstance(g.potential_energy().pot_s, u.Quantity)
+    assert isinstance(g.potential_energy().pot_g, u.Quantity)
     assert isinstance(g.energy[0], u.Quantity)
     assert isinstance(g.energy[1], u.Quantity)
     assert isinstance(g.energy[2], u.Quantity)
@@ -320,7 +345,6 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
 @pytest.mark.parametrize("stars", [(True), (False)])
 def test_values_len(stars, mock_real_galaxy):
     """Test the lengths of 2D and 1D array of value mehods."""
-
     g = mock_real_galaxy
 
     X, y = g.values(star=stars)
