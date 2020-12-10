@@ -88,15 +88,15 @@ class Galaxy:
         Shape: (n,3). Default units: kpc*km/s
     Jr_star : `Quantity`
         Absolute value of the angular momentum for stars.
-        Shape: (n_s,1). Default units: kpc*km/s
+        Shape: (n_s,1). Default unit: kpc*km/s
     Jr : `Quantity`
         Absolute value of total the angular momentum in the xy plane.
-        Shape: (n,1). Default units: kpc*km/s
+        Shape: (n,1). Default unit: kpc*km/s
     J_star : `Quantity`
         Angular momentum for stars.
-        Shape: (n_s,1). Default units: kpc*km/s
+        Shape: (n_s,1). Default unit: kpc*km/s
     x : `Quantity`
-        Normalized energy. Default units: (km/s)**2
+        Normalized energy. Default unit: (km/s)**2
     y : `Quantity`
         z component of the normalized angular momentum.
         Default units: kpc*km/s
@@ -145,13 +145,13 @@ class Galaxy:
     pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
     pot_g = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
 
-    J_part = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    Jr_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    Jr = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
-    J_star = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
 
-    x = uttr.ib(default=0.0, unit=(u.km / u.s) ** 2)
-    y = uttr.ib(default=0.0, unit=(u.kpc * u.km / u.s))
+    x = uttr.ib(default=None, unit=(u.km / u.s) ** 2)
+    y = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
 
     arr_ = uttr.array_accessor()
 
@@ -166,64 +166,97 @@ class Galaxy:
         This method determine that the length of the different particles
         families are the same.
         """
-        length_s = np.array(
-            [
-                len(self.arr_.y_s),
-                len(self.arr_.z_s),
-                len(self.arr_.vx_s),
-                len(self.arr_.vy_s),
-                len(self.arr_.vz_s),
-                len(self.arr_.m_s),
-            ]
-        )
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_s = np.array(
+                [
+                    len(self.arr_.y_s),
+                    len(self.arr_.z_s),
+                    len(self.arr_.vx_s),
+                    len(self.arr_.vy_s),
+                    len(self.arr_.vz_s),
+                    len(self.arr_.m_s),
+                    len(self.arr_.pot_s),
+                ]
+            )
+        else:
+            length_s = np.array(
+                [
+                    len(self.arr_.y_s),
+                    len(self.arr_.z_s),
+                    len(self.arr_.vx_s),
+                    len(self.arr_.vy_s),
+                    len(self.arr_.vz_s),
+                    len(self.arr_.m_s),
+                ]
+            )
 
         if np.any(len(self.arr_.x_s) != length_s):
             raise ValueError("Stars inputs must have the same length")
 
-        length_dm = np.array(
-            [
-                len(self.arr_.y_dm),
-                len(self.arr_.z_dm),
-                len(self.arr_.vx_dm),
-                len(self.arr_.vy_dm),
-                len(self.arr_.vz_dm),
-                len(self.arr_.m_dm),
-            ]
-        )
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_dm = np.array(
+                [
+                    len(self.arr_.y_dm),
+                    len(self.arr_.z_dm),
+                    len(self.arr_.vx_dm),
+                    len(self.arr_.vy_dm),
+                    len(self.arr_.vz_dm),
+                    len(self.arr_.m_dm),
+                    len(self.arr_.pot_dm),
+                ]
+            )
+        else:
+            length_dm = np.array(
+                [
+                    len(self.arr_.y_dm),
+                    len(self.arr_.z_dm),
+                    len(self.arr_.vx_dm),
+                    len(self.arr_.vy_dm),
+                    len(self.arr_.vz_dm),
+                    len(self.arr_.m_dm),
+                ]
+            )
 
         if np.any(len(self.arr_.x_dm) != length_dm):
             raise ValueError("Dark matter inputs must have the same length")
-
-        length_g = np.array(
-            [
-                len(self.arr_.y_g),
-                len(self.arr_.z_g),
-                len(self.arr_.vx_g),
-                len(self.arr_.vy_g),
-                len(self.arr_.vz_g),
-                len(self.arr_.m_g),
-            ]
-        )
+        
+        if np.all(self.arr_.pot_s) != 0.0:
+            length_g = np.array(
+                [
+                    len(self.arr_.y_g),
+                    len(self.arr_.z_g),
+                    len(self.arr_.vx_g),
+                    len(self.arr_.vy_g),
+                    len(self.arr_.vz_g),
+                    len(self.arr_.m_g),
+                    len(self.arr_.pot_g),
+                ]
+            )
+        else:
+            length_g = np.array(
+                [
+                    len(self.arr_.y_g),
+                    len(self.arr_.z_g),
+                    len(self.arr_.vx_g),
+                    len(self.arr_.vy_g),
+                    len(self.arr_.vz_g),
+                    len(self.arr_.m_g),
+                ]
+            )
 
         if np.any(len(self.arr_.x_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
 
-    def __potential_energy_init__(self):
-        """
-        Potential energy input validator.
-
-        This method determine the validation of input of the specific
-        potential energy.
-        """
+        # Potential energy input validator.
         if np.any(self.arr_.pot_dm != 0.0) and (
-            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_s == 0.0)
+            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_g == 0.0)
         ):
             raise ValueError(
                 "Potential energy must be instanced for all type particles"
             )
 
         if np.any(self.arr_.pot_s != 0.0) and (
-            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_s == 0.0)
+            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_g == 0.0)
         ):
             raise ValueError(
                 "Potential energy must be instanced for all type particles"
