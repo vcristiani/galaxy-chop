@@ -35,7 +35,8 @@ def test_GCKmeans(mock_real_galaxy):
     X, y = gal.values()
     expected = kmeans.fit_transform(X, y)
 
-    np.testing.assert_array_equal(result, expected)
+    np.testing.assert_allclose(result, expected, rtol=1e-9, atol=1e-06)
+
 
 
 @pytest.mark.parametrize(
