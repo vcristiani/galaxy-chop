@@ -44,7 +44,7 @@ class Galaxy:
     """
     Galaxy class.
 
-    Build a galaxy object from the masses, positions, and
+    Builds a galaxy object from the masses, positions, and
     velocities of the particles (stars, dark matter, and gas)
 
     Parameters
@@ -165,12 +165,12 @@ class Galaxy:
 
         Units length validator.
 
-        This method determine that the length of the different particles
+        This method determines that the length of the different particles
         families are the same.
 
         Potential energy input validator.
 
-        This method determine the validation of input of the specific
+        This method determines the validation of input of the specific
         potential energy.
 
         """
@@ -300,7 +300,7 @@ class Galaxy:
         Return
         ------
         X : `np.ndarray(n,7)`
-            2D array where each file it is a diferen particle and
+            2D array where each file it is a diferent particle and
             each column it is a parameter of the particles (E_star, eps, eps_r)
         y : `np.ndarray(n)`
             1D array where is identified the nature of each particle
@@ -331,12 +331,12 @@ class Galaxy:
         """
         Specific kinetic energy calculation.
 
-        Calculate the specific kinetic energy
+        Calculates the specific kinetic energy
         of dark matter, star and gas particles.
 
         Returns
         -------
-        tuple : 'Quantity'
+        tuple : `Quantity`
             Specific kinetic energy of dark matter, stars and
             gas in this order.
         """
@@ -366,7 +366,7 @@ class Galaxy:
         """
         Specific potential energy calculation.
 
-        Calculate the specific potencial energy
+        Calculates the specific potencial energy
         of dark matter, star and gas particles.
 
         Returns
@@ -431,12 +431,12 @@ class Galaxy:
         """
         Specific energy calculation.
 
-        Calculate the specific energy
+        Calculates the specific energy
         of dark matter, star and gas particles.
 
         Returns
         -------
-        tuple : 'Quantity'
+        tuple : `Quantity`
             Specific energy of dark matter, stars and gas in that order.
         """
         potential = np.concatenate(
@@ -723,7 +723,7 @@ class Galaxy:
 
         Return
         ------
-        tuple : Quantity
+        tuple : `Quantity`
             Normalized specific energy of the stars, J_z/J_circ, J_p/J_circ.
 
         Notes
@@ -769,12 +769,12 @@ class Galaxy:
         #    k=1,
         # )
 
-        # Calculate the circularity parameter Lz/Lc.
+        # Calculates of the circularity parameter Lz/Lc.
         # eps = J_star_ / spl(E_star)
         jcir = self.jcirc().arr_
         eps = Jz_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
-        # Calculate the same for Lp/Lc.
+        # Calculates the same for Lp/Lc.
         # eps_r = Jr_star_ / spl(E_star)
         eps_r = Jr_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
