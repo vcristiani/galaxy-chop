@@ -80,7 +80,7 @@ def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
 
 
 def test_output_galaxy_properties(mock_galaxy):
-    """Test output of properties."""
+    """Test of properties and methods outputs."""
     g = mock_galaxy
     g_test = g.angular_momentum()
 
@@ -144,7 +144,7 @@ def test_energy_method(mock_galaxy):
 
 
 def test_energy_method_real_galaxy(mock_real_galaxy):
-    """Test energy method."""
+    """Test energy method with real galaxy."""
     gal = mock_real_galaxy
 
     E_tot_dm, E_tot_s, E_tot_g = gal.energy

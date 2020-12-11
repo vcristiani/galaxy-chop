@@ -103,27 +103,27 @@ def align(
     """
     Align the galaxy.
 
-    Rotate the positions, velocities and angular momentum of the
+    Rotates the positions, velocities and angular momentum of the
     particles so that the total angular moment coincides with the z-axis.
     Optionally, only particles within a cutting radius
     `(r_cut)` can be used to calculate the rotation matrix.
 
     Parameters
     ----------
-    m_s : `np.ndarray(n,1)`
-        Star masses. Units M_sun
-    x_s, y_s, z_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    m_s : `np.ndarray(n_s,1)`
+        Star masses.
+    x_s, y_s, z_s : `np.ndarray(n_s,1)`
         Star positions.
-    vx_s, vy_s, vz_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_s, vy_s, vz_s : `np.ndarray(n_s,1)`
         Star velocities.
-    x_dm, y_dm, z_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
-        Dark matter positions. Units: kpc
-    vx_dm, vy_dm, vz_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1)`
+        Dark matter positions.
+    vx_dm, vy_dm, vz_dm : `np.ndarray(n_dm,1)`
         Dark matter velocities.
-        Softening radius of dark matter particles. Units: kpc
-    x_g, y_g, z_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+        Softening radius of dark matter particles.
+    x_g, y_g, z_g : `np.ndarray(n_g,1)`
         Gas positions.
-    vx_g, vy_g, vz_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_g, vy_g, vz_g : `np.ndarray(n_g,1)`
         Gas velocities.
     r_cut : `float`, optional
         The default is ``None``; if provided, it must be
@@ -132,18 +132,22 @@ def align(
 
     Returns
     -------
-    x_s, y_s, z_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_s, y_s, z_s : `np.ndarray(n_s,1), np.ndarray(n_s,1), np.ndarray(n_s,1)`
         Rotated positions of the star particles.
-    vx_s, vy_s, vz_s : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_s, vy_s, vz_s : `np.ndarray(n_s,1), np.ndarray(n_s,1),\
+        np.ndarray(n_s,1)`
         Rotated velocities of the star particles.
-    x_dm, y_dm, z_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1), np.ndarray(n_dm,1),\
+        np.ndarray(n_dm,1)`
         Rotated positions of the dark matter particles.
-    vx_dm, vy_dm, vz_dm : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_dm, vy_dm, vz_dm : `np.ndarray(n_dm,1), np.ndarray(n_dm,1),\
+        np.ndarray(n_dm,1)`
         Rotated velocities of the dark matter particles.
-        Softening radius of dark matter particles. Units: kpc
-    x_g, y_g, z_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+        Softening radius of dark matter particles.
+    x_g, y_g, z_g : `np.ndarray(n_g,1), np.ndarray(n_g,1), np.ndarray(n_g,1)`
         Rotated positions of the gas particles.
-    vx_g, vy_g, vz_g : `np.ndarray(n,1), np.ndarray(n,1), np.ndarray(n,1)`
+    vx_g, vy_g, vz_g : `np.ndarray(n_g,1), np.ndarray(n_g,1),\
+        np.ndarray(n_g,1)`
         Rotated velocities of the gas particles.
     """
     if (r_cut is not None) and (r_cut <= 0.0):
@@ -194,7 +198,7 @@ def align(
 @dask.delayed
 def _potential_dask(x, y, z, m, eps):
     """
-    Calculate the specific gravitational potential energy of particles.
+    Specific gravitational potential energy of particles calculation.
 
     Parameters
     ----------
@@ -225,7 +229,7 @@ def _potential_dask(x, y, z, m, eps):
 
 
 def potential(x, y, z, m, eps=0.0):
-    """Compute de potential energy."""
+    """Potential energy calculation."""
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
 

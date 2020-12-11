@@ -26,7 +26,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     """Galaxy chop Abadi class."""
 
     def __init__(self, n_bin=100):
-
+        """Init function."""
         self.n_bin = n_bin
 
     def fit(self, X, y=None, sample_weight=None):

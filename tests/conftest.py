@@ -111,23 +111,23 @@ def rotate(pos, vel, matrix):
     """
     Rotate.
 
-    Apply the rotation `matrix` to a set of particles positions `pos` and
+    Applies the rotation `matrix` to a set of particles positions `pos` and
     velocities `vel`
 
     Parameters
     ----------
-    pos : `np.ndarray`, shape = N_part, 3
+    pos : `np.ndarray`, shape = (N_part, 3)
         Positions of particles
-    vel : `np.ndarray`, shape = N_part, 3
+    vel : `np.ndarray`, shape = (N_part, 3)
         Velocities of particles
     matrix : `np.ndarray`
         Rotation matrix, with shape (3, 3)
 
     Returns
     -------
-    pos_rot : `np.ndarray`, shape = N_part, 3
+    pos_rot : `np.ndarray`, shape = (N_part, 3)
         Rotated, positions of particles
-    vel_rot : `np.ndarray`, shape = N_part, 3
+    vel_rot : `np.ndarray`, shape = (N_part, 3)
         Rotated, velocities of particles
     """
     pos_rot = pos @ matrix
@@ -236,7 +236,8 @@ def random_galaxy_params():
 
 @pytest.fixture(scope="session")
 def solid_disk():
-    """Mock solid disk.
+    """
+    Mock solid disk.
 
     Creates a mock solid disc of particles with masses
     and velocities.
@@ -269,9 +270,9 @@ def solid_disk():
 @pytest.fixture(scope="session")
 def mock_dm_halo():
     """
-    Mock Dark Matter Halo.
+    Mock dark matter Halo.
 
-    Creates a mock DM Halo of particles with masses
+    Creates a mock DM halo of particles with masses
     and velocities.
     """
 
@@ -343,7 +344,7 @@ def disc_particles(solid_disk):
 
 @pytest.fixture
 def disc_particles_all(solid_disk):
-    """Solid disc wit velocities."""
+    """Solid disc with velocities."""
     mass_s, pos_s, vel_s = solid_disk(N_part=100)
     mass_g, pos_g, vel_g = solid_disk(N_part=100)
 
