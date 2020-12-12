@@ -6,15 +6,63 @@
 
 """Module models."""
 
+__all__ = ["GCDecomposeMixin", "GCClusterMixin", "GCAbadi", "GCKmeans"]
+
 # #####################################################
 # IMPORTS
 # #####################################################
 
-from galaxychop.sklearn_models import GCClusterMixin
+import enum
 
 import numpy as np
 
+from sklearn.base import ClusterMixin
 from sklearn.base import TransformerMixin
+from sklearn.cluster import KMeans
+
+from . import core
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+
+class Columns(enum.Enum):
+    """Name for columns used to decompose galaxies."""
+
+    circular_parameter = 1
+
+
+# #####################################################
+# GCDecomposeMixin CLASS
+# #####################################################
+
+
+class GCDecomposeMixin:
+    """Galaxy chop decompose mixin class."""
+
+    def decompose(self, galaxy):
+        """Decompose method."""
+        if not isinstance(galaxy, core.Galaxy):
+            found = type(galaxy)
+            raise TypeError(
+                f"'galaxy' must be a core.Galaxy instance. Found {found}"
+            )
+
+        X, y = galaxy.values()
+
+        return self.fit_transform(X, y)
+
+
+# #####################################################
+# GCClusterMixin CLASS
+# #####################################################
+
+
+class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
+    """Galaxy chop cluster mixin class."""
+
+    pass
 
 
 # #####################################################
@@ -25,9 +73,26 @@ from sklearn.base import TransformerMixin
 class GCAbadi(GCClusterMixin, TransformerMixin):
     """Galaxy chop Abadi class."""
 
-    def __init__(self, n_bin=100):
+    def __init__(self, n_bin=100, digits=2, seed=None):
         """Init function."""
         self.n_bin = n_bin
+        self.digits = digits
+        self.seed = seed
+        self._random = np.random.default_rng(seed=seed)
+
+    def _make_histogram(self, X, n_bin):
+
+        eps = X[:, Columns.circular_parameter.value]
+
+        full_histogram = np.histogram(eps, n_bin, range=(-1.0, 1.0))
+
+        hist = full_histogram[0]
+        edges = np.round(full_histogram[1], self.digits)
+        bin_width = edges[1] - edges[0]
+        center = full_histogram[1][:-1] + bin_width / 2.0
+        bin0 = np.where(edges == 0.0)[0][0]
+
+        return eps, edges, center, bin0, hist
 
     def fit(self, X, y=None, sample_weight=None):
         """Compute Abadi clustering.
@@ -49,102 +114,78 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         self
             Fitted estimator.
         """
-        # Building the histogram of the circularity parameter.
-        h = np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[0]
-        edges = np.round(
-            np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[1], 2
-        )
-        a_bin = edges[1] - edges[0]
-        center = (
-            np.histogram(X[:, 1], self.n_bin, range=(-1.0, 1.0))[1][:-1]
-            + a_bin / 2.0
-        )
-        (cero,) = np.where(edges == 0.0)
-        m = cero[0]
+        X = X.to_value()
 
-        X_ind = np.arange(len(X[:, 1]))
+        n_bin = self.n_bin
+        labels = np.empty(len(X), dtype=int)
+
+        # Building the histogram of the circularity parameter.
+        eps, edges, center, bin0, hist = self._make_histogram(X, n_bin)
+        X_ind = np.arange(len(eps))
 
         # Building a dictionary: n={} where the IDs of the particles
         # that satisfy the restrictions given by the mask will be stored.
         # So we can then have control over which particles are selected.
-        n = {}
+        bin_to_particle = {}
 
-        for i in range(0, self.n_bin - 1):
-            (mask,) = np.where(
-                (X[:, 1] >= edges[i]) & (X[:, 1] < edges[i + 1])
-            )
-            n["bin" + "%s" % i] = X_ind[mask]
+        for i in range(n_bin - 1):
+            (mask,) = np.where((eps >= edges[i]) & (eps < edges[i + 1]))
+            bin_to_particle[i] = X_ind[mask]
 
         (mask,) = np.where(
-            (X[:, 1] >= edges[self.n_bin - 1]) & (X[:, 1] <= edges[self.n_bin])
+            (eps >= edges[n_bin - 1]) & (eps <= edges[self.n_bin])
         )
-        n["bin" + "%s" % (len(center) - 1)] = X_ind[mask]
+        bin_to_particle[len(center) - 1] = X_ind[mask]
 
         # Selection of the particles that belong to the spheroid according to
         # the circularity parameter.
-        np.random.seed(10)
         sph = {}
+        for i in range(bin0):
+            sph[i] = bin_to_particle[i]
 
-        for i in range(0, m):
-            sph["bin" + "%s" % i] = n["bin" + "%s" % i]
+        lim_aux = 0 if (n_bin >= 2 * bin0) else (2 * bin0 - self.n_bin)
 
-        if len(h) >= 2 * m:
-            lim_aux = 0
-        else:
-            lim_aux = 2 * m - len(h)
+        for cour_bin in range(lim_aux, bin0):
+            corr_bin = 2 * bin0 - 1 - i
 
-        for i in range(lim_aux, m):
-
-            if len(n["bin" + "%s" % i]) >= len(
-                n["bin" + "%s" % (2 * m - 1 - i)]
+            if len(bin_to_particle[cour_bin]) >= len(
+                bin_to_particle[corr_bin]
             ):
-                sph["bin" + "%s" % (2 * m - 1 - i)] = n[
-                    "bin" + "%s" % (2 * m - 1 - i)
-                ]
+                sph[corr_bin] = bin_to_particle[corr_bin]
             else:
-                sph["bin" + "%s" % (2 * m - 1 - i)] = np.random.choice(
-                    n["bin" + "%s" % (2 * m - 1 - i)],
-                    len(n["bin" + "%s" % i]),
+                sph[corr_bin] = self._random.choice(
+                    bin_to_particle[corr_bin],
+                    len(bin_to_particle[cour_bin]),
                     replace=False,
                 )
 
         # The rest of the particles are assigned to the disk.
-        dsk = n.copy()
+        dsk = bin_to_particle.copy()
+        for i in range(bin0):
+            dsk[i] = []  # Bins with only spheroid particles are left empty.
 
-        for i in range(0, m):
-            # Bins with only spheroid particles are left empty.
-            dsk["bin" + "%s" % i] = []
+        lim = bin0 if (n_bin >= 2 * bin0) else (n_bin - bin0)
 
-        x = set()
-        y = set()
-
-        if len(h) >= 2 * m:
-            lim = m
-        else:
-            lim = len(h) - m
-
-        for i in range(lim, len(sph)):
-            x = set(sph["bin" + "%s" % i])
-            y = set(n["bin" + "%s" % i])
-            y -= x
-            y = np.array(list(y))
-            dsk["bin" + "%s" % i] = y
+        for key in range(lim, len(sph)):
+            arr, flt = bin_to_particle[key], sph[key]
+            dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
 
         # The indexes of the particles belonging to the spheroid and the disk
         # are saved.
-        esf_ = []
+        esf = []
         for i in range(len(sph)):
-            esf_ = np.concatenate((esf_, sph["bin" + "%s" % (i)]))
-        esf_ = np.int_(esf_)
+            esf = np.concatenate((esf, sph[i]))
+        esf_idx = esf.astype(int)
 
-        disk_ = []
+        disk = []
         for i in range(len(dsk)):
-            disk_ = np.concatenate((disk_, dsk["bin" + "%s" % (i)]))
-        disk_ = np.int_(disk_)
+            disk = np.concatenate((disk, dsk[i]))
+        disk_idx = disk.astype(int)
 
-        labels = np.empty(len(X))
-        labels[esf_] = 0
-        labels[disk_] = 1
+        labels = np.empty(len(X), dtype=int)
+        labels[esf_idx] = 0
+        labels[disk_idx] = 1
+
         self.labels_ = labels
 
         return self
@@ -188,3 +229,14 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
             X transformed.
         """
         return self
+
+
+# =============================================================================
+# SCIKIT_LEARN WRAPPERS
+# =============================================================================
+
+
+class GCKmeans(GCClusterMixin, KMeans):
+    """Galaxy chop KMean class."""
+
+    pass
