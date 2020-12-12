@@ -11,7 +11,6 @@
 # =============================================================================
 
 from galaxychop import models
-from galaxychop import sklearn_models
 
 import numpy as np
 
@@ -28,7 +27,7 @@ def test_GCKmeans(mock_real_galaxy):
     """Test GCKmeans."""
     gal = mock_real_galaxy
 
-    gckmeans = sklearn_models.GCKmeans(n_clusters=5, random_state=0)
+    gckmeans = models.GCKmeans(n_clusters=5, random_state=0)
     result = gckmeans.decompose(gal)
 
     kmeans = KMeans(n_clusters=5, random_state=0)
@@ -50,14 +49,14 @@ def test_GCKmeans(mock_real_galaxy):
 def test_type_error_GCDecomposeMixin_class(type_values):
     """Test type error GCDecomposeMixin."""
     with pytest.raises(TypeError):
-        sklearn_models.GCDecomposeMixin(type_values)
+        models.GCDecomposeMixin(type_values)
 
 
 def test_GCAbadi_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    abadi = models.GCAbadi()
+    abadi = models.GCAbadi(seed=10)
     abadi.decompose(gal)
 
     longitude = len(abadi.labels_)
@@ -67,7 +66,7 @@ def test_GCAbadi_len(mock_real_galaxy):
 def test_GCAbadi_outputs(mock_real_galaxy):
     """Test output of GCAbadi model."""
     gal = mock_real_galaxy
-    abadi = models.GCAbadi()
+    abadi = models.GCAbadi(seed=10)
     abadi.decompose(gal)
 
     assert (abadi.labels_ >= 0).all() and (abadi.labels_ <= 1).all()

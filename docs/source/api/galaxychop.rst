@@ -34,14 +34,6 @@ Module ``galaxychop.models``
     :show-inheritance:
     :member-order: bysource
 
-Module ``galaxychop.sklearn_models``
-------------------------------------
-
-.. automodule:: galaxychop.sklearn_models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :member-order: bysource
 
 Module ``galaxychop.utils``
 ---------------------------

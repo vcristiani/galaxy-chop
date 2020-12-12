@@ -26,11 +26,6 @@ __version__ = "0.1.0"
 # =============================================================================
 
 from .core import *  # noqa
-
 from .utils import *  # noqa
-
-from .sklearn_models import *  # noqa
-
 from .models import *  # noqa
-
 from .dataset import *  # noqa
