@@ -14,7 +14,7 @@ Welcome to GalaxyChop's documentation!
    :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/galaxy-chop/badge/?version=master
-   :target: https://galaxy-chop.readthedocs.io/en/latest/?badge=master
+   :target: https://galaxy-chop.readthedocs.io/en/master/?badge=master
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00
