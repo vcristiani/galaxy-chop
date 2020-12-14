@@ -81,7 +81,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         self._random = np.random.default_rng(seed=seed)
 
     def _make_histogram(self, X, n_bin):
-
+        """Build the histrogram of the circularity parameter."""
         eps = X[:, Columns.circular_parameter.value]
 
         full_histogram = np.histogram(eps, n_bin, range=(-1.0, 1.0))
@@ -93,6 +93,44 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         bin0 = np.where(edges == 0.0)[0][0]
 
         return eps, edges, center, bin0, hist
+
+    def _make_count_sph(self, bin0, bin_to_particle):
+        """Build the counter-rotating part of the spheroid."""
+        sph = {}
+        for i in range(bin0):
+            sph[i] = bin_to_particle[i]
+        return sph
+
+    def _make_corot_sph(self, n_bin, bin0, bin_to_particle, sph):
+        """Build the corotating part of the spheroid."""
+        lim_aux = 0 if (n_bin >= 2 * bin0) else (2 * bin0 - self.n_bin)
+
+        for count_bin in range(lim_aux, bin0):
+            corot_bin = 2 * bin0 - 1 - count_bin
+
+            if len(bin_to_particle[count_bin]) >= len(
+                bin_to_particle[corot_bin]
+            ):
+                sph[corot_bin] = bin_to_particle[corot_bin]
+            else:
+                sph[corot_bin] = self._random.choice(
+                    bin_to_particle[corot_bin],
+                    len(bin_to_particle[count_bin]),
+                    replace=False,
+                )
+
+    def _make_disk(self, bin_to_particle, bin0, n_bin, sph):
+        """Build the disk."""
+        dsk = bin_to_particle.copy()
+        for i in range(bin0):
+            dsk[i] = []  # Bins with only spheroid particles are left empty.
+
+        lim = bin0 if (n_bin >= 2 * bin0) else (n_bin - bin0)
+
+        for key in range(lim, len(sph)):
+            arr, flt = bin_to_particle[key], sph[key]
+            dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
+        return dsk
 
     def fit(self, X, y=None, sample_weight=None):
         """Compute Abadi clustering.
@@ -139,36 +177,11 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
 
         # Selection of the particles that belong to the spheroid according to
         # the circularity parameter.
-        sph = {}
-        for i in range(bin0):
-            sph[i] = bin_to_particle[i]
-
-        lim_aux = 0 if (n_bin >= 2 * bin0) else (2 * bin0 - self.n_bin)
-
-        for cour_bin in range(lim_aux, bin0):
-            corr_bin = 2 * bin0 - 1 - i
-
-            if len(bin_to_particle[cour_bin]) >= len(
-                bin_to_particle[corr_bin]
-            ):
-                sph[corr_bin] = bin_to_particle[corr_bin]
-            else:
-                sph[corr_bin] = self._random.choice(
-                    bin_to_particle[corr_bin],
-                    len(bin_to_particle[cour_bin]),
-                    replace=False,
-                )
+        sph = self._make_count_sph(bin0, bin_to_particle)
+        self._make_corot_sph(n_bin, bin0, bin_to_particle, sph)
 
         # The rest of the particles are assigned to the disk.
-        dsk = bin_to_particle.copy()
-        for i in range(bin0):
-            dsk[i] = []  # Bins with only spheroid particles are left empty.
-
-        lim = bin0 if (n_bin >= 2 * bin0) else (n_bin - bin0)
-
-        for key in range(lim, len(sph)):
-            arr, flt = bin_to_particle[key], sph[key]
-            dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
+        dsk = self._make_disk(bin_to_particle, bin0, n_bin, sph)
 
         # The indexes of the particles belonging to the spheroid and the disk
         # are saved.
