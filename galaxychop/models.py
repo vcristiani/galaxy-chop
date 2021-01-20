@@ -42,7 +42,14 @@ class GCDecomposeMixin:
     """Galaxy chop decompose mixin class."""
 
     def decompose(self, galaxy):
-        """Decompose method."""
+        """Decompose method.
+
+        Validation of the input galaxy instance.
+
+        Parameters
+        ----------
+        galaxy : `galaxy object`
+        """
         if not isinstance(galaxy, core.Galaxy):
             found = type(galaxy)
             raise TypeError(
