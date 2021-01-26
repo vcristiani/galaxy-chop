@@ -306,7 +306,7 @@ class Galaxy:
             1D array where is identified the nature of each particle
             0=star, 1=gas and 2=dark matter
         """
-        X = np.empty((0, 3))
+        X = np.empty((0, 10))
         y = np.empty(0, int)
 
         if star:
@@ -314,6 +314,13 @@ class Galaxy:
 
             X_s = np.hstack(
                 (
+                    self.arr_.x_s.reshape(n_s, 1),
+                    self.arr_.y_s.reshape(n_s, 1),
+                    self.arr_.z_s.reshape(n_s, 1),
+                    self.arr_.vx_s.reshape(n_s, 1),
+                    self.arr_.vy_s.reshape(n_s, 1),
+                    self.arr_.vz_s.reshape(n_s, 1),
+                    self.arr_.m_s.reshape(n_s, 1),
                     self.paramcirc[0].reshape(n_s, 1),
                     self.paramcirc[1].reshape(n_s, 1),
                     self.paramcirc[2].reshape(n_s, 1),
@@ -739,6 +746,10 @@ class Galaxy:
 
         E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
 
+        E_star_ = np.full(len(Etot_s), np.nan)
+        eps_ = np.full(len(Etot_s), np.nan)
+        eps_r_ = np.full(len(Etot_s), np.nan)
+
         # Remove the particles that are not bound: E > 0.
         (neg,) = np.where(E_tot <= 0.0)
         (neg_star,) = np.where(Etot_s <= 0.0)
@@ -781,8 +792,8 @@ class Galaxy:
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        E_star_ = u.Quantity(E_star[mask])
-        eps_ = u.Quantity(eps[mask])
-        eps_r_ = u.Quantity(eps_r[mask])
+        E_star_[neg_star[fin_star[mask]]] = E_star[mask]
+        eps_[neg_star[fin_star[mask]]] = eps[mask]
+        eps_r_[neg_star[fin_star[mask]]] = eps_r[mask]
 
         return E_star_, eps_, eps_r_

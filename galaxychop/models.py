@@ -30,7 +30,7 @@ from . import core
 class Columns(enum.Enum):
     """Name for columns used to decompose galaxies."""
 
-    circular_parameter = 1
+    circular_parameter = 8
 
 
 # #####################################################
@@ -86,6 +86,13 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         self.digits = digits
         self.seed = seed
         self._random = np.random.default_rng(seed=seed)
+
+    def _clean_none_values(self, X):
+        """Clean the None value of the circular parameter array."""
+        eps = X[:, Columns.circular_parameter.value]
+        (mask_clean,) = np.where(~np.isnan(eps))
+        (mask_dirty,) = np.where(np.isnan(eps))
+        return mask_clean, mask_dirty
 
     def _make_histogram(self, X, n_bin):
         """Build the histrogram of the circularity parameter."""
@@ -159,13 +166,15 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         self
             Fitted estimator.
         """
-        X = X.to_value()
-
         n_bin = self.n_bin
         labels = np.empty(len(X), dtype=int)
 
+        mask_clean, mask_dirty = self._clean_none_values(X)
+
         # Building the histogram of the circularity parameter.
-        eps, edges, center, bin0, hist = self._make_histogram(X, n_bin)
+        eps, edges, center, bin0, hist = self._make_histogram(
+            X[mask_clean, :], n_bin
+        )
         X_ind = np.arange(len(eps))
 
         # Building a dictionary: n={} where the IDs of the particles
@@ -203,8 +212,9 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         disk_idx = disk.astype(int)
 
         labels = np.empty(len(X), dtype=int)
-        labels[esf_idx] = 0
-        labels[disk_idx] = 1
+        labels[mask_clean[esf_idx]] = 0
+        labels[mask_clean[disk_idx]] = 1
+        labels[mask_dirty] = -1
 
         self.labels_ = labels
 

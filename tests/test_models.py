@@ -60,7 +60,7 @@ def test_GCAbadi_len(mock_real_galaxy):
     abadi.decompose(gal)
 
     longitude = len(abadi.labels_)
-    assert np.shape(X) == (longitude, 3)
+    assert np.shape(X) == (longitude, 10)
 
 
 def test_GCAbadi_outputs(mock_real_galaxy):
@@ -69,7 +69,7 @@ def test_GCAbadi_outputs(mock_real_galaxy):
     abadi = models.GCAbadi(seed=10)
     abadi.decompose(gal)
 
-    assert (abadi.labels_ >= 0).all() and (abadi.labels_ <= 1).all()
+    assert (abadi.labels_ >= -1).all() and (abadi.labels_ <= 1).all()
 
 
 def test_GCAbadi_histogram(mock_real_galaxy):
@@ -82,9 +82,9 @@ def test_GCAbadi_histogram(mock_real_galaxy):
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
 
-    full_histogram = np.histogram(X[:, 1], bins=100, range=(-1.0, 1.0))
-    comp0_histogram = np.histogram(X[:, 1][comp0], bins=100, range=(-1.0, 1.0))
-    comp1_histogram = np.histogram(X[:, 1][comp1], bins=100, range=(-1.0, 1.0))
+    full_histogram = np.histogram(X[:, 8], bins=100, range=(-1.0, 1.0))
+    comp0_histogram = np.histogram(X[:, 8][comp0], bins=100, range=(-1.0, 1.0))
+    comp1_histogram = np.histogram(X[:, 8][comp1], bins=100, range=(-1.0, 1.0))
 
     comp0_hist_plus_comp1_hist = comp0_histogram[0] + comp1_histogram[0]
 
