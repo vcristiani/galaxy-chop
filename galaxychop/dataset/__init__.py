@@ -22,8 +22,6 @@ import numpy as np
 
 PATH = Path(os.path.abspath(os.path.dirname(__file__)))
 
-TEST_DATA_PATH = PATH / "tutorialdata"
-
 
 # #####################################################
 # FUNCTIONS
@@ -32,20 +30,20 @@ TEST_DATA_PATH = PATH / "tutorialdata"
 
 def load_star():
     """Input for testing."""
-    path = TEST_DATA_PATH / "star.dat"
+    path = PATH / "star.dat"
 
     return np.loadtxt(path)
 
 
 def load_dark():
     """Input for testing."""
-    path = TEST_DATA_PATH / "dark.dat"
+    path = PATH / "dark.dat"
 
     return np.loadtxt(path)
 
 
 def load_gas():
     """Input for testing."""
-    path = TEST_DATA_PATH / "gas_.dat"
+    path = PATH / "gas_.dat"
 
     return np.loadtxt(path)

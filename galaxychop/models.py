@@ -90,8 +90,8 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     def _clean_none_values(self, X):
         """Clean the None value of the circular parameter array."""
         eps = X[:, Columns.circular_parameter.value]
-        (mask_clean,) = np.where(np.isnan(eps, where=False))
-        (mask_dirty,) = np.where(np.isnan(eps, where=True))
+        (mask_clean,) = np.where(~np.isnan(eps))
+        (mask_dirty,) = np.where(np.isnan(eps))
         return mask_clean, mask_dirty
 
     def _make_histogram(self, X, n_bin):
