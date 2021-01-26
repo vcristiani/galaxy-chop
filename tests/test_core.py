@@ -338,7 +338,7 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     gal = mock_real_galaxy
 
     E_star, eps, eps_r = gal.paramcirc
-    (mask,) = np.where(np.isnan(eps, where=False))
+    (mask,) = np.where(~np.isnan(eps))
     assert (eps[mask] <= 1.0).any()
     assert (eps[mask] >= -1.0).any()
 
