@@ -23,20 +23,6 @@ from sklearn.cluster import KMeans
 # =============================================================================
 
 
-def test_GCKmeans(mock_real_galaxy):
-    """Test GCKmeans."""
-    gal = mock_real_galaxy
-
-    gckmeans = models.GCKmeans(n_clusters=5, random_state=0)
-    result = gckmeans.decompose(gal)
-
-    kmeans = KMeans(n_clusters=5, random_state=0)
-    X, y = gal.values()
-    expected = kmeans.fit_transform(X, y)
-
-    np.testing.assert_allclose(result, expected, rtol=1e-9, atol=1e-06)
-
-
 @pytest.mark.parametrize(
     "type_values",
     [
@@ -89,3 +75,24 @@ def test_GCAbadi_histogram(mock_real_galaxy):
     comp0_hist_plus_comp1_hist = comp0_histogram[0] + comp1_histogram[0]
 
     np.testing.assert_equal(comp0_hist_plus_comp1_hist, full_histogram[0])
+
+
+def test_GCKmeans(mock_real_galaxy):
+    """Test GCKmeans."""
+    gal = mock_real_galaxy
+
+    gckmeans = models.GCKmeans(n_clusters=5, random_state=0)
+    result = gckmeans.decompose(gal)
+    (clean_label_gal,) = np.where(result.labels_ != -1)
+
+    kmeans = KMeans(n_clusters=5, random_state=0)
+    X, y = gal.values()
+    (clean_eps,) = np.where(~np.isnan(X[:, 8]))
+    expected = kmeans.fit(X[:, :7][clean_eps], y[clean_eps])
+
+    np.testing.assert_array_equal(
+        result.labels_[clean_label_gal], expected.labels_
+    )
+    np.testing.assert_array_equal(
+        result.cluster_centers_, expected.cluster_centers_
+    )
