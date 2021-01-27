@@ -11,8 +11,8 @@ jobs:
         python-version: [3.7, 3.8]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup Python
+    - uses: actions/checkout@v1
+    - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
@@ -22,4 +22,4 @@ jobs:
         pip install tox tox-gh-actions
 
     - name: Test with tox
-      run: tox
+      run: tox -e py
