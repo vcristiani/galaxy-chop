@@ -64,12 +64,19 @@ def test_GCAbadi_len(mock_real_galaxy):
 
 
 def test_GCAbadi_outputs(mock_real_galaxy):
-    """Test output of GCAbadi model."""
+    """Test outputs of GCAbadi model."""
     gal = mock_real_galaxy
     abadi = models.GCAbadi(seed=10)
     abadi.decompose(gal)
 
-    assert (abadi.labels_ >= -1).all() and (abadi.labels_ <= 1).all()
+    labels = abadi.labels_
+    (comp0,) = np.where(labels == 0)
+    (comp1,) = np.where(labels == 1)
+    (comp_nan,) = np.where(labels == -1)
+    len_lab = len(labels[comp0]) + len(labels[comp1]) + len(labels[comp_nan])
+
+    assert (labels >= -1).all() and (labels <= 1).all()
+    assert len_lab == len(labels)
 
 
 def test_GCAbadi_histogram(mock_real_galaxy):

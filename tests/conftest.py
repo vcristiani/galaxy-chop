@@ -40,12 +40,10 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 def rot_matrix_xaxis(theta=0):
     """
     Rotation matrix of a transformation around X axis.
-
     Parameters
     ----------
     theta : `float`
         Rotation angle in radians
-
     Returns
     -------
     A : `np.ndarray`
@@ -64,7 +62,6 @@ def rot_matrix_xaxis(theta=0):
 def rot_matrix_yaxis(theta=0):
     """
     Rotation matrix of a transformation around Y axis.
-
     Parameters
     ----------
     theta : `float`
@@ -87,7 +84,6 @@ def rot_matrix_yaxis(theta=0):
 def rot_matrix_zaxis(theta=0):
     """
     Rotation matrix of a transformation around Z axis.
-
     Parameters
     ----------
     theta : `float`
@@ -110,10 +106,8 @@ def rot_matrix_zaxis(theta=0):
 def rotate(pos, vel, matrix):
     """
     Rotate.
-
     Applies the rotation `matrix` to a set of particles positions `pos` and
     velocities `vel`
-
     Parameters
     ----------
     pos : `np.ndarray`, shape = (N_part, 3)
@@ -122,7 +116,6 @@ def rotate(pos, vel, matrix):
         Velocities of particles
     matrix : `np.ndarray`
         Rotation matrix, with shape (3, 3)
-
     Returns
     -------
     pos_rot : `np.ndarray`, shape = (N_part, 3)
@@ -139,16 +132,13 @@ def rotate(pos, vel, matrix):
 def save_data(N_part=100):
     """
     Save data.
-
     This function saves a file with mock particles in a solid disk created with
     `solid_disk` function to run potentials with `potential_test.f90`
     to validate the potential function with dask
-
     Parameters
     ----------
     N_part : `int`
         The total number of particles to obtain
-
     Returns
     -------
     File named  `mock_particles.dat` on the folder tests/test_data
@@ -173,7 +163,6 @@ def save_data(N_part=100):
 def random_galaxy_params():
     """
     Galaxy parameter for test.
-
     This return a function of a dictionary with random params of a Galaxy
     object
     """
@@ -238,7 +227,6 @@ def random_galaxy_params():
 def solid_disk():
     """
     Mock solid disk.
-
     Creates a mock solid disc of particles with masses
     and velocities.
     """
@@ -271,7 +259,6 @@ def solid_disk():
 def mock_dm_halo():
     """
     Mock dark matter Halo.
-
     Creates a mock DM halo of particles with masses
     and velocities.
     """
