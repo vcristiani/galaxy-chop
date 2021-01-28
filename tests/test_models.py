@@ -122,14 +122,18 @@ def test_GCChop_eps_cut(mock_real_galaxy):
 
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
+    (comp_nan,) = np.where(labels == -1)
 
     X, y = gal.values()
-    clean_eps = np.where(~np.isnan(X[:, 8]))[0]
+
+    clean_eps = ~np.isnan(X[:, 8])
     expected_esf = np.where(X[clean_eps, 8] <= 0.6)[0]
     expected_disk = np.where(X[clean_eps, 8] > 0.6)[0]
+    expected_nan = np.where(np.isnan(X[:, 8]))[0]
 
     np.testing.assert_array_equal(comp0, expected_esf)
     np.testing.assert_array_equal(comp1, expected_disk)
+    np.testing.assert_array_equal(comp_nan, expected_nan)
 
 
 @pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
