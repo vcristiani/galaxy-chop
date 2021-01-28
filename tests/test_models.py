@@ -84,6 +84,60 @@ def test_GCAbadi_histogram(mock_real_galaxy):
     np.testing.assert_equal(comp0_hist_plus_comp1_hist, full_histogram[0])
 
 
+def test_GCChop_len(mock_real_galaxy):
+    """Test the lengths of labels."""
+    gal = mock_real_galaxy
+    X, y = gal.values()
+
+    chop = models.GCChop()
+    chop.decompose(gal)
+
+    longitude = len(chop.labels_)
+    assert np.shape(X) == (longitude, 10)
+
+
+def test_GCChop_outputs(mock_real_galaxy):
+    """Test outputs of GCChop model."""
+    gal = mock_real_galaxy
+    chop = models.GCChop()
+    chop.decompose(gal)
+    labels = chop.labels_
+
+    (comp0,) = np.where(labels == 0)
+    (comp1,) = np.where(labels == 1)
+    (comp_nan,) = np.where(labels == -1)
+
+    len_lab = len(labels[comp0]) + len(labels[comp1]) + len(labels[comp_nan])
+
+    assert (labels >= -1).all() and (labels <= 1).all()
+    assert len_lab == len(labels)
+
+
+def test_GCChop_eps_cut(mock_real_galaxy):
+    """Tests the number of particles in each component."""
+    gal = mock_real_galaxy
+    chop = models.GCChop()
+    chop.decompose(gal)
+    labels = chop.labels_
+
+    (comp0,) = np.where(labels == 0)
+    (comp1,) = np.where(labels == 1)
+
+    X, y = gal.values()
+    clean_eps = np.where(~np.isnan(X[:, 8]))[0]
+    expected_esf = np.where(X[clean_eps, 8] <= 0.6)[0]
+    expected_disk = np.where(X[clean_eps, 8] > 0.6)[0]
+
+    np.testing.assert_array_equal(comp0, expected_esf)
+    np.testing.assert_array_equal(comp1, expected_disk)
+
+
+@pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
+def test_GCChop_eps_cut_value_error(eps_cut):
+    with pytest.raises(ValueError):
+        models.GCChop(eps_cut)
+
+
 def test_GCKmeans(mock_real_galaxy):
     """Test GCKmeans."""
     gal = mock_real_galaxy
