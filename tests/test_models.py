@@ -153,11 +153,15 @@ def test_GCKmeans(mock_real_galaxy):
     kmeans = KMeans(n_clusters=5, random_state=0)
     X, y = gal.values()
     (clean_eps,) = np.where(~np.isnan(X[:, 8]))
-    expected = kmeans.fit(X[:, :7][clean_eps], y[clean_eps])
+    expected = kmeans.fit(X[:, [7, 8, 9]][clean_eps], y[clean_eps])
 
     np.testing.assert_array_equal(
         result.labels_[clean_label_gal], expected.labels_
     )
-    np.testing.assert_array_equal(
-        result.cluster_centers_, expected.cluster_centers_
+
+    np.testing.assert_allclose(
+        result.cluster_centers_,
+        expected.cluster_centers_,
+        rtol=1e-7,
+        atol=1e-8,
     )
