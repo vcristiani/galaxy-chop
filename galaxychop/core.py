@@ -10,6 +10,8 @@
 # IMPORTS
 # #####################################################
 
+import enum
+
 from astropy import units as u
 
 import attr
@@ -33,6 +35,26 @@ import uttr
 Units: kpc Msun**(-1) (km/s)**2"""
 
 G = 4.299e-6
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+
+class Columns(enum.Enum):
+    """Name for columns used to decompose galaxies."""
+
+    x = 0
+    y = 1
+    z = 2
+    vx = 3
+    vy = 4
+    vz = 5
+    m = 6
+    normalized_energy = 7
+    eps = 8
+    eps_r = 9
+
 
 # #####################################################
 # GALAXY CLASS

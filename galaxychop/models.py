@@ -6,13 +6,17 @@
 
 """Module models."""
 
-__all__ = ["GCDecomposeMixin", "GCClusterMixin", "GCAbadi", "GCKmeans"]
+__all__ = [
+    "GCDecomposeMixin",
+    "GCClusterMixin",
+    "GCAbadi",
+    "GCChop",
+    "GCKmeans",
+]
 
 # #####################################################
 # IMPORTS
 # #####################################################
-
-import enum
 
 import numpy as np
 
@@ -21,17 +25,6 @@ from sklearn.base import TransformerMixin
 from sklearn.cluster import KMeans
 
 from . import core
-
-# =============================================================================
-# ENUMS
-# =============================================================================
-
-
-class Columns(enum.Enum):
-    """Name for columns used to decompose galaxies."""
-
-    normalized_energy = 7
-    circular_parameter = 8
 
 
 # #####################################################
@@ -44,7 +37,7 @@ class GCDecomposeMixin:
 
     def get_clean_mask(self, X):
         """Clean the Nan value of the circular parameter array."""
-        eps = X[:, Columns.circular_parameter.value]
+        eps = X[:, core.Columns.eps.value]
         (clean,) = np.where(~np.isnan(eps))
         return clean
 
@@ -53,6 +46,14 @@ class GCDecomposeMixin:
         complete = -np.ones(len(clean_mask), dtype=int)
         complete[clean_mask] = labels
         return complete
+
+    def get_columns(self):
+        """Obtain the columns of the quantities to be used."""
+        return [
+            core.Columns.normalized_energy.value,
+            core.Columns.eps.value,
+            core.Columns.eps_r.value,
+        ]
 
     def decompose(self, galaxy):
         """Decompose method.
@@ -76,11 +77,13 @@ class GCDecomposeMixin:
         clean_mask = self.get_clean_mask(X)
         X_clean, y_clean = X[clean_mask], y[clean_mask]
 
+        # select only the needed columns
+        columns = self.get_columns()
+        X_ready = X_clean[:, columns]
+
         # execute the cluster with the quantities of interest in dynamic
         # decomposition
-        self.fit_transform(
-            X_clean[:, : Columns.normalized_energy.value], y_clean
-        )
+        self.fit_transform(X_ready, y_clean)
 
         # retrieve and fix the labels
         labels = self.labels_
@@ -327,4 +330,12 @@ class GCChop(GCAbadi):
 class GCKmeans(GCClusterMixin, KMeans):
     """Galaxy chop KMean class."""
 
-    pass
+    def __init__(self, columns=None, **kwargs):
+        super().__init__(**kwargs)
+        self.columns = columns
+
+    def get_columns(self):
+        """Obtain the columns of the quantities to be used."""
+        if self.columns is None:
+            return super().get_columns()
+        return self.columns
