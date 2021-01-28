@@ -277,6 +277,48 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         return self
 
 
+# #####################################################
+# GCChop CLASS
+# #####################################################
+
+
+class GCChop(GCAbadi):
+    """Galaxy chop Chop class.
+
+    Parameters
+    ----------
+    eps_cut : float, default=0.6
+        Cut-off value in the circularity parameter. Particles with
+        eps>eps_cut are assigned to the disk and particles with eps<=eps_cut
+        to the spheroid.
+    """
+
+    def __init__(self, eps_cut=0.6):
+        """Init function."""
+        self.eps_cut = eps_cut
+        if self.eps_cut > 1.0 or self.eps_cut < -1.0:
+            raise ValueError(
+                "The cut-off value in the circularity parameter is not between"
+                "(-1,1)."
+                "Got eps_cut %d" % (self.eps_cut)
+            )
+
+    def fit(self, X, y=None):
+        """Compute Chop clustering."""
+        eps_cut = self.eps_cut
+
+        (esf_idx,) = np.where(X[:, 1] <= eps_cut)
+        (disk_idx,) = np.where(X[:, 1] > eps_cut)
+
+        labels = np.empty(len(X), dtype=int)
+        labels[esf_idx] = 0
+        labels[disk_idx] = 1
+
+        self.labels_ = labels
+
+        return self
+
+
 # =============================================================================
 # SCIKIT_LEARN WRAPPERS
 # =============================================================================
