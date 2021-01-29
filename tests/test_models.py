@@ -17,6 +17,7 @@ import numpy as np
 import pytest
 
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 
 # =============================================================================
 # TESTS
@@ -162,6 +163,32 @@ def test_GCKmeans(mock_real_galaxy):
     np.testing.assert_allclose(
         result.cluster_centers_,
         expected.cluster_centers_,
+        rtol=1e-7,
+        atol=1e-8,
+    )
+
+
+def test_GCgmm(mock_real_galaxy):
+    """Test GCgmm."""
+    gal = mock_real_galaxy
+
+    gcgmm = models.GCgmm(n_components=5, random_state=0)
+    result = gcgmm.decompose(gal)
+    (clean_label_gal,) = np.where(result.labels_ != -1)
+
+    gmm = GaussianMixture(n_components=5, random_state=0)
+    X, y = gal.values()
+    (clean_eps,) = np.where(~np.isnan(X[:, 8]))
+    expected = gmm.fit(X[:, [7, 8, 9]][clean_eps], y[clean_eps])
+
+    np.testing.assert_array_equal(
+        result.labels_[clean_label_gal],
+        expected.predict(X[:, [7, 8, 9]][clean_eps]),
+    )
+
+    np.testing.assert_allclose(
+        result.means_,
+        expected.means_,
         rtol=1e-7,
         atol=1e-8,
     )
