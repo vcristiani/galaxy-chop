@@ -23,6 +23,7 @@ import numpy as np
 from sklearn.base import ClusterMixin
 from sklearn.base import TransformerMixin
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 
 from . import core
 
@@ -339,3 +340,23 @@ class GCKmeans(GCClusterMixin, KMeans):
         if self.columns is None:
             return super().get_columns()
         return self.columns
+
+
+class GCgmm(GCDecomposeMixin, GaussianMixture):
+    """Galaxy chop Gaussian Mixture Model class."""
+
+    def __init__(self, columns=None, **kwargs):
+        super().__init__(**kwargs)
+        self.columns = columns
+
+    def get_columns(self):
+        """Obtain the columns of the quantities to be used."""
+        if self.columns is None:
+            return super().get_columns()
+        return self.columns
+
+    def fit_transform(self, X, y=None):
+        """Transform method."""
+        labels = self.fit(X).predict(X)
+        self.labels_ = labels
+        return self
