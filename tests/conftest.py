@@ -174,7 +174,7 @@ def distance(x, y, z, m):
 
 def epot(x, y, z, m, eps=0.0):
     """
-    Energy potencial with python.
+    Potential energy with python.
 
     Parameters
     ----------
@@ -182,7 +182,7 @@ def epot(x, y, z, m, eps=0.0):
         Positions
     m : `np.ndarray`, shape = (N_part, 1)
         Masses
-    eps: `np.float`
+    eps: `float`
         Softening radius
 
     Returns

@@ -265,12 +265,12 @@ def test_type_energy(disc_particles_all, halo_particles):
         x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
     )
 
-    assert isinstance(p_s, (float, np.float, np.ndarray))
-    assert isinstance(p_dm, (float, np.float, np.ndarray))
-    assert isinstance(p_g, (float, np.float, np.ndarray))
-    assert isinstance(k_s, (float, np.float, np.ndarray))
-    assert isinstance(k_dm, (float, np.float, np.ndarray))
-    assert isinstance(k_g, (float, np.float, np.ndarray))
+    assert isinstance(p_s, (float, np.float64, np.ndarray))
+    assert isinstance(p_dm, (float, np.float64, np.ndarray))
+    assert isinstance(p_g, (float, np.float64, np.ndarray))
+    assert isinstance(k_s, (float, np.float64, np.ndarray))
+    assert isinstance(k_dm, (float, np.float64, np.ndarray))
+    assert isinstance(k_g, (float, np.float64, np.ndarray))
 
 
 def test_center_existence(disc_particles_all, halo_particles):
