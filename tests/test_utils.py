@@ -12,12 +12,13 @@
 import os
 from pathlib import Path
 
+import conftest
+
 from galaxychop import utils
 
 import numpy as np
 
 import pytest
-
 
 # =============================================================================
 # PATHS
@@ -84,9 +85,25 @@ def test_rcut_value(mock_galaxy):
         mock_galaxy.angular_momentum(r_cut=-1)
 
 
-@pytest.mark.xfail
-def test_daskpotential(disc_particles):
+def test_daskpotential(halo_particles):
     """Test potential function."""
-    dpotential = utils.potential(*disc_particles)
-    fpotential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
-    np.testing.assert_allclose(dpotential, fpotential, rtol=1e-4, atol=1e-3)
+
+    mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
+
+    dask_potential = utils.potential(
+        pos_dm[:, 0], pos_dm[:, 1], pos_dm[:, 2], mass_dm
+    )
+    python_potential = conftest.epot(
+        pos_dm[:, 0], pos_dm[:, 1], pos_dm[:, 2], mass_dm
+    )
+    fortran_potential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
+
+    np.testing.assert_allclose(
+        dask_potential, python_potential, rtol=1e-6, atol=1e-6
+    )
+    np.testing.assert_allclose(
+        python_potential, fortran_potential, rtol=1e-6, atol=1e-6
+    )
+    np.testing.assert_allclose(
+        dask_potential, fortran_potential, rtol=1e-6, atol=1e-6
+    )

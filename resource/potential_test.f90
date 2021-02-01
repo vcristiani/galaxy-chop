@@ -5,9 +5,9 @@ program potencial
 
     integer, parameter   :: n = 100
     real*8, dimension(:), allocatable   :: x, y, z, m, ep
-    real*8, parameter      :: G = 4.299e+4, eps=0.1
+    real*8, parameter      :: G = 4.299e-6, eps=0.0
     real*8                 :: dist
-    integer              :: i, j
+    integer                :: i, j
 
 
     allocate(x(n), y(n), z(n), m(n), ep(n))

@@ -40,6 +40,7 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 def rot_matrix_xaxis(theta=0):
     """
     Rotation matrix of a transformation around X axis.
+
     Parameters
     ----------
     theta : `float`
@@ -62,6 +63,7 @@ def rot_matrix_xaxis(theta=0):
 def rot_matrix_yaxis(theta=0):
     """
     Rotation matrix of a transformation around Y axis.
+
     Parameters
     ----------
     theta : `float`
@@ -84,6 +86,7 @@ def rot_matrix_yaxis(theta=0):
 def rot_matrix_zaxis(theta=0):
     """
     Rotation matrix of a transformation around Z axis.
+
     Parameters
     ----------
     theta : `float`
@@ -106,8 +109,10 @@ def rot_matrix_zaxis(theta=0):
 def rotate(pos, vel, matrix):
     """
     Rotate.
+
     Applies the rotation `matrix` to a set of particles positions `pos` and
     velocities `vel`
+
     Parameters
     ----------
     pos : `np.ndarray`, shape = (N_part, 3)
@@ -116,6 +121,7 @@ def rotate(pos, vel, matrix):
         Velocities of particles
     matrix : `np.ndarray`
         Rotation matrix, with shape (3, 3)
+
     Returns
     -------
     pos_rot : `np.ndarray`, shape = (N_part, 3)
@@ -129,31 +135,77 @@ def rotate(pos, vel, matrix):
     return pos_rot, vel_rot
 
 
-def save_data(N_part=100):
+def distance(x, y, z, m):
     """
-    Save data.
-    This function saves a file with mock particles in a solid disk created with
-    `solid_disk` function to run potentials with `potential_test.f90`
-    to validate the potential function with dask
+    Distances calculator.
+
+    Calculate distances beetween particles.
+
     Parameters
     ----------
-    N_part : `int`
-        The total number of particles to obtain
+    x, y, z: `np.ndarray`, shape = (N_part, 1)
+        Positions
+    m : `np.ndarray`, shape = (N_part, 1)
+        Masses
+
     Returns
     -------
-    File named  `mock_particles.dat` on the folder tests/test_data
-    with 4 columns and N_part rows. From left to right:
-    x, y, z : Positions
-    mass : Masses
+    dx, dy, dz: `np.ndarray`, shape = (N_part, N_part)
+        Distances between particles.
     """
-    mass, pos, vel = solid_disk(N_part)
-    data = np.ndarray([len(mass), 4])
-    data[:, 0] = pos[:, 0]
-    data[:, 1] = pos[:, 1]
-    data[:, 2] = pos[:, 2]
-    data[:, 3] = mass
+    N_part = len(m)
 
-    np.savetxt("test_data/mock_particles.dat", data, fmt="%12.6f")
+    dx = np.zeros((N_part, N_part))
+    dy = np.zeros((N_part, N_part))
+    dz = np.zeros((N_part, N_part))
+
+    for i in range(0, N_part - 1):
+        for j in range(i + 1, N_part):
+            dx[i, j] = x[j] - x[i]
+            dy[i, j] = y[j] - y[i]
+            dz[i, j] = z[j] - z[i]
+
+            dx[j, i] = -dx[i, j]
+            dy[j, i] = -dy[i, j]
+            dz[j, i] = -dz[i, j]
+
+    return dx, dy, dz
+
+
+def epot(x, y, z, m, eps=0.0):
+    """
+    Potential energy with python.
+
+    Parameters
+    ----------
+    x, y, z: `np.ndarray`, shape = (N_part, 1)
+        Positions
+    m : `np.ndarray`, shape = (N_part, 1)
+        Masses
+    eps: `float`
+        Softening radius
+
+    Returns
+    -------
+    Upot: `np.ndarray`, shape = (N_part, 1)
+        Potential energy of particles
+    """
+    G = 4.299e-6
+    N_part = len(m)
+
+    U = np.zeros((N_part, N_part))
+
+    dx, dy, dz = distance(x, y, z, m)
+
+    dist = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2 + eps ** 2)
+
+    for i in range(N_part - 1):
+        for j in range(i + 1, N_part):
+            U[i, j] = G * m[j] * m[i] / dist[i, j]
+            U[j, i] = U[i, j]
+
+    Upot = np.sum(U / m, axis=0)
+    return Upot
 
 
 # =============================================================================
@@ -163,6 +215,7 @@ def save_data(N_part=100):
 def random_galaxy_params():
     """
     Galaxy parameter for test.
+
     This return a function of a dictionary with random params of a Galaxy
     object
     """
@@ -227,6 +280,7 @@ def random_galaxy_params():
 def solid_disk():
     """
     Mock solid disk.
+
     Creates a mock solid disc of particles with masses
     and velocities.
     """
@@ -259,6 +313,7 @@ def solid_disk():
 def mock_dm_halo():
     """
     Mock dark matter Halo.
+
     Creates a mock DM halo of particles with masses
     and velocities.
     """
