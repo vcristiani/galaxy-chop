@@ -213,3 +213,9 @@ def test_GCAutogmm(mock_real_galaxy):
         expected.predict(X[:, [7, 8, 9]][clean_eps]),
     )
 
+    np.testing.assert_allclose(
+        result.gcgmm_.means_,
+        expected.means_,
+        rtol=1e-7,
+        atol=1e-8,
+    )
