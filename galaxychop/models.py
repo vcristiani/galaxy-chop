@@ -361,3 +361,44 @@ class GCgmm(GCDecomposeMixin, GaussianMixture):
         labels = self.fit(X).predict(X)
         self.labels_ = labels
         return self
+
+
+class GCAutogmm(GCDecomposeMixin, GaussianMixture):
+    """Galaxy chop auto-gmm class."""
+
+    def __init__(self, columns=None, c_bic=0.1, **kwargs):
+        super().__init__(**kwargs)
+        self.columns = columns
+        self.c_bic = c_bic
+
+    def get_columns(self):
+        """Obtain the columns of the quantities to be used."""
+        if self.columns is None:
+            return super().get_columns()
+        return self.columns
+
+    def fit_transform(self, X, y=None):
+        """Transform method."""
+        componenst_to_try = np.arange(2, 16)
+        bic_med = np.empty(len(componenst_to_try))
+
+        # Acá vamos de decidir cuantas componentes vamos a usar con el
+        # criterio de Du et al.
+        for i in componenst_to_try:
+            # Aplicamos el GMM
+            gmm = GaussianMixture(n_components=i, n_init=10)
+            gmm.fit(X)
+            bic_med[i] = gmm.bic(X) / len(X)
+
+        bic_min = np.sum(bic_med[-5:]) / 5.0
+        delta_bic = bic_med - bic_min
+
+        c_bic = self.c_bic
+        mask = np.where(delta_bic <= c_bic)[0]
+
+        # nro de componentes
+        number_of_gaussians = np.min(componenst_to_try[mask])
+        gmm = GaussianMixture(n_components=number_of_gaussians, n_init=10)
+        labels = gmm.fit(X).predict(X)
+        self.labels_ = labels
+        return self
