@@ -28,6 +28,11 @@ components.
 It runs in numerical N-body simulations populated with Semi-analytical models
 and full Hydrodynamical simulations, such as Illustris TNG.
 
+
+| **Authors**
+| Valeria Cristiani (E-mail: valeria.cristiani@unc.edu.ar),
+| Ornela Marioni, Nelson Villagra, Antonela Taverna and Rafael Pignata
+
 Repository
 ----------
 
@@ -38,14 +43,13 @@ https://github.com/vcristiani/galaxy-chop
    :maxdepth: 1
    :caption: Contents:
 
-   api/galaxychop.rst
+   installation.rst
    tutorial.ipynb
    license.rst
-
+   api/galaxychop.rst
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

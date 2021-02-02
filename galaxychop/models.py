@@ -44,9 +44,10 @@ class GCDecomposeMixin:
         (clean,) = np.where(~np.isnan(eps))
         return clean
 
-    def add_dirty(self, labels, clean_mask):
+    def add_dirty(self, X, labels, clean_mask):
         """Complete the labels."""
-        complete = -np.ones(len(clean_mask), dtype=int)
+        eps = X[:, core.Columns.eps.value]
+        complete = -np.ones(len(eps), dtype=int)
         complete[clean_mask] = labels
         return complete
 
@@ -90,7 +91,7 @@ class GCDecomposeMixin:
 
         # retrieve and fix the labels
         labels = self.labels_
-        self.labels_ = self.add_dirty(labels, clean_mask)
+        self.labels_ = self.add_dirty(X, labels, clean_mask)
 
         # return the instance
         return self
