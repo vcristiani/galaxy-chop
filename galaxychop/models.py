@@ -394,7 +394,7 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         number_of_gaussians = np.min(self.component_to_try[mask])
         self.n_components = number_of_gaussians
 
-        # Clustering with gaussian mixture and the parameters obtained. 
+        # Clustering with gaussian mixture and the parameters obtained.
         gcgmm_ = GaussianMixture(n_components=number_of_gaussians)
         self.gcgmm_ = gcgmm_
         labels = gcgmm_.fit(X).predict(X)
