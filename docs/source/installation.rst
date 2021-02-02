@@ -42,7 +42,7 @@ Check out GalaxyChop main development branch like so:
    $ git clone https://github.com/vcristiani/galaxy-chop.git
    
 
-This will create a directory *Pyedra* in your current directory.
+This will create a directory *galaxy-chop* in your current directory.
 
 Then you can proceed to install with the commands
 
