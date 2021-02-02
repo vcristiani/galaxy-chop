@@ -168,11 +168,11 @@ def test_GCKmeans(mock_real_galaxy):
     )
 
 
-def test_GCgmm(mock_real_galaxy):
-    """Test GCgmm."""
+def test_GCGmm(mock_real_galaxy):
+    """Test GCGmm."""
     gal = mock_real_galaxy
 
-    gcgmm = models.GCgmm(n_components=5, random_state=0)
+    gcgmm = models.GCGmm(n_components=5, random_state=0)
     result = gcgmm.decompose(gal)
     (clean_label_gal,) = np.where(result.labels_ != -1)
 

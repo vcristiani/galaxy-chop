@@ -12,7 +12,7 @@ __all__ = [
     "GCAbadi",
     "GCChop",
     "GCKmeans",
-    "GCgmm",
+    "GCGmm",
     "GCAutogmm",
 ]
 
@@ -345,7 +345,7 @@ class GCKmeans(GCClusterMixin, KMeans):
         return self.columns
 
 
-class GCgmm(GCDecomposeMixin, GaussianMixture):
+class GCGmm(GCDecomposeMixin, GaussianMixture):
     """Galaxy chop Gaussian Mixture Model class."""
 
     def __init__(self, columns=None, **kwargs):
@@ -365,42 +365,42 @@ class GCgmm(GCDecomposeMixin, GaussianMixture):
         return self
 
 
-class GCAutogmm(GCgmm):
+class GCAutogmm(GCClusterMixin, TransformerMixin):
     """Galaxy chop auto-gmm class."""
 
-    def __init__(self, c_bic=0.1, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, c_bic=0.1, component_to_try=None):
         self.c_bic = c_bic
-        self.n_components = _get_number_of_gaussians()
+        self.component_to_try = (
+            np.arange(2, 16) if component_to_try is None else component_to_try
+        )
 
-
-    def _get_number_of_gaussians(self, X):
-        "Automatic selection of the number of gaussians."
-        componenst_to_try = np.arange(2, 16)
-        bic_med = np.empty(len(componenst_to_try))
-
-        for i in componenst_to_try:
+    def fit(self, X, y=None):
+        """Compute clustering."""
+        bic_med = np.empty(len(self.component_to_try))
+        for i in self.component_to_try:
             # Implementation of gmm for all possible components of the method.
             gmm = GaussianMixture(n_components=i, n_init=10)
             gmm.fit(X)
-            bic_med[i] = gmm.bic(X) / len(X)
+            bic_med[i - 2] = gmm.bic(X) / len(X)
 
-        bic_min = np.sum(bic_med[-5:]) / 5.0
-        delta_bic = bic_med - bic_min
+        self.bic_min_ = np.sum(bic_med[-5:]) / 5.0
+        self.delta_bic_ = bic_med - self.bic_min_
 
         # Criteria for the choice of the number of gaussians.
         c_bic = self.c_bic
-        mask = np.where(delta_bic <= c_bic)[0]
+        mask = np.where(self.delta_bic_ <= c_bic)[0]
 
-        # nro de componentes
-        number_of_gaussians = np.min(componenst_to_try[mask])
+        # Number of components
+        number_of_gaussians = np.min(self.component_to_try[mask])
+        self.n_components = number_of_gaussians
 
-        return number_of_gaussians
-
-
-    def fit_transform(self, X, y=None):
-        """Transform method."""
-        gmm = GaussianMixture(n_components=self.n_components, n_init=10)
-        labels = gmm.fit(X).predict(X)
+        gcgmm_ = GaussianMixture(n_components=number_of_gaussians)
+        self.gcgmm_ = gcgmm_
+        labels = gcgmm_.fit(X).predict(X)
         self.labels_ = labels
+        self.predict_proba = gcgmm_.predict_proba(X)
+        return self
+
+    def transform(self, X, y=None):
+        """Transform method."""
         return self
