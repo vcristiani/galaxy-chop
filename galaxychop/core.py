@@ -159,13 +159,13 @@ class Galaxy:
     vz_g = uttr.ib(unit=(u.km / u.s))
     m_g = uttr.ib(unit=u.Msun)
 
+    pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
+    pot_dm = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
+    pot_g = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
+
     eps_s = uttr.ib(default=0.0, unit=u.kpc)
     eps_dm = uttr.ib(default=0.0, unit=u.kpc)
     eps_g = uttr.ib(default=0.0, unit=u.kpc)
-
-    pot_dm = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
-    pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
-    pot_g = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
 
     J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
     Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
@@ -541,8 +541,26 @@ class Galaxy:
         vy_dm = self.arr_.vy_dm
         vz_dm = self.arr_.vz_dm
 
+        pot_s = self.arr_.pot_s
+        pot_dm = self.arr_.pot_dm
+        pot_g = self.arr_.pot_g
+
         xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
-            x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g, m_s, m_g, m_dm
+            x_s,
+            y_s,
+            z_s,
+            x_dm,
+            y_dm,
+            z_dm,
+            x_g,
+            y_g,
+            z_g,
+            m_s,
+            m_g,
+            m_dm,
+            pot_s,
+            pot_dm,
+            pot_g,
         )
 
         (

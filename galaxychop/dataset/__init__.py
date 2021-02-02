@@ -47,3 +47,45 @@ def load_gas():
     path = PATH / "gas_.dat"
 
     return np.loadtxt(path)
+
+
+def load_star_394242():
+    """Input for testing."""
+    path = PATH / "star_ID_394242.npy"
+
+    return np.load(path)
+
+
+def load_dark_394242():
+    """Input for testing."""
+    path = PATH / "dark_ID_394242.npy"
+
+    return np.load(path)
+
+
+def load_gas_394242():
+    """Input for testing."""
+    path = PATH / "gas_ID_394242.npy"
+
+    return np.load(path)
+
+
+def load_pot_star_394242():
+    """Input for testing."""
+    path = PATH / "potential_star_ID_394242.npy"
+
+    return np.load(path)
+
+
+def load_pot_dark_394242():
+    """Input for testing."""
+    path = PATH / "potential_dark_ID_394242.npy"
+
+    return np.load(path)
+
+
+def load_pot_gas_394242():
+    """Input for testing."""
+    path = PATH / "potential_gas_ID_394242.npy"
+
+    return np.load(path)

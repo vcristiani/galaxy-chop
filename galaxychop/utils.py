@@ -247,6 +247,9 @@ def center(
     m_s,
     m_g,
     m_dm,
+    pot_s=0,
+    pot_dm=0,
+    pot_g=0,
     eps_dm=0,
     eps_s=0,
     eps_g=0,
@@ -258,17 +261,22 @@ def center(
     m = np.hstack((m_s, m_dm, m_g))
     eps = np.max([eps_dm, eps_s, eps_g])
 
-    pot = potential(
-        da.asarray(x, chunks=100),
-        da.asarray(y, chunks=100),
-        da.asarray(z, chunks=100),
-        da.asarray(m, chunks=100),
-        da.asarray(eps),
-    )
+    total_potential = pot_dm
 
-    num_s = len(m_s)
-    num = len(m_s) + len(m_dm)
-    pot_dark = pot[num_s:num]
+    if np.all(total_potential == 0.0):
+        pot = potential(
+            da.asarray(x, chunks=100),
+            da.asarray(y, chunks=100),
+            da.asarray(z, chunks=100),
+            da.asarray(m, chunks=100),
+            da.asarray(eps),
+        )
+
+        num_s = len(m_s)
+        num = len(m_s) + len(m_dm)
+        pot_dark = pot[num_s:num]
+    else:
+        pot_dark = pot_dm
 
     x_s = x_s - x_dm[pot_dark.argmax()]
     y_s = y_s - y_dm[pot_dark.argmax()]
