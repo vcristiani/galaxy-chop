@@ -34,6 +34,8 @@ jobs:
 
    # - name: Run check-manifest on itself
    #   run: python check_manifest.py
+    - name: Run flake8
+      run: flake8 
     
     - name: Test with tox
       run: tox
