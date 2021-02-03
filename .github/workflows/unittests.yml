@@ -40,10 +40,14 @@ jobs:
     
     - name: Run docs
       working-directory: ./docs
-      uses: py-actions/py-dependency-install@v2
-      with:
-        path: "requirements.txt" 
-      run: sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
+      run: |
+        pip install ipykernel
+        pip install ipython
+        pip install Sphinx
+        pip install sphinx-rtd-theme
+        pip instal lnbsphinx
+        pip install Cython >= 0.28.5 
+        sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
 
 
     - name: Check-manifest
