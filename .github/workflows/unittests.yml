@@ -32,10 +32,14 @@ jobs:
    # - name: Check test coverage
    #   run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
 
-   # - name: Run check-manifest on itself
-   #   run: python check_manifest.py
+    - name: Run tests
+      run: pytest tests/
+      
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
     
-    - name: Pytest
-      run: pytest tests/
+    - name: Run pydocstyle
+      run: pydocstyle galaxychop --convention=numpy
+   
+    - name: Test with tox
+      run: tox
