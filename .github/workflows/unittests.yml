@@ -32,8 +32,8 @@ jobs:
    # - name: Check test coverage
    #   run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
 
-    - name: Run check-manifest on itself
-      run: python check_manifest.py
+   # - name: Run check-manifest on itself
+   #   run: python check_manifest.py
     
     - name: Test with tox
-      run: tox
+      run: "tox -e ${{ matrix.tox_env }}-coverage"
