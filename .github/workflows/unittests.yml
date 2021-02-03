@@ -45,7 +45,7 @@ jobs:
         pip install ipython
         pip install Sphinx
         pip install sphinx-rtd-theme
-        pip instal lnbsphinx
+        pip install nbsphinx
         pip install Cython >= 0.28.5 
         sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
 
