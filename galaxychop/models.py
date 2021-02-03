@@ -443,6 +443,7 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         for i in range(len(X)):
             labels[i] = probability[i, :].argmax()
 
+        self.probability_of_gaussianmixture = predict_proba
         self.probability = probability
         self.labels_ = labels
 
