@@ -377,31 +377,73 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
     def fit(self, X, y=None):
         """Compute clustering."""
         bic_med = np.empty(len(self.component_to_try))
+        gausians = []
         for i in self.component_to_try:
             # Implementation of gmm for all possible components of the method.
             gmm = GaussianMixture(n_components=i, n_init=10, random_state=0)
             gmm.fit(X)
             bic_med[i - 2] = gmm.bic(X) / len(X)
+            gausians.append(gmm)
 
-        self.bic_min_ = np.sum(bic_med[-5:]) / 5.0
-        self.delta_bic_ = bic_med - self.bic_min_
+        bic_min = np.sum(bic_med[-5:]) / 5.0
+        delta_bic_ = bic_med - bic_min
 
         # Criteria for the choice of the number of gaussians.
         c_bic = self.c_bic
-        mask = np.where(self.delta_bic_ <= c_bic)[0]
+        mask = np.where(delta_bic_ <= c_bic)[0]
 
         # Number of components
         number_of_gaussians = np.min(self.component_to_try[mask])
-        self.n_components = number_of_gaussians
 
         # Clustering with gaussian mixture and the parameters obtained.
-        gcgmm_ = GaussianMixture(n_components=number_of_gaussians)
+        gcgmm_ = GaussianMixture(
+            n_components=number_of_gaussians,
+            random_state=0,
+        )
+        gcgmm_.fit(X)
+
+        # store all in the instances
+        self.bic_med_ = bic_med
+        self.gausians_ = tuple(gausians)
+        self.bic_min_ = bic_min
+        self.delta_bic_ = delta_bic_
+        self.c_bic_ = c_bic
+        self.mask_ = mask
+        self.n_components_ = number_of_gaussians
         self.gcgmm_ = gcgmm_
-        labels = gcgmm_.fit(X).predict(X)
-        self.labels_ = labels
 
         return self
 
     def transform(self, X, y=None):
         """Transform method."""
+        n_components = self.n_components_
+        center = self.gcgmm_.means_
+        predict_proba = self.gcgmm_.predict_proba(X)
+
+        # Sumamos las probabilidades para obtener la clasificación de las
+        # diferentes particulas
+        halo = np.zeros(len(X))
+        bulge = np.zeros(len(X))
+        cold_disk = np.zeros(len(X))
+        warm_disk = np.zeros(len(X))
+
+        for i in range(0, n_components):
+            if center[i, 1] >= 0.85:
+                cold_disk = cold_disk + predict_proba[:, i]
+            if (center[i, 1] < 0.85) & (center[i, 1] >= 0.5):
+                warm_disk = warm_disk + predict_proba[:, i]
+            if (center[i, 1] < 0.5) & (center[i, 0] >= -0.75):
+                halo = halo + predict_proba[:, i]
+            if (center[i, 1] < 0.5) & (center[i, 0] < -0.75):
+                bulge = bulge + predict_proba[:, i]
+
+        probability = np.column_stack((halo, bulge, cold_disk, warm_disk))
+        labels = np.empty(len(X), dtype=int)
+
+        for i in range(len(X)):
+            labels[i] = probability[i, :].argmax()
+
+        self.probability = probability
+        self.labels_ = labels
+
         return self
