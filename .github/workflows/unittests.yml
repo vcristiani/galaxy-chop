@@ -23,20 +23,20 @@ jobs:
         pip install tox tox-gh-actions
         python -m pip install -e .[test]
         
-   # - name: Run tests
-   #   run: coverage run -m pytest
-   #   env:
-   #     SKIP_NO_TESTS: "1"
-   #     FORCE_TEST_VCS: ${{ matrix.vcs }}
-
-   # - name: Check test coverage
-   #   run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
-
     - name: Run tests
-      run: pytest tests/
-      
+      run: coverage run -m pytest tests/
+      env:
+        SKIP_NO_TESTS: "1"
+        FORCE_TEST_VCS: ${{ matrix.vcs }}
+
     - name: Check test coverage
-      run:  pytest -q tests/ --cov=galaxychop --cov-append --cov-report=coverage report --fail-under=86
+      run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 }}
+
+    # - name: Run tests
+    #  run: pytest tests/
+      
+    # - name: Check test coverage
+    #   run:  pytest -q tests/ --cov=galaxychop --cov-append --cov-report=coverage report --fail-under=86
       
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
