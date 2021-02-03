@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -U coverage pytest flake8
+        python -m pip install -U coverage pytest flake8 pydocstyle check-manifest
         pip install tox tox-gh-actions
         python -m pip install -e .[test]
         
@@ -37,5 +37,10 @@ jobs:
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
     
-    - name: Test with tox
-      run: tox
+    - name: Coverage
+      run: |
+        coverage erase
+        pytest -q tests/ --cov=galaxychop --cov-append --cov-report = coverage report --fail-under=86 -m
+
+    - name: Docstyle
+      run: pydocstyle galaxychop --convention=numpy
