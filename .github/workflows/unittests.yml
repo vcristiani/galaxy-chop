@@ -37,10 +37,5 @@ jobs:
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
     
-    - name: Coverage
-      run: |
-        coverage erase
-        pytest -q tests/ --cov=galaxychop --cov-append --cov-report = coverage report --fail-under=86
-
-    - name: Docstyle
-      run: pydocstyle galaxychop --convention=numpy
+    - name: Pytest
+      run: pytest tests/
