@@ -23,16 +23,16 @@ jobs:
         pip install tox tox-gh-actions
         
     - name: Run tests
-        run: coverage run -m pytest
-        env:
+      run: coverage run -m pytest
+      env:
           SKIP_NO_TESTS: "1"
           FORCE_TEST_VCS: ${{ matrix.vcs }}
 
-      - name: Check test coverage
-        run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
+    - name: Check test coverage
+      run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
 
-      - name: Run check-manifest on itself
-        run: python check_manifest.py
+    - name: Run check-manifest on itself
+      run: python check_manifest.py
     
     - name: Test with tox
       run: tox
