@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -U coverage pytest flake8 pydocstyle check-manifest
+        python -m pip install -U coverage pytest flake8 pydocstyle check-manifest pytest-cov
         pip install tox tox-gh-actions
         python -m pip install -e .[test]
         
