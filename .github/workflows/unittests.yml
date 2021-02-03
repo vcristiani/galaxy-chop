@@ -31,6 +31,20 @@ jobs:
 
    # - name: Check test coverage
    #   run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
+      
+    - name: Run flake8
+      run: flake8 setup.py galaxychop tests 
+    
+    - name: Run pydocstyle
+      run: pydocstyle galaxychop --convention=numpy
+    
+    - name: Run docs
+      working-directory: ./docs
+      run: sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
+
+
+    - name: Check-manifest
+      run: check-manifest
 
     - name: Run tests
       run: pytest tests/
@@ -39,15 +53,6 @@ jobs:
       run: | 
         pytest -q tests/ --cov=galaxychop --cov-append --cov-report= 
         coverage report --fail-under=86
-      
-    - name: Run flake8
-      run: flake8 setup.py galaxychop tests 
-    
-    - name: Run pydocstyle
-      run: pydocstyle galaxychop --convention=numpy
-
-    - name: Check-manifest
-      run: check-manifest
       
     - name: Test with tox
       run: tox
