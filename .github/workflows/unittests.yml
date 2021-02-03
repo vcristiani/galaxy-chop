@@ -40,6 +40,9 @@ jobs:
     
     - name: Run docs
       working-directory: ./docs
+      uses: py-actions/py-dependency-install@v2
+      with:
+        path: "requirements.txt" 
       run: sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
 
 
