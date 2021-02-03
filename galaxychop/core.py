@@ -467,6 +467,8 @@ class Galaxy:
             )
 
             return Galaxy(**new)
+       else:
+            raise ValueError("Potential are already calculated")
 
     @property
     def energy(self):
