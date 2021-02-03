@@ -22,18 +22,12 @@ jobs:
         python -m pip install -U coverage pytest flake8 pydocstyle check-manifest pytest-cov
         pip install tox tox-gh-actions
         python -m pip install -e .[test]
-        
-   # - name: Run tests
-   #   run: coverage run -m pytest
-   #   env:
-   #     SKIP_NO_TESTS: "1"
-   #     FORCE_TEST_VCS: ${{ matrix.vcs }}
-
-   # - name: Check test coverage
-   #   run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 90 || 100 }}
 
     - name: Run tests
       run: pytest tests/
+    
+    - name: Check test coverage
+      run: pytest -q tests/ --cov=galaxychop --cov-append --cov-report= coverage report --fail-under=86 -m
       
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
