@@ -36,4 +36,4 @@ jobs:
    #   run: python check_manifest.py
     
     - name: Test with tox
-      run: "tox -e ${{ matrix.tox_env }}-coverage"
+      run: tox
