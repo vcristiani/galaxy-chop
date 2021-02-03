@@ -195,12 +195,13 @@ def test_GCGmm(mock_real_galaxy):
 
 
 def test_GCAutogmm(mock_real_galaxy):
-    """Test GCGmm."""
+    """Test GCAutogmm."""
     gal = mock_real_galaxy
 
     autogmm = models.GCAutogmm(c_bic=0.1)
     result = autogmm.decompose(gal)
     n_components = autogmm.n_components
+    # parameters_autogmm = autogmm.gcgmm_.get_params()
     (clean_label_gal,) = np.where(result.labels_ != -1)
 
     gmm = GaussianMixture(n_components=n_components, random_state=0)

@@ -379,7 +379,7 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         bic_med = np.empty(len(self.component_to_try))
         for i in self.component_to_try:
             # Implementation of gmm for all possible components of the method.
-            gmm = GaussianMixture(n_components=i, n_init=10)
+            gmm = GaussianMixture(n_components=i, n_init=10, random_state=0)
             gmm.fit(X)
             bic_med[i - 2] = gmm.bic(X) / len(X)
 
@@ -394,7 +394,7 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         number_of_gaussians = np.min(self.component_to_try[mask])
         self.n_components = number_of_gaussians
 
-        # Clustering with gaussian mixture and the parameters obtained. 
+        # Clustering with gaussian mixture and the parameters obtained.
         gcgmm_ = GaussianMixture(n_components=number_of_gaussians)
         self.gcgmm_ = gcgmm_
         labels = gcgmm_.fit(X).predict(X)
