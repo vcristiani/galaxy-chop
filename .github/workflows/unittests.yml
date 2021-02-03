@@ -35,7 +35,7 @@ jobs:
    # - name: Run check-manifest on itself
    #   run: python check_manifest.py
     - name: Run flake8
-      run: flake8 setup.py galaxychop tests {posargs}
+      run: flake8 setup.py galaxychop tests 
     
     - name: Test with tox
       run: tox
