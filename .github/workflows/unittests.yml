@@ -46,5 +46,9 @@ jobs:
     - name: Run pydocstyle
       run: pydocstyle galaxychop --convention=numpy
 
+    - name: Check-manifest
+      run: check-manifest
+      
     - name: Test with tox
       run: tox
+    
