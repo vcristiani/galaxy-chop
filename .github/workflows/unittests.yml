@@ -35,6 +35,9 @@ jobs:
     - name: Run tests
       run: pytest tests/
       
+    - name: Check test coverage
+      run:  pytest -q tests/ --cov=galaxychop --cov-append --cov-report=coverage report --fail-under=86
+      
     - name: Run flake8
       run: flake8 setup.py galaxychop tests 
     
