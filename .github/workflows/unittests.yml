@@ -40,7 +40,7 @@ jobs:
     - name: Coverage
       run: |
         coverage erase
-        pytest -q tests/ --cov=galaxychop --cov-append --cov-report = coverage report --fail-under=86 -m
+        pytest -q tests/ --cov=galaxychop --cov-append --cov-report = coverage report --fail-under=86
 
     - name: Docstyle
       run: pydocstyle galaxychop --convention=numpy
