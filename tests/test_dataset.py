@@ -71,7 +71,6 @@ def test_load_pot_gas_TNG_394242():
     assert result.shape == (80153,)
 
 
-
 def test_load_pot_star_TNG_394242():
     """Check the potential_star_ID_394242.npy array len."""
     result = gc.dataset.load_pot_star_394242()
