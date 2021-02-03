@@ -47,6 +47,7 @@ jobs:
         pip install sphinx-rtd-theme
         pip install nbsphinx
         pip install Cython
+        pip install pandoc
         sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html
 
 
