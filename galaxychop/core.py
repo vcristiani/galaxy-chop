@@ -467,7 +467,7 @@ class Galaxy:
             )
 
             return Galaxy(**new)
-       else:
+        else:
             raise ValueError("Potential are already calculated")
 
     @property
