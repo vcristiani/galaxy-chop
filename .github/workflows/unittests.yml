@@ -21,10 +21,10 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version3.7 }}
       - name: Install tox
         run: pip install tox
       - name: Test with tox ${{ matrix.env.TOXENV }}
-        env: ${{ matrix.env }}
+        env: ${{ matrix.env.style }}
         run: tox
       
