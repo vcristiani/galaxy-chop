@@ -420,8 +420,8 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         center = self.gcgmm_.means_
         predict_proba = self.gcgmm_.predict_proba(X)
 
-        # Sumamos las probabilidades para obtener la clasificación de las
-        # diferentes particulas
+        # We add up the probabilities to obtain the classification of the
+        # different particles.
         halo = np.zeros(len(X))
         bulge = np.zeros(len(X))
         cold_disk = np.zeros(len(X))
