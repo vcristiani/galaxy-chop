@@ -4,4 +4,3 @@ Sphinx
 sphinx-rtd-theme
 nbsphinx
 Cython >= 0.28.5 
-pandoc
