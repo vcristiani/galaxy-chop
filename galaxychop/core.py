@@ -420,40 +420,55 @@ class Galaxy:
         m_g = self.arr_.m_g
         m_dm = self.arr_.m_dm
 
+        pot_s = self.arr_.pot_s
+        pot_dm = self.arr_.pot_dm
+        pot_g = self.arr_.pot_g
+
         eps_s = self.arr_.eps_s
-        eps_g = self.arr_.eps_g
         eps_dm = self.arr_.eps_dm
+        eps_g = self.arr_.eps_g
 
-        x = np.hstack((x_s, x_dm, x_g))
-        y = np.hstack((y_s, y_dm, y_g))
-        z = np.hstack((z_s, z_dm, z_g))
-        m = np.hstack((m_s, m_dm, m_g))
-        eps = np.max([eps_s, eps_dm, eps_g])
-
-        pot = utils.potential(
-            da.asarray(x, chunks=100),
-            da.asarray(y, chunks=100),
-            da.asarray(z, chunks=100),
-            da.asarray(m, chunks=100),
-            da.asarray(eps),
+        potential = np.concatenate(
+            [
+                pot_s,
+                pot_dm,
+                pot_g,
+            ]
         )
 
-        num_s = len(m_s)
-        num = len(m_s) + len(m_dm)
+        if np.all(potential == 0.0):
+            x = np.hstack((x_s, x_dm, x_g))
+            y = np.hstack((y_s, y_dm, y_g))
+            z = np.hstack((z_s, z_dm, z_g))
+            m = np.hstack((m_s, m_dm, m_g))
+            eps = np.max([eps_s, eps_dm, eps_g])
 
-        pot_s = pot[:num_s]
-        pot_dm = pot[num_s:num]
-        pot_g = pot[num:]
+            pot = utils.potential(
+                da.asarray(x, chunks=100),
+                da.asarray(y, chunks=100),
+                da.asarray(z, chunks=100),
+                da.asarray(m, chunks=100),
+                da.asarray(eps),
+            )
 
-        new = attr.asdict(self, recurse=False)
-        del new["arr_"]
-        new.update(
-            pot_dm=-pot_dm * (u.km / u.s) ** 2,
-            pot_s=-pot_s * (u.km / u.s) ** 2,
-            pot_g=-pot_g * (u.km / u.s) ** 2,
-        )
+            num_s = len(m_s)
+            num = len(m_s) + len(m_dm)
 
-        return Galaxy(**new)
+            pot_s = pot[:num_s]
+            pot_dm = pot[num_s:num]
+            pot_g = pot[num:]
+
+            new = attr.asdict(self, recurse=False)
+            del new["arr_"]
+            new.update(
+                pot_s=-pot_s * (u.km / u.s) ** 2,
+                pot_dm=-pot_dm * (u.km / u.s) ** 2,
+                pot_g=-pot_g * (u.km / u.s) ** 2,
+            )
+
+            return Galaxy(**new)
+        else:
+            raise ValueError("Potential are already calculated")
 
     @property
     def energy(self):
