@@ -114,7 +114,6 @@ def test_GCChop_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
-@pytest.mark.xfail
 def test_GCChop_eps_cut(mock_real_galaxy):
     """Tests the number of particles in each component."""
     gal = mock_real_galaxy

@@ -36,13 +36,6 @@ import pytest
         "vx_s",
         "vy_s",
         "vz_s",
-        "x_dm",
-        "y_dm",
-        "z_dm",
-        "m_dm",
-        "vx_dm",
-        "vy_dm",
-        "vz_dm",
         "m_g",
         "x_g",
         "y_g",
@@ -50,6 +43,14 @@ import pytest
         "vx_g",
         "vy_g",
         "vz_g",
+        "m_dm",
+        "x_dm",
+        "y_dm",
+        "z_dm",
+        "vx_dm",
+        "vy_dm",
+        "vz_dm",
+        
     ],
 )
 def test_same_size_inputs(shorten, random_galaxy_params):
@@ -64,8 +65,8 @@ def test_same_size_inputs(shorten, random_galaxy_params):
     "pot_name, npart",
     [
         ("pot_s", 10),
-        ("pot_dm", 20),
-        ("pot_g", 30),
+        ("pot_g", 20),
+        ("pot_dm", 30),
     ],
 )
 def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
@@ -73,7 +74,7 @@ def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
     seed = 42
     random = np.random.RandomState(seed=seed)
     pot = random.random_sample(size=npart)
-    params = random_galaxy_params(stars=10, dm=20, gas=30, seed=42)
+    params = random_galaxy_params(stars=10, gas=20, dm=30, seed=42)
     params[pot_name] = pot
     with pytest.raises(ValueError):
         core.Galaxy(**params)
@@ -87,15 +88,15 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g.kinetic_energy[0], u.Quantity)
     assert isinstance(g.kinetic_energy[1], u.Quantity)
     assert isinstance(g.kinetic_energy[2], u.Quantity)
-    assert isinstance(g.potential_energy().pot_s, u.Quantity)
     assert isinstance(g.potential_energy().pot_dm, u.Quantity)
+    assert isinstance(g.potential_energy().pot_s, u.Quantity)
     assert isinstance(g.potential_energy().pot_g, u.Quantity)
     assert isinstance(g.energy[0], u.Quantity)
     assert isinstance(g.energy[1], u.Quantity)
     assert isinstance(g.energy[2], u.Quantity)
     assert isinstance(g_test.J_part, u.Quantity)
     assert isinstance(g_test.Jr_star, u.Quantity)
-    assert isinstance(g_test.Jr_part, u.Quantity)
+    assert isinstance(g_test.Jr, u.Quantity)
     assert isinstance(g_test.J_star, u.Quantity)
     assert isinstance(g.jcirc().x, u.Quantity)
     assert isinstance(g.jcirc().y, u.Quantity)
@@ -108,7 +109,7 @@ def test_energy_method(mock_galaxy):
     """Test energy method."""
     g = mock_galaxy
 
-    E_tot_s, E_tot_dm, E_tot_g = g.energy
+    E_tot_dm, E_tot_s, E_tot_g = g.energy
 
     k_s = 0.5 * (g.arr_.vx_s ** 2 + g.arr_.vy_s ** 2 + g.arr_.vz_s ** 2)
     k_dm = 0.5 * (g.arr_.vx_dm ** 2 + g.arr_.vy_dm ** 2 + g.arr_.vz_dm ** 2)
@@ -147,7 +148,7 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
     """Test energy method with real galaxy."""
     gal = mock_real_galaxy
 
-    E_tot_s, E_tot_dm, E_tot_g = gal.energy
+    E_tot_dm, E_tot_s, E_tot_g = gal.energy
 
     k_s = 0.5 * (gal.arr_.vx_s ** 2 + gal.arr_.vy_s ** 2 + gal.arr_.vz_s ** 2)
     k_dm = 0.5 * (
@@ -213,12 +214,11 @@ def test_stars_and_gas_pot_energy(disc_particles_all):
     """Test potential energy STAR and GAS."""
     (mass_s, pos_s, vel_s, mass_g, pos_g, vel_g) = disc_particles_all
 
-    p_s = utils.potential(
-        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
-    )
-
     p_g = utils.potential(
         x=pos_g[:, 0], y=pos_g[:, 1], z=pos_g[:, 2], m=mass_g
+    )
+    p_s = utils.potential(
+        x=pos_s[:, 0], y=pos_s[:, 1], z=pos_s[:, 2], m=mass_s
     )
 
     assert (p_g > 0).all()
@@ -229,10 +229,10 @@ def test_total_energy(mock_real_galaxy):
     """Test total energy."""
     g = mock_real_galaxy
 
-    E_tot_s, E_tot_dm, E_tot_g = g.energy
+    E_tot_dark, E_tot_star, E_tot_gas = g.energy
 
-    (ii_s,) = np.where(E_tot_s.value < 0)
-    perc_s = len(ii_s) / len(E_tot_s.value)
+    (ii_s,) = np.where(E_tot_star.value < 0)
+    perc_s = len(ii_s) / len(E_tot_star.value)
     #    (ii_dm,) = np.where(E_tot_dark.value < 0)
     #    perc_dm = len(ii_dm) / len(E_tot_dark.value)
     #    (ii_g,) = np.where(E_tot_gas.value < 0)
@@ -241,9 +241,9 @@ def test_total_energy(mock_real_galaxy):
     assert perc_s > 0.95
     #    assert perc_dm > 0.5
     #    assert perc_g > 0.5
-    assert (E_tot_s.value < 0.0).any()
-    assert (E_tot_dm.value < 0.0).any()
-    assert (E_tot_g.value < 0.0).any()
+    assert (E_tot_star.value < 0.0).any()
+    assert (E_tot_dark.value < 0.0).any()
+    assert (E_tot_gas.value < 0.0).any()
 
 
 def test_type_energy(disc_particles_all, halo_particles):
@@ -281,18 +281,18 @@ def test_center_existence(disc_particles_all, halo_particles):
     mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     gx_c = utils.center(
-        mass_s,
         pos_s[:, 0],
         pos_s[:, 1],
         pos_s[:, 2],
-        mass_dm,
         pos_dm[:, 0],
         pos_dm[:, 1],
         pos_dm[:, 2],
-        mass_g,
         pos_g[:, 0],
         pos_g[:, 1],
         pos_g[:, 2],
+        mass_s,
+        mass_g,
+        mass_dm,
     )
 
     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
@@ -309,7 +309,7 @@ def test_angular_momentum_outputs(mock_galaxy):
     g = mock_galaxy
     g_test = g.angular_momentum()
 
-    longitude = len(g.x_s) + len(g.x_dm) + len(g.x_g)
+    longitude = len(g.x_s) + len(g.x_g) + len(g.x_dm)
     assert np.shape(g_test.J_part.value) == (3, longitude)
 
 
@@ -317,10 +317,10 @@ def test_jcirc_E_tot_len(mock_galaxy):
     """Check the E_tot array len."""
     g = mock_galaxy
 
-    E_tot_s, E_tot_dm, E_tot_g = g.energy
+    E_tot_dm, E_tot_s, E_tot_g = g.energy
 
     E_tot = np.hstack((E_tot_s.value, E_tot_dm.value, E_tot_g.value))
-    tot_len = len(E_tot_s) + len(E_tot_dm) + len(E_tot_g)
+    tot_len = len(E_tot_dm) + len(E_tot_s) + len(E_tot_g)
 
     assert len(E_tot) == tot_len
 

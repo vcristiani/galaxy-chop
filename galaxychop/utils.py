@@ -235,18 +235,18 @@ def potential(x, y, z, m, eps=0.0):
 
 
 def center(
-    m_s,
     x_s,
     y_s,
     z_s,
-    m_dm,
     x_dm,
     y_dm,
     z_dm,
-    m_g,
     x_g,
     y_g,
     z_g,
+    m_s,
+    m_g,
+    m_dm,
     pot_s=0,
     pot_dm=0,
     pot_g=0,
