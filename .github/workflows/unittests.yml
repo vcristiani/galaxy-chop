@@ -13,7 +13,6 @@ jobs:
           - TOXENV: style 
           - TOXENV: coverage
           - TOXENV: docstyle
-          - TOXENV: docs
           - TOXENV: check-manifest
     
     steps:
