@@ -168,11 +168,11 @@ def test_GCKmeans(mock_real_galaxy):
     )
 
 
-def test_GCgmm(mock_real_galaxy):
-    """Test GCgmm."""
+def test_GCGmm(mock_real_galaxy):
+    """Test GCGmm."""
     gal = mock_real_galaxy
 
-    gcgmm = models.GCgmm(n_components=5, random_state=0)
+    gcgmm = models.GCGmm(n_components=5, random_state=0)
     result = gcgmm.decompose(gal)
     (clean_label_gal,) = np.where(result.labels_ != -1)
 
@@ -192,3 +192,45 @@ def test_GCgmm(mock_real_galaxy):
         rtol=1e-7,
         atol=1e-8,
     )
+
+
+def test_GCAutogmm_prob(mock_real_galaxy):
+    """Test that the probabilities obtained by the method sum to 1."""
+    gal = mock_real_galaxy
+
+    autogmm = models.GCAutogmm(c_bic=0.1)
+    autogmm.decompose(gal)
+
+    predict_proba = autogmm.probability_of_gaussianmixture
+    probability = autogmm.probability
+    labels = autogmm.labels_
+
+    sum_predict_proba = np.apply_along_axis(sum, 1, predict_proba)
+    sum_probability = np.apply_along_axis(sum, 1, probability)
+    sum_expected = np.ones(len(labels))
+
+    np.testing.assert_allclose(
+        sum_predict_proba,
+        sum_expected,
+        rtol=1e-8,
+        atol=1e-8,
+    )
+    np.testing.assert_allclose(
+        sum_probability,
+        sum_expected,
+        rtol=1e-8,
+        atol=1e-8,
+    )
+
+
+def test_GCAutogmm_label(mock_real_galaxy):
+    """Test of label values."""
+    gal = mock_real_galaxy
+
+    autogmm = models.GCAutogmm(c_bic=0.1)
+    autogmm.decompose(gal)
+
+    labels = autogmm.labels_
+    print(labels)
+
+    assert (labels < 4).all()

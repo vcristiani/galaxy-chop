@@ -423,9 +423,13 @@ class Galaxy:
         pot_dm = self.arr_.pot_dm
         pot_g = self.arr_.pot_g
 
+        pot_s = self.arr_.pot_s
+        pot_dm = self.arr_.pot_dm
+        pot_g = self.arr_.pot_g
+
         eps_s = self.arr_.eps_s
-        eps_g = self.arr_.eps_g
         eps_dm = self.arr_.eps_dm
+        eps_g = self.arr_.eps_g
 
         potential = np.concatenate([pot_s, pot_dm, pot_g])
 
