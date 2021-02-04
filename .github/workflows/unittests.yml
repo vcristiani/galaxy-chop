@@ -1,4 +1,4 @@
-name: Python package
+name: Galaxy Chop Actions
 
 on: [push]
 
@@ -14,8 +14,7 @@ jobs:
           - TOXENV: coverage
           - TOXENV: docstyle
           - TOXENV: check-manifest
-          - TOXENV: py38
-          - TOXENV: py37
+
     
     steps:
       - uses: actions/checkout@master
