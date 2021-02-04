@@ -11,11 +11,11 @@
 It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
 ## Dynamic decomposition models implemented
-- GCAbadi: Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
-- GCChop: Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
-- GCgmm: Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract).
-- GCAutogmm: Implementation of the method for dynamically decomposing galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
-- GCKmeans: Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means. 
+- **GCAbadi:** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
+- **GCChop:** Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
+- **GCgmm:** Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract).
+- **GCAutogmm:** Implementation of the method for dynamically decomposing galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
+- **GCKmeans:** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means. 
 
 ## Requirements
 
