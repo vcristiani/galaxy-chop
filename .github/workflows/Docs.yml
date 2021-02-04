@@ -11,6 +11,7 @@ jobs:
         env:
           - TOXENV: docs
     steps:
+      - uses: actions/checkout@master
         uses: actions/setup-python@v1
       - uses: docker://pandoc/core:2.9
         with:
