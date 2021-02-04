@@ -64,8 +64,8 @@ def test_same_size_inputs(shorten, random_galaxy_params):
     "pot_name, npart",
     [
         ("pot_s", 10),
-        ("pot_g", 20),
-        ("pot_dm", 30),
+        ("pot_dm", 20),
+        ("pot_g", 30),
     ],
 )
 def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
@@ -73,10 +73,24 @@ def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
     seed = 42
     random = np.random.RandomState(seed=seed)
     pot = random.random_sample(size=npart)
-    params = random_galaxy_params(stars=10, gas=20, dm=30, seed=42)
+    params = random_galaxy_params(stars=10, dm=20, gas=30, seed=42)
     params[pot_name] = pot
     with pytest.raises(ValueError):
         core.Galaxy(**params)
+
+
+def test_potential_validator(random_galaxy_params):
+    seed = 42
+    random = np.random.RandomState(seed=seed)
+    pot_star = random.random_sample(size=10)
+    pot_drk = random.random_sample(size=20)
+    pot_gas = random.random_sample(size=30)
+    params = random_galaxy_params(stars=10, dm=20, gas=30, seed=42)
+    params["pot_s"] = pot_star
+    params["pot_dm"] = pot_drk
+    params["pot_g"] = pot_gas
+    with pytest.raises(ValueError):
+        core.Galaxy(**params).potential_energy()
 
 
 def test_output_galaxy_properties(mock_galaxy):
@@ -281,18 +295,18 @@ def test_center_existence(disc_particles_all, halo_particles):
     mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     gx_c = utils.center(
+        mass_s,
         pos_s[:, 0],
         pos_s[:, 1],
         pos_s[:, 2],
+        mass_dm,
         pos_dm[:, 0],
         pos_dm[:, 1],
         pos_dm[:, 2],
+        mass_g,
         pos_g[:, 0],
         pos_g[:, 1],
         pos_g[:, 2],
-        mass_s,
-        mass_g,
-        mass_dm,
     )
 
     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
