@@ -37,10 +37,10 @@ jobs:
     
     - name: Run pydocstyle
       run: pydocstyle galaxychop --convention=numpy
-    
+
+    - uses: docker://pandoc/latex
     - name: Run docs
       working-directory: ./docs
-      uses: docker://pandoc/latex
       run: |
         pip install ipykernel
         pip install ipython
