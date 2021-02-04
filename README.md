@@ -4,7 +4,7 @@
 
 ![logo](https://github.com/vcristiani/galaxy-chop/blob/master/docs/galaxychop_logo.png)
 
-# Welcome to `galaxy-chop`
+# Welcome to **GalaxyChop**
 
 **GalaxyChop**  is a Python code that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
 
