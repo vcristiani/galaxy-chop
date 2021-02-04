@@ -30,7 +30,7 @@ Installing the development version
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you’d like to be able to update your GalaxyChop code occasionally with the
-latest bug fixes and improvements, follow these instructions:
+latest improvements and bug fixes, follow these instructions:
 
 Make sure that you have Git installed and that you can run its commands from a shell.
 (Enter *git help* at a shell prompt to test this.)
