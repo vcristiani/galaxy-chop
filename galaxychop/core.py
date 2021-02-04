@@ -44,13 +44,13 @@ G = 4.299e-6
 class Columns(enum.Enum):
     """Name for columns used to decompose galaxies."""
 
-    x = 0
-    y = 1
-    z = 2
-    vx = 3
-    vy = 4
-    vz = 5
-    m = 6
+    m = 0
+    x = 1
+    y = 2
+    z = 3
+    vx = 4
+    vy = 5
+    vz = 6
     normalized_energy = 7
     eps = 8
     eps_r = 9
@@ -336,13 +336,13 @@ class Galaxy:
 
             X_s = np.hstack(
                 (
+                    self.arr_.m_s.reshape(n_s, 1),
                     self.arr_.x_s.reshape(n_s, 1),
                     self.arr_.y_s.reshape(n_s, 1),
                     self.arr_.z_s.reshape(n_s, 1),
                     self.arr_.vx_s.reshape(n_s, 1),
                     self.arr_.vy_s.reshape(n_s, 1),
                     self.arr_.vz_s.reshape(n_s, 1),
-                    self.arr_.m_s.reshape(n_s, 1),
                     self.paramcirc[0].reshape(n_s, 1),
                     self.paramcirc[1].reshape(n_s, 1),
                     self.paramcirc[2].reshape(n_s, 1),
@@ -522,51 +522,50 @@ class Galaxy:
             New instanced galaxy with all particles centered respect to the
             lowest specific energy one and the addition of J_part, J_star, Jr_part.
         """
+        m_s = self.arr_.m_s
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
         z_s = self.arr_.z_s
-
-        x_g = self.arr_.x_g
-        y_g = self.arr_.y_g
-        z_g = self.arr_.z_g
-
-        x_dm = self.arr_.x_dm
-        y_dm = self.arr_.y_dm
-        z_dm = self.arr_.z_dm
-
-        m_s = self.arr_.m_s
-        m_g = self.arr_.m_g
-        m_dm = self.arr_.m_dm
 
         vx_s = self.arr_.vx_s
         vy_s = self.arr_.vy_s
         vz_s = self.arr_.vz_s
 
-        vx_g = self.arr_.vx_g
-        vy_g = self.arr_.vy_g
-        vz_g = self.arr_.vz_g
+        m_dm = self.arr_.m_dm
+        x_dm = self.arr_.x_dm
+        y_dm = self.arr_.y_dm
+        z_dm = self.arr_.z_dm
 
         vx_dm = self.arr_.vx_dm
         vy_dm = self.arr_.vy_dm
         vz_dm = self.arr_.vz_dm
+        
+        m_g = self.arr_.m_g
+        x_g = self.arr_.x_g
+        y_g = self.arr_.y_g
+        z_g = self.arr_.z_g
+
+        vx_g = self.arr_.vx_g
+        vy_g = self.arr_.vy_g
+        vz_g = self.arr_.vz_g
 
         pot_s = self.arr_.pot_s
         pot_dm = self.arr_.pot_dm
         pot_g = self.arr_.pot_g
 
         xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
+            m_s,
             x_s,
             y_s,
             z_s,
+            m_dm,
             x_dm,
             y_dm,
             z_dm,
+            m_g,
             x_g,
             y_g,
             z_g,
-            m_s,
-            m_g,
-            m_dm,
             pot_s,
             pot_dm,
             pot_g,
@@ -614,19 +613,19 @@ class Galaxy:
             r_cut=r_cut,
         )
 
-        J_dark = np.array(
-            [
-                pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
-                pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
-                pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x,
-            ]
-        )
-
         J_star = np.array(
             [
                 pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
                 pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
                 pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x,
+            ]
+        )
+
+        J_dark = np.array(
+            [
+                pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
+                pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
+                pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x,
             ]
         )
 

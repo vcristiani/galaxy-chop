@@ -232,14 +232,6 @@ def random_galaxy_params():
         vz_s = random.random(stars)
         m_s = random.random(stars)
 
-        x_g = random.random(gas)
-        y_g = random.random(gas)
-        z_g = random.random(gas)
-        vx_g = random.random(gas)
-        vy_g = random.random(gas)
-        vz_g = random.random(gas)
-        m_g = random.random(gas)
-
         x_dm = random.random(dm)
         y_dm = random.random(dm)
         z_dm = random.random(dm)
@@ -248,28 +240,36 @@ def random_galaxy_params():
         vz_dm = random.random(dm)
         m_dm = random.random(dm)
 
+        x_g = random.random(gas)
+        y_g = random.random(gas)
+        z_g = random.random(gas)
+        vx_g = random.random(gas)
+        vy_g = random.random(gas)
+        vz_g = random.random(gas)
+        m_g = random.random(gas)
+
         params = {
+            "m_s": m_s,
             "x_s": x_s,
             "y_s": y_s,
             "z_s": z_s,
             "vx_s": vx_s,
             "vy_s": vy_s,
             "vz_s": vz_s,
-            "m_s": m_s,
+            "m_dm": m_dm,
             "x_dm": x_dm,
             "y_dm": y_dm,
             "z_dm": z_dm,
             "vx_dm": vx_dm,
             "vy_dm": vy_dm,
             "vz_dm": vz_dm,
-            "m_dm": m_dm,
+            "m_g": m_g,
             "x_g": x_g,
             "y_g": y_g,
             "z_g": z_g,
             "vx_g": vx_g,
             "vy_g": vy_g,
             "vz_g": vz_g,
-            "m_g": m_g,
         }
         return params
 
@@ -415,27 +415,27 @@ def mock_galaxy(disc_particles_all, halo_particles):
     mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     g = core.Galaxy(
+        m_s=mass_s * u.M_sun,
         x_s=pos_s[:, 0] * u.kpc,
         y_s=pos_s[:, 1] * u.kpc,
         z_s=pos_s[:, 2] * u.kpc,
         vx_s=vel_s[:, 0] * (u.km / u.s),
         vy_s=vel_s[:, 1] * (u.km / u.s),
         vz_s=vel_s[:, 2] * (u.km / u.s),
-        m_s=mass_s * u.M_sun,
+        m_dm=mass_dm * u.M_sun,
         x_dm=pos_dm[:, 0] * u.kpc,
         y_dm=pos_dm[:, 1] * u.kpc,
         z_dm=pos_dm[:, 2] * u.kpc,
         vx_dm=vel_dm[:, 0] * (u.km / u.s),
         vy_dm=vel_dm[:, 1] * (u.km / u.s),
         vz_dm=vel_dm[:, 2] * (u.km / u.s),
-        m_dm=mass_dm * u.M_sun,
+        m_g=mass_g * u.M_sun,
         x_g=pos_g[:, 0] * u.kpc,
         y_g=pos_g[:, 1] * u.kpc,
         z_g=pos_g[:, 2] * u.kpc,
         vx_g=vel_g[:, 0] * (u.km / u.s),
         vy_g=vel_g[:, 1] * (u.km / u.s),
         vz_g=vel_g[:, 2] * (u.km / u.s),
-        m_g=mass_g * u.M_sun,
     )
 
     return g
@@ -448,27 +448,27 @@ def mock_real_galaxy():
     s = np.loadtxt(TEST_DATA_REAL_PATH / "star.dat")
     g = np.loadtxt(TEST_DATA_REAL_PATH / "gas_.dat")
     gal = core.Galaxy(
+        m_s=s[:, 0] * 1e10 * u.M_sun,
         x_s=s[:, 1] * u.kpc,
         y_s=s[:, 2] * u.kpc,
         z_s=s[:, 3] * u.kpc,
         vx_s=s[:, 4] * (u.km / u.s),
         vy_s=s[:, 5] * (u.km / u.s),
         vz_s=s[:, 6] * (u.km / u.s),
-        m_s=s[:, 0] * 1e10 * u.M_sun,
+        m_dm=dm[:, 0] * 1e10 * u.M_sun,
         x_dm=dm[:, 1] * u.kpc,
         y_dm=dm[:, 2] * u.kpc,
         z_dm=dm[:, 3] * u.kpc,
         vx_dm=dm[:, 4] * (u.km / u.s),
         vy_dm=dm[:, 5] * (u.km / u.s),
         vz_dm=dm[:, 6] * (u.km / u.s),
-        m_dm=dm[:, 0] * 1e10 * u.M_sun,
+        m_g=g[:, 0] * 1e10 * u.M_sun,
         x_g=g[:, 1] * u.kpc,
         y_g=g[:, 2] * u.kpc,
         z_g=g[:, 3] * u.kpc,
         vx_g=g[:, 4] * (u.km / u.s),
         vy_g=g[:, 5] * (u.km / u.s),
         vz_g=g[:, 6] * (u.km / u.s),
-        m_g=g[:, 0] * 1e10 * u.M_sun,
     )
 
     return gal
