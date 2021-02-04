@@ -13,8 +13,8 @@ Welcome to GalaxyChop's documentation!
    :target: https://travis-ci.com/vcristiani/galaxy-chop
    :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/galaxy-chop/badge/?version=master
-   :target: https://galaxy-chop.readthedocs.io/en/master/?badge=master
+.. image:: https://readthedocs.org/projects/galaxy-chop/badge/?version=latest
+   :target: https://galaxy-chop.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00
