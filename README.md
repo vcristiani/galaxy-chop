@@ -6,50 +6,33 @@
 
 # Welcome to `galaxy-chop`
 
-`galaxy-chop` is a package where you can find the most used methods for galaxy dynamical decomposition.
+**GalaxyChop**  is a Python code that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
+
+It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
 ## Methods implemented
-- Abadi+ 2003
-- Cristiani+
-- Obreja+ 2019
-- Du+...
+- Abadi (https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract)
+- Cristiani 
+- Obreja (https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract)
+- Du (https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
+- Chop
+- K-means (https://scikit-learn.org/stable/about.html#citing-scikit-learn)
 
-# Requirements
+## Requirements
 
-Libraries gfortran, gcc and others...
+You need Python 3.7 or 3.8 to run GalaxyChop.
 
-# Installation
-You could find `galaxy-chop` at PyPI. The standar instalation via pip:
+## Standard Installation
+
+You could find **GalaxyChop**  at PyPI. The standar instalation via pip:
 
     $ pip install galaxy-chop
 
-# Documentation
+## Development Install
 
-## Input data
- - Masses (in mass solar units)
- - Positions (in kpc)
- - Velocities (in km/s)
+Clone this repo and then inside the local directory execute
 
- **Note:** You must have one file for each particle type, e.g. the file _stars.dat_ must contain 7 columns: m, x, y, z, vx, vy, vz. Then you must have other file for dark matter particles and other for gas (if you have).
-
-## Output data
-
-You will get the dinamical decomposition of the galaxy obtained with the method you had choose.
-
-### Additionally you could get:
-- The gravitational potencial of the particles
-- The rotation matrix of the galaxy with respect some dynamical axis (e.i: align with the angular momentum or some compornent of it)
-
-# Quickstart
-
-
-# Based on
-
-- paper 1
-
-# License
-
-MIT
+     $ pip install -e .
 
 # Authors
 - Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar)
