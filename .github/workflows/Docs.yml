@@ -3,26 +3,9 @@ name:  Galaxy Chop Actions Docs
 on: push
 
 jobs:
-  build:
-
+  convert_via_pandoc:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8]
-        env:
-          - TOXENV: dosc 
     steps:
-      - uses: actions/checkout@master
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version}}
-      - name: Pandoc Install
       - uses: docker://pandoc/core:2.9
         with:
           args: "--help" # gets appended to pandoc command
-      - name: Install tox
-        run: pip install tox
-      - name: Test with tox ${{ matrix.env.TOXENV }}
-        env: ${{ matrix.env }}
-        run: tox -r
