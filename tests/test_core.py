@@ -96,7 +96,7 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g.energy[2], u.Quantity)
     assert isinstance(g_test.J_part, u.Quantity)
     assert isinstance(g_test.Jr_star, u.Quantity)
-    assert isinstance(g_test.Jr, u.Quantity)
+    assert isinstance(g_test.Jr_part, u.Quantity)
     assert isinstance(g_test.J_star, u.Quantity)
     assert isinstance(g.jcirc().x, u.Quantity)
     assert isinstance(g.jcirc().y, u.Quantity)

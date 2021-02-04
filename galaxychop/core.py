@@ -71,51 +71,51 @@ class Galaxy:
 
     Parameters
     ----------
+    m_s : `Quantity`
+        Star masses. Shape: (n_s,1). Default unit: M_sun
     x_s, y_s, z_s : `Quantity`
         Star positions. Shape: (n_s,1). Default unit: kpc.
     vx_s, vy_s, vz_s : `Quantity`
         Star velocities. Shape: (n_s,1). Default unit: km/s.
-    m_s : `Quantity`
-        Star masses. Shape: (n_s,1). Default unit: M_sun
-    eps_s : `Quantity` Default value = 0
-        Softening radius of star particles. Shape: (1,). Default unit: kpc.
-    pot_s : `Quantity` Default value = 0
-        Specific potential energy of star particles.
-        Shape: (n_s,1). Default unit: (km/s)**2.
+    m_dm : `Quantity`
+        Dark matter masses. Shape: (n_dm,1). Default unit: M_sun
     x_dm, y_dm, z_dm :  `Quantity`
         Dark matter positions. Shape: (n_dm,1). Default unit: kpc.
     vx_dm, vy_dm, vz_dm : `Quantity`
         Dark matter velocities. Shape: (n_dm,1). Default unit: km/s.
-    m_dm : `Quantity`
-        Dark matter masses. Shape: (n_dm,1). Default unit: M_sun
-    eps_dm : `Quantity` Default value = 0
-        Softening radius of dark matter particles.
-        Shape: (1,). Default unit: kpc.
-    pot_dm : `Quantity` Default value = 0
-        Specific potential energy of dark matter particles.
-        Shape: (n_dm,1). Default unit: (km/s)**2.
+    m_g : `Quantity`
+        Gas masses. Shape: (n_g,1). Default unit: M_sun
     x_g, y_g, z_g :  `Quantity`
         Gas positions. Shape: (n_g,1). Default unit: kpc.
     vx_g, vy_g, vz_g : `Quantity`
         Gas velocities. Shape: (n_g,1). Default unit: km/s.
-    m_g : `Quantity`
-        Gas masses. Shape: (n_g,1). Default unit: M_sun
-    eps_g : `Quantity` Default value = 0
-        Softening radius of gas particles. Shape: (1,). Default unit: kpc.
+    pot_s : `Quantity` Default value = 0
+        Specific potential energy of star particles.
+        Shape: (n_s,1). Default unit: (km/s)**2.
+    pot_dm : `Quantity` Default value = 0
+        Specific potential energy of dark matter particles.
+        Shape: (n_dm,1). Default unit: (km/s)**2.
     pot_g : `Quantity` Default value = 0
         Specific potential energy of gas particles.
         Shape: (n_g,1). Default unit: (km/s)**2.
+    eps_s : `Quantity` Default value = 0
+        Softening radius of star particles. Shape: (1,). Default unit: kpc.
+    eps_dm : `Quantity` Default value = 0
+        Softening radius of dark matter particles.
+        Shape: (1,). Default unit: kpc.
+    eps_g : `Quantity` Default value = 0
+        Softening radius of gas particles. Shape: (1,). Default unit: kpc.
     J_part : `Quantity`
         Angular momentum for gas, dark matter and stars.
         Shape: (n,3). Default units: kpc*km/s
-    Jr_star : `Quantity`
-        Absolute value of the angular momentum for stars.
-        Shape: (n_s,1). Default unit: kpc*km/s
-    Jr : `Quantity`
-        Absolute value of total the angular momentum in the xy plane.
-        Shape: (n,1). Default unit: kpc*km/s
     J_star : `Quantity`
         Angular momentum for stars.
+        Shape: (n_s,1). Default unit: kpc*km/s
+    Jr_part : `Quantity`
+        Absolute value of total the angular momentum in the xy plane.
+        Shape: (n,1). Default unit: kpc*km/s
+    Jr_star : `Quantity`
+        Absolute value of the angular momentum for stars.
         Shape: (n_s,1). Default unit: kpc*km/s
     x : `Quantity`
         Normalized energy. Default unit: (km/s)**2
@@ -135,29 +135,29 @@ class Galaxy:
     ---------
     """
 
+    m_s = uttr.ib(unit=u.Msun)
     x_s = uttr.ib(unit=u.kpc)
     y_s = uttr.ib(unit=u.kpc)
     z_s = uttr.ib(unit=u.kpc)
     vx_s = uttr.ib(unit=(u.km / u.s))
     vy_s = uttr.ib(unit=(u.km / u.s))
     vz_s = uttr.ib(unit=(u.km / u.s))
-    m_s = uttr.ib(unit=u.Msun)
 
+    m_dm = uttr.ib(unit=u.Msun)
     x_dm = uttr.ib(unit=u.kpc)
     y_dm = uttr.ib(unit=u.kpc)
     z_dm = uttr.ib(unit=u.kpc)
     vx_dm = uttr.ib(unit=(u.km / u.s))
     vy_dm = uttr.ib(unit=(u.km / u.s))
     vz_dm = uttr.ib(unit=(u.km / u.s))
-    m_dm = uttr.ib(unit=u.Msun)
 
+    m_g = uttr.ib(unit=u.Msun)
     x_g = uttr.ib(unit=u.kpc)
     y_g = uttr.ib(unit=u.kpc)
     z_g = uttr.ib(unit=u.kpc)
     vx_g = uttr.ib(unit=(u.km / u.s))
     vy_g = uttr.ib(unit=(u.km / u.s))
     vz_g = uttr.ib(unit=(u.km / u.s))
-    m_g = uttr.ib(unit=u.Msun)
 
     pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
     pot_dm = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
@@ -168,9 +168,9 @@ class Galaxy:
     eps_g = uttr.ib(default=0.0, unit=u.kpc)
 
     J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-    Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-    Jr = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
     J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
 
     x = uttr.ib(default=None, unit=(u.km / u.s) ** 2)
     y = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
@@ -515,7 +515,7 @@ class Galaxy:
         -------
         gx : `galaxy object`
             New instanced galaxy with all particles centered respect to the
-            lowest specific energy one and the addition of J_part, J_star, Jr.
+            lowest specific energy one and the addition of J_part, J_star, Jr_part.
         """
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
@@ -637,15 +637,15 @@ class Galaxy:
 
         Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
 
-        Jr = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
+        Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
 
         new = attr.asdict(self, recurse=False)
         del new["arr_"]
         new.update(
             J_part=J_part * u.kpc * u.km / u.s,
-            Jr_star=Jr_star * u.kpc * u.km / u.s,
-            Jr=Jr * u.kpc * u.km / u.s,
             J_star=J_star * u.kpc * u.km / u.s,
+            Jr_part=Jr_part * u.kpc * u.km / u.s,
+            Jr_star=Jr_star * u.kpc * u.km / u.s,
         )
 
         return Galaxy(**new)
@@ -814,7 +814,7 @@ class Galaxy:
         Jz_star_norm = up2 / down2
 
         up3 = ang_momentum.Jr_star[neg_star][fin_star]
-        down3 = np.max(np.abs(ang_momentum.Jr[neg][fin]))
+        down3 = np.max(np.abs(ang_momentum.Jr_part[neg][fin]))
         Jr_star_norm = up3 / down3
 
         # We do the interpolation to calculate the J_circ.
