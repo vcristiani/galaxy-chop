@@ -15,6 +15,7 @@ jobs:
           - TOXENV: docstyle
           - TOXENV: check-manifest
           - TOXENV: py38
+          - TOXENV: docs
 
     
     steps:
