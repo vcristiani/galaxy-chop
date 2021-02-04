@@ -14,10 +14,11 @@ jobs:
           - TOXENV: coverage
           - TOXENV: docstyle
           - TOXENV: check-manifest
+          - TOXENV: py38
+          - TOXENV: py37
     
     steps:
       - uses: actions/checkout@master
-      - uses: docker://pandoc/latex:2.9
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
