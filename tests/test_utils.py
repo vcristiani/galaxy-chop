@@ -99,11 +99,11 @@ def test_daskpotential(halo_particles):
     fortran_potential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
 
     np.testing.assert_allclose(
-        dask_potential, python_potential, rtol=1e-6, atol=1e-6
+        dask_potential, python_potential, rtol=1e-5, atol=1e-5
     )
     np.testing.assert_allclose(
-        python_potential, fortran_potential, rtol=1e-6, atol=1e-6
+        python_potential, fortran_potential, rtol=1e-5, atol=1e-5
     )
     np.testing.assert_allclose(
-        dask_potential, fortran_potential, rtol=1e-6, atol=1e-6
+        dask_potential, fortran_potential, rtol=1e-5, atol=1e-5
     )
