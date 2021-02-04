@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.com/vcristiani/galaxy-chop.svg?branch=master)](https://travis-ci.com/vcristiani/galaxy-chop)
-[!example workflow name](https://github.com/vcristiani/galaxy-chop/workflows/Greet%20Everyone/badge.svg)(https://github.com/vcristiani/galaxy-chop/actions)
+[![example workflow name](https://github.com/vcristiani/galaxy-chop/workflows/Greet%20Everyone/badge.svg)](https://github.com/vcristiani/galaxy-chop/actions)
 [![Documentation Status](https://readthedocs.org/projects/galaxy-chop/badge/?version=master)](https://galaxy-chop.readthedocs.io/en/master/?badge=master)
 [![https://github.com/leliel12/diseno_sci_sfw](https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00)](https://github.com/leliel12/diseno_sci_sfw)
 
