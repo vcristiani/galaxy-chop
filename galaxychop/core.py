@@ -199,94 +199,94 @@ class Galaxy:
         if np.all(self.arr_.pot_s) != 0.0:
             length_s = np.array(
                 [
+                    len(self.arr_.x_s),
                     len(self.arr_.y_s),
                     len(self.arr_.z_s),
                     len(self.arr_.vx_s),
                     len(self.arr_.vy_s),
                     len(self.arr_.vz_s),
-                    len(self.arr_.m_s),
                     len(self.arr_.pot_s),
                 ]
             )
         else:
             length_s = np.array(
                 [
+                    len(self.arr_.x_s),
                     len(self.arr_.y_s),
                     len(self.arr_.z_s),
                     len(self.arr_.vx_s),
                     len(self.arr_.vy_s),
                     len(self.arr_.vz_s),
-                    len(self.arr_.m_s),
                 ]
             )
 
-        if np.any(len(self.arr_.x_s) != length_s):
+        if np.any(len(self.arr_.m_s) != length_s):
             raise ValueError("Stars inputs must have the same length")
 
-        if np.all(self.arr_.pot_s) != 0.0:
+        if np.all(self.arr_.pot_dm) != 0.0:
             length_dm = np.array(
                 [
+                    len(self.arr_.x_dm),
                     len(self.arr_.y_dm),
                     len(self.arr_.z_dm),
                     len(self.arr_.vx_dm),
                     len(self.arr_.vy_dm),
                     len(self.arr_.vz_dm),
-                    len(self.arr_.m_dm),
                     len(self.arr_.pot_dm),
                 ]
             )
         else:
             length_dm = np.array(
                 [
+                    len(self.arr_.x_dm),
                     len(self.arr_.y_dm),
                     len(self.arr_.z_dm),
                     len(self.arr_.vx_dm),
                     len(self.arr_.vy_dm),
                     len(self.arr_.vz_dm),
-                    len(self.arr_.m_dm),
                 ]
             )
 
-        if np.any(len(self.arr_.x_dm) != length_dm):
+        if np.any(len(self.arr_.m_dm) != length_dm):
             raise ValueError("Dark matter inputs must have the same length")
 
-        if np.all(self.arr_.pot_s) != 0.0:
+        if np.all(self.arr_.pot_g) != 0.0:
             length_g = np.array(
                 [
+                    len(self.arr_.x_g),
                     len(self.arr_.y_g),
                     len(self.arr_.z_g),
                     len(self.arr_.vx_g),
                     len(self.arr_.vy_g),
                     len(self.arr_.vz_g),
-                    len(self.arr_.m_g),
                     len(self.arr_.pot_g),
                 ]
             )
         else:
             length_g = np.array(
                 [
+                    len(self.arr_.x_g),
                     len(self.arr_.y_g),
                     len(self.arr_.z_g),
                     len(self.arr_.vx_g),
                     len(self.arr_.vy_g),
                     len(self.arr_.vz_g),
-                    len(self.arr_.m_g),
                 ]
             )
 
-        if np.any(len(self.arr_.x_g) != length_g):
+        if np.any(len(self.arr_.m_g) != length_g):
             raise ValueError("Gas inputs must have the same length")
 
         # Potential energy input validator.
-        if np.any(self.arr_.pot_dm != 0.0) and (
-            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_g == 0.0)
+        if np.any(self.arr_.pot_s != 0.0) and (
+            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_g == 0.0)
         ):
             raise ValueError(
                 "Potential energy must be instanced for all type particles"
             )
 
-        if np.any(self.arr_.pot_s != 0.0) and (
-            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_g == 0.0)
+        if np.any(self.arr_.pot_dm != 0.0) and (
+            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_g == 0.0)
         ):
             raise ValueError(
                 "Potential energy must be instanced for all type particles"
@@ -373,23 +373,23 @@ class Galaxy:
         vy_s = self.arr_.vy_s
         vz_s = self.arr_.vz_s
 
-        vx_g = self.arr_.vx_g
-        vy_g = self.arr_.vy_g
-        vz_g = self.arr_.vz_g
-
         vx_dm = self.arr_.vx_dm
         vy_dm = self.arr_.vy_dm
         vz_dm = self.arr_.vz_dm
 
-        k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
+        vx_g = self.arr_.vx_g
+        vy_g = self.arr_.vy_g
+        vz_g = self.arr_.vz_g
+
         k_s = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
+        k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
         k_g = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
 
-        k_dm = k_dm * (u.km / u.s) ** 2
         k_s = k_s * (u.km / u.s) ** 2
+        k_dm = k_dm * (u.km / u.s) ** 2
         k_g = k_g * (u.km / u.s) ** 2
 
-        return (k_dm, k_s, k_g)
+        return (k_s, k_dm, k_g)
 
     def potential_energy(self):
         """
@@ -404,21 +404,20 @@ class Galaxy:
             New instanced galaxy specific potencial energy calculated for
             dark matter, stars and gas.
         """
+        m_s = self.arr_.m_s
         x_s = self.arr_.x_s
         y_s = self.arr_.y_s
         z_s = self.arr_.z_s
 
-        x_g = self.arr_.x_g
-        y_g = self.arr_.y_g
-        z_g = self.arr_.z_g
-
+        m_dm = self.arr_.m_dm
         x_dm = self.arr_.x_dm
         y_dm = self.arr_.y_dm
         z_dm = self.arr_.z_dm
 
-        m_s = self.arr_.m_s
         m_g = self.arr_.m_g
-        m_dm = self.arr_.m_dm
+        x_g = self.arr_.x_g
+        y_g = self.arr_.y_g
+        z_g = self.arr_.z_g
 
         pot_s = self.arr_.pot_s
         pot_dm = self.arr_.pot_dm
@@ -428,36 +427,42 @@ class Galaxy:
         eps_g = self.arr_.eps_g
         eps_dm = self.arr_.eps_dm
 
-        x = np.hstack((x_s, x_dm, x_g))
-        y = np.hstack((y_s, y_dm, y_g))
-        z = np.hstack((z_s, z_dm, z_g))
-        m = np.hstack((m_s, m_dm, m_g))
-        eps = np.max([eps_s, eps_dm, eps_g])
+        potential = np.concatenate([pot_s, pot_dm, pot_g])
 
-        pot = utils.potential(
-            da.asarray(x, chunks=100),
-            da.asarray(y, chunks=100),
-            da.asarray(z, chunks=100),
-            da.asarray(m, chunks=100),
-            da.asarray(eps),
-        )
+        if np.all(potential == 0.0):
+            x = np.hstack((x_s, x_dm, x_g))
+            y = np.hstack((y_s, y_dm, y_g))
+            z = np.hstack((z_s, z_dm, z_g))
+            m = np.hstack((m_s, m_dm, m_g))
+            eps = np.max([eps_s, eps_dm, eps_g])
 
-        num_s = len(m_s)
-        num = len(m_s) + len(m_dm)
+            pot = utils.potential(
+                da.asarray(x, chunks=100),
+                da.asarray(y, chunks=100),
+                da.asarray(z, chunks=100),
+                da.asarray(m, chunks=100),
+                da.asarray(eps),
+            )
 
-        pot_s = pot[:num_s]
-        pot_dm = pot[num_s:num]
-        pot_g = pot[num:]
+            num_s = len(m_s)
+            num = len(m_s) + len(m_dm)
 
-        new = attr.asdict(self, recurse=False)
-        del new["arr_"]
-        new.update(
-            pot_dm=-pot_dm * (u.km / u.s) ** 2,
-            pot_s=-pot_s * (u.km / u.s) ** 2,
-            pot_g=-pot_g * (u.km / u.s) ** 2,
-        )
+            pot_s = pot[:num_s]
+            pot_dm = pot[num_s:num]
+            pot_g = pot[num:]
 
-        return Galaxy(**new)
+            new = attr.asdict(self, recurse=False)
+            del new["arr_"]
+            new.update(
+                pot_s=-pot_s * (u.km / u.s) ** 2,
+                pot_dm=-pot_dm * (u.km / u.s) ** 2,
+                pot_g=-pot_g * (u.km / u.s) ** 2,
+            )
+
+            return Galaxy(**new)
+        
+        else: 
+            raise ValueError("Potentials are already calculated")
 
     @property
     def energy(self):
@@ -480,24 +485,24 @@ class Galaxy:
             ]
         )
 
-        k_dm = self.kinetic_energy[0].value
-        k_s = self.kinetic_energy[1].value
+        k_s = self.kinetic_energy[0].value
+        k_dm = self.kinetic_energy[1].value
         k_g = self.kinetic_energy[2].value
 
         if np.all(potential == 0.0):
-            pot_dm = self.potential_energy().arr_.pot_dm
             pot_s = self.potential_energy().arr_.pot_s
+            pot_dm = self.potential_energy().arr_.pot_dm
             pot_g = self.potential_energy().arr_.pot_g
         else:
-            pot_dm = self.arr_.pot_dm
             pot_s = self.arr_.pot_s
+            pot_dm = self.arr_.pot_dm
             pot_g = self.arr_.pot_g
 
-        Etot_dm = (k_dm + pot_dm) * (u.km / u.s) ** 2
         Etot_s = (k_s + pot_s) * (u.km / u.s) ** 2
+        Etot_dm = (k_dm + pot_dm) * (u.km / u.s) ** 2
         Etot_g = (k_g + pot_g) * (u.km / u.s) ** 2
 
-        return (Etot_dm, Etot_s, Etot_g)
+        return (Etot_s, Etot_dm, Etot_g)
 
     def angular_momentum(self, r_cut=None):
         """
@@ -682,8 +687,8 @@ class Galaxy:
             is assigned to x and its value of the z component of the normalized
             specific angular momentum to y.
         """
-        Etot_dm = self.energy[0].value
-        Etot_s = self.energy[1].value
+        Etot_s = self.energy[0].value
+        Etot_dm = self.energy[1].value
         Etot_g = self.energy[2].value
 
         E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
@@ -784,8 +789,8 @@ class Galaxy:
         J_p : module of the projection on the xy plane of the normalized
         specific angular momentum.
         """
-        Etot_dm = self.energy[0].value
-        Etot_s = self.energy[1].value
+        Etot_s = self.energy[0].value
+        Etot_dm = self.energy[1].value
         Etot_g = self.energy[2].value
 
         E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
