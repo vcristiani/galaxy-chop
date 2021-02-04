@@ -460,8 +460,8 @@ class Galaxy:
             )
 
             return Galaxy(**new)
-        
-        else: 
+
+        else:
             raise ValueError("Potentials are already calculated")
 
     @property
@@ -520,7 +520,8 @@ class Galaxy:
         -------
         gx : `galaxy object`
             New instanced galaxy with all particles centered respect to the
-            lowest specific energy one and the addition of J_part, J_star, Jr_part.
+            lowest specific energy one and the addition of J_part, J_star,
+            Jr_part.
         """
         m_s = self.arr_.m_s
         x_s = self.arr_.x_s
@@ -539,7 +540,7 @@ class Galaxy:
         vx_dm = self.arr_.vx_dm
         vy_dm = self.arr_.vy_dm
         vz_dm = self.arr_.vz_dm
-        
+
         m_g = self.arr_.m_g
         x_g = self.arr_.x_g
         y_g = self.arr_.y_g

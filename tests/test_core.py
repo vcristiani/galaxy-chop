@@ -50,7 +50,6 @@ import pytest
         "vx_dm",
         "vy_dm",
         "vz_dm",
-        
     ],
 )
 def test_same_size_inputs(shorten, random_galaxy_params):
@@ -224,7 +223,6 @@ def test_stars_and_gas_pot_energy(disc_particles_all):
 
     assert (p_s > 0).all()
     assert (p_g > 0).all()
-
 
 
 def test_total_energy(mock_real_galaxy):
