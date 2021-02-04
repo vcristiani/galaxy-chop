@@ -11,12 +11,12 @@
 It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
 ## Methods implemented
-- Abadi (https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract)
+- [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract)
 - Cristiani 
-- Obreja (https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract)
-- Du (https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
+- [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract)
+- [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
 - Chop
-- K-means (https://scikit-learn.org/stable/about.html#citing-scikit-learn)
+- [K-means](https://scikit-learn.org/stable/about.html#citing-scikit-learn)
 
 ## Requirements
 
