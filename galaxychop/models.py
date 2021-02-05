@@ -36,7 +36,11 @@ from . import core
 
 
 class GCDecomposeMixin:
-    """Galaxy chop decompose mixin class."""
+    """GalaxyChop decompose mixin class.
+
+    Implementation of the particle decomposition as a
+    method of the class.
+    """
 
     def get_clean_mask(self, X):
         """Clean the Nan value of the circular parameter array."""
@@ -62,11 +66,17 @@ class GCDecomposeMixin:
     def decompose(self, galaxy):
         """Decompose method.
 
+        Assign the component of the galaxy to which each particle belongs.
         Validation of the input galaxy instance.
 
         Parameters
         ----------
         galaxy : `galaxy object`
+
+        Return
+        ------
+        labels_: `np.ndarray(n)`, n: number of stellar particles.
+        Index of the cluster each stellar particles belongs to.
         """
         if not isinstance(galaxy, core.Galaxy):
             found = type(galaxy)
@@ -103,7 +113,7 @@ class GCDecomposeMixin:
 
 
 class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
-    """Galaxy chop cluster mixin class."""
+    """GalaxyChop cluster mixin class."""
 
     pass
 
@@ -114,7 +124,30 @@ class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
 
 
 class GCAbadi(GCClusterMixin, TransformerMixin):
-    """Galaxy chop Abadi class."""
+    """GalaxyChop Abadi class.
+
+    Implementation of galaxy dynamical decomposition model described in
+    Abadi et al. (2003) [1]_.
+
+    Examples
+    --------
+    Example of implementation of Abadi Model.
+
+    >>> gal0 = gc.Galaxy(...)
+    >>> gcabadi = gc.GCAbadi()
+    >>> gcabadi.decompose(gal0)
+    >>> labels = gcabadi.labels_
+    >>> print(labels)
+    array([-1, -1,  0, ...,  0,  0,  1])
+
+    References
+    ----------
+    .. [1] Abadi, M. G., Navarro, J. F., Steinmetz, M., and Eke, V. R.,
+        “Simulations of Galaxy Formation in a Λ Cold Dark Matter Universe. II.
+        The Fine Structure of Simulated Galactic Disks”, The Astrophysical
+        Journal, vol. 597, no. 1, pp. 21–34, 2003. doi:10.1086/378316.
+        `<https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract>`_
+    """
 
     def __init__(self, n_bin=100, digits=2, seed=None):
         """Init function."""
@@ -176,7 +209,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         return dsk
 
     def fit(self, X, y=None, sample_weight=None):
-        """Compute Abadi clustering.
+        """Compute Abadi model clustering.
 
         Parameters
         ----------
@@ -290,7 +323,12 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
 
 
 class GCChop(GCAbadi):
-    """Galaxy chop Chop class.
+    """GalaxyChop Chop class.
+
+    Implementation of galaxy dynamical decomposition model using
+    only the circularity parameter. Tissera et al.(2012) [2]_,
+    Marinacci et al.(2014) [3]_, Vogelsberger et al.(2014) [4]_,
+    Park et al.(2019) [5]_ .
 
     Parameters
     ----------
@@ -298,6 +336,41 @@ class GCChop(GCAbadi):
         Cut-off value in the circularity parameter. Particles with
         eps>eps_cut are assigned to the disk and particles with eps<=eps_cut
         to the spheroid.
+
+    Examples
+    --------
+    Example of implementation of Chop Model.
+
+    >>> gal0 = gc.Galaxy(...)
+    >>> gcchop = gc.GCChop()
+    >>> gcchop.decompose(gal0)
+    >>> labels = gcchop.labels_
+    >>> print(labels)
+    array([-1, -1,  0, ...,  0,  0,  1])
+
+    References
+    ----------
+    .. [2] Tissera, P. B., White, S. D. M., and Scannapieco, C.,
+        “Chemical signatures of formation processes in the stellar
+        populations of simulated galaxies”,
+        Monthly Notices of the Royal Astronomical Society, vol. 420, no. 1,
+        pp. 255–270, 2012. doi:10.1111/j.1365-2966.2011.20028.x.
+        `<https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract>`_
+    .. [3] Marinacci, F., Pakmor, R., and Springel, V.,
+        “The formation of disc galaxies in high-resolution moving-mesh
+        cosmological simulations”, Monthly Notices of the Royal Astronomical
+        Society, vol. 437, no. 2, pp. 1750–1775, 2014.
+        doi:10.1093/mnras/stt2003.
+        `<https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract>`_
+    .. [4] Vogelsberger, M., “Introducing the Illustris Project: simulating
+        the coevolution of dark and visible matter in the Universe”,
+        Monthly Notices of the Royal Astronomical Society, vol. 444, no. 2,
+        pp. 1518–1547, 2014. doi:10.1093/mnras/stu1536.
+        `<https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract>`_
+    .. [5] Park, M.-J., “New Horizon: On the Origin of the Stellar Disk and
+        Spheroid of Field Galaxies at z = 0.7”, The Astrophysical Journal,
+        vol. 883, no. 1, 2019. doi:10.3847/1538-4357/ab3afe.
+        `<https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract>`_
     """
 
     def __init__(self, eps_cut=0.6):
@@ -332,7 +405,33 @@ class GCChop(GCAbadi):
 
 
 class GCKmeans(GCClusterMixin, KMeans):
-    """Galaxy chop KMean class."""
+    """GalaxyChop KMeans class.
+
+    Implementation of Skitlearn [6]_ K-means as a method for dynamically
+    decomposing galaxies.
+
+    Parameters
+    ----------
+    n_clusters : int
+        The number of clusters to form.
+
+    Examples
+    --------
+    Example of implementation of CGKMeans Model.
+
+    >>> gal0 = gc.Galaxy(...)
+    >>> gckmeans = gc.GCKmeans(n_clusters=3)
+    >>> gckmeans.decompose(gal0)
+    >>> labels = gckmeans.labels_
+    >>> print(labels)
+    array([-1, -1,  2, ...,  1,  2,  1])
+
+    References
+    ----------
+    .. [6] Pedregosa et al., Journal of Machine Learning Research 12,
+        pp. 2825-2830, 2011.
+        `<https://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html>`_
+    """
 
     def __init__(self, columns=None, **kwargs):
         super().__init__(**kwargs)
@@ -346,7 +445,35 @@ class GCKmeans(GCClusterMixin, KMeans):
 
 
 class GCGmm(GCDecomposeMixin, GaussianMixture):
-    """Galaxy chop Gaussian Mixture Model class."""
+    """GalaxyChop Gaussian Mixture Model class.
+
+    Implementation of the method for dynamically decomposing galaxies
+    described by Obreja et al.(2019) [7]_ .
+
+    Parameters
+    ----------
+    n_components : int, default=1
+        The number of mixture components.
+
+    Examples
+    --------
+    Example of implementation of CGGmm Model.
+
+    >>> gal0 = gc.Galaxy(...)
+    >>> gcgmm = gc.GCGmm(n_components=3)
+    >>> gcgmm.decompose(gal0)
+    >>> labels = gcgmm.labels_
+    >>> print(labels)
+    array([-1, -1,  2, ...,  1,  2,  1])
+
+    References
+    ----------
+    .. [7] Obreja, A., “NIHAO XVI: the properties and evolution of
+        kinematically selected discs, bulges, and stellar haloes”,
+        Monthly Notices of the Royal Astronomical Society, vol. 487,
+        no. 3, pp. 4424–4456, 2019. doi:10.1093/mnras/stz1563.
+        `<https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract>`_
+    """
 
     def __init__(self, columns=None, **kwargs):
         super().__init__(**kwargs)
@@ -366,7 +493,32 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
 
 
 class GCAutogmm(GCClusterMixin, TransformerMixin):
-    """Galaxy chop auto-gmm class."""
+    """GalaxyChop auto-gmm class.
+
+    Implementation of the method for dynamically decomposing galaxies
+    described by Du et al.(2019) [8]_ .
+
+    Examples
+    --------
+    Example of implementation of CGAutogmm Model.
+
+    >>> gal0 = gc.Galaxy(...)
+    >>> gcautogmm = gc.GCAutogmm()
+    >>> X, y = gal0.values()
+    >>> preguntar_vale
+    >>> gcautogmm.fit(X)
+    >>> gcautogmm.transform()
+    >>> labels = gcautogmm.labels_
+    >>> probability = gcautogmm.probability
+    >>> preguntar_vale
+
+    References
+    ----------
+    .. [8] Du, M., “Identifying Kinematic Structures in Simulated Galaxies
+        Using Unsupervised Machine Learning”, The Astrophysical Journal,
+        vol. 884, no. 2, 2019. doi:10.3847/1538-4357/ab43cc.
+        `<https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract>`_
+    """
 
     def __init__(self, c_bic=0.1, component_to_try=None):
         self.c_bic = c_bic
