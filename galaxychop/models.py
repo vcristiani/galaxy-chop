@@ -342,7 +342,7 @@ class GCChop(GCAbadi):
     Example of implementation of Chop Model.
 
     >>> gal0 = gc.Galaxy(...)
-    >>> gcchop = gc.GCChop()
+    >>> gcchop = gc.GCChop(eps_cut=0.6)
     >>> gcchop.decompose(gal0)
     >>> labels = gcchop.labels_
     >>> print(labels)
@@ -503,14 +503,11 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
     Example of implementation of CGAutogmm Model.
 
     >>> gal0 = gc.Galaxy(...)
-    >>> gcautogmm = gc.GCAutogmm()
-    >>> X, y = gal0.values()
-    >>> preguntar_vale
-    >>> gcautogmm.fit(X)
-    >>> gcautogmm.transform()
+    >>> gcautogmm = gc.GCAutogmm(c_bic=0.1)
+    >>> gcautogmm.decompose(gal0)
     >>> labels = gcautogmm.labels_
-    >>> probability = gcautogmm.probability
-    >>> preguntar_vale
+    >>> print(labels)
+    array([-1, -1,  2, ...,  1,  2,  1])
 
     References
     ----------
