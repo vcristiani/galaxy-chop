@@ -331,7 +331,7 @@ class GCChop(GCAbadi):
 # #####################################################
 
 
-class GCJE(GCClusterMixin, TransformerMixin):
+class GCJE(GCAbadi):
     """Galaxy chop JE class."""
 
     def __init__(self, n_bin_E=20, **kwargs):
