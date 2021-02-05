@@ -6,7 +6,7 @@
 
 # Welcome to **GalaxyChop**
 
-**GalaxyChop**  is a Python code that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
+**GalaxyChop**  is a Python package that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
 
 It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
