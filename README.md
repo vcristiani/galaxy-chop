@@ -10,7 +10,7 @@
 
 It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
-## Dynamic decomposition models implemented
+## Dynamic decomposition method implemented
 - **[GCAbadi](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAbadi):** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
 - **[GCChop](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCChop):** Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
 - **[GCKmeans](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCKmeans):** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a method for dynamically decomposing galaxies. 
@@ -39,7 +39,7 @@ Clone this repo and then inside the local directory execute
 - [GalaxyChop API](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html)
 
 
-# Authors
+## Authors
 - Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar)
 - Ornela Marioni (e-mail: ornela.marioni@unc.edu.ar)
 - Nelson Villagra (e-mail: ntvillagra@gmail.com)
