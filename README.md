@@ -13,9 +13,6 @@ It runs in numerical N-body simulations populated with Semi-analytical models an
 ## Dynamic decomposition models implemented
 <<<<<<< HEAD
 - **[GCAbadi](https://galaxy-chop.readthedocs.io/en/master/api/galaxychop.html#galaxychop.models.GCAbadi):** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
-=======
-- **GCAbadi:** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract). 
->>>>>>> 89b059e4e9c71322f48a582895b651fe0125598c
 - **GCChop:** Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
 - **GCgmm:** Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract).
 - **GCAutogmm:** Implementation of the method for dynamically decomposing galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
