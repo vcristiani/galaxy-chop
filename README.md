@@ -33,6 +33,12 @@ Clone this repo and then inside the local directory execute
 
      $ pip install -e .
 
+## Helpful links
+- [GalaxyChop's Tutorial](https://galaxy-chop.readthedocs.io/en/latest/tutorial.html)
+- [Licence](https://galaxy-chop.readthedocs.io/en/latest/license.html)
+- [GalaxyChop API](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html)
+
+
 # Authors
 - Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar)
 - Ornela Marioni (e-mail: ornela.marioni@unc.edu.ar)
