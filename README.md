@@ -4,52 +4,40 @@
 
 ![logo](https://github.com/vcristiani/galaxy-chop/blob/master/docs/galaxychop_logo.png)
 
-# Welcome to `galaxy-chop`
+# Welcome to **GalaxyChop**
 
-`galaxy-chop` is a package where you can find the most used methods for galaxy dynamical decomposition.
+**GalaxyChop**  is a Python code that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
 
-## Methods implemented
-- Abadi+ 2003
-- Cristiani+
-- Obreja+ 2019
-- Du+...
+It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
 
-# Requirements
+## Dynamic decomposition models implemented
+- **[GCAbadi](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAbadi):** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
+- **[GCChop](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCChop):** Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
+- **[GCKmeans](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCKmeans):** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a method for dynamically decomposing galaxies. 
+- **[GCgmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCGmm):** Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract).
+- **[GCAutogmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAutogmm):** Implementation of the method for dynamically decomposing galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
 
-Libraries gfortran, gcc and others...
+## Requirements
 
-# Installation
-You could find `galaxy-chop` at PyPI. The standar instalation via pip:
+You need Python 3.7 or 3.8 to run GalaxyChop.
+
+## Standard Installation
+
+You could find **GalaxyChop**  at PyPI. The standar instalation via pip:
 
     $ pip install galaxy-chop
 
-# Documentation
+## Development Install
 
-## Input data
- - Masses (in mass solar units)
- - Positions (in kpc)
- - Velocities (in km/s)
+Clone this repo and then inside the local directory execute
 
- **Note:** You must have one file for each particle type, e.g. the file _stars.dat_ must contain 7 columns: m, x, y, z, vx, vy, vz. Then you must have other file for dark matter particles and other for gas (if you have).
+     $ pip install -e .
 
-## Output data
+## Helpful links
+- [GalaxyChop's Tutorial](https://galaxy-chop.readthedocs.io/en/latest/tutorial.html)
+- [Licence](https://galaxy-chop.readthedocs.io/en/latest/license.html)
+- [GalaxyChop API](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html)
 
-You will get the dinamical decomposition of the galaxy obtained with the method you had choose.
-
-### Additionally you could get:
-- The gravitational potencial of the particles
-- The rotation matrix of the galaxy with respect some dynamical axis (e.i: align with the angular momentum or some compornent of it)
-
-# Quickstart
-
-
-# Based on
-
-- paper 1
-
-# License
-
-MIT
 
 # Authors
 - Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar)
