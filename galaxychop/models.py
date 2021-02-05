@@ -201,18 +201,18 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         eps, edges, center, bin0, hist = self._make_histogram(X, n_bin)
         X_ind = np.arange(len(eps))
 
-        # Building a dictionary: n={} where the IDs of the particles
-        # that satisfy the restrictions given by the mask will be stored.
-        # So we can then have control over which particles are selected.
+        # Building a dictionary: bin_to_particle={} where the IDs of the
+        # particles that satisfy the restrictions given by the mask will be
+        # stored. So we can then have control over which particles are
+        # selected.
         bin_to_particle = {}
 
         for i in range(n_bin - 1):
             (mask,) = np.where((eps >= edges[i]) & (eps < edges[i + 1]))
             bin_to_particle[i] = X_ind[mask]
 
-        (mask,) = np.where(
-            (eps >= edges[n_bin - 1]) & (eps <= edges[self.n_bin])
-        )
+        # This considers the right edge of the last bin.
+        (mask,) = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))
         bin_to_particle[len(center) - 1] = X_ind[mask]
 
         # Selection of the particles that belong to the spheroid according to
@@ -317,6 +317,182 @@ class GCChop(GCAbadi):
         (esf_idx,) = np.where(X[:, 1] <= eps_cut)
         (disk_idx,) = np.where(X[:, 1] > eps_cut)
 
+        labels = np.empty(len(X), dtype=int)
+        labels[esf_idx] = 0
+        labels[disk_idx] = 1
+
+        self.labels_ = labels
+
+        return self
+
+
+# #####################################################
+# GCJE CLASS
+# #####################################################
+
+
+class GCJE(GCClusterMixin, TransformerMixin):
+    """Galaxy chop JE class."""
+
+    def __init__(self, n_bin_E=20, **kwargs):
+        super().__init__(**kwargs)
+        self.n_bin_E = n_bin_E
+
+    def _make_corot_sph(
+        self,
+        n_bin,
+        bin0,
+        bin_to_particle,
+        sph,
+        normalized_energy,
+        n_bin_E,
+        X_ind,
+    ):
+        """Build the corotating part of the spheroid."""
+        # We build the corotating sph
+        lim_aux = 0 if (n_bin >= 2 * bin0) else (2 * bin0 - n_bin)
+
+        for count_bin in range(lim_aux, bin0):
+            corot_bin = 2 * bin0 - 1 - count_bin
+            # If the length of the bin contrarrot >= length of the bin corrot,
+            # then we assign all particles in the bin corrot to the sph.
+            if len(bin_to_particle[count_bin]) >= len(
+                bin_to_particle[corot_bin]
+            ):
+                sph[corot_bin] = bin_to_particle[corot_bin]
+            # Otherwise, we look at the energy distributions of both bins to
+            # make the selection.
+            else:
+                energy_hist_count, energy_edges_count = np.histogram(
+                    normalized_energy[np.int_(bin_to_particle[count_bin])],
+                    bins=n_bin_E,
+                    range=(-1.0, 0.0),
+                )
+                energy_hist_corr, energy_edges_corr = np.histogram(
+                    normalized_energy[np.int_(bin_to_particle[corot_bin])],
+                    bins=n_bin_E,
+                    range=(-1.0, 0.0),
+                )
+                # For a fixed contr and corr bin, we go through the energy bins
+                # and select particles and add them to the aux0 list.
+                aux0 = []
+                for j in range(n_bin_E):
+                    if energy_hist_count[j] != 0:
+                        # If the energy bin length contr >= the energy bin
+                        # length contr, we add all particles from the corr
+                        # energy bin to the list of particles in the corr bin.
+                        if energy_hist_count[j] >= energy_hist_corr[j]:
+                            (energy_mask,) = np.where(
+                                (
+                                    normalized_energy[
+                                        np.int_(bin_to_particle[corot_bin])
+                                    ]
+                                    >= energy_edges_corr[j]
+                                )
+                                & (
+                                    normalized_energy[
+                                        np.int_(bin_to_particle[corot_bin])
+                                    ]
+                                    < energy_edges_corr[j + 1]
+                                )
+                            )
+
+                            aux1 = X_ind[np.int_(bin_to_particle[corot_bin])][
+                                energy_mask
+                            ]
+                            aux0 = np.concatenate((aux0, aux1), axis=None)
+                        # Otherwise we make a random selection in the energy
+                        # bin to add to the list.
+                        else:
+                            (energy_mask,) = np.where(
+                                (
+                                    normalized_energy[
+                                        np.int_(bin_to_particle[corot_bin])
+                                    ]
+                                    >= energy_edges_corr[j]
+                                )
+                                & (
+                                    normalized_energy[
+                                        np.int_(bin_to_particle[corot_bin])
+                                    ]
+                                    < energy_edges_corr[j + 1]
+                                )
+                            )
+
+                            aux1 = self._random.choice(
+                                X_ind[np.int_(bin_to_particle[corot_bin])][
+                                    energy_mask
+                                ],
+                                energy_hist_count[j],
+                                replace=False,
+                            )
+                            aux0 = np.concatenate((aux0, aux1), axis=None)
+                    # If there are no particles in the contr energy bin, we do
+                    # not add anything to the list.
+                    else:
+                        aux1 = []
+                        aux0 = np.concatenate((aux0, aux1), axis=None)
+                # We assign all the particles in the list, selected by energy,
+                # to the bin corr of the sph.
+                sph[corot_bin] = aux0
+
+    def fit(self, X, y=None):
+        """Compute JE clustering."""
+        n_bin = self.n_bin
+        n_bin_E = self.n_bin_E
+
+        normalized_energy = X[:, 0]
+
+        # Building the histogram of the circularity parameter.
+        eps, edges, center, bin0, hist = self._make_histogram(X, n_bin)
+        X_ind = np.arange(len(eps))
+
+        # Building a dictionary: bin_to_particle={} where the IDs of the
+        # particles that satisfy the restrictions given by the mask will be
+        # stored. So we can then have control over which particles are
+        # selected.
+        bin_to_particle = {}
+
+        for i in range(n_bin - 1):
+            (mask,) = np.where((eps >= edges[i]) & (eps < edges[i + 1]))
+            bin_to_particle[i] = X_ind[mask]
+
+        # This considers the right edge of the last bin.
+        (mask,) = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))
+        bin_to_particle[len(center) - 1] = X_ind[mask]
+
+        # Selection of the particles that belong to the spheroid according to
+        # the circularity parameter and normalized energy.
+
+        # The counter-rotating spheroid is constructed.
+        sph = self._make_count_sph(bin0, bin_to_particle)
+        # Ther corotating spheroid is constructed
+        self._make_corot_sph(
+            n_bin,
+            bin0,
+            bin_to_particle,
+            sph,
+            normalized_energy,
+            n_bin_E,
+            X_ind,
+        )
+
+        # The rest of the particles are assigned to the disk.
+        dsk = self._make_disk(bin_to_particle, bin0, n_bin, sph)
+
+        # The indexes of the particles belonging to the spheroid and the disk
+        # are saved.
+        esf = []
+        for i in range(len(sph)):
+            esf = np.concatenate((esf, sph[i]))
+        esf_idx = esf.astype(int)
+
+        disk = []
+        for i in range(len(dsk)):
+            disk = np.concatenate((disk, dsk[i]))
+        disk_idx = disk.astype(int)
+
+        # Component labels are assigned
         labels = np.empty(len(X), dtype=int)
         labels[esf_idx] = 0
         labels[disk_idx] = 1
