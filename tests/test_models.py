@@ -150,7 +150,7 @@ def test_GCCristiani_len(mock_real_galaxy):
     cristiani = models.GCCristiani(seed=10)
     cristiani.decompose(gal)
 
-    longitude = len(je.labels_)
+    longitude = len(cristiani.labels_)
     assert np.shape(X) == (longitude, 10)
 
 
