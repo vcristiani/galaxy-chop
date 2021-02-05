@@ -147,8 +147,8 @@ def test_GCCristiani_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    je = models.GCJE(seed=10)
-    je.decompose(gal)
+    cristiani = models.GCCristiani(seed=10)
+    cristiani.decompose(gal)
 
     longitude = len(je.labels_)
     assert np.shape(X) == (longitude, 10)
@@ -157,10 +157,10 @@ def test_GCCristiani_len(mock_real_galaxy):
 def test_GCCristiani_outputs(mock_real_galaxy):
     """Test outputs of GCCristiani model."""
     gal = mock_real_galaxy
-    je = models.GCJE(seed=10)
-    je.decompose(gal)
+    cristiani = models.GCCristiani(seed=10)
+    cristiani.decompose(gal)
 
-    labels = je.labels_
+    labels = cristiani.labels_
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
     (comp_nan,) = np.where(labels == -1)
@@ -174,9 +174,9 @@ def test_GCCristiani_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    je = models.GCJE(seed=10)
-    je.decompose(gal)
-    labels = je.labels_
+    cristiani = models.GCCristiani(seed=10)
+    cristiani.decompose(gal)
+    labels = cristiani.labels_
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
 
