@@ -11,6 +11,7 @@ __all__ = [
     "GCClusterMixin",
     "GCAbadi",
     "GCChop",
+    "GCCristiani",
     "GCKmeans",
     "GCGmm",
     "GCAutogmm",
@@ -404,7 +405,7 @@ class GCChop(GCAbadi):
 # #####################################################
 
 
-class GCJE(GCAbadi):
+class GCCristiani(GCAbadi):
     """Galaxy chop JE class."""
 
     def __init__(self, n_bin_E=20, **kwargs):
@@ -693,11 +694,12 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         `<https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract>`_
     """
 
-    def __init__(self, c_bic=0.1, component_to_try=None):
+    def __init__(self, c_bic=0.1):
         self.c_bic = c_bic
-        self.component_to_try = (
-            np.arange(2, 16) if component_to_try is None else component_to_try
-        )
+        self.component_to_try = np.arange(2, 16)
+        # self.component_to_try = (
+        #     np.arange(2, 16) if component_to_try is None else component_to_try
+        # )
 
     def fit(self, X, y=None):
         """Compute clustering."""

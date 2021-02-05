@@ -143,7 +143,7 @@ def test_GCChop_eps_cut_value_error(eps_cut):
         models.GCChop(eps_cut)
 
 
-def test_GCJE_len(mock_real_galaxy):
+def test_GCCristiani_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
     X, y = gal.values()
@@ -154,8 +154,8 @@ def test_GCJE_len(mock_real_galaxy):
     assert np.shape(X) == (longitude, 10)
 
 
-def test_GCJE_outputs(mock_real_galaxy):
-    """Test outputs of GCJE model."""
+def test_GCCristiani_outputs(mock_real_galaxy):
+    """Test outputs of GCCristiani model."""
     gal = mock_real_galaxy
     je = models.GCJE(seed=10)
     je.decompose(gal)
@@ -170,7 +170,7 @@ def test_GCJE_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
-def test_GCJE_histogram(mock_real_galaxy):
+def test_GCCristiani_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
     X, y = gal.values()
