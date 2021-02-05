@@ -698,7 +698,8 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         self.c_bic = c_bic
         self.component_to_try = np.arange(2, 16)
         # self.component_to_try = (
-        #     np.arange(2, 16) if component_to_try is None else component_to_try
+        #     np.arange(2, 16) if component_to_try is None else
+        # component_to_try
         # )
 
     def fit(self, X, y=None):
