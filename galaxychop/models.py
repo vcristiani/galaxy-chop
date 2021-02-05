@@ -134,7 +134,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     Example of implementation of Abadi Model.
 
     >>> gal0 = gc.Galaxy(...)
-    >>> gcabadi = gc.GCAbadi()
+    >>> gcabadi = gc.GCAbadi(n_bin=100, digits=2, seed=None)
     >>> gcabadi.decompose(gal0)
     >>> labels = gcabadi.labels_
     >>> print(labels)
