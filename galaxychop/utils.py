@@ -5,6 +5,11 @@
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
 """Utilities module."""
+
+# #####################################################
+# IMPORTS
+# #####################################################
+
 import astropy.units as u
 
 import dask
@@ -13,6 +18,10 @@ import dask.array as da
 import numpy as np
 
 G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
+
+# #####################################################
+# Utility functions
+# #####################################################
 
 
 def _get_rot_matrix(m, pos, vel, r_cut=None):
@@ -120,7 +129,6 @@ def align(
         Dark matter positions.
     vx_dm, vy_dm, vz_dm : `np.ndarray(n_dm,1)`
         Dark matter velocities.
-        Softening radius of dark matter particles.
     x_g, y_g, z_g : `np.ndarray(n_g,1)`
         Gas positions.
     vx_g, vy_g, vz_g : `np.ndarray(n_g,1)`
@@ -132,23 +140,46 @@ def align(
 
     Returns
     -------
-    x_s, y_s, z_s : `np.ndarray(n_s,1), np.ndarray(n_s,1), np.ndarray(n_s,1)`
+    x_s : `np.ndarray(n_s,1)`
         Rotated positions of the star particles.
-    vx_s, vy_s, vz_s : `np.ndarray(n_s,1), np.ndarray(n_s,1),\
-        np.ndarray(n_s,1)`
+    y_s : `np.ndarray(n_s,1)`
+        Rotated positions of the star particles.
+    z_s : `np.ndarray(n_s,1)`
+        Rotated positions of the star particles.
+    vx_s : `np.ndarray(n_s,1)`
         Rotated velocities of the star particles.
-    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1), np.ndarray(n_dm,1),\
-        np.ndarray(n_dm,1)`
+    vy_s : `np.ndarray(n_s,1)`
+        Rotated velocities of the star particles.
+    vz_s : `np.ndarray(n_s,1)`
+        Rotated velocities of the star particles.
+    x_dm : `np.ndarray(n_dm,1)`
         Rotated positions of the dark matter particles.
-    vx_dm, vy_dm, vz_dm : `np.ndarray(n_dm,1), np.ndarray(n_dm,1),\
-        np.ndarray(n_dm,1)`
+    y_dm : `np.ndarray(n_dm,1)`
+        Rotated positions of the dark matter particles.
+    z_dm : `np.ndarray(n_dm,1)`
+        Rotated positions of the dark matter particles.
+    vx_dm : `np.ndarray(n_dm,1)`
         Rotated velocities of the dark matter particles.
-        Softening radius of dark matter particles.
-    x_g, y_g, z_g : `np.ndarray(n_g,1), np.ndarray(n_g,1), np.ndarray(n_g,1)`
+    vy_dm : `np.ndarray(n_dm,1)`
+        Rotated velocities of the dark matter particles.
+    vz_dm : `np.ndarray(n_dm,1)`
+        Rotated velocities of the dark matter particles.
+    x_g : `np.ndarray(n_g,1)`
         Rotated positions of the gas particles.
-    vx_g, vy_g, vz_g : `np.ndarray(n_g,1), np.ndarray(n_g,1),\
-        np.ndarray(n_g,1)`
+    y_g : `np.ndarray(n_g,1)`
+        Rotated positions of the gas particles.
+    z_g : `np.ndarray(n_g,1)`
+        Rotated positions of the gas particles.
+    vx_g : `np.ndarray(n_g,1)`
         Rotated velocities of the gas particles.
+    vy_g : `np.ndarray(n_g,1)`
+        Rotated velocities of the gas particles.
+    vz_g : `np.ndarray(n_g,1)`
+        Rotated velocities of the gas particles.
+
+    Return type
+    -----------
+    array
     """
     if (r_cut is not None) and (r_cut <= 0.0):
         raise ValueError("r_cut must not be lower than 0.")
@@ -229,7 +260,25 @@ def _potential_dask(x, y, z, m, eps):
 
 
 def potential(x, y, z, m, eps=0.0):
-    """Potential energy calculation."""
+    """Potential energy calculation.
+
+    Parameters
+    ----------
+    x, y, z : `np.ndarray`, shape(n,1)
+        Positions of particles.
+    m : `np.ndarray`, shape(n,1)
+        Masses of particles.
+    eps : `float`, optional
+        Softening parameter.
+
+    Returns
+    -------
+    Specific potential energy of particles
+
+    Return type
+    -----------
+    np.array of shape
+    """
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
 
@@ -254,7 +303,45 @@ def center(
     eps_s=0,
     eps_g=0,
 ):
-    """Centers the particles."""
+    """Centers the particles.
+
+    Centers the position of all particles in the galaxy respect
+    to the position of the lowest potential dark matter particle.
+
+    Parameters
+    ----------
+    x_s, y_s, z_s : `np.ndarray(n_s,1)`
+        Star positions.
+    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1)`
+        Dark matter positions.
+    x_g, y_g, z_g : `np.ndarray(n_g,1)`
+        Gas positions.
+
+    Returns
+    -------
+    x_s : `np.ndarray(n_s,1)`
+        Centered star positions.
+    y_s : `np.ndarray(n_s,1)`
+        Centered star positions.
+    z_s : `np.ndarray(n_s,1)`
+        Centered star positions.
+    x_dm : `np.ndarray(n_dm,1)`
+        Centered dark matter positions.
+    y_dm : `np.ndarray(n_dm,1)`
+        Centered dark matter positions.
+    z_dm : `np.ndarray(n_dm,1)`
+        Centered dark matter positions.
+    x_g : `np.ndarray(n_g,1)`
+        Centered gas positions.
+    y_g : `np.ndarray(n_g,1)`
+        Centered gas positions.
+    z_g : `np.ndarray(n_g,1)`
+        Centered gas positions.
+
+    Return type
+    -----------
+    ndrray of shape
+    """
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
     z = np.hstack((z_s, z_dm, z_g))
