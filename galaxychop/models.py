@@ -74,10 +74,10 @@ class GCDecomposeMixin:
         ----------
         galaxy : `galaxy object`
 
-        Return
-        ------
+        Attributes
+        ----------
         labels_: `np.ndarray(n)`, n: number of stellar particles.
-        Index of the cluster each stellar particles belongs to.
+            Index of the cluster each stellar particles belongs to.
         """
         if not isinstance(galaxy, core.Galaxy):
             found = type(galaxy)
@@ -130,10 +130,27 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     Implementation of galaxy dynamical decomposition model described in
     Abadi et al. (2003) [1]_.
 
+    Parameters
+    ----------
+    n_bin: default=100
+        Description.
+    digits: default=2
+        Description.
+    seed: default=None
+        Description.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+
     Examples
     --------
     Example of implementation of Abadi Model.
 
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.base import TransformerMixin
+    >>> import galaxychop as gc
     >>> gal0 = gc.Galaxy(...)
     >>> gcabadi = gc.GCAbadi(n_bin=100, digits=2, seed=None)
     >>> gcabadi.decompose(gal0)
@@ -338,10 +355,18 @@ class GCChop(GCAbadi):
         eps>eps_cut are assigned to the disk and particles with eps<=eps_cut
         to the spheroid.
 
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+
     Examples
     --------
     Example of implementation of Chop Model.
 
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.base import TransformerMixin
+    >>> import galaxychop as gc
     >>> gal0 = gc.Galaxy(...)
     >>> gcchop = gc.GCChop(eps_cut=0.6)
     >>> gcchop.decompose(gal0)
@@ -406,7 +431,35 @@ class GCChop(GCAbadi):
 
 
 class GCCristiani(GCAbadi):
-    """Galaxy chop JE class."""
+    """GalaxyChop Cristiani class.
+
+    Parameters
+    ----------
+    n_bin_E: default=20
+        Description.
+    **kwargs: key, value mappings
+        Other optional keyword arguments are passed through to
+        :py:class:`GCAbadi` classes.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+
+    Examples
+    --------
+    Example of implementation of Cristini Model.
+
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.base import TransformerMixin
+    >>> import galaxychop as gc
+    >>> gal0 = gc.Galaxy(...)
+    >>> gccristiani = gc.GCCristiani()
+    >>> gccristiani.decompose(gal0)
+    >>> labels = gcristiani.labels_
+    >>> print(labels)
+    array([-1, -1,  0, ...,  0,  0,  1])
+    """
 
     def __init__(self, n_bin_E=20, **kwargs):
         super().__init__(**kwargs)
@@ -511,7 +564,7 @@ class GCCristiani(GCAbadi):
                 sph[corot_bin] = aux0
 
     def fit(self, X, y=None):
-        """Compute JE clustering."""
+        """Compute Cristiani clustering."""
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E
 
@@ -589,19 +642,38 @@ class GCKmeans(GCClusterMixin, KMeans):
 
     Parameters
     ----------
-    n_clusters : int
-        The number of clusters to form.
+    columns: default=None
+        Physical quantities of stellars particles
+        used to decompose galaxies.
+
+    **kwargs: key, value mappings
+        Other optional keyword arguments are passed through to
+        :py:class:`GCClusterMixin` and :py:class:`KMeans` classes.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+
+    Notes
+    -----
+    n_clusters: type:int.
+        The number of clusters to form. Parameter of :py:class:`KMeans` class.
 
     Examples
     --------
     Example of implementation of CGKMeans Model.
 
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.cluster import KMeans
+    >>> import galaxychop as gc
     >>> gal0 = gc.Galaxy(...)
     >>> gckmeans = gc.GCKmeans(n_clusters=3)
     >>> gckmeans.decompose(gal0)
     >>> labels = gckmeans.labels_
     >>> print(labels)
     array([-1, -1,  2, ...,  1,  2,  1])
+
 
     References
     ----------
@@ -629,13 +701,33 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
 
     Parameters
     ----------
+    columns: default=None
+        Physical quantities of stellars particles
+        used to decompose galaxies.
+
+    **kwargs: key, value mappings
+        Other optional keyword arguments are passed through to
+        :py:class:`GCDecomposeMixin` and :py:class:`GaussianMixture` classes.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+
+    Notes
+    -----
     n_components : int, default=1
-        The number of mixture components.
+        The number of mixture components. Parameter of
+        :py:class:`GaussianMixture` class.
 
     Examples
     --------
     Example of implementation of CGGmm Model.
 
+
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.mixture import GaussianMixture
+    >>> import galaxychop as gc
     >>> gal0 = gc.Galaxy(...)
     >>> gcgmm = gc.GCGmm(n_components=3)
     >>> gcgmm.decompose(gal0)
@@ -675,10 +767,31 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
     Implementation of the method for dynamically decomposing galaxies
     described by Du et al.(2019) [8]_ .
 
+    Parameters
+    ----------
+    c_bic: default=0.1
+        Description.
+
+    component_to_try: default=
+        Description.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+        Index of the cluster each stellar particles belongs to.
+    probability: type:
+        Description
+    probability_of_gaussianmixturey: type:
+        Description
+
     Examples
     --------
     Example of implementation of CGAutogmm Model.
 
+    >>> from sklearn.base import ClusterMixin
+    >>> from sklearn.base import TransformerMixin
+    >>> from sklearn.mixture import GaussianMixture
+    >>> import galaxychop as gc
     >>> gal0 = gc.Galaxy(...)
     >>> gcautogmm = gc.GCAutogmm(c_bic=0.1)
     >>> gcautogmm.decompose(gal0)
