@@ -179,7 +179,7 @@ def align(
 
     Return type
     -----------
-    array
+    tuple of arrays (lenght=18)
     """
     if (r_cut is not None) and (r_cut <= 0.0):
         raise ValueError("r_cut must not be lower than 0.")
@@ -261,6 +261,9 @@ def _potential_dask(x, y, z, m, eps):
 
 def potential(x, y, z, m, eps=0.0):
     """Potential energy calculation.
+
+    Given the positions and masses of particles, calculate
+    their specific gravitational potential energy.
 
     Parameters
     ----------
