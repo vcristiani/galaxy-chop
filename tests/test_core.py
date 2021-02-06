@@ -358,16 +358,13 @@ def test_param_circ_eps_one_minus_one(mock_real_galaxy):
     assert (eps[mask] >= -1.0).any()
 
 
-@pytest.mark.parametrize("stars", [(True), (False)])
-def test_values_len(stars, mock_real_galaxy):
+def test_values_len(mock_real_galaxy):
     """Test the lengths of 2D and 1D array of value mehods."""
     g = mock_real_galaxy
 
-    X, y = g.values(star=stars)
+    X, y = g.values()
 
-    first = len(g.x_s) if stars else 0
-
-    length = first
+    length = len(g.x_s)
 
     assert X.shape == (length, 10)
     assert y.shape == (length,)
