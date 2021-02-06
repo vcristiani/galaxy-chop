@@ -111,8 +111,8 @@ def test_output_galaxy_properties(mock_galaxy):
     assert isinstance(g_test.J_star, u.Quantity)
     assert isinstance(g_test.Jr_part, u.Quantity)
     assert isinstance(g_test.Jr_star, u.Quantity)
-    assert isinstance(g.jcirc().x, u.Quantity)
-    assert isinstance(g.jcirc().y, u.Quantity)
+    assert isinstance(g.jcirc().Enorm, u.Quantity)
+    assert isinstance(g.jcirc().Enorm_z, u.Quantity)
     # assert isinstance(g.paramcirc[0], u.Quantity)
     # assert isinstance(g.paramcirc[1], u.Quantity)
     # assert isinstance(g.paramcirc[2], u.Quantity)
@@ -345,7 +345,7 @@ def test_jcirc_x_y_len(mock_real_galaxy):
 
     g_test = gal.jcirc().arr_
 
-    assert len(g_test.x) == len(g_test.y)
+    assert len(g_test.Enorm) == len(g_test.Enorm_z)
 
 
 def test_param_circ_eps_one_minus_one(mock_real_galaxy):
