@@ -280,7 +280,7 @@ def potential(x, y, z, m, eps=0.0):
 
     Return type
     -----------
-    np.array of shape
+    ndrray of shape (n_p,)
     """
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
@@ -343,7 +343,7 @@ def center(
 
     Return type
     -----------
-    ndrray of shape
+    tuple of arrays (lenght=9)
     """
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
