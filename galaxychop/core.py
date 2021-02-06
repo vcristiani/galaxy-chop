@@ -98,11 +98,13 @@ class Galaxy:
     Jr_star : `Quantity`
         Absolute value of the angular momentum of stars.
         Shape: (n_s,1). Default unit: kpc*km/s
-    Enorm : `Quantity`
-        Specific normalized energy. Default unit: (km/s)**2
-    Ez_norm : `Quantity`
-        z-component of the specific normalized angular momentum.
-        Default units: kpc*km/s
+    x : `Quantity`
+        Normalized specific energy for the particle with the maximum
+        z-component of the normalized specific energy per bin.
+        Default unit: dimensionless
+    y : `Quantity`
+        Maximum value of the z-component of the normalized specific energy per
+        bin. Default units: dimensionless
     """
 
     m_s = uttr.ib(unit=u.Msun)
@@ -142,8 +144,8 @@ class Galaxy:
     Jr_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
     Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
 
-    Enorm = uttr.ib(default=None, unit=(u.km / u.s) ** 2)
-    Enorm_z = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
+    x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
+    y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
 
     arr_ = uttr.array_accessor()
 
@@ -289,7 +291,7 @@ class Galaxy:
         particles respectively.
 
         >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(**params)
+        >>> galaxy = gc.Galaxy(...)
         >>> k_s, k_dm, k_g = galaxy.kinetic_energy
         """
         vx_s = self.arr_.vx_s
@@ -333,7 +335,7 @@ class Galaxy:
         gas particles.
 
         >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(**params)
+        >>> galaxy = gc.Galaxy(...)
         >>> pot_s = galaxy.potential_energy().pot_s
         >>> pot_dm = galaxy.potential_energy().pot_dm
         >>> pot_g = galaxy.potential_energy().pot_g
@@ -427,7 +429,7 @@ class Galaxy:
         particles respectively.
 
         >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(**params)
+        >>> galaxy = gc.Galaxy(...)
         >>> E_s, E_dm, E_g = galaxy.energy
         """
         potential = np.concatenate(
@@ -485,7 +487,7 @@ class Galaxy:
         gas particles.
 
         >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(**params)
+        >>> galaxy = gc.Galaxy(...)
         >>> J_part = galaxy.angular_momentum().J_part
         >>> J_star = galaxy.angular_momentum().J_star
         >>> Jr_part = galaxy.angular_momentum().Jr_part
@@ -643,28 +645,32 @@ class Galaxy:
         Returns
         -------
         gx : `galaxy object`
-            New instanced galaxy with Enorm (normalized specific energy) and
-            Enorm_z (z component of the normalized specific angular momentum).
+            New instanced galaxy with `x`, being the normalized specific
+            energy for the particle with the maximum z-specific angular
+            momentum component per the bin, and `y` beign the maximum of
+            z-specific angular momentum component.
             See section Notes for more details.
 
         Notes
         -----
-            The 'Enorm` and `Enorm_z` are calculated from the binning in the
+            The `x` and `y` are calculated from the binning in the
             normalized specific energy. In each bin, the particle with the
-            highest value of z-component of standardized specific angular
-            momentum is selected, and its value of normalized specific energy
-            is assigned to `Enorm` and its value of the z-component of the
-            normalized specific angular momentum to `Enorm_z`.
+            maximum value of z-component of standardized specific angular
+            momentum is selected. This value is assigned to the `y` parameter
+            and its corresponding normalized specific energy pair value to
+            `x`.
 
         Examples
         --------
-        This returns the specific normalized energy `Enorm` and the
-        z-component of the specific normalized energy.
+        This returns the normalized specific energy for the particle with
+        the maximum z-component of the normalized specific energy per bin
+        (`x`) and the maximum value of the z-component of the normalized
+        specific energy per bin (`y`)
 
         >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(**params)
-        >>> Enorm = galaxy.jcirc().Enorm
-        >>> Enorm_z = galaxy.jcirc().Enorm_z
+        >>> galaxy = gc.Galaxy(...)
+        >>> x = galaxy.jcirc().x
+        >>> y = galaxy.jcirc().y
 
         """
         Etot_s = self.energy[0].value
@@ -748,26 +754,41 @@ class Galaxy:
 
         new = attr.asdict(self, recurse=False)
         del new["arr_"]
-        new.update(Enorm=x * (u.km / u.s) ** 2, Enorm_z=y * u.kpc * u.km / u.s)
+        new.update(x=u.Quantity(x), y=u.Quantity(y))
 
         return Galaxy(**new)
 
     @property
     def paramcirc(self):
         """
-        Circular parameters calculation.
+        Circularity parameter calculation.
 
         Return
         ------
-        tuple : `Quantity`
-            Normalized specific energy of the stars, J_z/J_circ, J_p/J_circ.
+        tuple : `float`
+            (E_star, eps, eps_r): Normalized specific energy of the stars,
+            circularity parameter (J_z/J_circ), J_p/J_circ.
+            Shape(n_s, 1). Unit: dimensionless
 
         Notes
         -----
         J_z : z-component of normalized specific angular momentum.
-        J_circ : circular specific angular momentum.
-        J_p : module of the projection on the xy plane of the normalized
-        specific angular momentum.
+
+        J_circ : Specific circular angular momentum.
+
+        J_p : Absolute value of the projection on the xy plane of the
+        normalized specific angular momentum.
+
+        Examples
+        --------
+        This returns the normalized specific energy of stars (E_star), the
+        circularity parameter (eps : J_z/J_circ) and
+        eps_r: (J_p/J_circ).
+
+        >>> import galaxychop as gc
+        >>> galaxy = gc.Galaxy(...)
+        >>> E_star, eps, eps_r = galaxy.paramcirc
+
         """
         Etot_s = self.energy[0].value
         Etot_dm = self.energy[1].value
@@ -804,19 +825,19 @@ class Galaxy:
 
         # We do the interpolation to calculate the J_circ.
         # spl = InterpolatedUnivariateSpline(
-        #    self.jcirc().arr_.Enorm,
-        #    self.jcirc().arr_.Enorm_z,
+        #    self.jcirc().arr_.x,
+        #    self.jcirc().arr_.y,
         #    k=1,
         # )
 
         # Calculates of the circularity parameter Lz/Lc.
         # eps = J_star_ / spl(E_star)
         jcir = self.jcirc().arr_
-        eps = Jz_star_norm / np.interp(E_star, jcir.Enorm, jcir.Enorm_z)
+        eps = Jz_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
         # Calculates the same for Lp/Lc.
         # eps_r = Jr_star_ / spl(E_star)
-        eps_r = Jr_star_norm / np.interp(E_star, jcir.Enorm, jcir.Enorm_z)
+        eps_r = Jr_star_norm / np.interp(E_star, jcir.x, jcir.y)
 
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
@@ -894,12 +915,22 @@ class Columns(enum.Enum):
     """Columns name used to decompose galaxies."""
 
     m = 0
+    """Masses"""
     x = 1
+    """x-position"""
     y = 2
+    """y-position"""
     z = 3
+    """z-position"""
     vx = 4
+    """x-component of velocity"""
     vy = 5
+    """y-component of velocity"""
     vz = 6
+    """z-component of velocity"""
     normalized_energy = 7
+    """Normalized specific energy of stars"""
     eps = 8
+    """Circularity param"""
     eps_r = 9
+    """Circularity param r"""
