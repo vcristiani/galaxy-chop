@@ -140,46 +140,45 @@ def align(
 
     Returns
     -------
-    x_s : `np.ndarray(n_s,1)`
-        Rotated positions of the star particles.
-    y_s : `np.ndarray(n_s,1)`
-        Rotated positions of the star particles.
-    z_s : `np.ndarray(n_s,1)`
-        Rotated positions of the star particles.
-    vx_s : `np.ndarray(n_s,1)`
-        Rotated velocities of the star particles.
-    vy_s : `np.ndarray(n_s,1)`
-        Rotated velocities of the star particles.
-    vz_s : `np.ndarray(n_s,1)`
-        Rotated velocities of the star particles.
-    x_dm : `np.ndarray(n_dm,1)`
-        Rotated positions of the dark matter particles.
-    y_dm : `np.ndarray(n_dm,1)`
-        Rotated positions of the dark matter particles.
-    z_dm : `np.ndarray(n_dm,1)`
-        Rotated positions of the dark matter particles.
-    vx_dm : `np.ndarray(n_dm,1)`
-        Rotated velocities of the dark matter particles.
-    vy_dm : `np.ndarray(n_dm,1)`
-        Rotated velocities of the dark matter particles.
-    vz_dm : `np.ndarray(n_dm,1)`
-        Rotated velocities of the dark matter particles.
-    x_g : `np.ndarray(n_g,1)`
-        Rotated positions of the gas particles.
-    y_g : `np.ndarray(n_g,1)`
-        Rotated positions of the gas particles.
-    z_g : `np.ndarray(n_g,1)`
-        Rotated positions of the gas particles.
-    vx_g : `np.ndarray(n_g,1)`
-        Rotated velocities of the gas particles.
-    vy_g : `np.ndarray(n_g,1)`
-        Rotated velocities of the gas particles.
-    vz_g : `np.ndarray(n_g,1)`
-        Rotated velocities of the gas particles.
+    tuple : `np.ndarray`
+        x_s : `np.ndarray(n_s,1)`
+            Rotated positions of the star particles.
+        y_s : `np.ndarray(n_s,1)`
+            Rotated positions of the star particles.
+        z_s : `np.ndarray(n_s,1)`
+            Rotated positions of the star particles.
+        vx_s : `np.ndarray(n_s,1)`
+            Rotated velocities of the star particles.
+        vy_s : `np.ndarray(n_s,1)`
+            Rotated velocities of the star particles.
+        vz_s : `np.ndarray(n_s,1)`
+            Rotated velocities of the star particles.
+        x_dm : `np.ndarray(n_dm,1)`
+            Rotated positions of the dark matter particles.
+        y_dm : `np.ndarray(n_dm,1)`
+            Rotated positions of the dark matter particles.
+        z_dm : `np.ndarray(n_dm,1)`
+            Rotated positions of the dark matter particles.
+        vx_dm : `np.ndarray(n_dm,1)`
+            Rotated velocities of the dark matter particles.
+        vy_dm : `np.ndarray(n_dm,1)`
+            Rotated velocities of the dark matter particles.
+        vz_dm : `np.ndarray(n_dm,1)`
+            Rotated velocities of the dark matter particles.
+        x_g : `np.ndarray(n_g,1)`
+            Rotated positions of the gas particles.
+        y_g : `np.ndarray(n_g,1)`
+            Rotated positions of the gas particles.
+        z_g : `np.ndarray(n_g,1)`
+            Rotated positions of the gas particles.
+        vx_g : `np.ndarray(n_g,1)`
+            Rotated velocities of the gas particles.
+        vy_g : `np.ndarray(n_g,1)`
+            Rotated velocities of the gas particles.
+        vz_g : `np.ndarray(n_g,1)`
+            Rotated velocities of the gas particles.
 
-    Return type
-    -----------
-    tuple of arrays (lenght=18)
+        Lenght = 18. Unit: dimensionless.
     """
     if (r_cut is not None) and (r_cut <= 0.0):
         raise ValueError("r_cut must not be lower than 0.")
@@ -242,7 +241,9 @@ def _potential_dask(x, y, z, m, eps):
 
     Returns
     -------
-    Specific potential energy of particles
+    np.ndarray : `float`
+    Specific potential energy of particles.
+
     """
     dist = np.sqrt(
         np.square(x - x.reshape(-1, 1))
@@ -260,7 +261,8 @@ def _potential_dask(x, y, z, m, eps):
 
 
 def potential(x, y, z, m, eps=0.0):
-    """Potential energy calculation.
+    """
+    Potential energy calculation.
 
     Given the positions and masses of particles, calculate
     their specific gravitational potential energy.
@@ -276,11 +278,9 @@ def potential(x, y, z, m, eps=0.0):
 
     Returns
     -------
-    Specific potential energy of particles
-
-    Return type
-    -----------
-    ndrray of shape (n_p,)
+    np.ndarray : `float`
+        Specific potential energy of particles.
+        Shape (n_p, ). Unit: dimensionless.
     """
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
@@ -306,7 +306,8 @@ def center(
     eps_s=0,
     eps_g=0,
 ):
-    """Centers the particles.
+    """
+    Centers the particles.
 
     Centers the position of all particles in the galaxy respect
     to the position of the lowest potential dark matter particle.
@@ -322,28 +323,27 @@ def center(
 
     Returns
     -------
-    x_s : `np.ndarray(n_s,1)`
-        Centered star positions.
-    y_s : `np.ndarray(n_s,1)`
-        Centered star positions.
-    z_s : `np.ndarray(n_s,1)`
-        Centered star positions.
-    x_dm : `np.ndarray(n_dm,1)`
-        Centered dark matter positions.
-    y_dm : `np.ndarray(n_dm,1)`
-        Centered dark matter positions.
-    z_dm : `np.ndarray(n_dm,1)`
-        Centered dark matter positions.
-    x_g : `np.ndarray(n_g,1)`
-        Centered gas positions.
-    y_g : `np.ndarray(n_g,1)`
-        Centered gas positions.
-    z_g : `np.ndarray(n_g,1)`
-        Centered gas positions.
+    tuple : `np.ndarray`
+        x_s : `np.ndarray(n_s,1)`
+            Centered star positions.
+        y_s : `np.ndarray(n_s,1)`
+            Centered star positions.
+        z_s : `np.ndarray(n_s,1)`
+            Centered star positions.
+        x_dm : `np.ndarray(n_dm,1)`
+            Centered dark matter positions.
+        y_dm : `np.ndarray(n_dm,1)`
+            Centered dark matter positions.
+        z_dm : `np.ndarray(n_dm,1)`
+            Centered dark matter positions.
+        x_g : `np.ndarray(n_g,1)`
+            Centered gas positions.
+        y_g : `np.ndarray(n_g,1)`
+            Centered gas positions.
+        z_g : `np.ndarray(n_g,1)`
+            Centered gas positions.
 
-    Return type
-    -----------
-    tuple of arrays (lenght=9)
+        Lenght = 9. Unit: dimensionless.
     """
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
