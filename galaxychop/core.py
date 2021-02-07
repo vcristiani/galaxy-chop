@@ -86,25 +86,27 @@ class Galaxy:
     eps_g : `Quantity`. Default value = 0
         Softening radius of gas particles. Shape: (1,). Default unit: kpc.
     J_part : `Quantity`
-        Total angular momentum of all particles (stars, dark matter and gas).
+        Total specific angular momentum of all particles (stars, dark matter
+        and gas).
         Shape: (n,3). Default units: kpc*km/s
     J_star : `Quantity`
-        Total angular momentum of stars.
+        Total specific angular momentum of stars.
         Shape: (n_s,1). Default unit: kpc*km/s
     Jr_part : `Quantity`
-        Absolute value of total the angular momentum in the xy plane for all
-        particles.
+        Projection of the total specific angular momentum in the xy plane for
+        all particles.
         Shape: (n,1). Default unit: kpc*km/s
     Jr_star : `Quantity`
-        Absolute value of the angular momentum of stars.
+        Projection of the specific angular momentum of stars in the xy plane.
         Shape: (n_s,1). Default unit: kpc*km/s
     x : `Quantity`
         Normalized specific energy for the particle with the maximum
-        z-component of the normalized specific energy per bin.
+        z-component of the normalized specific angular momentum per bin.
         Default unit: dimensionless
     y : `Quantity`
-        Maximum value of the z-component of the normalized specific energy per
-        bin. Default units: dimensionless
+        Maximum value of the z-component of the normalized specific angular
+        momentum per bin.
+        Default units: dimensionless
     """
 
     m_s = uttr.ib(unit=u.Msun)
@@ -663,9 +665,9 @@ class Galaxy:
         Examples
         --------
         This returns the normalized specific energy for the particle with
-        the maximum z-component of the normalized specific energy per bin
-        (`x`) and the maximum value of the z-component of the normalized
-        specific energy per bin (`y`)
+        the maximum z-component of the normalized specific angular momentum
+        per bin (`x`) and the maximum value of the z-component of the normalized
+        specific angular momentum per bin (`y`)
 
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
@@ -776,8 +778,8 @@ class Galaxy:
 
         J_circ : Specific circular angular momentum.
 
-        J_p : Absolute value of the projection on the xy plane of the
-        normalized specific angular momentum.
+        J_p : Projection on the xy plane of the normalized specific angular
+        momentum.
 
         Examples
         --------
@@ -912,7 +914,16 @@ class Galaxy:
 
 
 class Columns(enum.Enum):
-    """Columns name used to decompose galaxies."""
+    """
+    Columns name used to decompose galaxies.
+    
+    Name and number of the columns that are used to decompose the galaxy
+    dynamically.
+    
+    Notes
+    -----
+    The dynamical decomposition is only perform over stellar particles.
+    """
 
     m = 0
     """Masses"""
