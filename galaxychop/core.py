@@ -666,8 +666,8 @@ class Galaxy:
         --------
         This returns the normalized specific energy for the particle with
         the maximum z-component of the normalized specific angular momentum
-        per bin (`x`) and the maximum value of the z-component of the normalized
-        specific angular momentum per bin (`y`)
+        per bin (`x`) and the maximum value of the z-component of the
+        normalized specific angular momentum per bin (`y`)
 
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
@@ -905,10 +905,10 @@ class Galaxy:
 class Columns(enum.Enum):
     """
     Columns name used to decompose galaxies.
-    
+
     Name and number of the columns that are used to decompose the galaxy
     dynamically.
-    
+
     Notes
     -----
     The dynamical decomposition is only perform over stellar particles.
