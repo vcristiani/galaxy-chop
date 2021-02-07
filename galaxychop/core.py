@@ -850,7 +850,7 @@ class Galaxy:
 
         return (E_star_, eps_, eps_r_)
 
-    def values(self, star=True):
+    def values(self):
         """
         2D and 1D inputs converter.
 
@@ -858,31 +858,20 @@ class Galaxy:
         particle and other 1D showing whether the particle is a star,
         gas or dark matter one.
 
-        Parameters
-        ----------
-        star : `bool`. Default=False
-            Indicates if the stars particles are going to be use to
-            build the array
-        dm : `bool`. Default=False
-            Indicates if the dark matter particles are going to be use to
-            build the array
-        gas : `bool`. Default=False
-            Indicates if the gas particles are going to be use to
-            build the array
-
-
         Returns
         -------
-        X : `np.ndarray(n,7)`
-            2D array where each file it is a diferent particle and
-            each column is a parameter of the particles (E_star, eps, eps_r)
+        X : `np.ndarray(n,10)`
+            2D array where each file it is a diferent stellar particle and
+            each column is a parameter of the particles:
+            (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
         y : `np.ndarray(n)`
             1D array where is identified the nature of each particle
-            0=star, 1=gas and 2=dark matter
+            0=star.
         """
         X = np.empty((0, 10))
         y = np.empty(0, int)
 
+        star = True
         if star:
             n_s = len(self.paramcirc[1])
 
