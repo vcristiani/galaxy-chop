@@ -44,20 +44,58 @@ class GCDecomposeMixin:
     """
 
     def get_clean_mask(self, X):
-        """Clean the Nan value of the circular parameter array."""
+        """Clean the Nan value of the circular parameter array.
+
+        Parameters
+        ----------
+        X : `np.ndarray(n,10)`
+            2D array where each file it is a different stellar particle and
+            each column is a parameter of the particles:
+            (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
+
+        Return
+        ------
+        clean: np.ndarray(n_m: number of particles with E<=0 and -1<eps<1).
+            Mask: Index of valid stellar particles to operate the clustering.
+        """
         eps = X[:, core.Columns.eps.value]
         (clean,) = np.where(~np.isnan(eps))
         return clean
 
     def add_dirty(self, X, labels, clean_mask):
-        """Complete the labels."""
+        """Complete the labels of all stellar particles.
+
+        Parameters
+        ----------
+        X : `np.ndarray(n,10)`
+            2D array where each file it is a diferent stellar particle and
+            each column is a parameter of the particles:
+            (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
+        labels: `np.ndarray(n)`, n: number of stellar particles.
+            Index of the cluster each stellar particles belongs to.
+        clean_mask: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
+            Mask: Only valid particles to operate the clustering.
+
+        Return
+        ------
+        complete: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
+            Complete index of the cluster each stellar particles belongs to.
+            Particles which not fulfil E<=0 or -1<eps<1 have index=-1.
+        """
         eps = X[:, core.Columns.eps.value]
         complete = -np.ones(len(eps), dtype=int)
         complete[clean_mask] = labels
         return complete
 
     def get_columns(self):
-        """Obtain the columns of the quantities to be used."""
+        """Obtain the columns of the quantities to be used.
+
+        Returns
+        -------
+        columns: list
+            Only the needed columns used to decompose galaxies.
+
+        """
         return [
             core.Columns.normalized_energy.value,
             core.Columns.eps.value,
@@ -72,7 +110,8 @@ class GCDecomposeMixin:
 
         Parameters
         ----------
-        galaxy : `galaxy object`
+        galaxy :
+            `galaxy object`
 
         Attributes
         ----------
@@ -133,27 +172,27 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     Parameters
     ----------
     n_bin: default=100
-        Description.
-    digits: default=2
-        Description.
-    seed: default=None
-        Description.
+        Number of bins needed to build the circularity parameter histogram.
+    digits: int, default=2
+        Number of decimals to which an array is rounded.
+    seed: int, default=None
+        Seed to initialize the random generator.
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
+        Index=0: correspond to galaxy spheroid.
+        Index=1: correspond to galaxy disk.
 
     Examples
     --------
     Example of implementation of Abadi Model.
 
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.base import TransformerMixin
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gcabadi = gc.GCAbadi(n_bin=100, digits=2, seed=None)
-    >>> gcabadi.decompose(gal0)
+    >>> gcabadi.decompose(galaxy)
     >>> labels = gcabadi.labels_
     >>> print(labels)
     array([-1, -1,  0, ...,  0,  0,  1])
@@ -314,7 +353,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
 
         Returns
         -------
-        labels : ndarray of shape (n_samples,)
+        labels: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
             Index of the cluster each sample belongs to.
         """
         return self.fit(X, sample_weight=sample_weight).labels_
@@ -326,6 +365,8 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             New data to transform.
+        y : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -357,19 +398,19 @@ class GCChop(GCAbadi):
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
+        Index=0: correspond to galaxy spheroid.
+        Index=1: correspond to galaxy disk.
 
     Examples
     --------
     Example of implementation of Chop Model.
 
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.base import TransformerMixin
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gcchop = gc.GCChop(eps_cut=0.6)
-    >>> gcchop.decompose(gal0)
+    >>> gcchop.decompose(galaxy)
     >>> labels = gcchop.labels_
     >>> print(labels)
     array([-1, -1,  0, ...,  0,  0,  1])
@@ -410,7 +451,21 @@ class GCChop(GCAbadi):
             )
 
     def fit(self, X, y=None):
-        """Compute Chop clustering."""
+        """Compute Chop clustering.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Training instances to cluster.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self
+            Fitted estimator.
+        """
         eps_cut = self.eps_cut
 
         (esf_idx,) = np.where(X[:, 1] <= eps_cut)
@@ -436,26 +491,27 @@ class GCCristiani(GCAbadi):
     Parameters
     ----------
     n_bin_E: default=20
-        Description.
+        Number of bins needed to build the normalised specific
+        energy histogram.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
         :py:class:`GCAbadi` classes.
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
+        Index=0: correspond to galaxy spheroid.
+        Index=1: correspond to galaxy disk.
 
     Examples
     --------
     Example of implementation of Cristini Model.
 
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.base import TransformerMixin
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gccristiani = gc.GCCristiani()
-    >>> gccristiani.decompose(gal0)
+    >>> gccristiani.decompose(galaxy)
     >>> labels = gcristiani.labels_
     >>> print(labels)
     array([-1, -1,  0, ...,  0,  0,  1])
@@ -564,7 +620,21 @@ class GCCristiani(GCAbadi):
                 sph[corot_bin] = aux0
 
     def fit(self, X, y=None):
-        """Compute Cristiani clustering."""
+        """Compute Cristiani clustering.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Training instances to cluster.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self
+            Fitted estimator.
+        """
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E
 
@@ -652,7 +722,7 @@ class GCKmeans(GCClusterMixin, KMeans):
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
 
     Notes
@@ -664,12 +734,10 @@ class GCKmeans(GCClusterMixin, KMeans):
     --------
     Example of implementation of CGKMeans Model.
 
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.cluster import KMeans
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gckmeans = gc.GCKmeans(n_clusters=3)
-    >>> gckmeans.decompose(gal0)
+    >>> gckmeans.decompose(galaxy)
     >>> labels = gckmeans.labels_
     >>> print(labels)
     array([-1, -1,  2, ...,  1,  2,  1])
@@ -687,7 +755,13 @@ class GCKmeans(GCClusterMixin, KMeans):
         self.columns = columns
 
     def get_columns(self):
-        """Obtain the columns of the quantities to be used."""
+        """Obtain the columns of the quantities to be used.
+
+        Returns
+        -------
+        columns: list
+            Only the needed columns used to decompose galaxies.
+        """
         if self.columns is None:
             return super().get_columns()
         return self.columns
@@ -697,7 +771,7 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
-    described by Obreja et al.(2019) [7]_ .
+    described by Obreja et al.(2018) [7]_ .
 
     Parameters
     ----------
@@ -711,7 +785,7 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
 
     Notes
@@ -724,24 +798,21 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
     --------
     Example of implementation of CGGmm Model.
 
-
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.mixture import GaussianMixture
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gcgmm = gc.GCGmm(n_components=3)
-    >>> gcgmm.decompose(gal0)
+    >>> gcgmm.decompose(galaxy)
     >>> labels = gcgmm.labels_
     >>> print(labels)
     array([-1, -1,  2, ...,  1,  2,  1])
 
     References
     ----------
-    .. [7] Obreja, A., “NIHAO XVI: the properties and evolution of
-        kinematically selected discs, bulges, and stellar haloes”,
-        Monthly Notices of the Royal Astronomical Society, vol. 487,
-        no. 3, pp. 4424–4456, 2019. doi:10.1093/mnras/stz1563.
-        `<https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract>`_
+    .. [7] Obreja, A., “Introducing galactic structure finder: the multiple
+        stellar kinematic structures of a simulated Milky Way mass galaxy”,
+        Monthly Notices of the Royal Astronomical Society, vol. 477, no. 4,
+        pp. 4915–4930, 2018. doi:10.1093/mnras/sty1022.
+        `<https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract>`_
     """
 
     def __init__(self, columns=None, **kwargs):
@@ -749,13 +820,32 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
         self.columns = columns
 
     def get_columns(self):
-        """Obtain the columns of the quantities to be used."""
+        """Obtain the columns of the quantities to be used.
+
+        Returns
+        -------
+        columns: list
+            Only the needed columns used to decompose galaxies.
+        """
         if self.columns is None:
             return super().get_columns()
         return self.columns
 
     def fit_transform(self, X, y=None):
-        """Transform method."""
+        """Transform method.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            New data to transform.
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        X_new : ndarray of shape (n_samples, n_clusters)
+            X transformed.
+        """
         labels = self.fit(X).predict(X)
         self.labels_ = labels
         return self
@@ -769,35 +859,38 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
 
     Parameters
     ----------
-    c_bic: default=0.1
-        Description.
-
-    component_to_try: default=
-        Description.
+    c_bic: float, default=0.1
+        Cut value of the criteria for the automatic choice of
+        the number of gaussians.
 
     Attributes
     ----------
-    labels_: `np.ndarray(n)`, n: number of filtered stellar particles.
+    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
-    probability: type:
-        Description
-    probability_of_gaussianmixturey: type:
-        Description
+        Index=0: correspond to galaxy stellar halo.
+        Index=1: correspond to galaxy bulge.
+        Index=2: correspond to galaxy cold disk.
+        Index=3: correspond to galaxy warm disk.
+
+    probability: np.ndarray(n,4), n:number of particles with E<=0 and -1<eps<1.
+        Probability of each stellar particle to belong to each
+        component of the galaxy.
+
+    probability_of_gaussianmixturey: `np.ndarray(n_particles, n_gaussians)`.
+        Probability of each stellar particle (with E<=0 and -1<eps<1) to belong
+        to each gaussian.
 
     Examples
     --------
     Example of implementation of CGAutogmm Model.
 
-    >>> from sklearn.base import ClusterMixin
-    >>> from sklearn.base import TransformerMixin
-    >>> from sklearn.mixture import GaussianMixture
     >>> import galaxychop as gc
-    >>> gal0 = gc.Galaxy(...)
+    >>> galaxy = gc.Galaxy(...)
     >>> gcautogmm = gc.GCAutogmm(c_bic=0.1)
-    >>> gcautogmm.decompose(gal0)
+    >>> gcautogmm.decompose(galaxy)
     >>> labels = gcautogmm.labels_
     >>> print(labels)
-    array([-1, -1,  2, ...,  1,  2,  1])
+    array([-1, -1,  1, ...  0, 0, 3])
 
     References
     ----------
@@ -816,7 +909,21 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         # )
 
     def fit(self, X, y=None):
-        """Compute clustering."""
+        """Compute GCAutogmm clustering.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Training instances to cluster.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self
+            Fitted estimator.
+        """
         bic_med = np.empty(len(self.component_to_try))
         gausians = []
         for i in self.component_to_try:
@@ -856,7 +963,20 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        """Transform method."""
+        """Transform method.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            New data to transform.
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        X_new : ndarray of shape (n_samples, n_clusters)
+            X transformed.
+        """
         n_components = self.n_components_
         center = self.gcgmm_.means_
         predict_proba = self.gcgmm_.predict_proba(X)
