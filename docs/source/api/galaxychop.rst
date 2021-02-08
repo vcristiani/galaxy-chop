@@ -3,13 +3,11 @@ GalaxyChop API
 
 The modules are:
 
-- **Core**: creates the galaxy to decompose.
+- **Core**: calculates the different dynamic quantities (specific energy and specific angular momentum).
 
-- **Models**: performs dynamic decomposition using the Abadi method.
+- **Models**: performs dynamic decomposition using six different methods.
 
-- **Sklearn_models**: performs dynamic decomposition using the Kmeans method.
-
-- **Utils**: stuff
+- **Utils**: different functions that Core module uses for the calculation of dynamic quantities.
 
 -------------------------------------------------------------------------------
 
