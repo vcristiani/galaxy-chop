@@ -273,14 +273,13 @@ def potential(x, y, z, m, eps=0.0):
         Positions of particles.
     m : `np.ndarray`, shape(n,1)
         Masses of particles.
-    eps : `float`, optional
+    eps : `float`, shape(1,), optional
         Softening parameter.
 
     Returns
     -------
-    np.ndarray : `float`
+    potential : `np.ndarray`
         Specific potential energy of particles.
-        Shape (n_p, ). Unit: dimensionless.
     """
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())
@@ -343,7 +342,6 @@ def center(
         z_g : `np.ndarray(n_g,1)`
             Centered gas positions.
 
-        Lenght = 9. Unit: dimensionless.
     """
     x = np.hstack((x_s, x_dm, x_g))
     y = np.hstack((y_s, y_dm, y_g))
