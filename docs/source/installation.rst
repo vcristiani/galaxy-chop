@@ -20,7 +20,7 @@ After setting up and activating the virtualenv, run the following command:
 
 .. code-block:: console
 
-   $ pip install GalaxyChop
+   $ pip install galaxychop
 
 That should be it all.
 
