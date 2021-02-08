@@ -14,7 +14,7 @@ It runs in numerical N-body simulations populated with Semi-analytical models an
 - **[GCAbadi](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAbadi):** Implementation of the method for dynamically decomposing galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
 - **[GCChop](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCChop):** Implementation of the method for dynamically decomposing galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
 - **[GCKmeans](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCKmeans):** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a method for dynamically decomposing galaxies. 
-- **[GCgmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCGmm):** Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.4424O/abstract).
+- **[GCgmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCGmm):** Implementation of the method for dynamically decomposing galaxies described by [Obreja et al.(2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract).
 - **[GCAutogmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAutogmm):** Implementation of the method for dynamically decomposing galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
 
 ## Requirements
@@ -25,12 +25,14 @@ You need Python 3.7 or 3.8 to run GalaxyChop.
 
 You could find **GalaxyChop**  at PyPI. The standar instalation via pip:
 
-    $ pip install galaxy-chop
+    $ pip install galaxychop
 
 ## Development Install
 
 Clone this repo and then inside the local directory execute
 
+     $ git clone https://github.com/vcristiani/galaxy-chop.git
+     $ cd galaxy-chop
      $ pip install -e .
 
 ## Helpful links
