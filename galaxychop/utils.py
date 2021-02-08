@@ -35,12 +35,12 @@ def _get_rot_matrix(m, pos, vel, r_cut=None):
 
     Parameters
     ----------
-    m : `np.ndarray`, shape(n,1)
-        Masses of particles.
-    pos : `np.ndarray`, shape(n,3)
-        Positions of particles.
-    vel : `np.ndarray`, shape(n,3)
-        Velocities of particles.
+    m : `np.ndarray`
+        Masses of particles. Shape(n,1)
+    pos : `np.ndarray`
+        Positions of particles. Shape(n,3)
+    vel : `np.ndarray`
+        Velocities of particles. Shape(n,3)
     r_cut : `float`, optional
         The default is ``None``; if provided, it must be
         positive and the rotation matrix `A` is calculated
@@ -49,8 +49,8 @@ def _get_rot_matrix(m, pos, vel, r_cut=None):
 
     Returns
     -------
-    A : `np.ndarray`, shape(3,3)
-        Rotation matrix.
+    A : `np.ndarray`
+        Rotation matrix. Shape(3,3)
     """
     jx = m * (pos[:, 1] * vel[:, 2] - pos[:, 2] * vel[:, 1])
     jy = m * (pos[:, 2] * vel[:, 0] - pos[:, 0] * vel[:, 2])
@@ -231,12 +231,12 @@ def _potential_dask(x, y, z, m, eps):
 
     Parameters
     ----------
-    x, y, z : `np.ndarray`, shape(n,1)
-        Positions of particles.
-    m : `np.ndarray`, shape(n,1)
-        Masses of particles.
+    x, y, z : `np.ndarray`
+        Positions of particles. Shape(n,1)
+    m : `np.ndarray`
+        Masses of particles. Shape(n,1)
     eps : `float`, optional
-        Softening parameter.
+        Softening parameter. Shape(1,)
 
     Returns
     -------
@@ -268,17 +268,17 @@ def potential(x, y, z, m, eps=0.0):
 
     Parameters
     ----------
-    x, y, z : `np.ndarray`, shape(n,1)
-        Positions of particles.
-    m : `np.ndarray`, shape(n,1)
-        Masses of particles.
-    eps : `float`, shape(1,), optional
-        Softening parameter.
+    x, y, z : `np.ndarray`
+        Positions of particles. Shape(n,1)
+    m : `np.ndarray`
+        Masses of particles. Shape(n,1)
+    eps : `float`, default value = 0
+        Softening parameter. Shape(1,)
 
     Returns
     -------
     potential : `np.ndarray`
-        Specific potential energy of particles.
+        Specific potential energy of particles. Shape(n,1)
     """
     pot = _potential_dask(x, y, z, m, eps)
     return np.asarray(pot.compute())

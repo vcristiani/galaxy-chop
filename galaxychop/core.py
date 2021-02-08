@@ -69,21 +69,21 @@ class Galaxy:
         Gas positions. Shape: (n_g,1). Default unit: kpc.
     vx_g, vy_g, vz_g : `Quantity`
         Gas velocities. Shape: (n_g,1). Default unit: km/s.
-    pot_s : `Quantity`. Default value = 0
+    pot_s : `Quantity`, default value = 0
         Specific potential energy of star particles.
         Shape: (n_s,1). Default unit: (km/s)**2.
-    pot_dm : `Quantity`. Default value = 0
+    pot_dm : `Quantity`, default value = 0
         Specific potential energy of dark matter particles.
         Shape: (n_dm,1). Default unit: (km/s)**2.
-    pot_g : `Quantity`. Default value = 0
+    pot_g : `Quantity`, default value = 0
         Specific potential energy of gas particles.
         Shape: (n_g,1). Default unit: (km/s)**2.
-    eps_s : `Quantity`. Default value = 0
+    eps_s : `Quantity`, default value = 0
         Softening radius of star particles. Shape: (1,). Default unit: kpc.
-    eps_dm : `Quantity`. Default value = 0
+    eps_dm : `Quantity`, default value = 0
         Softening radius of dark matter particles.
         Shape: (1,). Default unit: kpc.
-    eps_g : `Quantity`. Default value = 0
+    eps_g : `Quantity`, default value = 0
         Softening radius of gas particles. Shape: (1,). Default unit: kpc.
     J_part : `Quantity`
         Total specific angular momentum of all particles (stars, dark matter
@@ -107,6 +107,14 @@ class Galaxy:
         Maximum value of the z-component of the normalized specific angular
         momentum per bin.
         Default units: dimensionless
+
+    Attributes
+    ----------
+    arr_: `uttr.ArrayAccessor`
+        Original array accessor object create by the *uttr* library.
+        Array accesor: it converts uttr attributes to the default unit and
+        afterward to a `numpy.ndarray`.
+        For more information see: https://pypi.org/project/uttrs/
     """
 
     m_s = uttr.ib(unit=u.Msun)
