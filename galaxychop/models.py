@@ -193,8 +193,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
     >>> galaxy = gc.Galaxy(...)
     >>> gcabadi = gc.GCAbadi(n_bin=100, digits=2, seed=None)
     >>> gcabadi.decompose(galaxy)
-    >>> labels = gcabadi.labels_
-    >>> print(labels)
+    >>> gcabadi.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
 
     References
@@ -411,8 +410,7 @@ class GCChop(GCAbadi):
     >>> galaxy = gc.Galaxy(...)
     >>> gcchop = gc.GCChop(eps_cut=0.6)
     >>> gcchop.decompose(galaxy)
-    >>> labels = gcchop.labels_
-    >>> print(labels)
+    >>> gcchop.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
 
     References
@@ -516,8 +514,7 @@ class GCCristiani(GCAbadi):
     >>> galaxy = gc.Galaxy(...)
     >>> gccristiani = gc.GCCristiani()
     >>> gccristiani.decompose(galaxy)
-    >>> labels = gcristiani.labels_
-    >>> print(labels)
+    >>> gcristiani.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
     """
 
@@ -754,8 +751,7 @@ class GCKmeans(GCClusterMixin, KMeans):
     >>> galaxy = gc.Galaxy(...)
     >>> gckmeans = gc.GCKmeans(n_clusters=3)
     >>> gckmeans.decompose(galaxy)
-    >>> labels = gckmeans.labels_
-    >>> print(labels)
+    >>> gckmeans.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
 
 
@@ -844,8 +840,7 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
     >>> galaxy = gc.Galaxy(...)
     >>> gcgmm = gc.GCGmm(n_components=3)
     >>> gcgmm.decompose(galaxy)
-    >>> labels = gcgmm.labels_
-    >>> print(labels)
+    >>> gcgmm.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
 
     References
@@ -946,8 +941,7 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
     >>> galaxy = gc.Galaxy(...)
     >>> gcautogmm = gc.GCAutogmm(c_bic=0.1)
     >>> gcautogmm.decompose(galaxy)
-    >>> labels = gcautogmm.labels_
-    >>> print(labels)
+    >>> gcautogmm.labels_
     array([-1, -1,  1, ...  0, 0, 3])
 
     References
