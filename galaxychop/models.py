@@ -41,6 +41,11 @@ class GCDecomposeMixin:
 
     Implementation of the particle decomposition as a
     method of the class.
+
+    Attributes
+    ----------
+    labels_: `np.ndarray(n)`, n: number of stellar particles.
+        Index of the cluster each stellar particles belongs to.
     """
 
     def get_clean_mask(self, X):
@@ -112,11 +117,6 @@ class GCDecomposeMixin:
         ----------
         galaxy :
             `galaxy object`
-
-        Attributes
-        ----------
-        labels_: `np.ndarray(n)`, n: number of stellar particles.
-            Index of the cluster each stellar particles belongs to.
         """
         if not isinstance(galaxy, core.Galaxy):
             found = type(galaxy)
@@ -488,6 +488,10 @@ class GCChop(GCAbadi):
 class GCCristiani(GCAbadi):
     """GalaxyChop Cristiani class.
 
+    Implementation of a modification of Abadi galaxy dynamical
+    decomposition model using the circularity parameter and
+    specific energy distribution.
+
     Parameters
     ----------
     n_bin_E: default=20
@@ -707,7 +711,7 @@ class GCCristiani(GCAbadi):
 class GCKmeans(GCClusterMixin, KMeans):
     """GalaxyChop KMeans class.
 
-    Implementation of Skitlearn [6]_ K-means as a method for dynamically
+    Implementation of Scikit-learn [6]_ K-means as a method for dynamically
     decomposing galaxies.
 
     Parameters
@@ -725,10 +729,22 @@ class GCKmeans(GCClusterMixin, KMeans):
     labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
 
+    cluster_centers_:
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+    inertia_:
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+    n_iter_ :
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+
     Notes
     -----
     n_clusters: type:int.
         The number of clusters to form. Parameter of :py:class:`KMeans` class.
+    More information for `KMeans` class:
+        https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 
     Examples
     --------
@@ -787,12 +803,38 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
     ----------
     labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
+    weights_ :
+        Original attribute create by the `GaussianMixture`
+        class into `scikit-learn` library.
+    means_ :
+        Original attribute create by the `GaussianMixture` class into
+        `scikit-learn` library.
+    covariances_ :
+        Original attribute create by the `GaussianMixture`
+        class into `scikit-learn` library.
+    precisions_ :
+        Original attribute create by the `GaussianMixture` class into
+        `scikit-learn` library.
+    precisions_cholesky_ :
+        Original attribute create by the `GaussianMixture`
+        class into `scikit-learn` library.
+    converged_ :
+        Original attribute create by the `GaussianMixture` class into
+        `scikit-learn` library.
+    n_iter_ :
+        Original attribute create by the `GaussianMixture` class into
+        `scikit-learn` library.
+    lower_bound_ :
+        Original attribute create by the `GaussianMixture`
+        class into `scikit-learn` library.
 
     Notes
     -----
     n_components : int, default=1
         The number of mixture components. Parameter of
         :py:class:`GaussianMixture` class.
+    More information for `GaussianMixture` class:
+        https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
 
     Examples
     --------
@@ -879,6 +921,22 @@ class GCAutogmm(GCClusterMixin, TransformerMixin):
     probability_of_gaussianmixturey: `np.ndarray(n_particles, n_gaussians)`.
         Probability of each stellar particle (with E<=0 and -1<eps<1) to belong
         to each gaussian.
+
+    bic_med_: np.ndarray(number of component to try,1).
+        BIC parameter(len(X)).
+    gausians_: tuple(n_gausians).
+        Number of gaussians used to choise the number of clusters.
+    bic_min_: float.
+        Mean value of BIC(n_c>10).
+    delta_bic_: np.ndarray(number of component to try,1)
+        `bic_med_` - `bic_min_`.
+    mask_:  np.ndarray(number of gaussians).
+        Index of components to try that fulfil with c_BIC criteria.
+    n_components_: int.
+        Number of gaussians automatically selected.
+    gcgmm_: object.
+        Original `gcgmm_` object create by the `GaussianMixture` class
+        with number of cluster automatically selected.
 
     Examples
     --------
