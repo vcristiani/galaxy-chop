@@ -178,7 +178,6 @@ def align(
         vz_g : `np.ndarray(n_g,1)`
             Rotated velocities of the gas particles.
 
-        Lenght = 18. Unit: dimensionless.
     """
     if (r_cut is not None) and (r_cut <= 0.0):
         raise ValueError("r_cut must not be lower than 0.")
