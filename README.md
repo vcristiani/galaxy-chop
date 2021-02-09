@@ -49,5 +49,5 @@ Clone this repo and then inside the local directory execute
 
 
 ## Authors
-Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar), Ornela Marioni, Nelson Villagra, Antonela Taverna, Rafael Pignata, Bruno Sanchez.
+Valeria Cristiani (e-mail: valeria.cristiani@unc.edu.ar), Ornela Marioni, Nelson Villagra, Antonela Taverna, Rafael Pignata and Bruno Sanchez.
 
