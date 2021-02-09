@@ -80,7 +80,7 @@ def do_setup():
         license="MIT",
         keywords="galaxy, dynamics",
         classifiers=[
-            "Development Status :: 1 - Beta",
+            "Development Status :: 4 - Beta",
             "Intended Audience :: Education",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: MIT License",
