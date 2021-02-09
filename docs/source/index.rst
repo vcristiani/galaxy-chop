@@ -9,10 +9,11 @@ Welcome to GalaxyChop's documentation!
 .. image:: .. /galaxychop_logo.png
    :scale: 35
 
-.. image https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg
+.. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg
    :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.8%22
    :alt: Galaxy Chop Actions py3.8
-.. image https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.7/badge.svg
+   
+.. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.7/badge.svg
    :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.7%22
    :alt: Galaxy Chop Actions py3.7
 
