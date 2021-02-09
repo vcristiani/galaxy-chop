@@ -1,7 +1,7 @@
 Requirements
 ============
 
-You need Python 3.7 or later to run GalaxyChop.
+You need Python 3.7 or 3.8 to run GalaxyChop.
 
 
 Installation
