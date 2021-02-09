@@ -344,9 +344,8 @@ class Galaxy:
 
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
-        >>> pot_s = galaxy.potential_energy().pot_s
-        >>> pot_dm = galaxy.potential_energy().pot_dm
-        >>> pot_g = galaxy.potential_energy().pot_g
+        >>> gpot = galaxy.potential_energy()
+        >>> pot_s, pot_dm, pot_g = gpot.pot_s, gpot.pot_dm, gpot.pot_g
 
         Note
         ----
@@ -496,10 +495,8 @@ class Galaxy:
 
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
-        >>> J_part = galaxy.angular_momentum().J_part
-        >>> J_star = galaxy.angular_momentum().J_star
-        >>> Jr_part = galaxy.angular_momentum().Jr_part
-        >>> Jr_star = galaxy.angular_momentum().Jr_star
+        >>> g_J = galaxy.angular_momentum()
+        >>> J_part, J_star, Jr_part, Jr_star = g_J.J_part, g_J.J_star, g_J.Jr_part, g_J.Jr_star
 
         """
         m_s = self.arr_.m_s
@@ -677,8 +674,8 @@ class Galaxy:
 
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
-        >>> x = galaxy.jcirc().x
-        >>> y = galaxy.jcirc().y
+        >>> g_Jcirc = galaxy.jcirc()
+        >>> x, y = g_Jcirc.x, g_Jcirc.y
 
         """
         Etot_s = self.energy[0].value
