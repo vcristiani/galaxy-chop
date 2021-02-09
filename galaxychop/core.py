@@ -496,8 +496,8 @@ class Galaxy:
         >>> import galaxychop as gc
         >>> galaxy = gc.Galaxy(...)
         >>> g_J = galaxy.angular_momentum()
-        >>> J_part, J_star, Jr_part, Jr_star = g_J.J_part, g_J.J_star, g_J.Jr_part, g_J.Jr_star
-
+        >>> J_part, J_star= g_J.J_part, g_J.J_star
+        >>> Jr_part, Jr_star =  g_J.Jr_part, g_J.Jr_star
         """
         m_s = self.arr_.m_s
         x_s = self.arr_.x_s
