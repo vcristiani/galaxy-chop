@@ -22,8 +22,6 @@ from galaxychop import utils
 
 import numpy as np
 
-# from scipy.interpolate import InterpolatedUnivariateSpline
-
 import uttr
 
 
