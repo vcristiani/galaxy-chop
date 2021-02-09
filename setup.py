@@ -35,7 +35,7 @@ galaxychop_INIT_PATH = os.path.join(PATH, "galaxychop", "__init__.py")
 with open(galaxychop_INIT_PATH, "r") as f:
     for line in f:
         if line.startswith("__version__"):
-            _, _, PI_VERSION = line.replace('"', "").split()
+            VERSION = line.split("=", 1)[-1].replace('"', "").strip()
             break
 
 # =============================================================================
@@ -65,7 +65,7 @@ print(setuptools.find_packages())  # exclude=['test*']
 def do_setup():
     setuptools.setup(
         name="galaxychop",
-        version=PI_VERSION,
+        version=VERSION,
         description="Galaxy dynamic de-composition",
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
