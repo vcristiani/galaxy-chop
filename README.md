@@ -8,15 +8,15 @@
 
 # Welcome to **GalaxyChop**
 
-**GalaxyChop**  is a Python package that tackles the dynamical decomposition problem by utilizing clustering techniques in phase space for stellar galactic components.
+**GalaxyChop**  is a Python package that tackles the dynamical decomposition problem by using clustering techniques in phase space for stellar galactic components.
 
-It runs in numerical N-body simulations populated with Semi-analytical models and full Hydrodynamical simulations, such as Illustris TNG.
+It runs in numerical N-body simulations populated with semi-analytical models and full hydrodynamical simulations, such as Illustris TNG.
 
 ## Motivation
 
- Galaxies are self-gravitating complex stellar systems formed mainly by stars, dark matter, gas and dust. Star are assembledin different stellar components, such as the disk (thin and thick), the nucleus, the stellar halo and the bar. The components interact with each other and each of them follows its own temporal evolution. For this reason, the description of the formation and evolution  of  galaxies  is  strongly  linked  to  the  formation  and evolution of each of these individual components and their assemble in the final galaxy.
+ Galaxies are self-gravitating complex stellar systems formed mainly by stars, dark matter, gas and dust. Star are assembled in different stellar components, such as the disk (thin and thick), the nucleus, the stellar halo and the bar. The components interact with each other and each of them follows its own temporal evolution. For this reason, the description of the formation and evolution  of  galaxies  is  strongly  linked  to  the  formation and evolution of each of these individual components and their assemble in the final galaxy.
  
- A dynamical descomposition it is a fundamental tool to be able to separate each components of the galaxies for further study. Numerous methods exist in the literature to perform this task, but there is no tool that allows us to use several of them, providing the possibility of an easy comparison.
+ Dynamical decomposition it is a fundamental tool to separate each galaxy components for further study. Numerous methods exist in the literature to perform this task, but there is no tool that allows us to use several of them, providing the possibility of an easy comparison.
 
 
 ## Dynamic decomposition model implemented
