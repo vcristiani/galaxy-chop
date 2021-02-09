@@ -14,7 +14,7 @@ It runs in numerical N-body simulations populated with Semi-analytical models an
 
 ## Motivation
 
- Galaxies are self-gravitating complex stellar systems formed mainly by stars, dark matter, gas and dust. Star are assembledin different stellar components, such as the disk (thin and thick),the nucleus, the stellar halo and the bar. The components interact with each other and each of them follows its own temporal evolution. For this reason, the description of the formation and evolution  of  galaxies  is  strongly  linked  to  the  formation  and evolution of each of these individual components and their assemble in the final galaxy.
+ Galaxies are self-gravitating complex stellar systems formed mainly by stars, dark matter, gas and dust. Star are assembledin different stellar components, such as the disk (thin and thick), the nucleus, the stellar halo and the bar. The components interact with each other and each of them follows its own temporal evolution. For this reason, the description of the formation and evolution  of  galaxies  is  strongly  linked  to  the  formation  and evolution of each of these individual components and their assemble in the final galaxy.
  
  A dynamical descomposition it is a fundamental tool to be able to separate each components of the galaxies for further study. Numerous methods exist in the literature to perform this task, but there is no tool that allows us to use several of them, providing the possibility of an easy comparison.
 
