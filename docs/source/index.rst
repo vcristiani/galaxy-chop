@@ -39,7 +39,7 @@ and full Hydrodynamical simulations, such as Illustris TNG.
 
 | **Authors**
 | Valeria Cristiani (E-mail: valeria.cristiani@unc.edu.ar),
-| Ornela Marioni, Nelson Villagra, Antonela Taverna and Rafael Pignata
+| Ornela Marioni, Nelson Villagra, Antonela Taverna, Rafael Pignata and Bruno Sanchez.
 
 Repository
 ----------
