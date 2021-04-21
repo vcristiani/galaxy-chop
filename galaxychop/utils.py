@@ -365,16 +365,17 @@ def center(
     else:
         pot_dark = pot_dm
 
-    x_s = x_s - x_dm[pot_dark.argmax()]
-    y_s = y_s - y_dm[pot_dark.argmax()]
-    z_s = z_s - z_dm[pot_dark.argmax()]
+    argmin = pot_dark.argmin()
+    x_s = x_s - x_dm[argmin]
+    y_s = y_s - y_dm[argmin]
+    z_s = z_s - z_dm[argmin]
 
-    x_dm = x_dm - x_dm[pot_dark.argmax()]
-    y_dm = y_dm - y_dm[pot_dark.argmax()]
-    z_dm = z_dm - z_dm[pot_dark.argmax()]
+    x_dm = x_dm - x_dm[argmin]
+    y_dm = y_dm - y_dm[argmin]
+    z_dm = z_dm - z_dm[argmin]
 
-    x_g = x_g - x_dm[pot_dark.argmax()]
-    y_g = y_g - y_dm[pot_dark.argmax()]
-    z_g = z_g - z_dm[pot_dark.argmax()]
+    x_g = x_g - x_dm[argmin]
+    y_g = y_g - y_dm[argmin]
+    z_g = z_g - z_dm[argmin]
 
     return x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g

@@ -127,9 +127,8 @@ def test_GCChop_eps_cut(mock_real_galaxy):
 
     X, y = gal.values()
 
-    clean_eps = ~np.isnan(X[:, 8])
-    expected_esf = np.where(X[clean_eps, 8] <= 0.6)[0]
-    expected_disk = np.where(X[clean_eps, 8] > 0.6)[0]
+    expected_esf = np.where((X[:, 8] <= 0.6) & (~np.isnan(X[:, 8])))[0]
+    expected_disk = np.where((X[:, 8] > 0.6) & (~np.isnan(X[:, 8])))[0]
     expected_nan = np.where(np.isnan(X[:, 8]))[0]
 
     np.testing.assert_array_equal(comp0, expected_esf)
@@ -253,7 +252,7 @@ def test_GCAutogmm_prob(mock_real_galaxy):
 
     sum_predict_proba = np.apply_along_axis(sum, 1, predict_proba)
     sum_probability = np.apply_along_axis(sum, 1, probability)
-    sum_expected = np.ones(len(labels))
+    sum_expected = np.ones(len(labels[np.where(labels != -1)]))
 
     np.testing.assert_allclose(
         sum_predict_proba,
