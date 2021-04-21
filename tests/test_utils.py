@@ -88,6 +88,8 @@ def test_rcut_value(mock_galaxy):
 def test_daskpotential(halo_particles):
     """Test potential function."""
 
+    fortran_potential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
+
     mass_dm, pos_dm, vel_dm = halo_particles(N_part=100, seed=42)
 
     dask_potential = utils.potential(
@@ -96,7 +98,6 @@ def test_daskpotential(halo_particles):
     python_potential = conftest.epot(
         pos_dm[:, 0], pos_dm[:, 1], pos_dm[:, 2], mass_dm
     )
-    fortran_potential = np.loadtxt(TEST_DATA_PATH / "fpotential_test.dat")
 
     np.testing.assert_allclose(
         dask_potential, python_potential, rtol=1e-5, atol=1e-5

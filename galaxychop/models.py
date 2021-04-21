@@ -235,6 +235,8 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
 
     def _make_corot_sph(self, n_bin, bin0, bin_to_particle, sph):
         """Build the corotating part of the spheroid."""
+        sph = sph.copy()
+
         lim_aux = 0 if (n_bin >= 2 * bin0) else (2 * bin0 - self.n_bin)
 
         for count_bin in range(lim_aux, bin0):
@@ -250,6 +252,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
                     len(bin_to_particle[count_bin]),
                     replace=False,
                 )
+        return sph
 
     def _make_disk(self, bin_to_particle, bin0, n_bin, sph):
         """Build the disk."""
@@ -307,7 +310,7 @@ class GCAbadi(GCClusterMixin, TransformerMixin):
         # Selection of the particles that belong to the spheroid according to
         # the circularity parameter.
         sph = self._make_count_sph(bin0, bin_to_particle)
-        self._make_corot_sph(n_bin, bin0, bin_to_particle, sph)
+        sph = self._make_corot_sph(n_bin, bin0, bin_to_particle, sph)
 
         # The rest of the particles are assigned to the disk.
         dsk = self._make_disk(bin_to_particle, bin0, n_bin, sph)

@@ -106,3 +106,4 @@ venv.bak/
 
 # galaxychop
 .vscode/
+dask-worker-space/
