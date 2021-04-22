@@ -16,8 +16,6 @@ from astropy import units as u
 
 import attr
 
-import dask.array as da
-
 from galaxychop import utils
 
 import numpy as np
@@ -388,13 +386,7 @@ class Galaxy:
             m = np.hstack((m_s, m_dm, m_g))
             eps = np.max([eps_s, eps_dm, eps_g])
 
-            pot = utils.potential(
-                da.asarray(x, chunks=100),
-                da.asarray(y, chunks=100),
-                da.asarray(z, chunks=100),
-                da.asarray(m, chunks=100),
-                da.asarray(eps),
-            )
+            pot = utils.potential(x, y, z, m, eps)
 
             num_s = len(m_s)
             num = len(m_s) + len(m_dm)

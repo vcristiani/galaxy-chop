@@ -1,35 +1,32 @@
 # This file is part of
 # the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
-# Copyright (c) 2020, Valeria Cristiani
+# Copyright (c) 2021, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Utilities module."""
+# =============================================================================
+# DOCS
+# =============================================================================
 
-# #####################################################
+"""Utilities for align the galaxies."""
+
+# =============================================================================
 # IMPORTS
-# #####################################################
-
-import astropy.units as u
-
-import dask
-import dask.array as da
+# =============================================================================
 
 import numpy as np
 
-G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
-
-# #####################################################
-# Utility functions
-# #####################################################
+# =============================================================================
+# API
+# =============================================================================
 
 
-def _get_rot_matrix(m, pos, vel, r_cut=None):
+def get_rot_matrix(m, pos, vel, r_cut=None):
     """
     Rotation matrix calculation.
 
     Calculates the rotation matrix that aligns the TOTAL
-    agular momentum of the particles with the z-axis.
+    angular momentum of the particles with the z-axis.
     The positions, velocities and masses of the particles are used.
     Optionally, only particles within a cutting radius `(r_cut)` can be used.
 
@@ -109,8 +106,7 @@ def align(
     vz_g,
     r_cut,
 ):
-    """
-    Align the galaxy.
+    """Align the galaxy.
 
     Rotates the positions, velocities and angular momentum of the
     particles so that the total angular moment coincides with the z-axis.
@@ -185,7 +181,7 @@ def align(
     pos = np.vstack((x_s, y_s, z_s)).T
     vel = np.vstack((vx_s, vy_s, vz_s)).T
 
-    A = _get_rot_matrix(m_s, pos, vel, r_cut)
+    A = get_rot_matrix(m_s, pos, vel, r_cut)
 
     pos_rot_s = np.dot(A, pos.T)
     vel_rot_s = np.dot(A, vel.T)
@@ -222,160 +218,3 @@ def align(
         vel_rot_g.T[:, 1],
         vel_rot_g.T[:, 2],
     )
-
-
-@dask.delayed
-def _potential_dask(x, y, z, m, eps):
-    """
-    Specific gravitational potential energy of particles calculation.
-
-    Parameters
-    ----------
-    x, y, z : `np.ndarray`
-        Positions of particles. Shape(n,1)
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    eps : `float`, optional
-        Softening parameter. Shape(1,)
-
-    Returns
-    -------
-    np.ndarray : `float`
-    Specific potential energy of particles.
-
-    """
-    dist = np.sqrt(
-        np.square(x - x.reshape(-1, 1))
-        + np.square(y - y.reshape(-1, 1))
-        + np.square(z - z.reshape(-1, 1))
-        + np.square(eps)
-    )
-
-    np.fill_diagonal(dist, 0.0)
-
-    flt = dist != 0
-    mdist = da.divide(m, dist.astype(np.float32), where=flt)
-
-    return mdist.sum(axis=1) * G
-
-
-def potential(x, y, z, m, eps=0.0):
-    """
-    Potential energy calculation.
-
-    Given the positions and masses of particles, calculate
-    their specific gravitational potential energy.
-
-    Parameters
-    ----------
-    x, y, z : `np.ndarray`
-        Positions of particles. Shape(n,1)
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    eps : `float`, default value = 0
-        Softening parameter. Shape(1,)
-
-    Returns
-    -------
-    potential : `np.ndarray`
-        Specific potential energy of particles. Shape(n,1)
-    """
-    pot = _potential_dask(x, y, z, m, eps)
-    return np.asarray(pot.compute())
-
-
-def center(
-    m_s,
-    x_s,
-    y_s,
-    z_s,
-    m_dm,
-    x_dm,
-    y_dm,
-    z_dm,
-    m_g,
-    x_g,
-    y_g,
-    z_g,
-    pot_s=0,
-    pot_dm=0,
-    pot_g=0,
-    eps_dm=0,
-    eps_s=0,
-    eps_g=0,
-):
-    """
-    Centers the particles.
-
-    Centers the position of all particles in the galaxy respect
-    to the position of the lowest potential dark matter particle.
-
-    Parameters
-    ----------
-    x_s, y_s, z_s : `np.ndarray(n_s,1)`
-        Star positions.
-    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1)`
-        Dark matter positions.
-    x_g, y_g, z_g : `np.ndarray(n_g,1)`
-        Gas positions.
-
-    Returns
-    -------
-    tuple : `np.ndarray`
-        x_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        y_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        z_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        x_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        y_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        z_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        x_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-        y_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-        z_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-
-    """
-    x = np.hstack((x_s, x_dm, x_g))
-    y = np.hstack((y_s, y_dm, y_g))
-    z = np.hstack((z_s, z_dm, z_g))
-    m = np.hstack((m_s, m_dm, m_g))
-    eps = np.max([eps_dm, eps_s, eps_g])
-
-    total_potential = pot_dm
-
-    if np.all(total_potential == 0.0):
-        pot = potential(
-            da.asarray(x, chunks=100),
-            da.asarray(y, chunks=100),
-            da.asarray(z, chunks=100),
-            da.asarray(m, chunks=100),
-            da.asarray(eps),
-        )
-
-        num_s = len(m_s)
-        num = len(m_s) + len(m_dm)
-        pot_dark = pot[num_s:num]
-    else:
-        pot_dark = pot_dm
-
-    argmin = pot_dark.argmin()
-    x_s = x_s - x_dm[argmin]
-    y_s = y_s - y_dm[argmin]
-    z_s = z_s - z_dm[argmin]
-
-    x_dm = x_dm - x_dm[argmin]
-    y_dm = y_dm - y_dm[argmin]
-    z_dm = z_dm - z_dm[argmin]
-
-    x_g = x_g - x_dm[argmin]
-    y_g = y_g - y_dm[argmin]
-    z_g = z_g - z_dm[argmin]
-
-    return x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g

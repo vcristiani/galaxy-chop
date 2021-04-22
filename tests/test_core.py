@@ -12,8 +12,6 @@
 
 import astropy.units as u
 
-import dask.array as da
-
 from galaxychop import core
 from galaxychop import utils
 
@@ -134,10 +132,10 @@ def test_energy_method(mock_galaxy):
     m = np.hstack((g.arr_.m_s, g.arr_.m_dm, g.arr_.m_g))
 
     pot = utils.potential(
-        da.asarray(x, chunks=100),
-        da.asarray(y, chunks=100),
-        da.asarray(z, chunks=100),
-        da.asarray(m, chunks=100),
+        x,
+        y,
+        z,
+        m,
     )
     num_s = len(g.arr_.m_s)
     num = len(g.arr_.m_s) + len(g.arr_.m_dm)
@@ -175,10 +173,10 @@ def test_energy_method_real_galaxy(mock_real_galaxy):
     m = np.hstack((gal.arr_.m_s, gal.arr_.m_dm, gal.arr_.m_g))
 
     pot = utils.potential(
-        da.asarray(x, chunks=100),
-        da.asarray(y, chunks=100),
-        da.asarray(z, chunks=100),
-        da.asarray(m, chunks=100),
+        x,
+        y,
+        z,
+        m,
     )
     num_s = len(gal.arr_.m_s)
     num = len(gal.arr_.m_s) + len(gal.arr_.m_dm)
