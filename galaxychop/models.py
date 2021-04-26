@@ -13,7 +13,7 @@ __all__ = [
     "JEHistogram",
     "KMeans",
     "GaussianMixture",
-    "GCAutogmm",
+    "AutoGaussianMixture",
 ]
 
 # #####################################################
@@ -879,7 +879,9 @@ class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
         return self
 
 
-class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
+class AutoGaussianMixture(
+    GalaxyDecomposeMixin, ClusterMixin, TransformerMixin
+):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -930,9 +932,9 @@ class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> gcautogmm = gchop.GCAutogmm(c_bic=0.1)
-    >>> gcautogmm.decompose(galaxy)
-    >>> gcautogmm.labels_
+    >>> chopper = gchop.AutoGaussianMixture(c_bic=0.1)
+    >>> chopper.decompose(galaxy)
+    >>> chopper.labels_
     array([-1, -1,  1, ...  0, 0, 3])
 
     References
@@ -952,7 +954,7 @@ class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         # )
 
     def fit(self, X, y=None):
-        """Compute GCAutogmm clustering.
+        """Compute AutoGaussianMixture clustering.
 
         Parameters
         ----------

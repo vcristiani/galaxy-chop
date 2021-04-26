@@ -227,7 +227,7 @@ def test_GCAutogmm_prob(mock_real_galaxy):
     """Test that the probabilities obtained by the method sum to 1."""
     gal = mock_real_galaxy
 
-    autogmm = models.GCAutogmm(c_bic=0.1)
+    autogmm = models.AutoGaussianMixture(c_bic=0.1)
     autogmm.decompose(gal)
 
     predict_proba = autogmm.probability_of_gaussianmixture
@@ -256,7 +256,7 @@ def test_GCAutogmm_label(mock_real_galaxy):
     """Test of label values."""
     gal = mock_real_galaxy
 
-    autogmm = models.GCAutogmm(c_bic=0.1)
+    autogmm = models.AutoGaussianMixture(c_bic=0.1)
     autogmm.decompose(gal)
 
     labels = autogmm.labels_
