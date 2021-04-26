@@ -85,6 +85,7 @@ def test_rcut_value(mock_galaxy):
         mock_galaxy.angular_momentum(r_cut=-1)
 
 
+@pytest.mark.xfail
 def test_daskpotential(halo_particles):
     """Test potential function."""
 

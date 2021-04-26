@@ -33,10 +33,10 @@ from sklearn.mixture import GaussianMixture
         np.nan,
     ],
 )
-def test_type_error_GCDecomposeMixin_class(type_values):
-    """Test type error GCDecomposeMixin."""
+def test_type_error_GalaxyDecomposeMixin_class(type_values):
+    """Test type error GalaxyDecomposeMixin."""
     with pytest.raises(TypeError):
-        models.GCDecomposeMixin(type_values)
+        models.GalaxyDecomposeMixin(type_values)
 
 
 def test_GCAbadi_len(mock_real_galaxy):

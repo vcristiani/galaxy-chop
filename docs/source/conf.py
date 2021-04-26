@@ -28,7 +28,7 @@ import galaxychop
 # -- Project information -----------------------------------------------------
 
 project = 'galaxy-chop'
-copyright = '2020, Valeria Cristiani'
+copyright = '2020, 2021, Valeria Cristiani'
 author = 'Valeria Cristiani'
 
 # The full version, including alpha/beta/rc tags

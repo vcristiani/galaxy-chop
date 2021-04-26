@@ -7,7 +7,7 @@
 """Module models."""
 
 __all__ = [
-    "GCDecomposeMixin",
+    "GalaxyDecomposeMixin",
     "GCClusterMixin",
     "GCAbadi",
     "GCChop",
@@ -32,11 +32,11 @@ from . import core
 
 
 # #####################################################
-# GCDecomposeMixin CLASS
+# GalaxyDecomposeMixin CLASS
 # #####################################################
 
 
-class GCDecomposeMixin:
+class GalaxyDecomposeMixin:
     """GalaxyChop decompose mixin class.
 
     Implementation of the particle decomposition as a
@@ -152,7 +152,7 @@ class GCDecomposeMixin:
 # #####################################################
 
 
-class GCClusterMixin(GCDecomposeMixin, ClusterMixin):
+class GCClusterMixin(GalaxyDecomposeMixin, ClusterMixin):
     """GalaxyChop cluster mixin class."""
 
     pass
@@ -422,18 +422,18 @@ class GCChop(GCAbadi):
         “Chemical signatures of formation processes in the stellar
         populations of simulated galaxies”,
         Monthly Notices of the Royal Astronomical Society, vol. 420, no. 1,
-        pp. 255–270, 2012. doi:10.1111/j.1365-2966.2011.20028.x.
+        pp. 255-270, 2012. doi:10.1111/j.1365-2966.2011.20028.x.
         `<https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract>`_
     .. [3] Marinacci, F., Pakmor, R., and Springel, V.,
         “The formation of disc galaxies in high-resolution moving-mesh
         cosmological simulations”, Monthly Notices of the Royal Astronomical
-        Society, vol. 437, no. 2, pp. 1750–1775, 2014.
+        Society, vol. 437, no. 2, pp. 1750-1775, 2014.
         doi:10.1093/mnras/stt2003.
         `<https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract>`_
     .. [4] Vogelsberger, M., “Introducing the Illustris Project: simulating
         the coevolution of dark and visible matter in the Universe”,
         Monthly Notices of the Royal Astronomical Society, vol. 444, no. 2,
-        pp. 1518–1547, 2014. doi:10.1093/mnras/stu1536.
+        pp. 1518-1547, 2014. doi:10.1093/mnras/stu1536.
         `<https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract>`_
     .. [5] Park, M.-J., “New Horizon: On the Origin of the Stellar Disk and
         Spheroid of Field Galaxies at z = 0.7”, The Astrophysical Journal,
@@ -782,7 +782,7 @@ class GCKmeans(GCClusterMixin, KMeans):
         return self.columns
 
 
-class GCGmm(GCDecomposeMixin, GaussianMixture):
+class GCGmm(GalaxyDecomposeMixin, GaussianMixture):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -796,7 +796,7 @@ class GCGmm(GCDecomposeMixin, GaussianMixture):
 
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GCDecomposeMixin` and :py:class:`GaussianMixture` classes.
+        :py:class:`GalaxyDecomposeMixin` and :py:class:`GaussianMixture` classes.
 
     Attributes
     ----------
