@@ -1,5 +1,5 @@
 # This file is part of
-# the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
+# the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
 # Copyright (c) 2020, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
@@ -396,9 +396,9 @@ class GCChop(JHistogram):
     --------
     Example of implementation of Chop Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> gcchop = gc.GCChop(eps_cut=0.6)
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> gcchop = gchop.GCChop(eps_cut=0.6)
     >>> gcchop.decompose(galaxy)
     >>> gcchop.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
@@ -500,9 +500,9 @@ class JEHistogram(JHistogram):
     --------
     Example of implementation of Cristini Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> chopper = gc.JEHistogram()
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> chopper = gchop.JEHistogram()
     >>> chopper.decompose(galaxy)
     >>> gcristiani.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
@@ -738,9 +738,9 @@ class KMeans(GalaxyDecomposeMixin, cluster.KMeans):
     --------
     Example of implementation of CGKMeans Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> chopper = gc.KMeans(n_clusters=3)
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> chopper = gchop.KMeans(n_clusters=3)
     >>> chopper.decompose(galaxy)
     >>> chopper.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
@@ -827,9 +827,9 @@ class GCGmm(GalaxyDecomposeMixin, mixture.GaussianMixture):
     --------
     Example of implementation of CGGmm Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> gcgmm = gc.GCGmm(n_components=3)
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> gcgmm = gchop.GCGmm(n_components=3)
     >>> gcgmm.decompose(galaxy)
     >>> gcgmm.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
@@ -928,9 +928,9 @@ class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
     --------
     Example of implementation of CGAutogmm Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> gcautogmm = gc.GCAutogmm(c_bic=0.1)
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> gcautogmm = gchop.GCAutogmm(c_bic=0.1)
     >>> gcautogmm.decompose(galaxy)
     >>> gcautogmm.labels_
     array([-1, -1,  1, ...  0, 0, 3])

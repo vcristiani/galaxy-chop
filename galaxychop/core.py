@@ -1,5 +1,5 @@
 # This file is part of
-# the galxy-chop project (https://github.com/vcristiani/galaxy-chop)
+# the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
 # Copyright (c) 2020, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
@@ -296,8 +296,8 @@ class Galaxy:
         This returns the specific kinetic energy of stars, dark matter and gas
         particles respectively.
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> k_s, k_dm, k_g = galaxy.kinetic_energy
         """
         vx_s = self.arr_.vx_s
@@ -340,8 +340,8 @@ class Galaxy:
         This returns the specific potential energy of stars, dark matter and
         gas particles.
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> gpot = galaxy.potential_energy()
         >>> pot_s, pot_dm, pot_g = gpot.pot_s, gpot.pot_dm, gpot.pot_g
 
@@ -427,8 +427,8 @@ class Galaxy:
         This returns the specific total energy of stars, dark matter and gas
         particles respectively.
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> E_s, E_dm, E_g = galaxy.energy
         """
         potential = np.concatenate(
@@ -485,8 +485,8 @@ class Galaxy:
         This returns the specific potential energy of stars, dark matter and
         gas particles.
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> g_J = galaxy.angular_momentum()
         >>> J_part, J_star= g_J.J_part, g_J.J_star
         >>> Jr_part, Jr_star =  g_J.Jr_part, g_J.Jr_star
@@ -664,8 +664,8 @@ class Galaxy:
         per bin (`x`) and the maximum value of the z-component of the
         normalized specific angular momentum per bin (`y`)
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> g_Jcirc = galaxy.jcirc()
         >>> x, y = g_Jcirc.x, g_Jcirc.y
 
@@ -782,8 +782,8 @@ class Galaxy:
         circularity parameter (eps : J_z/J_circ) and
         eps_r: (J_p/J_circ).
 
-        >>> import galaxychop as gc
-        >>> galaxy = gc.Galaxy(...)
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
         >>> E_star, eps, eps_r = galaxy.paramcirc
 
         """
