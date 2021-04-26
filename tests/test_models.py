@@ -23,22 +23,6 @@ from sklearn.mixture import GaussianMixture
 # TESTS
 # =============================================================================
 
-
-@pytest.mark.parametrize(
-    "type_values",
-    [
-        "string",
-        np.random.rand(1),
-        np.inf,
-        np.nan,
-    ],
-)
-def test_type_error_GalaxyDecomposeMixin_class(type_values):
-    """Test type error GalaxyDecomposeMixin."""
-    with pytest.raises(TypeError):
-        models.GalaxyDecomposeMixin(type_values)
-
-
 def test_GCAbadi_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
