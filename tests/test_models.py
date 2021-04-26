@@ -172,12 +172,12 @@ def test_JEHistogram_histogram(mock_real_galaxy):
     np.testing.assert_equal(comp0_hist_plus_comp1_hist, full_histogram[0])
 
 
-def test_GCKmeans(mock_real_galaxy):
-    """Test GCKmeans."""
+def test_Kmeans(mock_real_galaxy):
+    """Test KMeans."""
     gal = mock_real_galaxy
 
-    gckmeans = models.GCKmeans(n_clusters=5, random_state=0)
-    result = gckmeans.decompose(gal)
+    chopper = models.KMeans(n_clusters=5, random_state=0)
+    result = chopper.decompose(gal)
     (clean_label_gal,) = np.where(result.labels_ != -1)
 
     kmeans = KMeans(n_clusters=5, random_state=0)

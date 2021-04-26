@@ -11,7 +11,7 @@ __all__ = [
     "JHistogram",
     "GCChop",
     "JEHistogram",
-    "GCKmeans",
+    "KMeans",
     "GCGmm",
     "GCAutogmm",
 ]
@@ -24,8 +24,7 @@ import numpy as np
 
 from sklearn.base import ClusterMixin
 from sklearn.base import TransformerMixin
-from sklearn.cluster import KMeans
-from sklearn.mixture import GaussianMixture
+from sklearn import cluster, mixture
 
 from . import core
 
@@ -696,7 +695,7 @@ class JEHistogram(JHistogram):
 # =============================================================================
 
 
-class GCKmeans(GalaxyDecomposeMixin, KMeans):
+class KMeans(GalaxyDecomposeMixin, cluster.KMeans):
     """GalaxyChop KMeans class.
 
     Implementation of Scikit-learn [6]_ K-means as a method for dynamically
@@ -741,9 +740,9 @@ class GCKmeans(GalaxyDecomposeMixin, KMeans):
 
     >>> import galaxychop as gc
     >>> galaxy = gc.Galaxy(...)
-    >>> gckmeans = gc.GCKmeans(n_clusters=3)
-    >>> gckmeans.decompose(galaxy)
-    >>> gckmeans.labels_
+    >>> chopper = gc.KMeans(n_clusters=3)
+    >>> chopper.decompose(galaxy)
+    >>> chopper.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
 
 
@@ -771,7 +770,7 @@ class GCKmeans(GalaxyDecomposeMixin, KMeans):
         return self.columns
 
 
-class GCGmm(GalaxyDecomposeMixin, GaussianMixture):
+class GCGmm(GalaxyDecomposeMixin, mixture.GaussianMixture):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -972,7 +971,9 @@ class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         gausians = []
         for i in self.component_to_try:
             # Implementation of gmm for all possible components of the method.
-            gmm = GaussianMixture(n_components=i, n_init=10, random_state=0)
+            gmm = mixture.GaussianMixture(
+                n_components=i, n_init=10, random_state=0
+            )
             gmm.fit(X)
             bic_med[i - 2] = gmm.bic(X) / len(X)
             gausians.append(gmm)
@@ -988,7 +989,7 @@ class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         number_of_gaussians = np.min(self.component_to_try[mask])
 
         # Clustering with gaussian mixture and the parameters obtained.
-        gcgmm_ = GaussianMixture(
+        gcgmm_ = mixture.GaussianMixture(
             n_components=number_of_gaussians,
             random_state=0,
         )
