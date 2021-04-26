@@ -8,7 +8,7 @@
 
 __all__ = [
     "GalaxyDecomposeMixin",
-    "GCAbadi",
+    "JHistogram",
     "GCChop",
     "GCCristiani",
     "GCKmeans",
@@ -147,11 +147,11 @@ class GalaxyDecomposeMixin:
 
 
 # #####################################################
-# GCAbadi CLASS
+# JHistogram CLASS
 # #####################################################
 
 
-class GCAbadi(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
+class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
     """GalaxyChop Abadi class.
 
     Implementation of galaxy dynamical decomposition model described in
@@ -177,11 +177,11 @@ class GCAbadi(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
     --------
     Example of implementation of Abadi Model.
 
-    >>> import galaxychop as gc
-    >>> galaxy = gc.Galaxy(...)
-    >>> gcabadi = gc.GCAbadi(n_bin=100, digits=2, seed=None)
-    >>> gcabadi.decompose(galaxy)
-    >>> gcabadi.labels_
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> chopper = gchop.JHistogram(n_bin=100, digits=2, seed=None)
+    >>> chopper.decompose(galaxy)
+    >>> chopper.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
 
     References
@@ -371,7 +371,7 @@ class GCAbadi(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
 # #####################################################
 
 
-class GCChop(GCAbadi):
+class GCChop(JHistogram):
     """GalaxyChop Chop class.
 
     Implementation of galaxy dynamical decomposition model using
@@ -474,7 +474,7 @@ class GCChop(GCAbadi):
 # #####################################################
 
 
-class GCCristiani(GCAbadi):
+class GCCristiani(JHistogram):
     """GalaxyChop Cristiani class.
 
     Implementation of a modification of Abadi galaxy dynamical
@@ -488,7 +488,7 @@ class GCCristiani(GCAbadi):
         energy histogram.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GCAbadi` classes.
+        :py:class:`JHistogram` classes.
 
     Attributes
     ----------

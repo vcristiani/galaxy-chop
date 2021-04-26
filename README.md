@@ -16,14 +16,14 @@ It runs in numerical N-body simulations populated with semi-analytical models an
 ## Motivation
 
  Galaxies are self-gravitating complex stellar systems formed mainly by stars, dark matter, gas and dust. Star are assembled in different stellar components, such as the disk (thin and thick), the nucleus, the stellar halo and the bar. The components interact with each other and each of them follows its own temporal evolution. For this reason, the description of the formation and evolution  of  galaxies  is  strongly  linked  to  the  formation and evolution of each of these individual components and their assemble in the final galaxy.
- 
+
  Dynamical decomposition it is a fundamental tool to separate each galaxy component for further study. Numerous methods exist in the literature to perform this task, but there is no tool that allows us to use several of them, providing the possibility of an easy comparison.
 
 
 ## Dynamic decomposition model implemented
-- **[GCAbadi](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAbadi):** Implementation of the dynamic decomposition model of galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract). 
+- **[JHistogram](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.JHistogram):** Implementation of the dynamic decomposition model of galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract).
 - **[GCChop](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCChop):** Implementation of the dynamic decomposition model of galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
-- **[GCKmeans](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCKmeans):** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a model for dynamical decomposing of galaxies. 
+- **[GCKmeans](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCKmeans):** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a model for dynamical decomposing of galaxies.
 - **[GCgmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCGmm):** Implementation of the dynamic decomposition model of galaxies described by [Obreja et al.(2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract).
 - **[GCAutogmm](https://galaxy-chop.readthedocs.io/en/latest/api/galaxychop.html#galaxychop.models.GCAutogmm):** Implementation of the  dynamic decomposition model of galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
 

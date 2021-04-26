@@ -23,24 +23,24 @@ from sklearn.mixture import GaussianMixture
 # TESTS
 # =============================================================================
 
-def test_GCAbadi_len(mock_real_galaxy):
+def test_JHistogram_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    abadi = models.GCAbadi(seed=10)
-    abadi.decompose(gal)
+    chopper = models.JHistogram(seed=10)
+    chopper.decompose(gal)
 
-    longitude = len(abadi.labels_)
+    longitude = len(chopper.labels_)
     assert np.shape(X) == (longitude, 10)
 
 
-def test_GCAbadi_outputs(mock_real_galaxy):
-    """Test outputs of GCAbadi model."""
+def test_JHistogram_outputs(mock_real_galaxy):
+    """Test outputs of JHistogram model."""
     gal = mock_real_galaxy
-    abadi = models.GCAbadi(seed=10)
-    abadi.decompose(gal)
+    chopper = models.JHistogram(seed=10)
+    chopper.decompose(gal)
 
-    labels = abadi.labels_
+    labels = chopper.labels_
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
     (comp_nan,) = np.where(labels == -1)
@@ -50,13 +50,13 @@ def test_GCAbadi_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
-def test_GCAbadi_histogram(mock_real_galaxy):
+def test_JHistogram_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    abadi = models.GCAbadi(seed=10)
-    abadi.decompose(gal)
-    labels = abadi.labels_
+    chopper = models.JHistogram(seed=10)
+    chopper.decompose(gal)
+    labels = chopper.labels_
     (comp0,) = np.where(labels == 0)
     (comp1,) = np.where(labels == 1)
 
