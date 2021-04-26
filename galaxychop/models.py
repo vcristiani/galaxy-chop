@@ -12,7 +12,7 @@ __all__ = [
     "GCChop",
     "JEHistogram",
     "KMeans",
-    "GCGmm",
+    "GaussianMixture",
     "GCAutogmm",
 ]
 
@@ -770,7 +770,7 @@ class KMeans(GalaxyDecomposeMixin, cluster.KMeans):
         return self.columns
 
 
-class GCGmm(GalaxyDecomposeMixin, mixture.GaussianMixture):
+class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -829,9 +829,9 @@ class GCGmm(GalaxyDecomposeMixin, mixture.GaussianMixture):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> gcgmm = gchop.GCGmm(n_components=3)
-    >>> gcgmm.decompose(galaxy)
-    >>> gcgmm.labels_
+    >>> chopper = gchop.GaussianMixture(n_components=3)
+    >>> chopper.decompose(galaxy)
+    >>> chopper.labels_
     array([-1, -1,  2, ...,  1,  2,  1])
 
     References
@@ -839,7 +839,7 @@ class GCGmm(GalaxyDecomposeMixin, mixture.GaussianMixture):
     .. [7] Obreja, A., “Introducing galactic structure finder: the multiple
         stellar kinematic structures of a simulated Milky Way mass galaxy”,
         Monthly Notices of the Royal Astronomical Society, vol. 477, no. 4,
-        pp. 4915–4930, 2018. doi:10.1093/mnras/sty1022.
+        pp. 4915-4930, 2018. doi:10.1093/mnras/sty1022.
         `<https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract>`_
     """
 

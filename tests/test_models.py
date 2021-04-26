@@ -198,11 +198,11 @@ def test_Kmeans(mock_real_galaxy):
 
 
 def test_GCGmm(mock_real_galaxy):
-    """Test GCGmm."""
+    """Test GaussianMixture."""
     gal = mock_real_galaxy
 
-    gcgmm = models.GCGmm(n_components=5, random_state=0)
-    result = gcgmm.decompose(gal)
+    chopper = models.GaussianMixture(n_components=5, random_state=0)
+    result = chopper.decompose(gal)
     (clean_label_gal,) = np.where(result.labels_ != -1)
 
     gmm = GaussianMixture(n_components=5, random_state=0)
