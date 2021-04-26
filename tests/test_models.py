@@ -126,21 +126,21 @@ def test_GCChop_eps_cut_value_error(eps_cut):
         models.GCChop(eps_cut)
 
 
-def test_GCCristiani_len(mock_real_galaxy):
+def test_JEHistogram_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    cristiani = models.GCCristiani(seed=10)
+    cristiani = models.JEHistogram(seed=10)
     cristiani.decompose(gal)
 
     longitude = len(cristiani.labels_)
     assert np.shape(X) == (longitude, 10)
 
 
-def test_GCCristiani_outputs(mock_real_galaxy):
-    """Test outputs of GCCristiani model."""
+def test_JEHistogram_outputs(mock_real_galaxy):
+    """Test outputs of JEHistogram model."""
     gal = mock_real_galaxy
-    cristiani = models.GCCristiani(seed=10)
+    cristiani = models.JEHistogram(seed=10)
     cristiani.decompose(gal)
 
     labels = cristiani.labels_
@@ -153,11 +153,11 @@ def test_GCCristiani_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
-def test_GCCristiani_histogram(mock_real_galaxy):
+def test_JEHistogram_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
     X, y = gal.values()
-    cristiani = models.GCCristiani(seed=10)
+    cristiani = models.JEHistogram(seed=10)
     cristiani.decompose(gal)
     labels = cristiani.labels_
     (comp0,) = np.where(labels == 0)

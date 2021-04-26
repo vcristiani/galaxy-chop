@@ -10,7 +10,7 @@ __all__ = [
     "GalaxyDecomposeMixin",
     "JHistogram",
     "GCChop",
-    "GCCristiani",
+    "JEHistogram",
     "GCKmeans",
     "GCGmm",
     "GCAutogmm",
@@ -470,11 +470,11 @@ class GCChop(JHistogram):
 
 
 # #####################################################
-# GCCristiani CLASS
+# JEHistogram CLASS
 # #####################################################
 
 
-class GCCristiani(JHistogram):
+class JEHistogram(JHistogram):
     """GalaxyChop Cristiani class.
 
     Implementation of a modification of Abadi galaxy dynamical
@@ -503,8 +503,8 @@ class GCCristiani(JHistogram):
 
     >>> import galaxychop as gc
     >>> galaxy = gc.Galaxy(...)
-    >>> gccristiani = gc.GCCristiani()
-    >>> gccristiani.decompose(galaxy)
+    >>> chopper = gc.JEHistogram()
+    >>> chopper.decompose(galaxy)
     >>> gcristiani.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
     """
