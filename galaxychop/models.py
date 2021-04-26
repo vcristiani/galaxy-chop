@@ -8,7 +8,6 @@
 
 __all__ = [
     "GalaxyDecomposeMixin",
-    "GCClusterMixin",
     "GCAbadi",
     "GCChop",
     "GCCristiani",
@@ -148,22 +147,11 @@ class GalaxyDecomposeMixin:
 
 
 # #####################################################
-# GCClusterMixin CLASS
-# #####################################################
-
-
-class GCClusterMixin(GalaxyDecomposeMixin, ClusterMixin):
-    """GalaxyChop cluster mixin class."""
-
-    pass
-
-
-# #####################################################
 # GCAbadi CLASS
 # #####################################################
 
 
-class GCAbadi(GCClusterMixin, TransformerMixin):
+class GCAbadi(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
     """GalaxyChop Abadi class.
 
     Implementation of galaxy dynamical decomposition model described in
@@ -708,7 +696,7 @@ class GCCristiani(GCAbadi):
 # =============================================================================
 
 
-class GCKmeans(GCClusterMixin, KMeans):
+class GCKmeans(GalaxyDecomposeMixin, KMeans):
     """GalaxyChop KMeans class.
 
     Implementation of Scikit-learn [6]_ K-means as a method for dynamically
@@ -722,7 +710,8 @@ class GCKmeans(GCClusterMixin, KMeans):
 
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GCClusterMixin` and :py:class:`KMeans` classes.
+        :py:class:`GalaxyDecomposeMixin`, :py:class:`ClusterMixin` and
+        :py:class:`KMeans` classes.
 
     Attributes
     ----------
@@ -891,7 +880,7 @@ class GCGmm(GalaxyDecomposeMixin, GaussianMixture):
         return self
 
 
-class GCAutogmm(GCClusterMixin, TransformerMixin):
+class GCAutogmm(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
