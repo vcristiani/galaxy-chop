@@ -59,7 +59,7 @@ def test_GalaxyDecomposeMixin_protocol(mock_real_galaxy, model):
     columns = chopper.get_columns()
     assert isinstance(columns, (list, tuple))  # is a list or tuple
     assert len(columns) == len(set(columns))  # no repeated columns
-    for column in columns:  # all columns are from core.column?
+    for column in columns:  # all columns are from core.Column?
         core.Columns(column)
 
     # decompose
