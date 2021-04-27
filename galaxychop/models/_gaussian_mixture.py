@@ -13,9 +13,8 @@
 
 import numpy as np
 
-from sklearn.base import ClusterMixin
-from sklearn.base import TransformerMixin
 from sklearn import mixture
+from sklearn.base import ClusterMixin, TransformerMixin
 
 from ._base import GalaxyDecomposeMixin
 
@@ -38,7 +37,8 @@ class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
 
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GalaxyDecomposeMixin` and :py:class:`GaussianMixture` classes.
+        :py:class:`GalaxyDecomposeMixin` and :py:class:`GaussianMixture`
+        classes.
 
     Attributes
     ----------

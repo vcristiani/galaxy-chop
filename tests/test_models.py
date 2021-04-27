@@ -23,6 +23,7 @@ from sklearn.mixture import GaussianMixture
 # TESTS
 # =============================================================================
 
+
 def test_JHistogram_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
