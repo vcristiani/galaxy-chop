@@ -74,7 +74,7 @@ def test_GCChop_len(mock_real_galaxy):
     gal = mock_real_galaxy
     X, y = gal.values()
 
-    chop = models.GCChop()
+    chop = models.JThreshold()
     chop.decompose(gal)
 
     longitude = len(chop.labels_)
@@ -82,9 +82,9 @@ def test_GCChop_len(mock_real_galaxy):
 
 
 def test_GCChop_outputs(mock_real_galaxy):
-    """Test outputs of GCChop model."""
+    """Test outputs of JThreshold model."""
     gal = mock_real_galaxy
-    chop = models.GCChop()
+    chop = models.JThreshold()
     chop.decompose(gal)
     labels = chop.labels_
 
@@ -101,7 +101,7 @@ def test_GCChop_outputs(mock_real_galaxy):
 def test_GCChop_eps_cut(mock_real_galaxy):
     """Tests the number of particles in each component."""
     gal = mock_real_galaxy
-    chop = models.GCChop()
+    chop = models.JThreshold()
     chop.decompose(gal)
     labels = chop.labels_
 
@@ -123,7 +123,7 @@ def test_GCChop_eps_cut(mock_real_galaxy):
 @pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
 def test_GCChop_eps_cut_value_error(eps_cut):
     with pytest.raises(ValueError):
-        models.GCChop(eps_cut)
+        models.JThreshold(eps_cut)
 
 
 def test_JEHistogram_len(mock_real_galaxy):

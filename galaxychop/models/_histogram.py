@@ -239,11 +239,11 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
 
 
 # #####################################################
-# GCChop CLASS
+# JThreshold CLASS
 # #####################################################
 
 
-class GCChop(JHistogram):
+class JThreshold(JHistogram):
     """GalaxyChop Chop class.
 
     Implementation of galaxy dynamical decomposition model using
@@ -271,7 +271,7 @@ class GCChop(JHistogram):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> gcchop = gchop.GCChop(eps_cut=0.6)
+    >>> gcchop = gchop.JThreshold(eps_cut=0.6)
     >>> gcchop.decompose(galaxy)
     >>> gcchop.labels_
     array([-1, -1,  0, ...,  0,  0,  1])
