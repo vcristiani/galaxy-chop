@@ -1,4 +1,3 @@
-
 # This file is part of
 # the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
 # Copyright (c) 2020, Valeria Cristiani
@@ -7,11 +6,20 @@
 
 """Module for dynamical decomposition models"""
 
-from ._base import GalaxyDecomposeMixin
-from ._histogram import JThreshold, JHistogram, JEHistogram
-from ._kmeans import KMeans
-from ._gaussian_mixture import GaussianMixture, AutoGaussianMixture
 
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
+from ._base import GalaxyDecomposeMixin
+from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
+from ._histogram import JEHistogram, JHistogram
+from ._kmeans import KMeans
+from ._threshold import JThreshold
+
+# =============================================================================
+# MAKE IT PUBLIC!
+# =============================================================================
 
 __all__ = [
     "GalaxyDecomposeMixin",
