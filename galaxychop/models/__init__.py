@@ -4,7 +4,7 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Module for dynamical decomposition models"""
+"""Module for dynamical decomposition models."""
 
 
 # =============================================================================
