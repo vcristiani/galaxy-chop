@@ -327,6 +327,17 @@ def test_angular_momentum_outputs(mock_galaxy):
     assert np.shape(g_test.J_part.value) == (3, longitude)
 
 
+def test_angular_momentum_order(mock_galaxy):
+    """Test object."""
+    g = mock_galaxy
+    g_test = g.angular_momentum()
+    jstar = g_test.J_star.value
+    jpart = g_test.J_part.value
+    n_star = len(jstar[0])
+
+    np.testing.assert_equal(jstar, jpart[:, :n_star])
+
+
 def test_jcirc_E_tot_len(mock_galaxy):
     """Check the E_tot array len."""
     g = mock_galaxy

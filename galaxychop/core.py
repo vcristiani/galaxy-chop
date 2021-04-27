@@ -606,7 +606,7 @@ class Galaxy:
             ]
         )
 
-        J_part = np.concatenate([J_gas, J_dark, J_star], axis=1)
+        J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
 
         Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
 
