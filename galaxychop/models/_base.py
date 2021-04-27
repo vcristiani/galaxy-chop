@@ -51,12 +51,12 @@ class GalaxyDecomposeMixin:
         (clean,) = np.where(~np.isnan(eps))
         return clean
 
-    def add_dirty(self, X, labels, clean_mask):
+    def label_dirty(self, X, labels, clean_mask):
         """Complete the labels of all stellar particles.
 
         Parameters
         ----------
-        X : `np.ndarray(n,10)`
+        X : `np.ndarray(n, 10)`
             2D array where each file it is a diferent stellar particle and
             each column is a parameter of the particles:
             (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
@@ -69,7 +69,7 @@ class GalaxyDecomposeMixin:
         ------
         complete: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
             Complete index of the cluster each stellar particles belongs to.
-            Particles which not fulfil E<=0 or -1<eps<1 have index=-1.
+            Particles which not fullfil E<=0 or -1<eps<1 have index=-1.
         """
         eps = X[:, core.Columns.eps.value]
         complete = -np.ones(len(eps), dtype=int)
@@ -125,7 +125,7 @@ class GalaxyDecomposeMixin:
 
         # retrieve and fix the labels
         labels = self.labels_
-        self.labels_ = self.add_dirty(X, labels, clean_mask)
+        self.labels_ = self.label_dirty(X, labels, clean_mask)
 
         # return the instance
         return self

@@ -10,7 +10,7 @@
 # IMPORTS
 # =============================================================================
 
-from galaxychop import models
+from galaxychop import core, models
 
 import numpy as np
 
@@ -20,7 +20,55 @@ from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
 
 # =============================================================================
-# TESTS
+# MIXIN PROTOCOL
+# =============================================================================
+
+
+def get_subclasses(cls, add_cls=False):
+    clss = set()
+    if cls.__module__.startswith("galaxychop.models"):
+        for scls in cls.__subclasses__():
+            clss.update(get_subclasses(scls, add_cls=True))
+        if add_cls:
+            clss.add(cls)
+    return clss
+
+
+@pytest.mark.parametrize("model", get_subclasses(models.GalaxyDecomposeMixin))
+def test_GalaxyDecomposeMixin_protocol(mock_real_galaxy, model):
+    chopper = model()
+
+    # dirty "X" feature matrix to check, get_clean_mask and add_dirty
+    dirty_X = np.array(
+        [
+            [0, 1, 2, 3, 4, 5, 6, 7, np.nan, 9],  # the row 0 is not clean
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        ]
+    )
+
+    # get_clean_mask
+    mask = chopper.get_clean_mask(dirty_X)
+    np.testing.assert_array_equal(mask, [1, 2])
+
+    # add_dirty
+    labels = chopper.label_dirty(dirty_X, [3, 3], [1, 2])
+    np.testing.assert_array_equal(labels, [-1, 3, 3])
+
+    # get_columns
+    columns = chopper.get_columns()
+    assert isinstance(columns, (list, tuple))  # is a list or tuple
+    assert len(columns) == len(set(columns))  # no repeated columns
+    for column in columns:  # all columns are from core.column?
+        core.Columns(column)
+
+    # decompose
+    result = chopper.decompose(mock_real_galaxy)
+    assert chopper is result
+
+
+# =============================================================================
+# MODELS
 # =============================================================================
 
 
