@@ -14,6 +14,7 @@
 # IMPORTS
 # =============================================================================
 
+import astropy.constants as c
 import astropy.units as u
 
 import numpy as np
@@ -22,7 +23,8 @@ import numpy as np
 # CONSTANTS
 # =============================================================================
 
-G = (4.299e-6 * u.kpc * (u.km / u.s) ** 2 / u.M_sun).to_value()
+#: Gravitational constant G. Units: kpc Msun**(-1) (km/s)**2
+G = c.G.to((u.km ** 2 * u.kpc) / (u.s ** 2 * u.solMass)).to_value()
 
 
 # =============================================================================

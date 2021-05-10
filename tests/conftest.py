@@ -15,7 +15,7 @@ from pathlib import Path
 
 import astropy.units as u
 
-from galaxychop import core
+from galaxychop import core, utils
 
 import numpy as np
 
@@ -190,7 +190,6 @@ def epot(x, y, z, m, eps=0.0):
     Upot: `np.ndarray`, shape = (N_part, 1)
         Potential energy of particles
     """
-    G = 4.299e-6
     N_part = len(m)
 
     U = np.zeros((N_part, N_part))
@@ -201,7 +200,7 @@ def epot(x, y, z, m, eps=0.0):
 
     for i in range(N_part - 1):
         for j in range(i + 1, N_part):
-            U[i, j] = G * m[j] * m[i] / dist[i, j]
+            U[i, j] = utils.G * m[j] * m[i] / dist[i, j]
             U[j, i] = U[i, j]
 
     Upot = np.sum(U / m, axis=0)
