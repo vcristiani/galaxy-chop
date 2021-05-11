@@ -6,11 +6,12 @@
 
 """Module galaxy-chop."""
 
-# #####################################################
+# =============================================================================
 # IMPORTS
-# #####################################################
+# =============================================================================
 
 import enum
+from collections import defaultdict
 
 from astropy import units as u
 
@@ -23,9 +24,111 @@ import numpy as np
 import uttr
 
 
-# #####################################################
+# =============================================================================
+# COLUMNS CLASS
+# =============================================================================
+class Columns(enum.Enum):
+    """
+    Columns name used to decompose galaxies.
+
+    Name and number of the columns that are used to decompose the galaxy
+    dynamically.
+
+    Notes
+    -----
+    The dynamical decomposition is only perform over stellar particles.
+    """
+
+    m = 0
+    """Masses"""
+    x = 1
+    """x-position"""
+    y = 2
+    """y-position"""
+    z = 3
+    """z-position"""
+    vx = 4
+    """x-component of velocity"""
+    vy = 5
+    """y-component of velocity"""
+    vz = 6
+    """z-component of velocity"""
+    normalized_energy = 7
+    """Normalized specific energy of stars"""
+    eps = 8
+    """Circularity param"""
+    eps_r = 9
+    """Circularity param r"""
+
+
+# =============================================================================
+# PARTICLE SET
+# =============================================================================
+
+
+@attr.s(frozen=True, slots=True)
+class ParticleSet:
+
+    name = attr.ib(converter=str)
+
+    m = uttr.ib(unit=u.Msun, repr=False)
+    x = uttr.ib(unit=u.kpc, repr=False)
+    y = uttr.ib(unit=u.kpc, repr=False)
+    z = uttr.ib(unit=u.kpc, repr=False)
+    vx = uttr.ib(unit=(u.km / u.s), repr=False)
+    vy = uttr.ib(unit=(u.km / u.s), repr=False)
+    vz = uttr.ib(unit=(u.km / u.s), repr=False)
+
+    potential = uttr.ib(
+        factory=lambda: np.zeros(1), unit=(u.km / u.s) ** 2, repr=False
+    )
+
+    eps = uttr.ib(default=0.0, unit=u.kpc, repr=False)
+
+    arr_ = uttr.array_accessor()
+    has_potential_ = uttr.ib(init=False, repr=False)
+
+    @has_potential_.default
+    def _has_potential_default(self):
+        return self.arr_.potential != 0.0
+
+    def __attrs_post_init__(self):
+        """
+        Validate attrs with units.
+
+        Units length validator.
+
+        This method determines that the length of the different particle
+        attributes are the same families are the same.
+
+        """
+        # creamos un diccionario donde vamos a poner como llaves,
+        # las longitudes, y como valores los componentes que tengan esa
+        # longitud en un set
+        lengths = defaultdict(set)
+        lengths[len(self.m)].add("m")
+        lengths[len(self.x)].add("x")
+        lengths[len(self.y)].add("y")
+        lengths[len(self.z)].add("z")
+        lengths[len(self.vx)].add("vx")
+        lengths[len(self.vy)].add("vy")
+        lengths[len(self.vz)].add("vz")
+
+        if self.has_pot:
+            lengths[len(self.potential)].add("potential")
+
+        # ahora si tenemos mas de una llave es por que hay longitudes
+        # diferentes
+        if len(lengths) > 1:
+            raise ValueError(
+                f"{self.name} inputs must have the same length. "
+                f"Lengths: {lengths}"
+            )
+
+
+# =============================================================================
 # GALAXY CLASS
-# #####################################################
+# =============================================================================
 
 
 @attr.s(frozen=True)
@@ -104,37 +207,9 @@ class Galaxy:
         For more information see: https://pypi.org/project/uttrs/
     """
 
-    m_s = uttr.ib(unit=u.Msun)
-    x_s = uttr.ib(unit=u.kpc)
-    y_s = uttr.ib(unit=u.kpc)
-    z_s = uttr.ib(unit=u.kpc)
-    vx_s = uttr.ib(unit=(u.km / u.s))
-    vy_s = uttr.ib(unit=(u.km / u.s))
-    vz_s = uttr.ib(unit=(u.km / u.s))
-
-    m_dm = uttr.ib(unit=u.Msun)
-    x_dm = uttr.ib(unit=u.kpc)
-    y_dm = uttr.ib(unit=u.kpc)
-    z_dm = uttr.ib(unit=u.kpc)
-    vx_dm = uttr.ib(unit=(u.km / u.s))
-    vy_dm = uttr.ib(unit=(u.km / u.s))
-    vz_dm = uttr.ib(unit=(u.km / u.s))
-
-    m_g = uttr.ib(unit=u.Msun)
-    x_g = uttr.ib(unit=u.kpc)
-    y_g = uttr.ib(unit=u.kpc)
-    z_g = uttr.ib(unit=u.kpc)
-    vx_g = uttr.ib(unit=(u.km / u.s))
-    vy_g = uttr.ib(unit=(u.km / u.s))
-    vz_g = uttr.ib(unit=(u.km / u.s))
-
-    pot_s = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
-    pot_dm = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
-    pot_g = uttr.ib(default=np.zeros(1), unit=(u.km / u.s) ** 2)
-
-    eps_s = uttr.ib(default=0.0, unit=u.kpc)
-    eps_dm = uttr.ib(default=0.0, unit=u.kpc)
-    eps_g = uttr.ib(default=0.0, unit=u.kpc)
+    stellar = attr.ib(validator=attr.validators.instance_of(ParticleSet))
+    dark_matter = attr.ib(validator=attr.validators.instance_of(ParticleSet))
+    gas = attr.ib(validator=attr.validators.instance_of(ParticleSet))
 
     J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
     J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
@@ -146,126 +221,20 @@ class Galaxy:
 
     arr_ = uttr.array_accessor()
 
-    # components_s = attr.ib(default=None)
-    # components_g = attr.ib(default=None)
-    # metadata = attr.ib(default=None)
-
     def __attrs_post_init__(self):
-        """
-        Validate attrs with units.
-
-        Units length validator.
-
-        This method determines that the length of the different particles
-        families are the same.
-
-        Potential energy input validator.
-
-        This method determines the validation of input of the specific
-        potential energy.
-
-        """
-        if np.all(self.arr_.pot_s) != 0.0:
-            length_s = np.array(
-                [
-                    len(self.arr_.x_s),
-                    len(self.arr_.y_s),
-                    len(self.arr_.z_s),
-                    len(self.arr_.vx_s),
-                    len(self.arr_.vy_s),
-                    len(self.arr_.vz_s),
-                    len(self.arr_.pot_s),
-                ]
-            )
-        else:
-            length_s = np.array(
-                [
-                    len(self.arr_.x_s),
-                    len(self.arr_.y_s),
-                    len(self.arr_.z_s),
-                    len(self.arr_.vx_s),
-                    len(self.arr_.vy_s),
-                    len(self.arr_.vz_s),
-                ]
-            )
-
-        if np.any(len(self.arr_.m_s) != length_s):
-            raise ValueError("Stars inputs must have the same length")
-
-        if np.all(self.arr_.pot_dm) != 0.0:
-            length_dm = np.array(
-                [
-                    len(self.arr_.x_dm),
-                    len(self.arr_.y_dm),
-                    len(self.arr_.z_dm),
-                    len(self.arr_.vx_dm),
-                    len(self.arr_.vy_dm),
-                    len(self.arr_.vz_dm),
-                    len(self.arr_.pot_dm),
-                ]
-            )
-        else:
-            length_dm = np.array(
-                [
-                    len(self.arr_.x_dm),
-                    len(self.arr_.y_dm),
-                    len(self.arr_.z_dm),
-                    len(self.arr_.vx_dm),
-                    len(self.arr_.vy_dm),
-                    len(self.arr_.vz_dm),
-                ]
-            )
-
-        if np.any(len(self.arr_.m_dm) != length_dm):
-            raise ValueError("Dark matter inputs must have the same length")
-
-        if np.all(self.arr_.pot_g) != 0.0:
-            length_g = np.array(
-                [
-                    len(self.arr_.x_g),
-                    len(self.arr_.y_g),
-                    len(self.arr_.z_g),
-                    len(self.arr_.vx_g),
-                    len(self.arr_.vy_g),
-                    len(self.arr_.vz_g),
-                    len(self.arr_.pot_g),
-                ]
-            )
-        else:
-            length_g = np.array(
-                [
-                    len(self.arr_.x_g),
-                    len(self.arr_.y_g),
-                    len(self.arr_.z_g),
-                    len(self.arr_.vx_g),
-                    len(self.arr_.vy_g),
-                    len(self.arr_.vz_g),
-                ]
-            )
-
-        if np.any(len(self.arr_.m_g) != length_g):
-            raise ValueError("Gas inputs must have the same length")
-
-        # Potential energy input validator.
-        if np.any(self.arr_.pot_s != 0.0) and (
-            np.all(self.arr_.pot_dm == 0.0) or np.all(self.arr_.pot_g == 0.0)
-        ):
+        # this is a set only can have 3 posible values:
+        # 1. {True} all the components has potential
+        # 2. {False} No component has potential
+        # 3. {True, False} mixed <- This is an error
+        has_pot = {
+            self.stellar.has_potential,
+            self.gas.has_potential,
+            self.dark_matter.has_potential,
+        }
+        if len(has_pot) != 1:
             raise ValueError(
-                "Potential energy must be instanced for all type particles"
-            )
-
-        if np.any(self.arr_.pot_dm != 0.0) and (
-            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_g == 0.0)
-        ):
-            raise ValueError(
-                "Potential energy must be instanced for all type particles"
-            )
-
-        if np.any(self.arr_.pot_g != 0.0) and (
-            np.all(self.arr_.pot_s == 0.0) or np.all(self.arr_.pot_dm == 0.0)
-        ):
-            raise ValueError(
-                "Potential energy must be instanced for all type particles"
+                "Potential energy must be instanced for all type particles. "
+                f"Found: {has_pot}"
             )
 
     @property
@@ -881,42 +850,3 @@ class Galaxy:
             y = np.hstack((y, y_s))
 
         return X, y
-
-
-# =============================================================================
-# COLUMNS CLASS
-# =============================================================================
-
-
-class Columns(enum.Enum):
-    """
-    Columns name used to decompose galaxies.
-
-    Name and number of the columns that are used to decompose the galaxy
-    dynamically.
-
-    Notes
-    -----
-    The dynamical decomposition is only perform over stellar particles.
-    """
-
-    m = 0
-    """Masses"""
-    x = 1
-    """x-position"""
-    y = 2
-    """y-position"""
-    z = 3
-    """z-position"""
-    vx = 4
-    """x-component of velocity"""
-    vy = 5
-    """y-component of velocity"""
-    vz = 6
-    """z-component of velocity"""
-    normalized_energy = 7
-    """Normalized specific energy of stars"""
-    eps = 8
-    """Circularity param"""
-    eps_r = 9
-    """Circularity param r"""
