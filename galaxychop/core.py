@@ -86,7 +86,7 @@ class ParticleSet:
     eps = uttr.ib(default=0.0, unit=u.kpc, repr=False)
 
     arr_ = uttr.array_accessor()
-    has_potential_ = uttr.ib(init=False, repr=False)
+    has_potential_ = attr.ib(init=False, repr=False)
 
     @has_potential_.default
     def _has_potential_default(self):
@@ -102,10 +102,10 @@ class ParticleSet:
         attributes are the same families are the same.
 
         """
-        # creamos un diccionario donde vamos a poner como llaves,
-        # las longitudes, y como valores los componentes que tengan esa
-        # longitud en un set
+        # we create a dictionary where we are going to put the length as keys,
+        # and the name of component with this length inside a set.
         lengths = defaultdict(set)
+
         lengths[len(self.m)].add("m")
         lengths[len(self.x)].add("x")
         lengths[len(self.y)].add("y")
@@ -114,11 +114,11 @@ class ParticleSet:
         lengths[len(self.vy)].add("vy")
         lengths[len(self.vz)].add("vz")
 
-        if self.has_pot:
+        if self.has_potential:
             lengths[len(self.potential)].add("potential")
 
-        # ahora si tenemos mas de una llave es por que hay longitudes
-        # diferentes
+        # now if we have more than one key it is because there are
+        # different lengths.
         if len(lengths) > 1:
             raise ValueError(
                 f"{self.name} inputs must have the same length. "
