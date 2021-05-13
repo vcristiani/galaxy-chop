@@ -23,8 +23,11 @@ import numpy as np
 # CONSTANTS
 # =============================================================================
 
-#: Gravitational constant G. Units: kpc Msun**(-1) (km/s)**2
-G = c.G.to((u.km ** 2 * u.kpc) / (u.s ** 2 * u.solMass)).to_value()
+#: GalaxyChop Gravitational unit
+G_UNIT = (u.km ** 2 * u.kpc) / (u.s ** 2 * u.solMass)
+
+#: Gravitational constant as float in G_UNIT
+G = c.G.to(G_UNIT).to_value()
 
 
 # =============================================================================
