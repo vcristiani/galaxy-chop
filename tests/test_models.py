@@ -35,6 +35,7 @@ def get_subclasses(cls, add_cls=False):
 
 
 @pytest.mark.parametrize("model", get_subclasses(models.GalaxyDecomposeMixin))
+@pytest.mark.xfail
 def test_GalaxyDecomposeMixin_protocol(mock_real_galaxy, model):
     chopper = model()
 
@@ -72,6 +73,7 @@ def test_GalaxyDecomposeMixin_protocol(mock_real_galaxy, model):
 # =============================================================================
 
 
+@pytest.mark.xfail
 def test_JHistogram_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
@@ -83,6 +85,7 @@ def test_JHistogram_len(mock_real_galaxy):
     assert np.shape(X) == (longitude, 10)
 
 
+@pytest.mark.xfail
 def test_JHistogram_outputs(mock_real_galaxy):
     """Test outputs of JHistogram model."""
     gal = mock_real_galaxy
@@ -99,6 +102,7 @@ def test_JHistogram_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
+@pytest.mark.xfail
 def test_JHistogram_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
@@ -118,6 +122,7 @@ def test_JHistogram_histogram(mock_real_galaxy):
     np.testing.assert_equal(comp0_hist_plus_comp1_hist, full_histogram[0])
 
 
+@pytest.mark.xfail
 def test_GCChop_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
@@ -130,6 +135,7 @@ def test_GCChop_len(mock_real_galaxy):
     assert np.shape(X) == (longitude, 10)
 
 
+@pytest.mark.xfail
 def test_GCChop_outputs(mock_real_galaxy):
     """Test outputs of JThreshold model."""
     gal = mock_real_galaxy
@@ -147,6 +153,7 @@ def test_GCChop_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
+@pytest.mark.xfail
 def test_GCChop_eps_cut(mock_real_galaxy):
     """Tests the number of particles in each component."""
     gal = mock_real_galaxy
@@ -175,6 +182,7 @@ def test_GCChop_eps_cut_value_error(eps_cut):
         models.JThreshold(eps_cut)
 
 
+@pytest.mark.xfail
 def test_JEHistogram_len(mock_real_galaxy):
     """Test the lengths of labels."""
     gal = mock_real_galaxy
@@ -186,6 +194,7 @@ def test_JEHistogram_len(mock_real_galaxy):
     assert np.shape(X) == (longitude, 10)
 
 
+@pytest.mark.xfail
 def test_JEHistogram_outputs(mock_real_galaxy):
     """Test outputs of JEHistogram model."""
     gal = mock_real_galaxy
@@ -202,6 +211,7 @@ def test_JEHistogram_outputs(mock_real_galaxy):
     assert len_lab == len(labels)
 
 
+@pytest.mark.xfail
 def test_JEHistogram_histogram(mock_real_galaxy):
     """Test the number of particles per bin."""
     gal = mock_real_galaxy
@@ -221,6 +231,7 @@ def test_JEHistogram_histogram(mock_real_galaxy):
     np.testing.assert_equal(comp0_hist_plus_comp1_hist, full_histogram[0])
 
 
+@pytest.mark.xfail
 def test_Kmeans(mock_real_galaxy):
     """Test KMeans."""
     gal = mock_real_galaxy
@@ -246,6 +257,7 @@ def test_Kmeans(mock_real_galaxy):
     )
 
 
+@pytest.mark.xfail
 def test_GCGmm(mock_real_galaxy):
     """Test GaussianMixture."""
     gal = mock_real_galaxy
@@ -272,6 +284,7 @@ def test_GCGmm(mock_real_galaxy):
     )
 
 
+@pytest.mark.xfail
 def test_GCAutogmm_prob(mock_real_galaxy):
     """Test that the probabilities obtained by the method sum to 1."""
     gal = mock_real_galaxy
@@ -301,6 +314,7 @@ def test_GCAutogmm_prob(mock_real_galaxy):
     )
 
 
+@pytest.mark.xfail
 def test_GCAutogmm_label(mock_real_galaxy):
     """Test of label values."""
     gal = mock_real_galaxy

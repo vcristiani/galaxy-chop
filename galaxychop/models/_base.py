@@ -69,12 +69,31 @@ class GalaxyDecomposeMixin:
         ------
         complete: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
             Complete index of the cluster each stellar particles belongs to.
-            Particles which not fullfil E<=0 or -1<eps<1 have index=-1.
+            Particles which not fullfil E <= 0 or -1 < eps < 1 have index = -1.
         """
         eps = X[:, core.Columns.eps.value]
         complete = -np.ones(len(eps), dtype=int)
         complete[clean_mask] = labels
         return complete
+
+    def prepare_values(self, galaxy):
+        paramcirc = galaxy.paramcirc
+
+        stars = galaxy.stars.as_array()
+        stars = np.delete(stars, np.s_[7:], axis=1)
+
+        n = len(stars)
+
+        X = np.hstack(
+            (
+                stars,
+                paramcirc[0].reshape(n, 1),
+                paramcirc[1].reshape(n, 1),
+                paramcirc[2].reshape(n, 1),
+            )
+        )
+        y = np.zeros(n, dtype=int)
+        return X, y
 
     def get_columns(self):
         """Obtain the columns of the quantities to be used.
@@ -109,7 +128,7 @@ class GalaxyDecomposeMixin:
             )
 
         # retrieve te galaxy as an array os star particles
-        X, y = galaxy.values()
+        X, y = self.prepare_values(galaxy)
 
         # calculate only the valid values to operate the clustering
         clean_mask = self.get_clean_mask(X)

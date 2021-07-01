@@ -21,6 +21,8 @@ from galaxychop import utils
 
 import numpy as np
 
+import pandas as pd
+
 import uttr
 
 
@@ -39,26 +41,54 @@ class Columns(enum.Enum):
     The dynamical decomposition is only perform over stellar particles.
     """
 
+    #: mass
     m = 0
-    """Masses"""
+
+    #: y-position
     x = 1
-    """x-position"""
+    #: y-position
     y = 2
-    """y-position"""
+
+    #: z-position
     z = 3
-    """z-position"""
+
+    #: x-component of velocity
     vx = 4
-    """x-component of velocity"""
+
+    #: y-component of velocity
     vy = 5
-    """y-component of velocity"""
+
+    #: z-component of velocity
     vz = 6
-    """z-component of velocity"""
-    normalized_energy = 7
-    """Normalized specific energy of stars"""
-    eps = 8
-    """Circularity param"""
-    eps_r = 9
-    """Circularity param r"""
+
+    #: softening
+    softening = 7
+
+    #: potential energy
+    potential = 8
+
+    #: Normalized specific energy of stars
+    normalized_energy = 9
+
+    #: Circularity param
+    eps = 10
+
+    #: Circularity param r
+    eps_r = 11
+
+    @classmethod
+    def aslist(cls):
+        aslist = list(cls)
+        aslist.sort(key=lambda r: r.value)
+        return aslist
+
+    @classmethod
+    def names(cls):
+        return [c.name for c in cls.aslist()]
+
+    @classmethod
+    def values(cls):
+        return [c.value for c in cls.aslist()]
 
 
 # =============================================================================
@@ -71,26 +101,35 @@ class ParticleSet:
 
     name = attr.ib(converter=str)
 
-    m = uttr.ib(unit=u.Msun, repr=False)
-    x = uttr.ib(unit=u.kpc, repr=False)
-    y = uttr.ib(unit=u.kpc, repr=False)
-    z = uttr.ib(unit=u.kpc, repr=False)
-    vx = uttr.ib(unit=(u.km / u.s), repr=False)
-    vy = uttr.ib(unit=(u.km / u.s), repr=False)
-    vz = uttr.ib(unit=(u.km / u.s), repr=False)
+    m: np.ndarray = uttr.ib(unit=u.Msun, repr=False)
+    x: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
+    y: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
+    z: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
+    vx: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
+    vy: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
+    vz: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
 
-    potential = uttr.ib(
-        factory=lambda: np.zeros(1), unit=(u.km / u.s) ** 2, repr=False
+    potential: np.ndarray = uttr.ib(
+        unit=(u.km / u.s) ** 2,
+        validator=attr.validators.optional(
+            attr.validators.instance_of(np.ndarray)
+        ),
+        repr=False,
     )
 
-    eps = uttr.ib(default=0.0, unit=u.kpc, repr=False)
+    softening: float = uttr.ib(
+        unit=u.kpc,
+        validator=attr.validators.instance_of(float),
+        repr=False,
+    )
 
     arr_ = uttr.array_accessor()
-    has_potential_ = attr.ib(init=False, repr=False)
+
+    has_potential_: bool = attr.ib(init=False, repr=False)
 
     @has_potential_.default
-    def _has_potential_default(self):
-        return self.arr_.potential != 0.0
+    def _has_potential__default(self):
+        return self.potential is not None
 
     def __attrs_post_init__(self):
         """
@@ -114,7 +153,7 @@ class ParticleSet:
         lengths[len(self.vy)].add("vy")
         lengths[len(self.vz)].add("vz")
 
-        if self.has_potential:
+        if self.has_potential_:
             lengths[len(self.potential)].add("potential")
 
         # now if we have more than one key it is because there are
@@ -124,6 +163,29 @@ class ParticleSet:
                 f"{self.name} inputs must have the same length. "
                 f"Lengths: {lengths}"
             )
+
+    def __len__(self):
+        return len(self.m)
+
+    def as_dataframe(self):
+        arr = self.arr_
+        data = {
+            "m": arr.m,
+            "x": arr.x,
+            "y": arr.y,
+            "z": arr.z,
+            "vx": arr.vx,
+            "vy": arr.vy,
+            "vz": arr.vz,
+            "eps": arr.eps,
+            "potential": arr.potential_ if self.has_potential_ else None,
+        }
+        df = pd.DataFrame(data)
+        df_sorted = df[Columns.names()]
+        return df_sorted
+
+    def as_array(self):
+        return self.as_dataframe().to_numpy()
 
 
 # =============================================================================
@@ -207,7 +269,7 @@ class Galaxy:
         For more information see: https://pypi.org/project/uttrs/
     """
 
-    stellar = attr.ib(validator=attr.validators.instance_of(ParticleSet))
+    stars = attr.ib(validator=attr.validators.instance_of(ParticleSet))
     dark_matter = attr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = attr.ib(validator=attr.validators.instance_of(ParticleSet))
 
@@ -222,18 +284,18 @@ class Galaxy:
     arr_ = uttr.array_accessor()
 
     def __attrs_post_init__(self):
-        # this is a set only can have 3 posible values:
+        # this is a set only can have 3 possible values:
         # 1. {True} all the components has potential
         # 2. {False} No component has potential
         # 3. {True, False} mixed <- This is an error
         has_pot = {
-            self.stellar.has_potential,
-            self.gas.has_potential,
-            self.dark_matter.has_potential,
+            "stellar": self.stellar.has_potential,
+            "gas": self.gas.has_potential,
+            "dark_matter": self.dark_matter.has_potential,
         }
-        if len(has_pot) != 1:
+        if set(has_pot.values()) == {True, False}:
             raise ValueError(
-                "Potential energy must be instanced for all type particles. "
+                "Potential energy must be instanced for all particles types. "
                 f"Found: {has_pot}"
             )
 
@@ -404,9 +466,10 @@ class Galaxy:
         k_g = self.kinetic_energy[2].value
 
         if np.all(potential == 0.0):
-            pot_s = self.potential_energy().arr_.pot_s
-            pot_dm = self.potential_energy().arr_.pot_dm
-            pot_g = self.potential_energy().arr_.pot_g
+            pots = self.potential_energy()
+            pot_s = pots.arr_.pot_s
+            pot_dm = pots.arr_.pot_dm
+            pot_g = pots.arr_.pot_g
         else:
             pot_s = self.arr_.pot_s
             pot_dm = self.arr_.pot_dm
@@ -805,48 +868,76 @@ class Galaxy:
 
         return (E_star_, eps_, eps_r_)
 
-    def values(self):
-        """
-        2D and 1D inputs converter.
 
-        Builds two arrays: one 2D listing all the parameters of each
-        particle and other 1D showing whether the particle is a star,
-        gas or dark matter one.
+# =============================================================================
+# API FUNCTIONS
+# =============================================================================
 
-        Returns
-        -------
-        X : `np.ndarray(n,10)`
-            2D array where each file it is a diferent stellar particle and
-            each column is a parameter of the particles:
-            (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
-        y : `np.ndarray(n)`
-            1D array where is identified the nature of each particle
-            0=star.
-        """
-        X = np.empty((0, 10))
-        y = np.empty(0, int)
 
-        star = True
-        if star:
-            n_s = len(self.paramcirc[1])
-
-            X_s = np.hstack(
-                (
-                    self.arr_.m_s.reshape(n_s, 1),
-                    self.arr_.x_s.reshape(n_s, 1),
-                    self.arr_.y_s.reshape(n_s, 1),
-                    self.arr_.z_s.reshape(n_s, 1),
-                    self.arr_.vx_s.reshape(n_s, 1),
-                    self.arr_.vy_s.reshape(n_s, 1),
-                    self.arr_.vz_s.reshape(n_s, 1),
-                    self.paramcirc[0].reshape(n_s, 1),
-                    self.paramcirc[1].reshape(n_s, 1),
-                    self.paramcirc[2].reshape(n_s, 1),
-                )
-            )
-            y_s = np.zeros(n_s)
-
-            X = np.vstack((X, X_s))
-            y = np.hstack((y, y_s))
-
-        return X, y
+def mkgalaxy(
+    m_s: np.ndarray,
+    x_s: np.ndarray,
+    y_s: np.ndarray,
+    z_s: np.ndarray,
+    vx_s: np.ndarray,
+    vy_s: np.ndarray,
+    vz_s: np.ndarray,
+    m_dm: np.ndarray,
+    x_dm: np.ndarray,
+    y_dm: np.ndarray,
+    z_dm: np.ndarray,
+    vx_dm: np.ndarray,
+    vy_dm: np.ndarray,
+    vz_dm: np.ndarray,
+    m_g: np.ndarray,
+    x_g: np.ndarray,
+    y_g: np.ndarray,
+    z_g: np.ndarray,
+    vx_g: np.ndarray,
+    vy_g: np.ndarray,
+    vz_g: np.ndarray,
+    softening_s: np.ndarray = 0.0,
+    softening_g: np.ndarray = 0.0,
+    softening_dm: np.ndarray = 0.0,
+    pot_s: np.ndarray = None,
+    pot_g: np.ndarray = None,
+    pot_dm: np.ndarray = None,
+):
+    stars = ParticleSet(
+        "stars",
+        m=m_s,
+        x=x_s,
+        y=y_s,
+        z=z_s,
+        vx=vx_s,
+        vy=vy_s,
+        vz=vz_s,
+        softening=softening_s,
+        potential=pot_s,
+    )
+    dark_matter = ParticleSet(
+        "dark_matter",
+        m=m_dm,
+        x=x_dm,
+        y=y_dm,
+        z=z_dm,
+        vx=vx_dm,
+        vy=vy_dm,
+        vz=vz_dm,
+        softening=softening_dm,
+        potential=pot_dm,
+    )
+    gas = ParticleSet(
+        "gas",
+        m=m_g,
+        x=x_g,
+        y=y_g,
+        z=z_g,
+        vx=vx_g,
+        vy=vy_g,
+        vz=vz_g,
+        softening=softening_g,
+        potential=pot_g,
+    )
+    galaxy = Galaxy(stars=stars, dark_matter=dark_matter, gas=gas)
+    return galaxy

@@ -49,6 +49,7 @@ REQUIREMENTS = [
     "dask[array]",
     "astropy",
     "uttrs",
+    "pandas",
 ]
 # =============================================================================
 # DESCRIPTION
