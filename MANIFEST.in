@@ -6,6 +6,7 @@ recursive-include galaxychop *.npy
 
 recursive-exclude docs *
 recursive-exclude legacy *
+recursive-exclude legacy_test *
 recursive-exclude resource *
 recursive-exclude tests *
 

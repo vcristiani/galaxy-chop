@@ -285,9 +285,9 @@ class Galaxy:
         # 2. {False} No component has potential
         # 3. {True, False} mixed <- This is an error
         has_pot = {
-            "stellar": self.stellar.has_potential,
-            "gas": self.gas.has_potential,
-            "dark_matter": self.dark_matter.has_potential,
+            "stars": self.stars.has_potential_,
+            "gas": self.gas.has_potential_,
+            "dark_matter": self.dark_matter.has_potential_,
         }
         if set(has_pot.values()) == {True, False}:
             raise ValueError(
