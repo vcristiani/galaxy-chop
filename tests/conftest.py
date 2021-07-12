@@ -36,97 +36,98 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 
 
 @pytest.fixture(scope="session")
-def data_galaxy():
+def data_particle_set():
     def make(
         seed=None,
-        stars=100,
-        dm=200,
-        gas=300,
-        stars_number_min=10_000,
-        stars_number_max=20_000,
-        dm_number_min_min=10_000,
-        dm_number_max=20_000,
-        gas_number_min=10_000,
-        gas_number_max=20_000
-        # stars_softening_min=0., stars_softening_max=.5,
-        # dm_softening_min_min=0., dm_softening_max=.5,
-        # gas_softening_min=0., gas_softening_max=.5,
-        # potential_stars=True,
-        # potential_gas=True,
-        # potential_dm=True
+        size_min=100,
+        size_max=1000,
+        soft_min=0.1,
+        soft_max=1,
+        has_potential=True,
+    ):
+        random = np.random.default_rng(seed=seed)
+
+        size = random.integers(size_min, size_max, endpoint=True)
+
+        m = random.random(size)
+        x = random.random(size)
+        y = random.random(size)
+        z = random.random(size)
+        vx = random.random(size)
+        vy = random.random(size)
+        vz = random.random(size)
+        soft = random.uniform(soft_min, soft_max)
+        pot = random.random(size) if has_potential else None
+
+        return m, x, y, z, vx, vy, vz, soft, pot
+
+    return make
+
+
+@pytest.fixture(scope="session")
+def data_galaxy(data_particle_set):
+    def make(
+        *,
+        seed=None,
+        stars_min=10_000,
+        stars_max=20_000,
+        stars_softening_min=0.0,
+        stars_softening_max=0.5,
+        stars_potential=True,
+        dm_min=10_000,
+        dm_max=20_000,
+        dm_softening_min=0.0,
+        dm_softening_max=0.5,
+        dm_potential=True,
+        gas_min=10_000,
+        gas_max=20_000,
+        gas_softening_min=0.0,
+        gas_softening_max=0.5,
+        gas_potential=True,
     ):
 
         # start the random generator
         random = np.random.default_rng(seed=seed)
 
-        x_s = random.random(stars)
-        y_s = random.random(stars)
-        z_s = random.random(stars)
-        vx_s = random.random(stars)
-        vy_s = random.random(stars)
-        vz_s = random.random(stars)
-        m_s = random.random(stars)
-
-        x_dm = random.random(dm)
-        y_dm = random.random(dm)
-        z_dm = random.random(dm)
-        vx_dm = random.random(dm)
-        vy_dm = random.random(dm)
-        vz_dm = random.random(dm)
-        m_dm = random.random(dm)
-
-        x_g = random.random(gas)
-        y_g = random.random(gas)
-        z_g = random.random(gas)
-        vx_g = random.random(gas)
-        vy_g = random.random(gas)
-        vz_g = random.random(gas)
-        m_g = random.random(gas)
-
-        softening_s = 0.0
-        softening_dm = 0.0
-        softening_g = 0.0
-        pot_s = random.random(stars)
-        pot_dm = random.random(dm)
-        pot_g = random.random(gas)
-
-        return (
-            m_s,
-            x_s,
-            y_s,
-            z_s,
-            vx_s,
-            vy_s,
-            vz_s,
-            m_dm,
-            x_dm,
-            y_dm,
-            z_dm,
-            vx_dm,
-            vy_dm,
-            vz_dm,
-            m_g,
-            x_g,
-            y_g,
-            z_g,
-            vx_g,
-            vy_g,
-            vz_g,
-            softening_s,
-            softening_g,
-            softening_dm,
-            pot_s,
-            pot_g,
-            pot_dm,
+        # STARS
+        stars_data = data_particle_set(
+            seed=random,
+            size_min=stars_min,
+            size_max=stars_max,
+            soft_min=stars_softening_min,
+            soft_max=stars_softening_max,
+            has_potential=stars_potential,
         )
+
+        # DARK_MATTER
+        dm_data = data_particle_set(
+            seed=random,
+            size_min=dm_min,
+            size_max=dm_max,
+            soft_min=dm_softening_min,
+            soft_max=dm_softening_max,
+            has_potential=dm_potential,
+        )
+
+        # GAS
+        gas_data = data_particle_set(
+            seed=random,
+            size_min=gas_min,
+            size_max=gas_max,
+            soft_min=gas_softening_min,
+            soft_max=gas_softening_max,
+            has_potential=gas_potential,
+        )
+
+        return stars_data + dm_data + gas_data
 
     return make
 
 
 @pytest.fixture(scope="session")
 def galaxy(data_galaxy):
-    @functools.wraps(data_galaxy)
-    def make(*args, **kwargs):
+    @functools.wraps(data_galaxy())
+    def make(**kwargs):
         (
             m_s,
             x_s,
@@ -135,6 +136,8 @@ def galaxy(data_galaxy):
             vx_s,
             vy_s,
             vz_s,
+            soft_s,
+            pot_s,
             m_dm,
             x_dm,
             y_dm,
@@ -142,6 +145,8 @@ def galaxy(data_galaxy):
             vx_dm,
             vy_dm,
             vz_dm,
+            soft_dm,
+            pot_dm,
             m_g,
             x_g,
             y_g,
@@ -149,13 +154,9 @@ def galaxy(data_galaxy):
             vx_g,
             vy_g,
             vz_g,
-            softening_s,
-            softening_g,
-            softening_dm,
-            pot_s,
+            soft_g,
             pot_g,
-            pot_dm,
-        ) = data_galaxy(*args, **kwargs)
+        ) = data_galaxy(**kwargs)
 
         gal = core.mkgalaxy(
             m_s=m_s,
@@ -179,9 +180,9 @@ def galaxy(data_galaxy):
             vx_g=vx_g,
             vy_g=vy_g,
             vz_g=vz_g,
-            softening_s=softening_s,
-            softening_g=softening_g,
-            softening_dm=softening_dm,
+            softening_s=soft_s,
+            softening_g=soft_g,
+            softening_dm=soft_dm,
             pot_s=pot_s,
             pot_g=pot_g,
             pot_dm=pot_dm,

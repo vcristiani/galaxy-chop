@@ -31,6 +31,8 @@ def test_mkgakaxy(data_galaxy):
         vx_s,
         vy_s,
         vz_s,
+        soft_s,
+        pot_s,
         m_dm,
         x_dm,
         y_dm,
@@ -38,6 +40,8 @@ def test_mkgakaxy(data_galaxy):
         vx_dm,
         vy_dm,
         vz_dm,
+        soft_dm,
+        pot_dm,
         m_g,
         x_g,
         y_g,
@@ -45,12 +49,8 @@ def test_mkgakaxy(data_galaxy):
         vx_g,
         vy_g,
         vz_g,
-        softening_s,
-        softening_g,
-        softening_dm,
-        pot_s,
+        soft_g,
         pot_g,
-        pot_dm,
     ) = data_galaxy(seed=42)
 
     gal = core.mkgalaxy(
@@ -75,9 +75,9 @@ def test_mkgakaxy(data_galaxy):
         vx_g=vx_g,
         vy_g=vy_g,
         vz_g=vz_g,
-        softening_s=softening_s,
-        softening_g=softening_g,
-        softening_dm=softening_dm,
+        softening_s=soft_s,
+        softening_g=soft_g,
+        softening_dm=soft_dm,
         pot_s=pot_s,
         pot_g=pot_g,
         pot_dm=pot_dm,
@@ -89,7 +89,7 @@ def test_mkgakaxy(data_galaxy):
     np.testing.assert_array_equal(gal.stars.vx.value, vx_s)
     np.testing.assert_array_equal(gal.stars.vy.value, vy_s)
     np.testing.assert_array_equal(gal.stars.vz.value, vz_s)
-    np.testing.assert_array_equal(gal.stars.softening, softening_s)
+    np.testing.assert_array_equal(gal.stars.softening, soft_s)
     np.testing.assert_array_equal(gal.stars.potential.value, pot_s)
 
     np.testing.assert_array_equal(gal.dark_matter.m.value, m_dm)
@@ -99,7 +99,7 @@ def test_mkgakaxy(data_galaxy):
     np.testing.assert_array_equal(gal.dark_matter.vx.value, vx_dm)
     np.testing.assert_array_equal(gal.dark_matter.vy.value, vy_dm)
     np.testing.assert_array_equal(gal.dark_matter.vz.value, vz_dm)
-    np.testing.assert_array_equal(gal.dark_matter.softening, softening_dm)
+    np.testing.assert_array_equal(gal.dark_matter.softening, soft_dm)
     np.testing.assert_array_equal(gal.dark_matter.potential.value, pot_dm)
 
     np.testing.assert_array_equal(gal.gas.m.value, m_g)
@@ -109,7 +109,7 @@ def test_mkgakaxy(data_galaxy):
     np.testing.assert_array_equal(gal.gas.vx.value, vx_g)
     np.testing.assert_array_equal(gal.gas.vy.value, vy_g)
     np.testing.assert_array_equal(gal.gas.vz.value, vz_g)
-    np.testing.assert_array_equal(gal.gas.softening, softening_g)
+    np.testing.assert_array_equal(gal.gas.softening, soft_g)
     np.testing.assert_array_equal(gal.gas.potential.value, pot_g)
 
     assert len(m_s) == len(x_s) == len(y_s) == len(z_s)
