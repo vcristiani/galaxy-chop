@@ -117,11 +117,7 @@ class ParticleSet:
         repr=False,
     )
 
-    softening: float = uttr.ib(
-        unit=u.kpc,
-        validator=attr.validators.instance_of(float),
-        repr=False,
-    )
+    softening: float = attr.ib(converter=float, repr=False)
 
     arr_ = uttr.array_accessor()
 
@@ -896,9 +892,9 @@ def mkgalaxy(
     vx_g: np.ndarray,
     vy_g: np.ndarray,
     vz_g: np.ndarray,
-    softening_s: np.ndarray = 0.0,
-    softening_g: np.ndarray = 0.0,
-    softening_dm: np.ndarray = 0.0,
+    softening_s: float = 0.0,
+    softening_g: float = 0.0,
+    softening_dm: float = 0.0,
     pot_s: np.ndarray = None,
     pot_g: np.ndarray = None,
     pot_dm: np.ndarray = None,
