@@ -42,8 +42,8 @@ def data_particleset():
         seed=None,
         size_min=100,
         size_max=1000,
-        soft_min=0.1,
-        soft_max=1,
+        soft_min=0.0,
+        soft_max=1.0,
         has_potential=True,
     ):
         random = np.random.default_rng(seed=seed)
@@ -73,17 +73,17 @@ def data_galaxy(data_particleset):
         stars_min=100,
         stars_max=100,
         stars_softening_min=0.0,
-        stars_softening_max=1,
+        stars_softening_max=1.0,
         stars_potential=True,
         dm_min=100,
         dm_max=1000,
         dm_softening_min=0.0,
-        dm_softening_max=1,
+        dm_softening_max=1.0,
         dm_potential=True,
         gas_min=100,
         gas_max=1000,
         gas_softening_min=0.0,
-        gas_softening_max=1,
+        gas_softening_max=1.0,
         gas_potential=True,
     ):
 
@@ -127,7 +127,8 @@ def data_galaxy(data_particleset):
 
 @pytest.fixture(scope="session")
 def galaxy(data_galaxy):
-    @functools.wraps(data_galaxy())
+
+    # @functools.wraps(data_galaxy)
     def make(**kwargs):
         (
             m_s,
@@ -160,6 +161,7 @@ def galaxy(data_galaxy):
         ) = data_galaxy(**kwargs)
 
         gal = core.mkgalaxy(
+            # stars
             m_s=m_s,
             x_s=x_s,
             y_s=y_s,
@@ -167,6 +169,9 @@ def galaxy(data_galaxy):
             vx_s=vx_s,
             vy_s=vy_s,
             vz_s=vz_s,
+            softening_s=soft_s,
+            pot_s=pot_s,
+            # dark matter
             m_dm=m_dm,
             x_dm=x_dm,
             y_dm=y_dm,
@@ -174,6 +179,9 @@ def galaxy(data_galaxy):
             vx_dm=vx_dm,
             vy_dm=vy_dm,
             vz_dm=vz_dm,
+            softening_dm=soft_dm,
+            pot_dm=pot_dm,
+            # gas
             m_g=m_g,
             x_g=x_g,
             y_g=y_g,
@@ -181,12 +189,8 @@ def galaxy(data_galaxy):
             vx_g=vx_g,
             vy_g=vy_g,
             vz_g=vz_g,
-            softening_s=soft_s,
             softening_g=soft_g,
-            softening_dm=soft_dm,
-            pot_s=pot_s,
             pot_g=pot_g,
-            pot_dm=pot_dm,
         )
         return gal
 

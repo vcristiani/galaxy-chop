@@ -896,11 +896,11 @@ def mkgalaxy(
     vy_g: np.ndarray,
     vz_g: np.ndarray,
     softening_s: float = 0.0,
-    softening_g: float = 0.0,
     softening_dm: float = 0.0,
+    softening_g: float = 0.0,
     pot_s: np.ndarray = None,
-    pot_g: np.ndarray = None,
     pot_dm: np.ndarray = None,
+    pot_g: np.ndarray = None,
 ):
     stars = ParticleSet(
         "stars",
