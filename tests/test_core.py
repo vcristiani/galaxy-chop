@@ -52,6 +52,8 @@ def test_ParticleSet_creation_with_potential(data_particleset):
     assert np.all(pset.vz.to_value() == vz) and pset.vz.unit == (u.km / u.s)
     assert np.all(pset.softening == soft)
 
+    import ipdb; ipdb.set_trace()
+
     assert pset.has_potential_
     assert np.all(pset.potential.to_value() == pot)
     assert pset.potential.unit == ((u.km / u.s) ** 2)
@@ -237,7 +239,123 @@ def test_ParticleSet_repr(data_particleset, has_potential):
 # =============================================================================
 # TEST MK_GALAXY
 # =============================================================================
-def test_mkgakaxy(data_galaxy):
+@pytest.mark.parametrize("has_potential", [True, False])
+def test_mkgakaxy(data_galaxy, has_potential):
+
+    (
+        m_s,
+        x_s,
+        y_s,
+        z_s,
+        vx_s,
+        vy_s,
+        vz_s,
+        soft_s,
+        pot_s,
+        m_dm,
+        x_dm,
+        y_dm,
+        z_dm,
+        vx_dm,
+        vy_dm,
+        vz_dm,
+        soft_dm,
+        pot_dm,
+        m_g,
+        x_g,
+        y_g,
+        z_g,
+        vx_g,
+        vy_g,
+        vz_g,
+        soft_g,
+        pot_g,
+    ) = data_galaxy(
+        seed=42,
+        stars_potential=has_potential,
+        dm_potential=has_potential,
+        gas_potential=has_potential,
+    )
+
+    gal = core.mkgalaxy(
+        m_s=m_s,
+        x_s=x_s,
+        y_s=y_s,
+        z_s=z_s,
+        vx_s=vx_s,
+        vy_s=vy_s,
+        vz_s=vz_s,
+        m_dm=m_dm,
+        x_dm=x_dm,
+        y_dm=y_dm,
+        z_dm=z_dm,
+        vx_dm=vx_dm,
+        vy_dm=vy_dm,
+        vz_dm=vz_dm,
+        m_g=m_g,
+        x_g=x_g,
+        y_g=y_g,
+        z_g=z_g,
+        vx_g=vx_g,
+        vy_g=vy_g,
+        vz_g=vz_g,
+        softening_s=soft_s,
+        softening_g=soft_g,
+        softening_dm=soft_dm,
+        pot_s=pot_s,
+        pot_g=pot_g,
+        pot_dm=pot_dm,
+    )
+    assert np.all(gal.stars.m.value == m_s)
+    assert np.all(gal.stars.x.value == x_s)
+    assert np.all(gal.stars.y.value == y_s)
+    assert np.all(gal.stars.z.value == z_s)
+    assert np.all(gal.stars.vx.value == vx_s)
+    assert np.all(gal.stars.vy.value == vy_s)
+    assert np.all(gal.stars.vz.value == vz_s)
+    assert np.all(gal.stars.softening == soft_s)
+
+    assert np.all(gal.dark_matter.m.value == m_dm)
+    assert np.all(gal.dark_matter.x.value == x_dm)
+    assert np.all(gal.dark_matter.y.value == y_dm)
+    assert np.all(gal.dark_matter.z.value == z_dm)
+    assert np.all(gal.dark_matter.vx.value == vx_dm)
+    assert np.all(gal.dark_matter.vy.value == vy_dm)
+    assert np.all(gal.dark_matter.vz.value == vz_dm)
+    assert np.all(gal.dark_matter.softening == soft_dm)
+
+    assert np.all(gal.gas.m.value == m_g)
+    assert np.all(gal.gas.x.value == x_g)
+    assert np.all(gal.gas.y.value == y_g)
+    assert np.all(gal.gas.z.value == z_g)
+    assert np.all(gal.gas.vx.value == vx_g)
+    assert np.all(gal.gas.vy.value == vy_g)
+    assert np.all(gal.gas.vz.value == vz_g)
+    assert np.all(gal.gas.softening == soft_g)
+
+    if has_potential:
+        assert (
+            gal.stars.has_potential_
+            and gal.dark_matter.has_potential_
+            and gal.gas.has_potential_
+        )
+        assert np.all(gal.dark_matter.potential.value == pot_dm)
+        assert np.all(gal.stars.potential.value == pot_s)
+        assert np.all(gal.gas.potential.value == pot_g)
+
+    else:
+        assert not (
+            gal.stars.has_potential_
+            or gal.dark_matter.has_potential_
+            or gal.gas.has_potential_
+        )
+        assert gal.dark_matter.potential is None
+        assert gal.stars.potential is None
+        assert gal.gas.potential is None
+
+
+@pytest.mark.parametrize("remove_potential", ["pot_s", "pot_g", "pot_dm"])
+def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
 
     (
         m_s,
@@ -269,61 +387,47 @@ def test_mkgakaxy(data_galaxy):
         pot_g,
     ) = data_galaxy(seed=42)
 
-    gal = core.mkgalaxy(
-        m_s=m_s,
-        x_s=x_s,
-        y_s=y_s,
-        z_s=z_s,
-        vx_s=vx_s,
-        vy_s=vy_s,
-        vz_s=vz_s,
-        m_dm=m_dm,
-        x_dm=x_dm,
-        y_dm=y_dm,
-        z_dm=z_dm,
-        vx_dm=vx_dm,
-        vy_dm=vy_dm,
-        vz_dm=vz_dm,
-        m_g=m_g,
-        x_g=x_g,
-        y_g=y_g,
-        z_g=z_g,
-        vx_g=vx_g,
-        vy_g=vy_g,
-        vz_g=vz_g,
-        softening_s=soft_s,
-        softening_g=soft_g,
-        softening_dm=soft_dm,
-        pot_s=pot_s,
-        pot_g=pot_g,
-        pot_dm=pot_dm,
-    )
-    np.testing.assert_array_equal(gal.stars.m.value, m_s)
-    np.testing.assert_array_equal(gal.stars.x.value, x_s)
-    np.testing.assert_array_equal(gal.stars.y.value, y_s)
-    np.testing.assert_array_equal(gal.stars.z.value, z_s)
-    np.testing.assert_array_equal(gal.stars.vx.value, vx_s)
-    np.testing.assert_array_equal(gal.stars.vy.value, vy_s)
-    np.testing.assert_array_equal(gal.stars.vz.value, vz_s)
-    np.testing.assert_array_equal(gal.stars.softening, soft_s)
-    np.testing.assert_array_equal(gal.stars.potential.value, pot_s)
+    params = {
+        "m_s": m_s,
+        "x_s": x_s,
+        "y_s": y_s,
+        "z_s": z_s,
+        "vx_s": vx_s,
+        "vy_s": vy_s,
+        "vz_s": vz_s,
+        "m_dm": m_dm,
+        "x_dm": x_dm,
+        "y_dm": y_dm,
+        "z_dm": z_dm,
+        "vx_dm": vx_dm,
+        "vy_dm": vy_dm,
+        "vz_dm": vz_dm,
+        "m_g": m_g,
+        "x_g": x_g,
+        "y_g": y_g,
+        "z_g": z_g,
+        "vx_g": vx_g,
+        "vy_g": vy_g,
+        "vz_g": vz_g,
+        "softening_s": soft_s,
+        "softening_g": soft_g,
+        "softening_dm": soft_dm,
+        "pot_s": pot_s,
+        "pot_g": pot_g,
+        "pot_dm": pot_dm,
+    }
 
-    np.testing.assert_array_equal(gal.dark_matter.m.value, m_dm)
-    np.testing.assert_array_equal(gal.dark_matter.x.value, x_dm)
-    np.testing.assert_array_equal(gal.dark_matter.y.value, y_dm)
-    np.testing.assert_array_equal(gal.dark_matter.z.value, z_dm)
-    np.testing.assert_array_equal(gal.dark_matter.vx.value, vx_dm)
-    np.testing.assert_array_equal(gal.dark_matter.vy.value, vy_dm)
-    np.testing.assert_array_equal(gal.dark_matter.vz.value, vz_dm)
-    np.testing.assert_array_equal(gal.dark_matter.softening, soft_dm)
-    np.testing.assert_array_equal(gal.dark_matter.potential.value, pot_dm)
+    params[remove_potential] = None
 
-    np.testing.assert_array_equal(gal.gas.m.value, m_g)
-    np.testing.assert_array_equal(gal.gas.x.value, x_g)
-    np.testing.assert_array_equal(gal.gas.y.value, y_g)
-    np.testing.assert_array_equal(gal.gas.z.value, z_g)
-    np.testing.assert_array_equal(gal.gas.vx.value, vx_g)
-    np.testing.assert_array_equal(gal.gas.vy.value, vy_g)
-    np.testing.assert_array_equal(gal.gas.vz.value, vz_g)
-    np.testing.assert_array_equal(gal.gas.softening, soft_g)
-    np.testing.assert_array_equal(gal.gas.potential.value, pot_g)
+    with pytest.raises(ValueError):
+        core.mkgalaxy(**params)
+
+
+# =============================================================================
+# KINECTIC ENERGY
+# =============================================================================
+
+def test_Galaxy_kinectic_energy(galaxy):
+
+    gal = galaxy(seed=42)
+    import ipdb; ipdb.set_trace()

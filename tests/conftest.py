@@ -38,6 +38,7 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 @pytest.fixture(scope="session")
 def data_particleset():
     def make(
+        *,
         seed=None,
         size_min=100,
         size_max=1000,
@@ -69,20 +70,20 @@ def data_galaxy(data_particleset):
     def make(
         *,
         seed=None,
-        stars_min=10_000,
-        stars_max=20_000,
+        stars_min=100,
+        stars_max=100,
         stars_softening_min=0.0,
-        stars_softening_max=0.5,
+        stars_softening_max=1,
         stars_potential=True,
-        dm_min=10_000,
-        dm_max=20_000,
+        dm_min=100,
+        dm_max=1000,
         dm_softening_min=0.0,
-        dm_softening_max=0.5,
+        dm_softening_max=1,
         dm_potential=True,
-        gas_min=10_000,
-        gas_max=20_000,
+        gas_min=100,
+        gas_max=1000,
         gas_softening_min=0.0,
-        gas_softening_max=0.5,
+        gas_softening_max=1,
         gas_potential=True,
     ):
 

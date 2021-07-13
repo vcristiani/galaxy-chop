@@ -11,6 +11,7 @@
 # =============================================================================
 
 import enum
+import functools
 from collections import defaultdict
 
 from astropy import units as u
@@ -119,13 +120,24 @@ class ParticleSet:
 
     softening: float = attr.ib(converter=float, repr=False)
 
+    has_potential_: bool = attr.ib(init=False)
+    kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
+
+    # UTTR Accessor
     arr_ = uttr.array_accessor()
 
-    has_potential_: bool = attr.ib(init=False, repr=False)
+    # UTTRS Orchectration =====================================================
 
     @has_potential_.default
     def _has_potential__default(self):
         return self.potential is not None
+
+    @kinetic_energy_.default
+    def _kinetic_energy__default(self):
+        import ipdb; ipdb.set_trace()
+        arr = self.arr_
+        ke = 0.5 * (arr.vx ** 2 + arr.vy ** 2 + arr.vz ** 2)
+        return ke
 
     def __attrs_post_init__(self):
         """
@@ -160,6 +172,8 @@ class ParticleSet:
                 f"Lengths: {lengths}"
             )
 
+    # REDEFINITIONS ===========================================================
+
     def __repr__(self):
         return (
             f"ParticleSet({self.ptype}, size={len(self)}, "
@@ -168,6 +182,8 @@ class ParticleSet:
 
     def __len__(self):
         return len(self.m)
+
+    # UTILITIES ===============================================================
 
     def to_dataframe(self):
         arr = self.arr_
@@ -303,8 +319,7 @@ class Galaxy:
                 f"Found: {has_pot}"
             )
 
-    @property
-    def kinetic_energy(self):
+    def kinetic_energy_(self):
         """
         Specific kinetic energy calculation.
 
@@ -326,27 +341,11 @@ class Galaxy:
         >>> galaxy = gchop.Galaxy(...)
         >>> k_s, k_dm, k_g = galaxy.kinetic_energy
         """
-        vx_s = self.arr_.vx_s
-        vy_s = self.arr_.vy_s
-        vz_s = self.arr_.vz_s
-
-        vx_dm = self.arr_.vx_dm
-        vy_dm = self.arr_.vy_dm
-        vz_dm = self.arr_.vz_dm
-
-        vx_g = self.arr_.vx_g
-        vy_g = self.arr_.vy_g
-        vz_g = self.arr_.vz_g
-
-        k_s = 0.5 * (vx_s ** 2 + vy_s ** 2 + vz_s ** 2)
-        k_dm = 0.5 * (vx_dm ** 2 + vy_dm ** 2 + vz_dm ** 2)
-        k_g = 0.5 * (vx_g ** 2 + vy_g ** 2 + vz_g ** 2)
-
-        k_s = k_s * (u.km / u.s) ** 2
-        k_dm = k_dm * (u.km / u.s) ** 2
-        k_g = k_g * (u.km / u.s) ** 2
-
-        return (k_s, k_dm, k_g)
+        return (
+            self.stars.kinetic_energy_,
+            self.dark_matter.kinetic_energy_,
+            self.gas.kinetic_energy_,
+        )
 
     def potential_energy(self):
         """
