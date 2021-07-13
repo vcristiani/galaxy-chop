@@ -96,18 +96,18 @@ class Columns(enum.Enum):
 # =============================================================================
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:
 
-    name = attr.ib(converter=str)
+    ptype = attr.ib(converter=str)
 
-    m: np.ndarray = uttr.ib(unit=u.Msun, repr=False)
-    x: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
-    y: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
-    z: np.ndarray = uttr.ib(unit=u.kpc, repr=False)
-    vx: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
-    vy: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
-    vz: np.ndarray = uttr.ib(unit=(u.km / u.s), repr=False)
+    m: np.ndarray = uttr.ib(unit=u.Msun)
+    x: np.ndarray = uttr.ib(unit=u.kpc)
+    y: np.ndarray = uttr.ib(unit=u.kpc)
+    z: np.ndarray = uttr.ib(unit=u.kpc)
+    vx: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    vy: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    vz: np.ndarray = uttr.ib(unit=(u.km / u.s))
 
     potential: np.ndarray = uttr.ib(
         unit=(u.km / u.s) ** 2,
@@ -156,16 +156,23 @@ class ParticleSet:
         # different lengths.
         if len(lengths) > 1:
             raise ValueError(
-                f"{self.name} inputs must have the same length. "
+                f"{self.ptype} inputs must have the same length. "
                 f"Lengths: {lengths}"
             )
+
+    def __repr__(self):
+        return (
+            f"ParticleSet({self.ptype}, size={len(self)}, "
+            f"softening={self.softening}, potentials={self.has_potential_})"
+        )
 
     def __len__(self):
         return len(self.m)
 
-    def as_dataframe(self):
+    def to_dataframe(self):
         arr = self.arr_
         data = {
+            "ptype": self.ptype,
             "m": arr.m,
             "x": arr.x,
             "y": arr.y,
@@ -173,15 +180,16 @@ class ParticleSet:
             "vx": arr.vx,
             "vy": arr.vy,
             "vz": arr.vz,
-            "eps": arr.eps,
-            "potential": arr.potential_ if self.has_potential_ else None,
+            "softening": self.softening,
+            "potential": arr.potential if self.has_potential_ else np.nan,
         }
         df = pd.DataFrame(data)
-        df_sorted = df[Columns.names()]
-        return df_sorted
+        return df
 
-    def as_array(self):
-        return self.as_dataframe().to_numpy()
+    def to_numpy(self):
+        df = self.to_dataframe()
+        del df["ptype"]
+        return df.to_numpy()
 
 
 # =============================================================================

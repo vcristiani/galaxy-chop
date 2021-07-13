@@ -36,7 +36,7 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 
 
 @pytest.fixture(scope="session")
-def data_particle_set():
+def data_particleset():
     def make(
         seed=None,
         size_min=100,
@@ -65,7 +65,7 @@ def data_particle_set():
 
 
 @pytest.fixture(scope="session")
-def data_galaxy(data_particle_set):
+def data_galaxy(data_particleset):
     def make(
         *,
         seed=None,
@@ -90,7 +90,7 @@ def data_galaxy(data_particle_set):
         random = np.random.default_rng(seed=seed)
 
         # STARS
-        stars_data = data_particle_set(
+        stars_data = data_particleset(
             seed=random,
             size_min=stars_min,
             size_max=stars_max,
@@ -100,7 +100,7 @@ def data_galaxy(data_particle_set):
         )
 
         # DARK_MATTER
-        dm_data = data_particle_set(
+        dm_data = data_particleset(
             seed=random,
             size_min=dm_min,
             size_max=dm_max,
@@ -110,7 +110,7 @@ def data_galaxy(data_particle_set):
         )
 
         # GAS
-        gas_data = data_particle_set(
+        gas_data = data_particleset(
             seed=random,
             size_min=gas_min,
             size_max=gas_max,

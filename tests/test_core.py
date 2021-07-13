@@ -16,11 +16,227 @@ from galaxychop import core
 
 import numpy as np
 
+import pandas as pd
+
+import pytest
+
 # =============================================================================
-# TESTS
+# PARTICLE_SET TESTS
 # =============================================================================
 
 
+def test_ParticleSet_creation_with_potential(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=True
+    )
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    assert pset.ptype == "foo"
+    assert np.all(pset.m.to_value() == m) and pset.m.unit == u.Msun
+    assert np.all(pset.x.to_value() == x) and pset.x.unit == u.kpc
+    assert np.all(pset.y.to_value() == y) and pset.y.unit == u.kpc
+    assert np.all(pset.z.to_value() == z) and pset.z.unit == u.kpc
+    assert np.all(pset.vx.to_value() == vx) and pset.vx.unit == (u.km / u.s)
+    assert np.all(pset.vy.to_value() == vy) and pset.vy.unit == (u.km / u.s)
+    assert np.all(pset.vz.to_value() == vz) and pset.vz.unit == (u.km / u.s)
+    assert np.all(pset.softening == soft)
+
+    assert pset.has_potential_
+    assert np.all(pset.potential.to_value() == pot)
+    assert pset.potential.unit == ((u.km / u.s) ** 2)
+
+
+def test_ParticleSet_creation_without_potential(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=False
+    )
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    assert pset.ptype == "foo"
+    assert np.all(pset.m.to_value() == m) and pset.m.unit == u.Msun
+    assert np.all(pset.x.to_value() == x) and pset.x.unit == u.kpc
+    assert np.all(pset.y.to_value() == y) and pset.y.unit == u.kpc
+    assert np.all(pset.z.to_value() == z) and pset.z.unit == u.kpc
+    assert np.all(pset.vx.to_value() == vx) and pset.vx.unit == (u.km / u.s)
+    assert np.all(pset.vy.to_value() == vy) and pset.vy.unit == (u.km / u.s)
+    assert np.all(pset.vz.to_value() == vz) and pset.vz.unit == (u.km / u.s)
+    assert np.all(pset.softening == soft)
+
+    assert not pset.has_potential_
+    assert pset.potential is None
+
+
+@pytest.mark.parametrize(
+    "remove_one",
+    ["m", "x", "y", "z", "vx", "vy", "vz", "potential"],
+)
+def test_ParticleSet_creation_bad_len(data_particleset, remove_one):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=True
+    )
+    params = dict(
+        m=m, x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, softening=soft, potential=pot
+    )
+
+    params[remove_one] = params[remove_one][1:]
+
+    with pytest.raises(ValueError):
+        core.ParticleSet("foo", **params)
+
+
+def test_ParticleSet_len(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=True
+    )
+
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    assert (
+        len(pset)
+        == len(m)
+        == len(x)
+        == len(y)
+        == len(z)
+        == len(vx)
+        == len(vy)
+        == len(vz)
+        == len(pot)
+    )
+
+
+@pytest.mark.parametrize("has_potential", [True, False])
+def test_ParticleSet_to_dataframe(data_particleset, has_potential):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=has_potential
+    )
+
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+    expected = pd.DataFrame(
+        {
+            "ptype": "foo",
+            "m": m,
+            "x": x,
+            "y": y,
+            "z": z,
+            "vx": vx,
+            "vy": vy,
+            "vz": vz,
+            "softening": soft,
+            "potential": pot if has_potential else np.full(len(pset), np.nan),
+        }
+    )
+    df = pset.to_dataframe()
+
+    assert df.equals(expected)
+
+
+@pytest.mark.parametrize("has_potential", [True, False])
+def test_ParticleSet_to_numpy(data_particleset, has_potential):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=has_potential
+    )
+
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+    expected = np.column_stack(
+        [
+            m,
+            x,
+            y,
+            z,
+            vx,
+            vy,
+            vz,
+            np.full(len(pset), soft),
+            pot if has_potential else np.full(len(pset), np.nan),
+        ]
+    )
+    arr = pset.to_numpy()
+
+    assert np.array_equal(arr, expected, equal_nan=True)
+
+
+@pytest.mark.parametrize("has_potential", [True, False])
+def test_ParticleSet_repr(data_particleset, has_potential):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=has_potential
+    )
+
+    pset = core.ParticleSet(
+        "foo",
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    expected = f"ParticleSet(foo, size={len(m)}, softening={soft}, potentials={has_potential})"
+
+    assert repr(pset) == expected
+
+
+# =============================================================================
+# TEST MK_GALAXY
+# =============================================================================
 def test_mkgakaxy(data_galaxy):
 
     (
@@ -111,19 +327,3 @@ def test_mkgakaxy(data_galaxy):
     np.testing.assert_array_equal(gal.gas.vz.value, vz_g)
     np.testing.assert_array_equal(gal.gas.softening, soft_g)
     np.testing.assert_array_equal(gal.gas.potential.value, pot_g)
-
-    assert len(m_s) == len(x_s) == len(y_s) == len(z_s)
-    assert len(m_s) == len(vx_s) == len(vy_s) == len(vz_s)
-    assert len(m_s) == len(gal.stars.m)
-    assert len(m_s) == len(gal.stars.x) == len(gal.stars.y) == len(gal.stars.z)
-    assert len(m_s) == len(gal.stars.vx)
-    assert len(m_s) == len(gal.stars.vy) == len(gal.stars.vz)
-
-    assert isinstance(gal.stars.m, u.Quantity)
-    assert isinstance(gal.stars.x, u.Quantity)
-    assert isinstance(gal.stars.y, u.Quantity)
-    assert isinstance(gal.stars.z, u.Quantity)
-    assert isinstance(gal.stars.vx, u.Quantity)
-    assert isinstance(gal.stars.vy, u.Quantity)
-    assert isinstance(gal.stars.vz, u.Quantity)
-    assert isinstance(gal.stars.potential, u.Quantity)
