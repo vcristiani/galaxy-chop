@@ -43,19 +43,23 @@ def test_ParticleSet_creation_with_potential(data_particleset):
     )
 
     assert pset.ptype == "foo"
-    assert np.all(pset.m.to_value() == m) and pset.m.unit == u.Msun
-    assert np.all(pset.x.to_value() == x) and pset.x.unit == u.kpc
-    assert np.all(pset.y.to_value() == y) and pset.y.unit == u.kpc
-    assert np.all(pset.z.to_value() == z) and pset.z.unit == u.kpc
-    assert np.all(pset.vx.to_value() == vx) and pset.vx.unit == (u.km / u.s)
-    assert np.all(pset.vy.to_value() == vy) and pset.vy.unit == (u.km / u.s)
-    assert np.all(pset.vz.to_value() == vz) and pset.vz.unit == (u.km / u.s)
+    assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
+    assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
+    assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
+    assert np.all(pset.arr_.z == z) and pset.z.unit == u.kpc
+    assert np.all(pset.arr_.vx == vx) and pset.vx.unit == (u.km / u.s)
+    assert np.all(pset.arr_.vy == vy) and pset.vy.unit == (u.km / u.s)
+    assert np.all(pset.arr_.vz == vz) and pset.vz.unit == (u.km / u.s)
     assert np.all(pset.softening == soft)
 
-    import ipdb; ipdb.set_trace()
+    kinetic_energy = 0.5 * (vx ** 2 + vy ** 2 + vz ** 2)
+    assert (
+        np.all(pset.arr_.kinetic_energy_ == kinetic_energy)
+        and pset.kinetic_energy_.unit == (u.km / u.s) ** 2
+    )
 
     assert pset.has_potential_
-    assert np.all(pset.potential.to_value() == pot)
+    assert np.all(pset.arr_.potential == pot)
     assert pset.potential.unit == ((u.km / u.s) ** 2)
 
 
@@ -77,14 +81,20 @@ def test_ParticleSet_creation_without_potential(data_particleset):
     )
 
     assert pset.ptype == "foo"
-    assert np.all(pset.m.to_value() == m) and pset.m.unit == u.Msun
-    assert np.all(pset.x.to_value() == x) and pset.x.unit == u.kpc
-    assert np.all(pset.y.to_value() == y) and pset.y.unit == u.kpc
-    assert np.all(pset.z.to_value() == z) and pset.z.unit == u.kpc
-    assert np.all(pset.vx.to_value() == vx) and pset.vx.unit == (u.km / u.s)
-    assert np.all(pset.vy.to_value() == vy) and pset.vy.unit == (u.km / u.s)
-    assert np.all(pset.vz.to_value() == vz) and pset.vz.unit == (u.km / u.s)
+    assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
+    assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
+    assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
+    assert np.all(pset.arr_.z == z) and pset.z.unit == u.kpc
+    assert np.all(pset.arr_.vx == vx) and pset.vx.unit == (u.km / u.s)
+    assert np.all(pset.arr_.vy == vy) and pset.vy.unit == (u.km / u.s)
+    assert np.all(pset.arr_.vz == vz) and pset.vz.unit == (u.km / u.s)
     assert np.all(pset.softening == soft)
+
+    kinetic_energy = 0.5 * (vx ** 2 + vy ** 2 + vz ** 2)
+    assert (
+        np.all(pset.arr_.kinetic_energy_ == kinetic_energy)
+        and pset.kinetic_energy_.unit == (u.km / u.s) ** 2
+    )
 
     assert not pset.has_potential_
     assert pset.potential is None
@@ -169,6 +179,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "vz": vz,
             "softening": soft,
             "potential": pot if has_potential else np.full(len(pset), np.nan),
+            "kinetic_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
         }
     )
     df = pset.to_dataframe()
@@ -205,6 +216,7 @@ def test_ParticleSet_to_numpy(data_particleset, has_potential):
             vz,
             np.full(len(pset), soft),
             pot if has_potential else np.full(len(pset), np.nan),
+            0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
         ]
     )
     arr = pset.to_numpy()
@@ -231,7 +243,10 @@ def test_ParticleSet_repr(data_particleset, has_potential):
         potential=pot,
     )
 
-    expected = f"ParticleSet(foo, size={len(m)}, softening={soft}, potentials={has_potential})"
+    expected = (
+        f"ParticleSet(foo, size={len(m)}, "
+        f"softening={soft}, potentials={has_potential})"
+    )
 
     assert repr(pset) == expected
 
@@ -306,31 +321,31 @@ def test_mkgakaxy(data_galaxy, has_potential):
         pot_g=pot_g,
         pot_dm=pot_dm,
     )
-    assert np.all(gal.stars.m.value == m_s)
-    assert np.all(gal.stars.x.value == x_s)
-    assert np.all(gal.stars.y.value == y_s)
-    assert np.all(gal.stars.z.value == z_s)
-    assert np.all(gal.stars.vx.value == vx_s)
-    assert np.all(gal.stars.vy.value == vy_s)
-    assert np.all(gal.stars.vz.value == vz_s)
+    assert np.all(gal.stars.arr_.m == m_s)
+    assert np.all(gal.stars.arr_.x == x_s)
+    assert np.all(gal.stars.arr_.y == y_s)
+    assert np.all(gal.stars.arr_.z == z_s)
+    assert np.all(gal.stars.arr_.vx == vx_s)
+    assert np.all(gal.stars.arr_.vy == vy_s)
+    assert np.all(gal.stars.arr_.vz == vz_s)
     assert np.all(gal.stars.softening == soft_s)
 
-    assert np.all(gal.dark_matter.m.value == m_dm)
-    assert np.all(gal.dark_matter.x.value == x_dm)
-    assert np.all(gal.dark_matter.y.value == y_dm)
-    assert np.all(gal.dark_matter.z.value == z_dm)
-    assert np.all(gal.dark_matter.vx.value == vx_dm)
-    assert np.all(gal.dark_matter.vy.value == vy_dm)
-    assert np.all(gal.dark_matter.vz.value == vz_dm)
+    assert np.all(gal.dark_matter.arr_.m == m_dm)
+    assert np.all(gal.dark_matter.arr_.x == x_dm)
+    assert np.all(gal.dark_matter.arr_.y == y_dm)
+    assert np.all(gal.dark_matter.arr_.z == z_dm)
+    assert np.all(gal.dark_matter.arr_.vx == vx_dm)
+    assert np.all(gal.dark_matter.arr_.vy == vy_dm)
+    assert np.all(gal.dark_matter.arr_.vz == vz_dm)
     assert np.all(gal.dark_matter.softening == soft_dm)
 
-    assert np.all(gal.gas.m.value == m_g)
-    assert np.all(gal.gas.x.value == x_g)
-    assert np.all(gal.gas.y.value == y_g)
-    assert np.all(gal.gas.z.value == z_g)
-    assert np.all(gal.gas.vx.value == vx_g)
-    assert np.all(gal.gas.vy.value == vy_g)
-    assert np.all(gal.gas.vz.value == vz_g)
+    assert np.all(gal.gas.arr_.m == m_g)
+    assert np.all(gal.gas.arr_.x == x_g)
+    assert np.all(gal.gas.arr_.y == y_g)
+    assert np.all(gal.gas.arr_.z == z_g)
+    assert np.all(gal.gas.arr_.vx == vx_g)
+    assert np.all(gal.gas.arr_.vy == vy_g)
+    assert np.all(gal.gas.arr_.vz == vz_g)
     assert np.all(gal.gas.softening == soft_g)
 
     if has_potential:
@@ -427,7 +442,10 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
 # KINECTIC ENERGY
 # =============================================================================
 
-def test_Galaxy_kinectic_energy(galaxy):
 
+def test_Galaxy_kinectic_energy(galaxy):
     gal = galaxy(seed=42)
-    import ipdb; ipdb.set_trace()
+    gke = gal.kinetic_energy_
+    assert np.all(gke[0] == gal.stars.kinetic_energy_)
+    assert np.all(gke[1] == gal.dark_matter.kinetic_energy_)
+    assert np.all(gke[2] == gal.gas.kinetic_energy_)

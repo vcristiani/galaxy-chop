@@ -11,7 +11,6 @@
 # =============================================================================
 
 import enum
-import functools
 from collections import defaultdict
 
 from astropy import units as u
@@ -100,6 +99,8 @@ class Columns(enum.Enum):
 @attr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:
 
+    arr_ = uttr.array_accessor()
+
     ptype = attr.ib(converter=str)
 
     m: np.ndarray = uttr.ib(unit=u.Msun)
@@ -123,9 +124,6 @@ class ParticleSet:
     has_potential_: bool = attr.ib(init=False)
     kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
 
-    # UTTR Accessor
-    arr_ = uttr.array_accessor()
-
     # UTTRS Orchectration =====================================================
 
     @has_potential_.default
@@ -134,7 +132,6 @@ class ParticleSet:
 
     @kinetic_energy_.default
     def _kinetic_energy__default(self):
-        import ipdb; ipdb.set_trace()
         arr = self.arr_
         ke = 0.5 * (arr.vx ** 2 + arr.vy ** 2 + arr.vz ** 2)
         return ke
@@ -198,6 +195,7 @@ class ParticleSet:
             "vz": arr.vz,
             "softening": self.softening,
             "potential": arr.potential if self.has_potential_ else np.nan,
+            "kinetic_energy": arr.kinetic_energy_,
         }
         df = pd.DataFrame(data)
         return df
@@ -319,11 +317,9 @@ class Galaxy:
                 f"Found: {has_pot}"
             )
 
+    @property
     def kinetic_energy_(self):
-        """
-        Specific kinetic energy calculation.
-
-        Calculates the specific kinetic energy
+        """Specific kinetic energy
         of stars, dark matter and gas particles.
 
         Returns
