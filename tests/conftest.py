@@ -10,7 +10,6 @@
 # IMPORTS
 # =============================================================================
 
-import functools
 import os
 from pathlib import Path
 

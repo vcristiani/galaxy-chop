@@ -96,12 +96,10 @@ class Columns(enum.Enum):
 # =============================================================================
 
 
-@attr.s(frozen=True, slots=True, repr=False)
+@uttr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:
 
-    arr_ = uttr.array_accessor()
-
-    ptype = attr.ib(converter=str)
+    ptype = uttr.ib(converter=str)
 
     m: np.ndarray = uttr.ib(unit=u.Msun)
     x: np.ndarray = uttr.ib(unit=u.kpc)
@@ -211,7 +209,7 @@ class ParticleSet:
 # =============================================================================
 
 
-@attr.s(frozen=True)
+@uttr.s(frozen=True)
 class Galaxy:
     """
     Galaxy class.
@@ -287,9 +285,9 @@ class Galaxy:
         For more information see: https://pypi.org/project/uttrs/
     """
 
-    stars = attr.ib(validator=attr.validators.instance_of(ParticleSet))
-    dark_matter = attr.ib(validator=attr.validators.instance_of(ParticleSet))
-    gas = attr.ib(validator=attr.validators.instance_of(ParticleSet))
+    stars = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
+    dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
+    gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
     J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
     J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
@@ -298,8 +296,6 @@ class Galaxy:
 
     x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
     y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
-
-    arr_ = uttr.array_accessor()
 
     def __attrs_post_init__(self):
         # this is a set only can have 3 possible values:
