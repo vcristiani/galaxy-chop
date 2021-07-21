@@ -367,32 +367,28 @@ class Galaxy:
         If the potentials are entered when the `galaxy` object is instanced,
         then, the calculation of `potential_energy` will raise a `ValueError`.
         """
-        m_s = self.arr_.m_s
-        x_s = self.arr_.x_s
-        y_s = self.arr_.y_s
-        z_s = self.arr_.z_s
+        m_s = self.stars.arr_.m
+        x_s = self.stars.arr_.x
+        y_s = self.stars.arr_.y
+        z_s = self.stars.arr_.z
 
-        m_dm = self.arr_.m_dm
-        x_dm = self.arr_.x_dm
-        y_dm = self.arr_.y_dm
-        z_dm = self.arr_.z_dm
+        m_dm = self.dark_matter.arr_.m
+        x_dm = self.dark_matter.arr_.x
+        y_dm = self.dark_matter.arr_.y
+        z_dm = self.dark_matter.arr_.z
 
-        m_g = self.arr_.m_g
-        x_g = self.arr_.x_g
-        y_g = self.arr_.y_g
-        z_g = self.arr_.z_g
+        m_g = self.gas.arr_.m
+        x_g = self.gas.arr_.x
+        y_g = self.gas.arr_.y
+        z_g = self.gas.arr_.z
 
-        pot_s = self.arr_.pot_s
-        pot_dm = self.arr_.pot_dm
-        pot_g = self.arr_.pot_g
+        pot_s = self.stars.potential.value
+        pot_dm = self.dark_matter.potential.value
+        pot_g = self.gas.potential.value
 
-        pot_s = self.arr_.pot_s
-        pot_dm = self.arr_.pot_dm
-        pot_g = self.arr_.pot_g
-
-        eps_s = self.arr_.eps_s
-        eps_dm = self.arr_.eps_dm
-        eps_g = self.arr_.eps_g
+        eps_s = self.stars.softening
+        eps_dm = self.dark_matter.softening
+        eps_g = self.gas.softening
 
         potential = np.concatenate([pot_s, pot_dm, pot_g])
 

@@ -449,3 +449,20 @@ def test_Galaxy_kinectic_energy(galaxy):
     assert np.all(gke[0] == gal.stars.kinetic_energy_)
     assert np.all(gke[1] == gal.dark_matter.kinetic_energy_)
     assert np.all(gke[2] == gal.gas.kinetic_energy_)
+
+
+# =============================================================================
+#   POTENTIAL ENERGY
+# =============================================================================
+
+
+#    tengo que crear otra gal sin pot?
+@pytest.mark.xfail
+def test_Galaxy_potential_energy(galaxy):
+    gal = galaxy(seed=42)
+    gpot = gal.potential_energy()
+    assert np.all(gpot.stars.potential.value == gal.stars.potential.value)
+    assert np.all(
+        gpot.dark_matter.potential.value == gal.dark_matter.potential.value
+    )
+    assert np.all(gpot.gas.potential.value == gal.gas.potential.value)
