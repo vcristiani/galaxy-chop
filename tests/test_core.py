@@ -11,7 +11,6 @@
 # =============================================================================
 
 import astropy.units as u
-from attr import has
 
 from galaxychop import core
 
@@ -463,9 +462,11 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
     with pytest.raises(ValueError):
         gal.potential_energy()
 
+
 @pytest.mark.xfail
 def test_Galaxy_potential_energy(galaxy):
     gal = galaxy(
         seed=42, stars_potential=False, dm_potential=False, gas_potential=False
     )
     pgal = gal.potential_energy()
+    assert pgal

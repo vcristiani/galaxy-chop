@@ -371,7 +371,7 @@ class Galaxy:
         pot_g = pot[num:]
 
         new = attr.asdict(self, recurse=False)
-        del new["arr_"]
+        del new["has_potential_"]
         new.update(
             pot_s=-pot_s * (u.km / u.s) ** 2,
             pot_dm=-pot_dm * (u.km / u.s) ** 2,
