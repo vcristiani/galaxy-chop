@@ -297,7 +297,10 @@ class Galaxy:
     x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
     y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
 
-    def __attrs_post_init__(self):
+    has_potential_: bool = attr.ib(init=False)
+
+    @has_potential_.default
+    def _has_potential__default(self):
         # this is a set only can have 3 possible values:
         # 1. {True} all the components has potential
         # 2. {False} No component has potential
@@ -312,6 +315,7 @@ class Galaxy:
                 "Potential energy must be instanced for all particles types. "
                 f"Found: {has_pot}"
             )
+        return self.stars.has_potential_
 
     @property
     def kinetic_energy_(self):
@@ -367,6 +371,9 @@ class Galaxy:
         If the potentials are entered when the `galaxy` object is instanced,
         then, the calculation of `potential_energy` will raise a `ValueError`.
         """
+        if self.has_potential_:
+            raise ValueError("Potentials are already calculated")
+
         m_s = self.stars.arr_.m
         x_s = self.stars.arr_.x
         y_s = self.stars.arr_.y
@@ -382,44 +389,35 @@ class Galaxy:
         y_g = self.gas.arr_.y
         z_g = self.gas.arr_.z
 
-        pot_s = self.stars.potential.value
-        pot_dm = self.dark_matter.potential.value
-        pot_g = self.gas.potential.value
-
         eps_s = self.stars.softening
         eps_dm = self.dark_matter.softening
         eps_g = self.gas.softening
 
-        potential = np.concatenate([pot_s, pot_dm, pot_g])
+        x = np.hstack((x_s, x_dm, x_g))
+        y = np.hstack((y_s, y_dm, y_g))
+        z = np.hstack((z_s, z_dm, z_g))
+        m = np.hstack((m_s, m_dm, m_g))
+        eps = np.max([eps_s, eps_dm, eps_g])
 
-        if np.all(potential == 0.0):
-            x = np.hstack((x_s, x_dm, x_g))
-            y = np.hstack((y_s, y_dm, y_g))
-            z = np.hstack((z_s, z_dm, z_g))
-            m = np.hstack((m_s, m_dm, m_g))
-            eps = np.max([eps_s, eps_dm, eps_g])
+        pot = utils.potential(x, y, z, m, eps)
 
-            pot = utils.potential(x, y, z, m, eps)
+        num_s = len(m_s)
+        num = len(m_s) + len(m_dm)
 
-            num_s = len(m_s)
-            num = len(m_s) + len(m_dm)
+        pot_s = pot[:num_s]
+        pot_dm = pot[num_s:num]
+        pot_g = pot[num:]
 
-            pot_s = pot[:num_s]
-            pot_dm = pot[num_s:num]
-            pot_g = pot[num:]
+        new = attr.asdict(self, recurse=False)
+        del new["arr_"]
+        new.update(
+            pot_s=-pot_s * (u.km / u.s) ** 2,
+            pot_dm=-pot_dm * (u.km / u.s) ** 2,
+            pot_g=-pot_g * (u.km / u.s) ** 2,
+        )
 
-            new = attr.asdict(self, recurse=False)
-            del new["arr_"]
-            new.update(
-                pot_s=-pot_s * (u.km / u.s) ** 2,
-                pot_dm=-pot_dm * (u.km / u.s) ** 2,
-                pot_g=-pot_g * (u.km / u.s) ** 2,
-            )
+        return Galaxy(**new)
 
-            return Galaxy(**new)
-
-        else:
-            raise ValueError("Potentials are already calculated")
 
     @property
     def energy(self):

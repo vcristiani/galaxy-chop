@@ -11,6 +11,7 @@
 # =============================================================================
 
 import astropy.units as u
+from attr import has
 
 from galaxychop import core
 
@@ -347,6 +348,8 @@ def test_mkgakaxy(data_galaxy, has_potential):
     assert np.all(gal.gas.arr_.vy == vy_g)
     assert np.all(gal.gas.arr_.vz == vz_g)
     assert np.all(gal.gas.softening == soft_g)
+    assert gal.has_potential_ == has_potential
+
 
     if has_potential:
         assert (
