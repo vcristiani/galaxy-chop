@@ -219,40 +219,7 @@ class Galaxy:
 
     Parameters
     ----------
-    m_s : `Quantity`
-        Star masses. Shape: (n_s,1). Default unit: M_sun
-    x_s, y_s, z_s : `Quantity`
-        Star positions. Shape: (n_s,1). Default unit: kpc.
-    vx_s, vy_s, vz_s : `Quantity`
-        Star velocities. Shape: (n_s,1). Default unit: km/s.
-    m_dm : `Quantity`
-        Dark matter masses. Shape: (n_dm,1). Default unit: M_sun
-    x_dm, y_dm, z_dm :  `Quantity`
-        Dark matter positions. Shape: (n_dm,1). Default unit: kpc.
-    vx_dm, vy_dm, vz_dm : `Quantity`
-        Dark matter velocities. Shape: (n_dm,1). Default unit: km/s.
-    m_g : `Quantity`
-        Gas masses. Shape: (n_g,1). Default unit: M_sun
-    x_g, y_g, z_g :  `Quantity`
-        Gas positions. Shape: (n_g,1). Default unit: kpc.
-    vx_g, vy_g, vz_g : `Quantity`
-        Gas velocities. Shape: (n_g,1). Default unit: km/s.
-    pot_s : `Quantity`, default value = 0
-        Specific potential energy of star particles.
-        Shape: (n_s,1). Default unit: (km/s)**2.
-    pot_dm : `Quantity`, default value = 0
-        Specific potential energy of dark matter particles.
-        Shape: (n_dm,1). Default unit: (km/s)**2.
-    pot_g : `Quantity`, default value = 0
-        Specific potential energy of gas particles.
-        Shape: (n_g,1). Default unit: (km/s)**2.
-    eps_s : `Quantity`, default value = 0
-        Softening radius of star particles. Shape: (1,). Default unit: kpc.
-    eps_dm : `Quantity`, default value = 0
-        Softening radius of dark matter particles.
-        Shape: (1,). Default unit: kpc.
-    eps_g : `Quantity`, default value = 0
-        Softening radius of gas particles. Shape: (1,). Default unit: kpc.
+
     J_part : `Quantity`
         Total specific angular momentum of all particles (stars, dark matter
         and gas).
@@ -317,6 +284,19 @@ class Galaxy:
             )
         return self.stars.has_potential_
 
+    # UTILITIES ===============================================================
+
+    def to_dataframe(self):
+        return pd.concat(
+            [
+                self.stars.to_dataframe(),
+                self.dark_matter.to_dataframe(),
+                self.gas.to_dataframe(),
+            ]
+        )
+
+    # ENERGY ===============================================================
+
     @property
     def kinetic_energy_(self):
         """Specific kinetic energy
@@ -374,35 +354,17 @@ class Galaxy:
         if self.has_potential_:
             raise ValueError("Potentials are already calculated")
 
-        m_s = self.stars.arr_.m
-        x_s = self.stars.arr_.x
-        y_s = self.stars.arr_.y
-        z_s = self.stars.arr_.z
+        df = self.to_dataframe()
+        x = df.x.to_numpy()
+        y = df.y.to_numpy()
+        z = df.z.to_numpy()
+        m = df.m.to_numpy()
+        softening = df.softening.max()
 
-        m_dm = self.dark_matter.arr_.m
-        x_dm = self.dark_matter.arr_.x
-        y_dm = self.dark_matter.arr_.y
-        z_dm = self.dark_matter.arr_.z
+        pot = utils.potential(x, y, z, m, softening)
 
-        m_g = self.gas.arr_.m
-        x_g = self.gas.arr_.x
-        y_g = self.gas.arr_.y
-        z_g = self.gas.arr_.z
-
-        eps_s = self.stars.softening
-        eps_dm = self.dark_matter.softening
-        eps_g = self.gas.softening
-
-        x = np.hstack((x_s, x_dm, x_g))
-        y = np.hstack((y_s, y_dm, y_g))
-        z = np.hstack((z_s, z_dm, z_g))
-        m = np.hstack((m_s, m_dm, m_g))
-        eps = np.max([eps_s, eps_dm, eps_g])
-
-        pot = utils.potential(x, y, z, m, eps)
-
-        num_s = len(m_s)
-        num = len(m_s) + len(m_dm)
+        num_s = len(self.stars)
+        num = len(self.stars) + len(self.dark_matter)
 
         pot_s = pot[:num_s]
         pot_dm = pot[num_s:num]
@@ -417,7 +379,6 @@ class Galaxy:
         )
 
         return Galaxy(**new)
-
 
     @property
     def energy(self):

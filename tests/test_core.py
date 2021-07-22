@@ -350,7 +350,6 @@ def test_mkgakaxy(data_galaxy, has_potential):
     assert np.all(gal.gas.softening == soft_g)
     assert gal.has_potential_ == has_potential
 
-
     if has_potential:
         assert (
             gal.stars.has_potential_
@@ -459,13 +458,14 @@ def test_Galaxy_kinectic_energy(galaxy):
 # =============================================================================
 
 
-#    tengo que crear otra gal sin pot?
+def test_Galaxy_potential_energy_already_calculated(galaxy):
+    gal = galaxy(seed=42)
+    with pytest.raises(ValueError):
+        gal.potential_energy()
+
 @pytest.mark.xfail
 def test_Galaxy_potential_energy(galaxy):
-    gal = galaxy(seed=42)
-    gpot = gal.potential_energy()
-    assert np.all(gpot.stars.potential.value == gal.stars.potential.value)
-    assert np.all(
-        gpot.dark_matter.potential.value == gal.dark_matter.potential.value
+    gal = galaxy(
+        seed=42, stars_potential=False, dm_potential=False, gas_potential=False
     )
-    assert np.all(gpot.gas.potential.value == gal.gas.potential.value)
+    pgal = gal.potential_energy()
