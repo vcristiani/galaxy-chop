@@ -14,7 +14,6 @@ import enum
 from collections import defaultdict
 
 from astropy import units as u
-from astropy.table import Table
 
 import attr
 
@@ -25,8 +24,6 @@ import numpy as np
 import pandas as pd
 
 import uttr
-
-import h5py
 
 
 # =============================================================================
@@ -124,7 +121,7 @@ class ParticleSet:
 
     has_potential_: bool = attr.ib(init=False)
     kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
-
+    total_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
     # UTTRS Orchectration =====================================================
 
     @has_potential_.default
@@ -136,6 +133,17 @@ class ParticleSet:
         arr = self.arr_
         ke = 0.5 * (arr.vx ** 2 + arr.vy ** 2 + arr.vz ** 2)
         return ke
+
+    @total_energy_.default
+    def _total_energy__default(self):
+        if not self.has_potential_:
+            return
+
+        arr = self.arr_
+        kenergy = arr.kinetic_energy_
+        penergy = arr.potential_energy_
+
+        return kenergy + penergy
 
     def __attrs_post_init__(self):
         """
@@ -326,6 +334,47 @@ class Galaxy:
             self.gas.kinetic_energy_,
         )
 
+    @property
+    def potential_energy_(self):
+        if not self.has_potential_:
+            raise ValueError("Galaxy has not potential energy")
+        return (
+            self.stars.potential,
+            self.dark_matter.potential,
+            self.gas.potential,
+        )
+
+    @property
+    def total_energy_(self):
+        """
+        Specific energy calculation.
+
+        Calculates the specific energy of dark matter, star and gas particles.
+
+        Returns
+        -------
+        tuple : `Quantity`
+            (Etot_s, Etot_dm, Etot_g): Specific total energy of stars, dark
+            matter and gas respectively.
+            Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+
+        Examples
+        --------
+        This returns the specific total energy of stars, dark matter and gas
+        particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> E_s, E_dm, E_g = galaxy.energy
+        """
+        if not self.has_potential_:
+            raise ValueError("Galaxy has not potential energy")
+        return (
+            self.stars.total_energy_,
+            self.dark_matter.total_energy_,
+            self.gas.total_energy_,
+        )
+
     def potential_energy(self):
         """
         Specific potential energy calculation.
@@ -382,57 +431,6 @@ class Galaxy:
         )
 
         return Galaxy(**new)
-
-    @property
-    def energy(self):
-        """
-        Specific energy calculation.
-
-        Calculates the specific energy of dark matter, star and gas particles.
-
-        Returns
-        -------
-        tuple : `Quantity`
-            (Etot_s, Etot_dm, Etot_g): Specific total energy of stars, dark
-            matter and gas respectively.
-            Shape(n_s, n_dm, n_g). Unit: (km/s)**2
-
-        Examples
-        --------
-        This returns the specific total energy of stars, dark matter and gas
-        particles respectively.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> E_s, E_dm, E_g = galaxy.energy
-        """
-        potential = np.concatenate(
-            [
-                self.arr_.pot_s,
-                self.arr_.pot_dm,
-                self.arr_.pot_s,
-            ]
-        )
-
-        k_s = self.kinetic_energy[0].value
-        k_dm = self.kinetic_energy[1].value
-        k_g = self.kinetic_energy[2].value
-
-        if np.all(potential == 0.0):
-            pots = self.potential_energy()
-            pot_s = pots.arr_.pot_s
-            pot_dm = pots.arr_.pot_dm
-            pot_g = pots.arr_.pot_g
-        else:
-            pot_s = self.arr_.pot_s
-            pot_dm = self.arr_.pot_dm
-            pot_g = self.arr_.pot_g
-
-        Etot_s = (k_s + pot_s) * (u.km / u.s) ** 2
-        Etot_dm = (k_dm + pot_dm) * (u.km / u.s) ** 2
-        Etot_g = (k_g + pot_g) * (u.km / u.s) ** 2
-
-        return (Etot_s, Etot_dm, Etot_g)
 
     def angular_momentum(self, r_cut=None):
         """
@@ -893,100 +891,4 @@ def mkgalaxy(
         potential=pot_g,
     )
     galaxy = Galaxy(stars=stars, dark_matter=dark_matter, gas=gas)
-    return galaxy
-
-
-def _table_to_dict(table, key_suffix):
-    kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
-    kws[f"pot_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
-
-    return kws
-
-
-def read_hdf5(
-    path,
-    softening_s: float = 0.0,
-    softening_dm: float = 0.0,
-    softening_g: float = 0.0,
-):
-
-    with h5py.File(path, "r") as f:
-        star_table = Table.read(f["stars"])
-        dark_table = Table.read(f["dark_matter"])
-        gas_table = Table.read(f["gas"])
-
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
-
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
-
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
-
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
-
-    galaxy = mkgalaxy(**galaxy_kws)
-
-    return galaxy
-
-
-def read_file(
-    path_star,
-    path_dark,
-    path_gas,
-    columns,
-    path_pot_s=None,
-    path_pot_dm=None,
-    path_pot_g=None,
-    softening_s: float = 0.0,
-    softening_dm: float = 0.0,
-    softening_g: float = 0.0,
-):
-
-    particles_star = np.load(path_star)
-    particles_dark = np.load(path_dark)
-    particles_gas = np.load(path_gas)
-
-    df_star = pd.DataFrame(particles_star, columns=columns)
-    df_dark = pd.DataFrame(particles_dark, columns=columns)
-    df_gas = pd.DataFrame(particles_gas, columns=columns)
-
-    if path_pot_s is not None:
-        pot_s = np.load(path_pot_s)
-        df_star.insert(7, "potential", pot_s, True)
-
-    if path_pot_dm is not None:
-        pot_dm = np.load(path_pot_dm)
-        df_dark.insert(7, "potential", pot_dm, True)
-
-    if path_pot_g is not None:
-        pot_g = np.load(path_pot_g)
-        df_gas.insert(7, "potential", pot_g, True)
-
-    star_table = Table.from_pandas(df_star)
-    dark_table = Table.from_pandas(df_dark)
-    gas_table = Table.from_pandas(df_gas)
-
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
-
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
-
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
-
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
-
-    galaxy = mkgalaxy(**galaxy_kws)
-
     return galaxy
