@@ -948,18 +948,14 @@ def read_file(
     softening_g: float = 0.0,
 ):
 
-    # Leo los files de las particulas
     particles_star = np.load(path_star)
     particles_dark = np.load(path_dark)
     particles_gas = np.load(path_gas)
 
-    # Armo los dataframes
     df_star = pd.DataFrame(particles_star, columns=columns)
     df_dark = pd.DataFrame(particles_dark, columns=columns)
     df_gas = pd.DataFrame(particles_gas, columns=columns)
 
-    # Leo los files de los potenciales si es que existen
-    # y agrego la columna a los dataframes
     if path_pot_s is not None:
         pot_s = np.load(path_pot_s)
         df_star.insert(7, "potential", pot_s, True)
@@ -972,12 +968,10 @@ def read_file(
         pot_g = np.load(path_pot_g)
         df_gas.insert(7, "potential", pot_g, True)
 
-    # Convierto los dataframes en tablas de astropy
     star_table = Table.from_pandas(df_star)
     dark_table = Table.from_pandas(df_dark)
     gas_table = Table.from_pandas(df_gas)
 
-    # De aca para abajo lo mismo que en el otro
     galaxy_kws = {
         "softening_s": softening_s,
         "softening_dm": softening_dm,
