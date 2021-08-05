@@ -180,7 +180,9 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "softening": soft,
             "potential": pot if has_potential else np.full(len(pset), np.nan),
             "kinetic_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
-            "total_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot if has_potential else np.full(len(pset), np.nan),
+            "total_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
+            if has_potential
+            else np.full(len(pset), np.nan),
         }
     )
     df = pset.to_dataframe()
@@ -218,7 +220,9 @@ def test_ParticleSet_to_numpy(data_particleset, has_potential):
             np.full(len(pset), soft),
             pot if has_potential else np.full(len(pset), np.nan),
             0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
-            0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot  if has_potential else np.full(len(pset), np.nan),
+            0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
+            if has_potential
+            else np.full(len(pset), np.nan),
         ]
     )
     arr = pset.to_numpy()
@@ -457,6 +461,7 @@ def test_Galaxy_kinectic_energy(galaxy):
 # =============================================================================
 #   POTENTIAL ENERGY
 # =============================================================================
+
 
 def test_Galaxy_potential_energy_already_calculated(galaxy):
     gal = galaxy(seed=42)

@@ -20,7 +20,7 @@ import attr
 
 from galaxychop import utils
 
-#import h5py
+import h5py
 
 import numpy as np
 
@@ -208,7 +208,9 @@ class ParticleSet:
             "softening": self.softening,
             "potential": arr.potential if self.has_potential_ else np.nan,
             "kinetic_energy": arr.kinetic_energy_,
-            "total_energy": arr.total_energy_  if self.has_potential_ else np.nan,
+            "total_energy": arr.total_energy_
+            if self.has_potential_
+            else np.nan,
         }
         df = pd.DataFrame(data)
         return df
