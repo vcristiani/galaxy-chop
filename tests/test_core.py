@@ -476,3 +476,30 @@ def test_Galaxy_potential_energy(galaxy):
     )
     pgal = gal.potential_energy()
     assert pgal
+    assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
+    assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
+    assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
+
+
+# =============================================================================
+#   TOTAL ENERGY
+# =============================================================================
+
+
+def test_Galaxy_toal_energy(galaxy):
+    gal = galaxy(seed=42)
+    gte = gal.total_energy_
+    assert np.all(gte[0] == gal.stars.total_energy_)
+    assert np.all(gte[1] == gal.dark_matter.total_energy_)
+    assert np.all(gte[2] == gal.gas.total_energy_)
+
+
+def test_Galaxy_energy(galaxy):
+    gal = galaxy(seed=42)
+    energy = gal.total_energy_
+    gke = gal.kinetic_energy_
+    gpe = gal.potential_energy_
+
+    assert np.all(gke[0] + gpe[0] == energy[0])
+    assert np.all(gke[1] + gpe[1] == energy[1])
+    assert np.all(gke[2] + gpe[2] == energy[2])
