@@ -272,7 +272,7 @@ def test_mkgakaxy(data_galaxy, has_potential):
         vy_s,
         vz_s,
         soft_s,
-        pot_s,
+        potential_s,
         m_dm,
         x_dm,
         y_dm,
@@ -281,7 +281,7 @@ def test_mkgakaxy(data_galaxy, has_potential):
         vy_dm,
         vz_dm,
         soft_dm,
-        pot_dm,
+        potential_dm,
         m_g,
         x_g,
         y_g,
@@ -290,7 +290,7 @@ def test_mkgakaxy(data_galaxy, has_potential):
         vy_g,
         vz_g,
         soft_g,
-        pot_g,
+        potential_g,
     ) = data_galaxy(
         seed=42,
         stars_potential=has_potential,
@@ -323,9 +323,9 @@ def test_mkgakaxy(data_galaxy, has_potential):
         softening_s=soft_s,
         softening_g=soft_g,
         softening_dm=soft_dm,
-        pot_s=pot_s,
-        pot_g=pot_g,
-        pot_dm=pot_dm,
+        potential_s=potential_s,
+        potential_g=potential_g,
+        potential_dm=potential_dm,
     )
     assert np.all(gal.stars.arr_.m == m_s)
     assert np.all(gal.stars.arr_.x == x_s)
@@ -361,9 +361,9 @@ def test_mkgakaxy(data_galaxy, has_potential):
             and gal.dark_matter.has_potential_
             and gal.gas.has_potential_
         )
-        assert np.all(gal.dark_matter.potential.value == pot_dm)
-        assert np.all(gal.stars.potential.value == pot_s)
-        assert np.all(gal.gas.potential.value == pot_g)
+        assert np.all(gal.dark_matter.potential.value == potential_dm)
+        assert np.all(gal.stars.potential.value == potential_s)
+        assert np.all(gal.gas.potential.value == potential_g)
 
     else:
         assert not (
@@ -376,7 +376,9 @@ def test_mkgakaxy(data_galaxy, has_potential):
         assert gal.gas.potential is None
 
 
-@pytest.mark.parametrize("remove_potential", ["pot_s", "pot_g", "pot_dm"])
+@pytest.mark.parametrize(
+    "remove_potential", ["potential_s", "potential_g", "potential_dm"]
+)
 def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
 
     (
@@ -388,7 +390,7 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
         vy_s,
         vz_s,
         soft_s,
-        pot_s,
+        potential_s,
         m_dm,
         x_dm,
         y_dm,
@@ -397,7 +399,7 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
         vy_dm,
         vz_dm,
         soft_dm,
-        pot_dm,
+        potential_dm,
         m_g,
         x_g,
         y_g,
@@ -406,7 +408,7 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
         vy_g,
         vz_g,
         soft_g,
-        pot_g,
+        potential_g,
     ) = data_galaxy(seed=42)
 
     params = {
@@ -434,15 +436,112 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
         "softening_s": soft_s,
         "softening_g": soft_g,
         "softening_dm": soft_dm,
-        "pot_s": pot_s,
-        "pot_g": pot_g,
-        "pot_dm": pot_dm,
+        "potential_s": potential_s,
+        "potential_g": potential_g,
+        "potential_dm": potential_dm,
     }
 
     params[remove_potential] = None
 
     with pytest.raises(ValueError):
         core.mkgalaxy(**params)
+
+
+# =============================================================================
+# AS KWARGS
+# =============================================================================
+
+
+def test_as_kwargs(data_galaxy):
+    (
+        m_s,
+        x_s,
+        y_s,
+        z_s,
+        vx_s,
+        vy_s,
+        vz_s,
+        soft_s,
+        potential_s,
+        m_dm,
+        x_dm,
+        y_dm,
+        z_dm,
+        vx_dm,
+        vy_dm,
+        vz_dm,
+        soft_dm,
+        potential_dm,
+        m_g,
+        x_g,
+        y_g,
+        z_g,
+        vx_g,
+        vy_g,
+        vz_g,
+        soft_g,
+        potential_g,
+    ) = data_galaxy(seed=42)
+
+    gal = core.mkgalaxy(
+        m_s=m_s,
+        x_s=x_s,
+        y_s=y_s,
+        z_s=z_s,
+        vx_s=vx_s,
+        vy_s=vy_s,
+        vz_s=vz_s,
+        m_dm=m_dm,
+        x_dm=x_dm,
+        y_dm=y_dm,
+        z_dm=z_dm,
+        vx_dm=vx_dm,
+        vy_dm=vy_dm,
+        vz_dm=vz_dm,
+        m_g=m_g,
+        x_g=x_g,
+        y_g=y_g,
+        z_g=z_g,
+        vx_g=vx_g,
+        vy_g=vy_g,
+        vz_g=vz_g,
+        softening_s=soft_s,
+        softening_g=soft_g,
+        softening_dm=soft_dm,
+        potential_s=potential_s,
+        potential_g=potential_g,
+        potential_dm=potential_dm,
+    )
+
+    gkwargs = core.as_kwargs(gal)
+
+    assert np.all(gkwargs["m_s"].to_value() == m_s)
+    assert np.all(gkwargs["x_s"].to_value() == x_s)
+    assert np.all(gkwargs["y_s"].to_value() == y_s)
+    assert np.all(gkwargs["z_s"].to_value() == z_s)
+    assert np.all(gkwargs["vx_s"].to_value() == vx_s)
+    assert np.all(gkwargs["vy_s"].to_value() == vy_s)
+    assert np.all(gkwargs["vz_s"].to_value() == vz_s)
+    assert np.all(gkwargs["m_dm"].to_value() == m_dm)
+    assert np.all(gkwargs["x_dm"].to_value() == x_dm)
+    assert np.all(gkwargs["y_dm"].to_value() == y_dm)
+    assert np.all(gkwargs["z_dm"].to_value() == z_dm)
+    assert np.all(gkwargs["vx_dm"].to_value() == vx_dm)
+    assert np.all(gkwargs["vy_dm"].to_value() == vy_dm)
+    assert np.all(gkwargs["vz_dm"].to_value() == vz_dm)
+    assert np.all(gkwargs["m_g"].to_value() == m_g)
+    assert np.all(gkwargs["x_g"].to_value() == x_g)
+    assert np.all(gkwargs["y_g"].to_value() == y_g)
+    assert np.all(gkwargs["z_g"].to_value() == z_g)
+    assert np.all(gkwargs["vx_g"].to_value() == vx_g)
+    assert np.all(gkwargs["vy_g"].to_value() == vy_g)
+    assert np.all(gkwargs["vz_g"].to_value() == vz_g)
+    assert np.all(gkwargs["softening_s"] == soft_s)
+    assert np.all(gkwargs["softening_g"] == soft_g)
+    assert np.all(gkwargs["softening_dm"] == soft_dm)
+    assert np.all(gkwargs["potential_s"].to_value() == potential_s)
+    assert np.all(gkwargs["potential_g"].to_value() == potential_g)
+    assert np.all(gkwargs["potential_dm"].to_value() == potential_dm)
 
 
 # =============================================================================
@@ -469,7 +568,6 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
         gal.potential_energy()
 
 
-@pytest.mark.xfail
 def test_Galaxy_potential_energy(galaxy):
     gal = galaxy(
         seed=42, stars_potential=False, dm_potential=False, gas_potential=False
@@ -486,7 +584,7 @@ def test_Galaxy_potential_energy(galaxy):
 # =============================================================================
 
 
-def test_Galaxy_toal_energy(galaxy):
+def test_Galaxy_total_energy(galaxy):
     gal = galaxy(seed=42)
     gte = gal.total_energy_
     assert np.all(gte[0] == gal.stars.total_energy_)

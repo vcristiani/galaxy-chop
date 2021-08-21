@@ -26,6 +26,7 @@ __version__ = "0.1.0"
 # =============================================================================
 
 from .core import *  # noqa
+from .io import *  # noqa
 from .utils import *  # noqa
 from .models import *  # noqa
 from .dataset import *  # noqa
