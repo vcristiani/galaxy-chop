@@ -425,7 +425,7 @@ class Galaxy:
         pot_dm = pot[num_s:num]
         pot_g = pot[num:]
 
-        new = as_kwargs(self)
+        new = galaxy_as_kwargs(self)
 
         new.update(
             potential_s=-pot_s * (u.km / u.s) ** 2,
@@ -828,7 +828,7 @@ class Galaxy:
 # =============================================================================
 
 
-def as_kwargs(galaxy):
+def galaxy_as_kwargs(galaxy):
     def _filter_internals(attribute, value):
         return attribute.init
 
