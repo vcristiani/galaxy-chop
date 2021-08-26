@@ -14,13 +14,10 @@ import enum
 from collections import defaultdict
 
 from astropy import units as u
-from astropy.table import Table
 
 import attr
 
 from galaxychop import utils
-
-import h5py
 
 import numpy as np
 
@@ -428,15 +425,15 @@ class Galaxy:
         pot_dm = pot[num_s:num]
         pot_g = pot[num:]
 
-        new = attr.asdict(self, recurse=False)
-        del new["has_potential_"]
+        new = galaxy_as_kwargs(self)
+
         new.update(
-            pot_s=-pot_s * (u.km / u.s) ** 2,
-            pot_dm=-pot_dm * (u.km / u.s) ** 2,
-            pot_g=-pot_g * (u.km / u.s) ** 2,
+            potential_s=-pot_s * (u.km / u.s) ** 2,
+            potential_dm=-pot_dm * (u.km / u.s) ** 2,
+            potential_g=-pot_g * (u.km / u.s) ** 2,
         )
 
-        return Galaxy(**new)
+        return mkgalaxy(**new)
 
     def angular_momentum(self, r_cut=None):
         """
@@ -831,6 +828,33 @@ class Galaxy:
 # =============================================================================
 
 
+def galaxy_as_kwargs(galaxy):
+    def _filter_internals(attribute, value):
+        return attribute.init
+
+    def _pset_as_kwargs(pset, suffix):
+        return {f"{k}_{suffix}": v for k, v in pset.items() if k != "ptype"}
+
+    gkwargs = attr.asdict(galaxy, recurse=True, filter=_filter_internals)
+
+    stars_kws = _pset_as_kwargs(gkwargs.pop("stars"), "s")
+    dark_matter_kws = _pset_as_kwargs(gkwargs.pop("dark_matter"), "dm")
+    gas_kws = _pset_as_kwargs(gkwargs.pop("gas"), "g")
+
+    gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
+
+    del (
+        gkwargs["J_part"],
+        gkwargs["J_star"],
+        gkwargs["Jr_part"],
+        gkwargs["Jr_star"],
+        gkwargs["x"],
+        gkwargs["y"],
+    )
+
+    return gkwargs
+
+
 def mkgalaxy(
     m_s: np.ndarray,
     x_s: np.ndarray,
@@ -856,9 +880,9 @@ def mkgalaxy(
     softening_s: float = 0.0,
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
-    pot_s: np.ndarray = None,
-    pot_dm: np.ndarray = None,
-    pot_g: np.ndarray = None,
+    potential_s: np.ndarray = None,
+    potential_dm: np.ndarray = None,
+    potential_g: np.ndarray = None,
 ):
     stars = ParticleSet(
         "stars",
@@ -870,7 +894,7 @@ def mkgalaxy(
         vy=vy_s,
         vz=vz_s,
         softening=softening_s,
-        potential=pot_s,
+        potential=potential_s,
     )
     dark_matter = ParticleSet(
         "dark_matter",
@@ -882,7 +906,7 @@ def mkgalaxy(
         vy=vy_dm,
         vz=vz_dm,
         softening=softening_dm,
-        potential=pot_dm,
+        potential=potential_dm,
     )
     gas = ParticleSet(
         "gas",
@@ -894,103 +918,7 @@ def mkgalaxy(
         vy=vy_g,
         vz=vz_g,
         softening=softening_g,
-        potential=pot_g,
+        potential=potential_g,
     )
     galaxy = Galaxy(stars=stars, dark_matter=dark_matter, gas=gas)
-    return galaxy
-
-
-def _table_to_dict(table, key_suffix):
-    kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
-    kws[f"pot_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
-
-    return kws
-
-
-def read_hdf5(
-    path,
-    softening_s: float = 0.0,
-    softening_dm: float = 0.0,
-    softening_g: float = 0.0,
-):
-
-    with h5py.File(path, "r") as f:
-        star_table = Table.read(f["stars"])
-        dark_table = Table.read(f["dark_matter"])
-        gas_table = Table.read(f["gas"])
-
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
-
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
-
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
-
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
-
-    galaxy = mkgalaxy(**galaxy_kws)
-
-    return galaxy
-
-
-def read_file(
-    path_star,
-    path_dark,
-    path_gas,
-    columns,
-    path_pot_s=None,
-    path_pot_dm=None,
-    path_pot_g=None,
-    softening_s: float = 0.0,
-    softening_dm: float = 0.0,
-    softening_g: float = 0.0,
-):
-
-    particles_star = np.load(path_star)
-    particles_dark = np.load(path_dark)
-    particles_gas = np.load(path_gas)
-
-    df_star = pd.DataFrame(particles_star, columns=columns)
-    df_dark = pd.DataFrame(particles_dark, columns=columns)
-    df_gas = pd.DataFrame(particles_gas, columns=columns)
-
-    if path_pot_s is not None:
-        pot_s = np.load(path_pot_s)
-        df_star.insert(7, "potential", pot_s, True)
-
-    if path_pot_dm is not None:
-        pot_dm = np.load(path_pot_dm)
-        df_dark.insert(7, "potential", pot_dm, True)
-
-    if path_pot_g is not None:
-        pot_g = np.load(path_pot_g)
-        df_gas.insert(7, "potential", pot_g, True)
-
-    star_table = Table.from_pandas(df_star)
-    dark_table = Table.from_pandas(df_dark)
-    gas_table = Table.from_pandas(df_gas)
-
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
-
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
-
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
-
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
-
-    galaxy = mkgalaxy(**galaxy_kws)
-
     return galaxy

@@ -138,7 +138,7 @@ def galaxy(data_galaxy):
             vy_s,
             vz_s,
             soft_s,
-            pot_s,
+            potential_s,
             m_dm,
             x_dm,
             y_dm,
@@ -147,7 +147,7 @@ def galaxy(data_galaxy):
             vy_dm,
             vz_dm,
             soft_dm,
-            pot_dm,
+            potential_dm,
             m_g,
             x_g,
             y_g,
@@ -156,7 +156,7 @@ def galaxy(data_galaxy):
             vy_g,
             vz_g,
             soft_g,
-            pot_g,
+            potential_g,
         ) = data_galaxy(**kwargs)
 
         gal = core.mkgalaxy(
@@ -169,7 +169,7 @@ def galaxy(data_galaxy):
             vy_s=vy_s,
             vz_s=vz_s,
             softening_s=soft_s,
-            pot_s=pot_s,
+            potential_s=potential_s,
             # dark matter
             m_dm=m_dm,
             x_dm=x_dm,
@@ -179,7 +179,7 @@ def galaxy(data_galaxy):
             vy_dm=vy_dm,
             vz_dm=vz_dm,
             softening_dm=soft_dm,
-            pot_dm=pot_dm,
+            potential_dm=potential_dm,
             # gas
             m_g=m_g,
             x_g=x_g,
@@ -189,7 +189,7 @@ def galaxy(data_galaxy):
             vy_g=vy_g,
             vz_g=vz_g,
             softening_g=soft_g,
-            pot_g=pot_g,
+            potential_g=potential_g,
         )
         return gal
 
