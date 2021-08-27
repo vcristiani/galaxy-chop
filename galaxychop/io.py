@@ -17,7 +17,6 @@ import h5py
 
 import numpy as np
 
-import pandas as pd
 
 from . import core
 
@@ -87,25 +86,21 @@ def read_file(
     particles_dark = np.load(path_dark)
     particles_gas = np.load(path_gas)
 
-    df_star = pd.DataFrame(particles_star, columns=columns)
-    df_dark = pd.DataFrame(particles_dark, columns=columns)
-    df_gas = pd.DataFrame(particles_gas, columns=columns)
+    star_table = Table(particles_star, names=columns)
+    dark_table = Table(particles_dark, names=columns)
+    gas_table = Table(particles_gas, names=columns)
 
     if path_pot_s is not None:
         pot_s = np.load(path_pot_s)
-        df_star.insert(7, "potential", pot_s, True)
+        star_table.add_column(pot_s, name="potential")
 
     if path_pot_dm is not None:
         pot_dm = np.load(path_pot_dm)
-        df_dark.insert(7, "potential", pot_dm, True)
+        dark_table.add_column(pot_dm, name="potential")
 
     if path_pot_g is not None:
         pot_g = np.load(path_pot_g)
-        df_gas.insert(7, "potential", pot_g, True)
-
-    star_table = Table.from_pandas(df_star)
-    dark_table = Table.from_pandas(df_dark)
-    gas_table = Table.from_pandas(df_gas)
+        gas_table.add_column(pot_g, name="potential")
 
     galaxy_kws = {
         "softening_s": softening_s,
