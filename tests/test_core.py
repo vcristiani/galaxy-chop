@@ -13,6 +13,7 @@
 import astropy.units as u
 
 from galaxychop import core
+from galaxychop import utils
 
 import numpy as np
 
@@ -601,3 +602,44 @@ def test_Galaxy_energy(galaxy):
     assert np.all(gke[0] + gpe[0] == energy[0])
     assert np.all(gke[1] + gpe[1] == energy[1])
     assert np.all(gke[2] + gpe[2] == energy[2])
+
+
+# =============================================================================
+#   ANGULAR MOMENTUM
+# =============================================================================
+
+
+@pytest.mark.xfail
+def test_center_existence(galaxy):
+    gal = galaxy(seed=42)
+
+    gx_c = utils.center(gal.x, gal.y, gal.z, gal.potential)
+    #    gal.stars.arr_.x,
+    #    gal.stars.arr_.y,
+    #    gal.stars.arr_.z,
+    #    gal.dark_matter.arr_.m,
+    #    gal.dark_matter.arr_.x,
+    #    gal.dark_matter.arr_.y,
+    #    gal.dark_matter.arr_.z,
+    #    gal.gas.arr_.m,
+    #    gal.gas.arr_.x,
+    #    gal.gas.arr_.y,
+    #    gal.gas.arr_.z,
+    #    )
+
+    x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
+    y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
+    z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
+
+    pos_gal = np.vstack((x_gal, y_gal, z_gal))
+
+    assert len(np.where(~pos_gal.any(axis=0))) == 1
+
+
+def test_angular_momentum_outputs(galaxy):
+    """Test object."""
+    gal = galaxy(seed=42)
+    gam = gal.angular_momentum()
+
+    longitude = len(gam.stars.x) + len(gam.dark_matter.x) + len(gam.gas.x)
+    assert np.shape(gam.J_part.value) == (3, longitude)

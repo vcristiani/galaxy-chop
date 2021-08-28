@@ -468,53 +468,25 @@ class Galaxy:
         >>> J_part, J_star= g_J.J_part, g_J.J_star
         >>> Jr_part, Jr_star =  g_J.Jr_part, g_J.Jr_star
         """
-        m_s = self.arr_.m_s
-        x_s = self.arr_.x_s
-        y_s = self.arr_.y_s
-        z_s = self.arr_.z_s
 
-        vx_s = self.arr_.vx_s
-        vy_s = self.arr_.vy_s
-        vz_s = self.arr_.vz_s
+        if not self.has_potential_:
+            raise ValueError("Galaxy has not potential energy")
 
-        m_dm = self.arr_.m_dm
-        x_dm = self.arr_.x_dm
-        y_dm = self.arr_.y_dm
-        z_dm = self.arr_.z_dm
-
-        vx_dm = self.arr_.vx_dm
-        vy_dm = self.arr_.vy_dm
-        vz_dm = self.arr_.vz_dm
-
-        m_g = self.arr_.m_g
-        x_g = self.arr_.x_g
-        y_g = self.arr_.y_g
-        z_g = self.arr_.z_g
-
-        vx_g = self.arr_.vx_g
-        vy_g = self.arr_.vy_g
-        vz_g = self.arr_.vz_g
-
-        pot_s = self.arr_.pot_s
-        pot_dm = self.arr_.pot_dm
-        pot_g = self.arr_.pot_g
+        df = self.to_dataframe()
+        x = df.x.to_numpy()
+        y = df.y.to_numpy()
+        z = df.z.to_numpy()
+        vx = df.vx.to_numpy()
+        vy = df.vy.to_numpy()
+        vz = df.vz.to_numpy()
+        m = df.m.to_numpy()
+        potential = df.potential.to_numpy()
 
         xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
-            m_s,
-            x_s,
-            y_s,
-            z_s,
-            m_dm,
-            x_dm,
-            y_dm,
-            z_dm,
-            m_g,
-            x_g,
-            y_g,
-            z_g,
-            pot_s,
-            pot_dm,
-            pot_g,
+            x,
+            y,
+            z,
+            potential,
         )
 
         (
@@ -537,25 +509,19 @@ class Galaxy:
             vel_rot_g_y,
             vel_rot_g_z,
         ) = utils.align(
-            m_s,
+            m,
             xs,
             ys,
             zs,
-            vx_s,
-            vy_s,
-            vz_s,
             xdm,
             ydm,
             zdm,
-            vx_dm,
-            vy_dm,
-            vz_dm,
             xg,
             yg,
             zg,
-            vx_g,
-            vy_g,
-            vz_g,
+            vx,
+            vy,
+            vz,
             r_cut=r_cut,
         )
 
@@ -589,8 +555,10 @@ class Galaxy:
 
         Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
 
-        new = attr.asdict(self, recurse=False)
-        del new["arr_"]
+        #       new = attr.asdict(self, recurse=False)
+        #       del new["arr_"]
+        new = galaxy_as_kwargs(self)
+
         new.update(
             J_part=J_part * u.kpc * u.km / u.s,
             J_star=J_star * u.kpc * u.km / u.s,

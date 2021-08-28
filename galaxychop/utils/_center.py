@@ -14,9 +14,6 @@
 # IMPORTS
 # =============================================================================
 
-import numpy as np
-
-from ._potential import potential
 
 # =============================================================================
 # BACKENDS
@@ -24,24 +21,10 @@ from ._potential import potential
 
 
 def center(
-    m_s,
-    x_s,
-    y_s,
-    z_s,
-    m_dm,
-    x_dm,
-    y_dm,
-    z_dm,
-    m_g,
-    x_g,
-    y_g,
-    z_g,
-    pot_s=0,
-    pot_dm=0,
-    pot_g=0,
-    eps_dm=0,
-    eps_s=0,
-    eps_g=0,
+    x,
+    y,
+    z,
+    potential,
 ):
     """Centers the particles.
 
@@ -80,40 +63,19 @@ def center(
             Centered gas positions.
 
     """
-    x = np.hstack((x_s, x_dm, x_g))
-    y = np.hstack((y_s, y_dm, y_g))
-    z = np.hstack((z_s, z_dm, z_g))
-    m = np.hstack((m_s, m_dm, m_g))
-    eps = np.max([eps_dm, eps_s, eps_g])
 
-    total_potential = pot_dm
+    argmin = potential[1].argmin()
 
-    if np.all(total_potential == 0.0):
-        pot = potential(
-            x,
-            y,
-            z,
-            m,
-            eps,
-        )
+    x_s = x[0] - x[1][argmin]
+    y_s = y[0] - y[1][argmin]
+    z_s = z[0] - z[1][argmin]
 
-        num_s = len(m_s)
-        num = len(m_s) + len(m_dm)
-        pot_dark = pot[num_s:num]
-    else:
-        pot_dark = pot_dm
+    x_dm = x[1] - x[1][argmin]
+    y_dm = y[1] - y[1][argmin]
+    z_dm = z[1] - z[1][argmin]
 
-    argmin = pot_dark.argmin()
-    x_s = x_s - x_dm[argmin]
-    y_s = y_s - y_dm[argmin]
-    z_s = z_s - z_dm[argmin]
-
-    x_dm = x_dm - x_dm[argmin]
-    y_dm = y_dm - y_dm[argmin]
-    z_dm = z_dm - z_dm[argmin]
-
-    x_g = x_g - x_dm[argmin]
-    y_g = y_g - y_dm[argmin]
-    z_g = z_g - z_dm[argmin]
+    x_g = x[2] - x[1][argmin]
+    y_g = y[2] - y[1][argmin]
+    z_g = z[2] - z[1][argmin]
 
     return x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g
