@@ -85,25 +85,19 @@ def get_rot_matrix(m, pos, vel, r_cut=None):
 
 
 def align(
-    m_s,
+    m,
     x_s,
     y_s,
     z_s,
-    vx_s,
-    vy_s,
-    vz_s,
     x_dm,
     y_dm,
     z_dm,
-    vx_dm,
-    vy_dm,
-    vz_dm,
     x_g,
     y_g,
     z_g,
-    vx_g,
-    vy_g,
-    vz_g,
+    vx,
+    vy,
+    vz,
     r_cut,
 ):
     """Align the galaxy.
@@ -179,21 +173,21 @@ def align(
         raise ValueError("r_cut must not be lower than 0.")
 
     pos = np.vstack((x_s, y_s, z_s)).T
-    vel = np.vstack((vx_s, vy_s, vz_s)).T
+    vel = np.vstack((vx[0], vy[0], vz[0])).T
 
-    A = get_rot_matrix(m_s, pos, vel, r_cut)
+    A = get_rot_matrix(m[0], pos, vel, r_cut)
 
     pos_rot_s = np.dot(A, pos.T)
     vel_rot_s = np.dot(A, vel.T)
 
     pos = np.vstack((x_dm, y_dm, z_dm)).T
-    vel = np.vstack((vx_dm, vy_dm, vz_dm)).T
+    vel = np.vstack((vx[1], vy[1], vz[1])).T
 
     pos_rot_dm = np.dot(A, pos.T)
     vel_rot_dm = np.dot(A, vel.T)
 
     pos = np.vstack((x_g, y_g, z_g)).T
-    vel = np.vstack((vx_g, vy_g, vz_g)).T
+    vel = np.vstack((vx[2], vy[2], vz[2])).T
 
     pos_rot_g = np.dot(A, pos.T)
     vel_rot_g = np.dot(A, vel.T)
