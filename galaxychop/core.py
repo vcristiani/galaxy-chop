@@ -270,11 +270,6 @@ class Galaxy:
     dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
-    J_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-    J_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-    Jr_part = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-    Jr_star = uttr.ib(default=None, unit=(u.kpc * u.km / u.s))
-
     x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
     y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
 
@@ -549,21 +544,21 @@ class Galaxy:
             ]
         )
 
-        J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
+        #   J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
 
-        Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
+        #   Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
 
-        Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
+        #   Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
 
         #       new = attr.asdict(self, recurse=False)
         #       del new["arr_"]
         new = galaxy_as_kwargs(self)
 
         new.update(
-            J_part=J_part * u.kpc * u.km / u.s,
-            J_star=J_star * u.kpc * u.km / u.s,
-            Jr_part=Jr_part * u.kpc * u.km / u.s,
-            Jr_star=Jr_star * u.kpc * u.km / u.s,
+            J_star=J_star,
+            J_dark=J_dark,
+            J_gas=J_gas,
+            #   * u.kpc * u.km / u.s
         )
 
         return Galaxy(**new)
@@ -812,10 +807,10 @@ def galaxy_as_kwargs(galaxy):
     gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
 
     del (
-        gkwargs["J_part"],
-        gkwargs["J_star"],
-        gkwargs["Jr_part"],
-        gkwargs["Jr_star"],
+        #   gkwargs["J_part"],
+        #   gkwargs["J_star"],
+        #   gkwargs["Jr_part"],
+        #   gkwargs["Jr_star"],
         gkwargs["x"],
         gkwargs["y"],
     )

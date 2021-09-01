@@ -10,11 +10,11 @@
 # IMPORTS
 # =============================================================================
 
-from galaxychop import core
-from galaxychop import io
-
 import os
 from pathlib import Path
+
+from galaxychop import core
+from galaxychop import io
 
 
 # =============================================================================
