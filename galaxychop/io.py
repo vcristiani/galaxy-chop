@@ -27,7 +27,7 @@ from . import core
 
 def _table_to_dict(table, key_suffix):
     kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
-    kws[f"pot_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
+    kws[f"potential_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
 
     return kws
 
