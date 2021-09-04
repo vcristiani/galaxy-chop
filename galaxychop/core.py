@@ -373,38 +373,6 @@ class Galaxy:
             self.gas.total_energy_,
         )
 
-    def potential_energy(self):
-        """
-        Specific potential energy calculation.
-
-        Calculates the specific potencial energy
-        of dark matter, star and gas particles.
-
-        Returns
-        -------
-        gx : `galaxy object`
-            New instanced galaxy specific potencial energy calculated for
-            stars, dark matter and gas particles.
-
-        Examples
-        --------
-        This returns the specific potential energy of stars, dark matter and
-        gas particles.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> gpot = galaxy.potential_energy()
-        >>> pot_s, pot_dm, pot_g = gpot.pot_s, gpot.pot_dm, gpot.pot_g
-
-        Note
-        ----
-        If the potentials are entered when the `galaxy` object is instanced,
-        then, the calculation of `potential_energy` will raise a `ValueError`.
-        """
-        return utils.potential(self)
-
-
-
     def angular_momentum(self, r_cut=None):
         """
         Specific angular momentum.

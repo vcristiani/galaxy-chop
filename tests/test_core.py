@@ -559,28 +559,6 @@ def test_Galaxy_kinectic_energy(galaxy):
 
 
 # =============================================================================
-#   POTENTIAL ENERGY
-# =============================================================================
-
-
-def test_Galaxy_potential_energy_already_calculated(galaxy):
-    gal = galaxy(seed=42)
-    with pytest.raises(ValueError):
-        gal.potential_energy()
-
-
-def test_Galaxy_potential_energy(galaxy):
-    gal = galaxy(
-        seed=42, stars_potential=False, dm_potential=False, gas_potential=False
-    )
-    pgal = gal.potential_energy()
-    assert pgal
-    assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
-    assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
-    assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
-
-
-# =============================================================================
 #   TOTAL ENERGY
 # =============================================================================
 
