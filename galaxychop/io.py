@@ -4,6 +4,10 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+# =============================================================================
+# DOCS
+# =============================================================================
+
 """Module galaxy-chop."""
 
 # =============================================================================
@@ -69,7 +73,7 @@ def read_hdf5(
     return galaxy
 
 
-def read_file(
+def read_npy(
     path_star,
     path_dark,
     path_gas,

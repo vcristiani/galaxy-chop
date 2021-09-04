@@ -33,6 +33,10 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 # Fixtures
 # =============================================================================
 
+@pytest.fixture(scope="session")
+def data_path():
+    return TEST_DATA_PATH.joinpath
+
 
 @pytest.fixture(scope="session")
 def data_particleset():
