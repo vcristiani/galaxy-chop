@@ -19,6 +19,8 @@ import astropy.units as u
 
 import numpy as np
 
+
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -35,7 +37,7 @@ G = c.G.to(G_UNIT).to_value()
 # =============================================================================
 
 
-def numpy_potential(x, y, z, m, eps):
+def numpy_potential(x, y, z, m, softening):
     """Numpy implementation for the gravitational potential energy calculation.
 
     Parameters
@@ -44,7 +46,7 @@ def numpy_potential(x, y, z, m, eps):
         Positions of particles. Shape(n,1)
     m : `np.ndarray`
         Masses of particles. Shape(n,1)
-    eps : `float`, optional
+    softening : `float`, optional
         Softening parameter. Shape(1,)
 
     Returns
@@ -57,7 +59,7 @@ def numpy_potential(x, y, z, m, eps):
         np.square(x - x.reshape(-1, 1))
         + np.square(y - y.reshape(-1, 1))
         + np.square(z - z.reshape(-1, 1))
-        + np.square(eps)
+        + np.square(softening)
     )
 
     np.fill_diagonal(dist, 0.0)
@@ -77,7 +79,7 @@ POTENTIAL_BACKENDS = {
 }
 
 
-def potential(x, y, z, m, eps=0.0, backend="numpy"):
+def potential(galaxy, backend="numpy"):
     """
     Potential energy calculation.
 
@@ -90,7 +92,7 @@ def potential(x, y, z, m, eps=0.0, backend="numpy"):
         Positions of particles. Shape(n,1)
     m : `np.ndarray`
         Masses of particles. Shape(n,1)
-    eps : `float`, default value = 0
+    softening : `float`, default value = 0
         Softening parameter. Shape(1,)
 
     Returns
@@ -98,18 +100,49 @@ def potential(x, y, z, m, eps=0.0, backend="numpy"):
     potential : `np.ndarray`
         Specific potential energy of particles. Shape(n,1)
     """
+    from .. import core
+
+    if galaxy.has_potential_:
+        raise ValueError("galaxy are already calculated")
+
     # extract the implementation
     backend_function = POTENTIAL_BACKENDS[backend]
+
+    # convert the galaxy in multiple arrays
+    df = galaxy.to_dataframe()
+    x = df.x.to_numpy()
+    y = df.y.to_numpy()
+    z = df.z.to_numpy()
+    m = df.m.to_numpy()
+    softening = df.softening.max()
 
     # convert all the inputs to float32
     x_f32 = np.asarray(x, dtype=np.float32)
     y_f32 = np.asarray(y, dtype=np.float32)
     z_f32 = np.asarray(z, dtype=np.float32)
     m_f32 = np.asarray(m, dtype=np.float32)
-    eps_f32 = np.asarray(eps, dtype=np.float32)
+    softening_f32 = np.asarray(softening, dtype=np.float32)
 
     # execute the function and return
-    pot, postproc = backend_function(x_f32, y_f32, z_f32, m_f32, eps_f32)
+    pot, postproc = backend_function(x_f32, y_f32, z_f32, m_f32, softening_f32)
 
-    # apply the post process and return
-    return postproc(pot)
+    # apply the post process to the final potential
+    potential = postproc(pot)
+
+    # recreate a new galaxy
+    num_s = len(galaxy.stars)
+    num = len(galaxy.stars) + len(galaxy.dark_matter)
+
+    pot_s = pot[:num_s]
+    pot_dm = pot[num_s:num]
+    pot_g = pot[num:]
+
+    new = core.galaxy_as_kwargs(galaxy)
+
+    new.update(
+        potential_s=-pot_s * (u.km / u.s) ** 2,
+        potential_dm=-pot_dm * (u.km / u.s) ** 2,
+        potential_g=-pot_g * (u.km / u.s) ** 2,
+    )
+
+    return core.mkgalaxy(**new)

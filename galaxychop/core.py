@@ -401,34 +401,9 @@ class Galaxy:
         If the potentials are entered when the `galaxy` object is instanced,
         then, the calculation of `potential_energy` will raise a `ValueError`.
         """
-        if self.has_potential_:
-            raise ValueError("Potentials are already calculated")
+        return utils.potential(self)
 
-        df = self.to_dataframe()
-        x = df.x.to_numpy()
-        y = df.y.to_numpy()
-        z = df.z.to_numpy()
-        m = df.m.to_numpy()
-        softening = df.softening.max()
 
-        pot = utils.potential(x, y, z, m, softening)
-
-        num_s = len(self.stars)
-        num = len(self.stars) + len(self.dark_matter)
-
-        pot_s = pot[:num_s]
-        pot_dm = pot[num_s:num]
-        pot_g = pot[num:]
-
-        new = galaxy_as_kwargs(self)
-
-        new.update(
-            potential_s=-pot_s * (u.km / u.s) ** 2,
-            potential_dm=-pot_dm * (u.km / u.s) ** 2,
-            potential_g=-pot_g * (u.km / u.s) ** 2,
-        )
-
-        return mkgalaxy(**new)
 
     def angular_momentum(self, r_cut=None):
         """
