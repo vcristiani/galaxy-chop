@@ -74,5 +74,17 @@ def test_center(galaxy):
 
     cgal = utils.center(gal)
 
+    df = gal.to_dataframe()
+    cdf = cgal.to_dataframe()
 
-#     import ipdb; ipdb.set_trace()
+    changed = ["x", "y", "z"]
+
+    for colname in df.columns[~df.columns.isin(changed)]:
+        ocol = df[colname]
+        ccol = cdf[colname]
+        assert (ocol == ccol).all()
+
+    for colname in changed:
+        ocol = df[colname]
+        ccol = cdf[colname]
+        assert (ocol == ccol).all() == False

@@ -85,17 +85,15 @@ def center(galaxy):
     new = core.galaxy_as_kwargs(galaxy)
 
     new.update(
-        x_s=stars.x,
-        y_s=stars.y,
-        z_s=stars.z,
-        x_dm=dark_matter.x,
-        y_dm=dark_matter.y,
-        z_dm=dark_matter.z,
-        x_g=gas.x,
-        y_g=gas.y,
-        z_g=gas.z,
+        x_s=stars.x.to_numpy(),
+        y_s=stars.y.to_numpy(),
+        z_s=stars.z.to_numpy(),
+        x_dm=dark_matter.x.to_numpy(),
+        y_dm=dark_matter.y.to_numpy(),
+        z_dm=dark_matter.z.to_numpy(),
+        x_g=gas.x.to_numpy(),
+        y_g=gas.y.to_numpy(),
+        z_g=gas.z.to_numpy(),
     )
 
     return core.mkgalaxy(**new)
-
-
