@@ -22,17 +22,57 @@ from galaxychop import core, utils
 
 
 def test_Galaxy_potential_energy_already_calculated(galaxy):
-    gal = galaxy(seed=42)
+    gal = galaxy(
+        seed=42,
+        stars_potential=True,
+        dm_potential=True,
+        gas_potential=True,
+    )
     with pytest.raises(ValueError):
         utils.potential(gal)
 
 
 def test_Galaxy_potential_energy(galaxy):
     gal = galaxy(
-        seed=42, stars_potential=False, dm_potential=False, gas_potential=False
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
     )
+
     pgal = utils.potential(gal)
+
     assert isinstance(pgal, core.Galaxy)
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
     assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
     assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
+
+
+# =============================================================================
+# CENTER
+# =============================================================================
+
+
+def test_center_without_potential_energy(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+    with pytest.raises(ValueError):
+        utils.center(gal)
+
+
+def test_center(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=True,
+        dm_potential=True,
+        gas_potential=True,
+    )
+
+    cgal = utils.center(gal)
+
+
+#     import ipdb; ipdb.set_trace()

@@ -31,7 +31,7 @@ def test_ParticleSet_creation_with_potential(data_particleset):
         seed=42, has_potential=True
     )
     pset = core.ParticleSet(
-        "foo",
+        core.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -43,7 +43,7 @@ def test_ParticleSet_creation_with_potential(data_particleset):
         potential=pot,
     )
 
-    assert pset.ptype == "foo"
+    assert pset.ptype == core.ParticleSetType.STARS
     assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
     assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
     assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
@@ -69,7 +69,7 @@ def test_ParticleSet_creation_without_potential(data_particleset):
         seed=42, has_potential=False
     )
     pset = core.ParticleSet(
-        "foo",
+        core.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -81,7 +81,7 @@ def test_ParticleSet_creation_without_potential(data_particleset):
         potential=pot,
     )
 
-    assert pset.ptype == "foo"
+    assert pset.ptype == core.ParticleSetType.STARS
     assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
     assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
     assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
@@ -116,7 +116,7 @@ def test_ParticleSet_creation_bad_len(data_particleset, remove_one):
     params[remove_one] = params[remove_one][1:]
 
     with pytest.raises(ValueError):
-        core.ParticleSet("foo", **params)
+        core.ParticleSet(core.ParticleSetType.STARS, **params)
 
 
 def test_ParticleSet_len(data_particleset):
@@ -125,7 +125,7 @@ def test_ParticleSet_len(data_particleset):
     )
 
     pset = core.ParticleSet(
-        "foo",
+        core.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -157,7 +157,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     )
 
     pset = core.ParticleSet(
-        "foo",
+        core.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -170,7 +170,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     )
     expected = pd.DataFrame(
         {
-            "ptype": "foo",
+            "ptype": core.ParticleSetType.STARS.value,
             "m": m,
             "x": x,
             "y": y,
@@ -191,45 +191,6 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     assert df.equals(expected)
 
 
-@pytest.mark.parametrize("has_potential", [True, False])
-def test_ParticleSet_to_numpy(data_particleset, has_potential):
-    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
-        seed=42, has_potential=has_potential
-    )
-
-    pset = core.ParticleSet(
-        "foo",
-        m=m,
-        x=x,
-        y=y,
-        z=z,
-        vx=vx,
-        vy=vy,
-        vz=vz,
-        softening=soft,
-        potential=pot,
-    )
-    expected = np.column_stack(
-        [
-            m,
-            x,
-            y,
-            z,
-            vx,
-            vy,
-            vz,
-            np.full(len(pset), soft),
-            pot if has_potential else np.full(len(pset), np.nan),
-            0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
-            0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
-            if has_potential
-            else np.full(len(pset), np.nan),
-        ]
-    )
-    arr = pset.to_numpy()
-
-    assert np.array_equal(arr, expected, equal_nan=True)
-
 
 @pytest.mark.parametrize("has_potential", [True, False])
 def test_ParticleSet_repr(data_particleset, has_potential):
@@ -238,7 +199,7 @@ def test_ParticleSet_repr(data_particleset, has_potential):
     )
 
     pset = core.ParticleSet(
-        "foo",
+        core.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -251,7 +212,7 @@ def test_ParticleSet_repr(data_particleset, has_potential):
     )
 
     expected = (
-        f"ParticleSet(foo, size={len(m)}, "
+        f"ParticleSet(STARS, size={len(m)}, "
         f"softening={soft}, potentials={has_potential})"
     )
 
@@ -587,38 +548,39 @@ def test_Galaxy_energy(galaxy):
 # =============================================================================
 
 
-@pytest.mark.xfail
-def test_center_existence(galaxy):
-    gal = galaxy(seed=42)
+# @pytest.mark.xfail
+# def test_center_existence(galaxy):
+#     gal = galaxy(seed=42)
+#     import ipdb; ipdb.set_trace()
 
-    gx_c = utils.center(gal.x, gal.y, gal.z, gal.potential)
-    #    gal.stars.arr_.x,
-    #    gal.stars.arr_.y,
-    #    gal.stars.arr_.z,
-    #    gal.dark_matter.arr_.m,
-    #    gal.dark_matter.arr_.x,
-    #    gal.dark_matter.arr_.y,
-    #    gal.dark_matter.arr_.z,
-    #    gal.gas.arr_.m,
-    #    gal.gas.arr_.x,
-    #    gal.gas.arr_.y,
-    #    gal.gas.arr_.z,
-    #    )
+#     gx_c = utils.center(gal.x, gal.y, gal.z, gal.potential)
+#     #    gal.stars.arr_.x,
+#     #    gal.stars.arr_.y,
+#     #    gal.stars.arr_.z,
+#     #    gal.dark_matter.arr_.m,
+#     #    gal.dark_matter.arr_.x,
+#     #    gal.dark_matter.arr_.y,
+#     #    gal.dark_matter.arr_.z,
+#     #    gal.gas.arr_.m,
+#     #    gal.gas.arr_.x,
+#     #    gal.gas.arr_.y,
+#     #    gal.gas.arr_.z,
+#     #    )
 
-    x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
-    y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
-    z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
+#     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
+#     y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
+#     z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
 
-    pos_gal = np.vstack((x_gal, y_gal, z_gal))
+#     pos_gal = np.vstack((x_gal, y_gal, z_gal))
 
-    assert len(np.where(~pos_gal.any(axis=0))) == 1
+#     assert len(np.where(~pos_gal.any(axis=0))) == 1
 
 
-@pytest.mark.xfail
-def test_angular_momentum_outputs(galaxy):
-    """Test object."""
-    gal = galaxy(seed=42)
-    gam = gal.angular_momentum()
+# @pytest.mark.xfail
+# def test_angular_momentum_outputs(galaxy):
+#     """Test object."""
+#     gal = galaxy(seed=42)
+#     gam = gal.angular_momentum()
 
-    longitude = len(gam.stars.x) + len(gam.dark_matter.x) + len(gam.gas.x)
-    assert np.shape(gam.J_part.value) == (3, longitude)
+#     longitude = len(gam.stars.x) + len(gam.dark_matter.x) + len(gam.gas.x)
+#     assert np.shape(gam.J_part.value) == (3, longitude)

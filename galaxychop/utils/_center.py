@@ -8,24 +8,20 @@
 # DOCS
 # =============================================================================
 
-"""Utilities module."""
+"""Utilities to center a galaxy."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
+import numpy as np
 
 # =============================================================================
 # BACKENDS
 # =============================================================================
 
 
-def center(
-    x,
-    y,
-    z,
-    potential,
-):
+def center(galaxy):
     """Centers the particles.
 
     Centers the position of all particles in the galaxy respect
@@ -63,19 +59,43 @@ def center(
             Centered gas positions.
 
     """
+    from .. import core
 
-    argmin = potential[1].argmin()
+    if not galaxy.has_potential_:
+        raise ValueError("galaxy must has the potential energy")
 
-    x_s = x[0] - x[1][argmin]
-    y_s = y[0] - y[1][argmin]
-    z_s = z[0] - z[1][argmin]
+    # sacamos como dataframe lo unico que vamos a operar
+    df = galaxy.to_dataframe(columns=["ptype", "x", "y", "z", "potential"])
 
-    x_dm = x[1] - x[1][argmin]
-    y_dm = y[1] - y[1][argmin]
-    z_dm = z[1] - z[1][argmin]
+    # minimo indice de potencial de todo y sacamos cual es la fila
+    minpot_idx = df.potential.argmin()
+    min_values = df.iloc[minpot_idx]
 
-    x_g = x[2] - x[1][argmin]
-    y_g = y[2] - y[1][argmin]
-    z_g = z[2] - z[1][argmin]
+    # restamos todas las columnas de posiciones por las de minimo valor de
+    # potencial y pisamos en df
+    columns = ["x", "y", "z", "potential"]
+    df[columns] = df[columns] - min_values[columns]
 
-    return x_s, y_s, z_s, x_dm, y_dm, z_dm, x_g, y_g, z_g
+    # espliteamos el dataframe en tipos
+    stars = df[df.ptype == core.ParticleSetType.STARS.value]
+    dark_matter = df[df.ptype == core.ParticleSetType.DARK_MATTER.value]
+    gas = df[df.ptype == core.ParticleSetType.GAS.value]
+
+    # patch
+    new = core.galaxy_as_kwargs(galaxy)
+
+    new.update(
+        x_s=stars.x,
+        y_s=stars.y,
+        z_s=stars.z,
+        x_dm=dark_matter.x,
+        y_dm=dark_matter.y,
+        z_dm=dark_matter.z,
+        x_g=gas.x,
+        y_g=gas.y,
+        z_g=gas.z,
+    )
+
+    return core.mkgalaxy(**new)
+
+

@@ -27,79 +27,19 @@ import uttr
 
 
 # =============================================================================
-# COLUMNS CLASS
-# =============================================================================
-class Columns(enum.Enum):
-    """
-    Columns name used to decompose galaxies.
-
-    Name and number of the columns that are used to decompose the galaxy
-    dynamically.
-
-    Notes
-    -----
-    The dynamical decomposition is only perform over stellar particles.
-    """
-
-    #: mass
-    m = 0
-
-    #: y-position
-    x = 1
-    #: y-position
-    y = 2
-
-    #: z-position
-    z = 3
-
-    #: x-component of velocity
-    vx = 4
-
-    #: y-component of velocity
-    vy = 5
-
-    #: z-component of velocity
-    vz = 6
-
-    #: softening
-    softening = 7
-
-    #: potential energy
-    potential = 8
-
-    #: Normalized specific energy of stars
-    normalized_energy = 9
-
-    #: Circularity param
-    eps = 10
-
-    #: Circularity param r
-    eps_r = 11
-
-    @classmethod
-    def aslist(cls):
-        aslist = list(cls)
-        aslist.sort(key=lambda r: r.value)
-        return aslist
-
-    @classmethod
-    def names(cls):
-        return [c.name for c in cls.aslist()]
-
-    @classmethod
-    def values(cls):
-        return [c.value for c in cls.aslist()]
-
-
-# =============================================================================
 # PARTICLE SET
 # =============================================================================
+class ParticleSetType(enum.Enum):
+
+    STARS = 0
+    DARK_MATTER = 1
+    GAS = 2
 
 
 @uttr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:
 
-    ptype = uttr.ib(converter=str)
+    ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
     m: np.ndarray = uttr.ib(unit=u.Msun)
     x: np.ndarray = uttr.ib(unit=u.kpc)
@@ -117,9 +57,9 @@ class ParticleSet:
         repr=False,
     )
 
-    softening: float = attr.ib(converter=float, repr=False)
+    softening: float = uttr.ib(converter=float, repr=False)
 
-    has_potential_: bool = attr.ib(init=False)
+    has_potential_: bool = uttr.ib(init=False)
     kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
     total_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
     # UTTRS Orchectration =====================================================
@@ -147,9 +87,7 @@ class ParticleSet:
 
     def __attrs_post_init__(self):
         """
-        Validate attrs with units.
-
-        Units length validator.
+        particle sets length validator.
 
         This method determines that the length of the different particle
         attributes are the same families are the same.
@@ -182,7 +120,7 @@ class ParticleSet:
 
     def __repr__(self):
         return (
-            f"ParticleSet({self.ptype}, size={len(self)}, "
+            f"ParticleSet({self.ptype.name}, size={len(self)}, "
             f"softening={self.softening}, potentials={self.has_potential_})"
         )
 
@@ -191,10 +129,10 @@ class ParticleSet:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self):
+    def to_dataframe(self, columns=None):
         arr = self.arr_
         data = {
-            "ptype": self.ptype,
+            "ptype": self.ptype.value,
             "m": arr.m,
             "x": arr.x,
             "y": arr.y,
@@ -210,12 +148,9 @@ class ParticleSet:
             else np.nan,
         }
         df = pd.DataFrame(data)
+        if columns is not None:
+            df = df[columns]
         return df
-
-    def to_numpy(self):
-        df = self.to_dataframe()
-        del df["ptype"]
-        return df.to_numpy()
 
 
 # =============================================================================
@@ -293,14 +228,25 @@ class Galaxy:
             )
         return self.stars.has_potential_
 
+    def __attrs_post_init__(self):
+        """Validate that the type of each particleset is correct."""
+        pset_types = [
+            ("stars", self.stars, ParticleSetType.STARS),
+            ("dark_matter", self.dark_matter, ParticleSetType.DARK_MATTER),
+            ("gas", self.gas, ParticleSetType.GAS),
+        ]
+        for psname, pset, pstype in pset_types:
+            if pset.ptype != pstype:
+                raise TypeError(f"{psname} must be of type {pstype}")
+
     # UTILITIES ===============================================================
 
-    def to_dataframe(self):
+    def to_dataframe(self, columns=None):
         return pd.concat(
             [
-                self.stars.to_dataframe(),
-                self.dark_matter.to_dataframe(),
-                self.gas.to_dataframe(),
+                self.stars.to_dataframe(columns=columns),
+                self.dark_matter.to_dataframe(columns=columns),
+                self.gas.to_dataframe(columns=columns),
             ]
         )
 
@@ -791,7 +737,7 @@ def mkgalaxy(
     potential_g: np.ndarray = None,
 ):
     stars = ParticleSet(
-        "stars",
+        ParticleSetType.STARS,
         m=m_s,
         x=x_s,
         y=y_s,
@@ -803,7 +749,7 @@ def mkgalaxy(
         potential=potential_s,
     )
     dark_matter = ParticleSet(
-        "dark_matter",
+        ParticleSetType.DARK_MATTER,
         m=m_dm,
         x=x_dm,
         y=y_dm,
@@ -815,7 +761,7 @@ def mkgalaxy(
         potential=potential_dm,
     )
     gas = ParticleSet(
-        "gas",
+        ParticleSetType.GAS,
         m=m_g,
         x=x_g,
         y=y_g,
