@@ -88,3 +88,28 @@ def test_center(galaxy):
         ocol = df[colname]
         ccol = cdf[colname]
         assert (ocol == ccol).all() == False
+
+
+def test_is_centered_without_potential_energy(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+    with pytest.raises(ValueError):
+        utils.is_centered(gal)
+
+
+def test_is_centered(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=True,
+        dm_potential=True,
+        gas_potential=True,
+    )
+
+    cgal = utils.center(gal)
+
+    assert not utils.is_centered(gal)
+    assert utils.is_centered(cgal)

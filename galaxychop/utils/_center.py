@@ -73,7 +73,7 @@ def center(galaxy):
 
     # restamos todas las columnas de posiciones por las de minimo valor de
     # potencial y pisamos en df
-    columns = ["x", "y", "z", "potential"]
+    columns = ["x", "y", "z"]
     df[columns] = df[columns] - min_values[columns]
 
     # espliteamos el dataframe en tipos
@@ -97,3 +97,17 @@ def center(galaxy):
     )
 
     return core.mkgalaxy(**new)
+
+
+def is_centered(galaxy, rtol=1e-05, atol=1e-08):
+    if not galaxy.has_potential_:
+        raise ValueError("galaxy must has the potential energy")
+
+    # sacamos como dataframe lo unico que vamos a operar
+    df = galaxy.to_dataframe(columns=["x", "y", "z", "potential"])
+
+    # minimo indice de potencial de todo y sacamos cual es la fila
+    minpot_idx = df.potential.argmin()
+    min_values = df.iloc[minpot_idx]
+
+    return np.allclose(min_values[["x", "y", "z"]], 0, rtol=rtol, atol=atol)
