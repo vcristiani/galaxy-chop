@@ -10,6 +10,7 @@
 # IMPORTS
 # =============================================================================
 
+from typing import Type
 import astropy.units as u
 
 from galaxychop import core
@@ -181,15 +182,19 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "softening": soft,
             "potential": pot if has_potential else np.full(len(pset), np.nan),
             "kinetic_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
-            "total_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
-            if has_potential
-            else np.full(len(pset), np.nan),
+            "total_energy": (
+                0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
+                if has_potential
+                else np.full(len(pset), np.nan)
+            ),
+            "Jx": y * vz - z * vy,
+            "Jy": z * vx - x * vz,
+            "Jz": x * vy - y * vx,
         }
     )
     df = pset.to_dataframe()
 
     assert df.equals(expected)
-
 
 
 @pytest.mark.parametrize("has_potential", [True, False])
@@ -217,6 +222,68 @@ def test_ParticleSet_repr(data_particleset, has_potential):
     )
 
     assert repr(pset) == expected
+
+
+def test_ParticleSet_angular_momentum(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(seed=42)
+
+    pset = core.ParticleSet(
+        core.ParticleSetType.STARS,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    assert np.all(pset.Jx_ == pset.angular_momentum_[0])
+    assert np.all(pset.Jy_ == pset.angular_momentum_[1])
+    assert np.all(pset.Jz_ == pset.angular_momentum_[2])
+    assert np.all(
+        pset.Jx_.unit
+        == pset.Jy_.unit
+        == pset.Jz_.unit
+        == pset.angular_momentum_.unit
+        == (u.kpc * u.km / u.s)
+    )
+
+
+# =============================================================================
+# TEST GALAXY MANUAL
+# =============================================================================
+
+
+def test_Galaxy_invalid_ParticleSetType(data_particleset):
+
+    bad_types = {
+        "stars": core.ParticleSetType.DARK_MATTER,  # WRONG
+        "dark_matter": core.ParticleSetType.GAS,
+        "gas": core.ParticleSetType.STARS,
+    }
+
+    gal_kwargs = {}
+    for pname, ptype in bad_types.items():
+        m, x, y, z, vx, vy, vz, soft, pot = data_particleset()
+        pset = core.ParticleSet(
+            ptype,
+            m=m,
+            x=x,
+            y=y,
+            z=z,
+            vx=vx,
+            vy=vy,
+            vz=vz,
+            softening=soft,
+            potential=pot,
+        )
+        gal_kwargs[pname] = pset
+
+    with pytest.raises(TypeError):
+        core.Galaxy(**gal_kwargs)
 
 
 # =============================================================================
@@ -520,7 +587,28 @@ def test_Galaxy_kinectic_energy(galaxy):
 
 
 # =============================================================================
-#   TOTAL ENERGY
+# POTENTIAL ENERGY
+# =============================================================================
+
+
+def test_Galaxy_potential_energy(galaxy):
+    gal = galaxy(seed=42)
+    s_pot, dm_pot, gas_pot = gal.potential_energy_
+    assert s_pot.unit == dm_pot.unit == gas_pot.unit == ((u.km / u.s) ** 2)
+    assert np.all(gal.stars.potential.to_value() == s_pot.to_value())
+    assert np.all(gal.dark_matter.potential.to_value() == dm_pot.to_value())
+    assert np.all(gal.gas.potential.to_value() == gas_pot.to_value())
+
+
+def test_Galaxy_potential_energy_without_potential(galaxy):
+    gal = galaxy(
+        stars_potential=False, dm_potential=False, gas_potential=False
+    )
+    assert gal.potential_energy_ is None
+
+
+# =============================================================================
+# TOTAL ENERGY
 # =============================================================================
 
 
@@ -532,7 +620,7 @@ def test_Galaxy_total_energy(galaxy):
     assert np.all(gte[2] == gal.gas.total_energy_)
 
 
-def test_Galaxy_energy(galaxy):
+def test_Galaxy_all_energies(galaxy):
     gal = galaxy(seed=42)
     energy = gal.total_energy_
     gke = gal.kinetic_energy_
@@ -543,44 +631,31 @@ def test_Galaxy_energy(galaxy):
     assert np.all(gke[2] + gpe[2] == energy[2])
 
 
+def test_Galaxy_total_energy_without_potential(galaxy):
+    gal = galaxy(
+        stars_potential=False, dm_potential=False, gas_potential=False
+    )
+    assert gal.total_energy_ == None
+
+
 # =============================================================================
 #   ANGULAR MOMENTUM
 # =============================================================================
 
 
-# @pytest.mark.xfail
-# def test_center_existence(galaxy):
-#     gal = galaxy(seed=42)
-#     import ipdb; ipdb.set_trace()
-
-#     gx_c = utils.center(gal.x, gal.y, gal.z, gal.potential)
-#     #    gal.stars.arr_.x,
-#     #    gal.stars.arr_.y,
-#     #    gal.stars.arr_.z,
-#     #    gal.dark_matter.arr_.m,
-#     #    gal.dark_matter.arr_.x,
-#     #    gal.dark_matter.arr_.y,
-#     #    gal.dark_matter.arr_.z,
-#     #    gal.gas.arr_.m,
-#     #    gal.gas.arr_.x,
-#     #    gal.gas.arr_.y,
-#     #    gal.gas.arr_.z,
-#     #    )
-
-#     x_gal = np.hstack((gx_c[0], gx_c[3], gx_c[6]))
-#     y_gal = np.hstack((gx_c[1], gx_c[4], gx_c[7]))
-#     z_gal = np.hstack((gx_c[2], gx_c[5], gx_c[8]))
-
-#     pos_gal = np.vstack((x_gal, y_gal, z_gal))
-
-#     assert len(np.where(~pos_gal.any(axis=0))) == 1
-
-
-# @pytest.mark.xfail
-# def test_angular_momentum_outputs(galaxy):
-#     """Test object."""
-#     gal = galaxy(seed=42)
-#     gam = gal.angular_momentum()
-
-#     longitude = len(gam.stars.x) + len(gam.dark_matter.x) + len(gam.gas.x)
-#     assert np.shape(gam.J_part.value) == (3, longitude)
+def test_Galaxy_angular_momentum(galaxy):
+    gal = galaxy(seed=42)
+    assert (
+        gal.Jstar_.unit
+        == gal.Jdark_matter_.unit
+        == gal.Jgas_.unit
+        == (u.kpc * u.km / u.s)
+    )
+    assert np.all(
+        gal.Jstar_.to_value() == gal.stars.angular_momentum_.to_value()
+    )
+    assert np.all(
+        gal.Jdark_matter_.to_value()
+        == gal.dark_matter.angular_momentum_.to_value()
+    )
+    assert np.all(gal.Jgas_.to_value() == gal.gas.angular_momentum_.to_value())

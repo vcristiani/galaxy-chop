@@ -12,8 +12,7 @@
 
 from ._potential import potential, G
 from ._center import center, is_centered
-from ._align import align, get_rot_matrix
-
+from ._align import align
 
 ___all__ = [
     "potential",
@@ -21,5 +20,4 @@ ___all__ = [
     "center",
     "is_centered",
     "align",
-    "get_rot_matrix",
 ]

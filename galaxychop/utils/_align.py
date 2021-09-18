@@ -21,7 +21,7 @@ import numpy as np
 # =============================================================================
 
 
-def get_rot_matrix(m, pos, vel, r_cut=None):
+def _get_rot_matrix(m, pos, vel, r_cut=None):
     """
     Rotation matrix calculation.
 
@@ -107,75 +107,16 @@ def align(
     Optionally, only particles within a cutting radius
     `(r_cut)` can be used to calculate the rotation matrix.
 
-    Parameters
-    ----------
-    m_s : `np.ndarray(n_s,1)`
-        Star masses.
-    x_s, y_s, z_s : `np.ndarray(n_s,1)`
-        Star positions.
-    vx_s, vy_s, vz_s : `np.ndarray(n_s,1)`
-        Star velocities.
-    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1)`
-        Dark matter positions.
-    vx_dm, vy_dm, vz_dm : `np.ndarray(n_dm,1)`
-        Dark matter velocities.
-    x_g, y_g, z_g : `np.ndarray(n_g,1)`
-        Gas positions.
-    vx_g, vy_g, vz_g : `np.ndarray(n_g,1)`
-        Gas velocities.
-    r_cut : `float`, optional
-        The default is ``None``; if provided, it must be
-        positive and the rotation matrix `A` is calculated
-        from the particles with smaller radii than r_cut.
 
-    Returns
-    -------
-    tuple : `np.ndarray`
-        x_s : `np.ndarray(n_s,1)`
-            Rotated positions of the star particles.
-        y_s : `np.ndarray(n_s,1)`
-            Rotated positions of the star particles.
-        z_s : `np.ndarray(n_s,1)`
-            Rotated positions of the star particles.
-        vx_s : `np.ndarray(n_s,1)`
-            Rotated velocities of the star particles.
-        vy_s : `np.ndarray(n_s,1)`
-            Rotated velocities of the star particles.
-        vz_s : `np.ndarray(n_s,1)`
-            Rotated velocities of the star particles.
-        x_dm : `np.ndarray(n_dm,1)`
-            Rotated positions of the dark matter particles.
-        y_dm : `np.ndarray(n_dm,1)`
-            Rotated positions of the dark matter particles.
-        z_dm : `np.ndarray(n_dm,1)`
-            Rotated positions of the dark matter particles.
-        vx_dm : `np.ndarray(n_dm,1)`
-            Rotated velocities of the dark matter particles.
-        vy_dm : `np.ndarray(n_dm,1)`
-            Rotated velocities of the dark matter particles.
-        vz_dm : `np.ndarray(n_dm,1)`
-            Rotated velocities of the dark matter particles.
-        x_g : `np.ndarray(n_g,1)`
-            Rotated positions of the gas particles.
-        y_g : `np.ndarray(n_g,1)`
-            Rotated positions of the gas particles.
-        z_g : `np.ndarray(n_g,1)`
-            Rotated positions of the gas particles.
-        vx_g : `np.ndarray(n_g,1)`
-            Rotated velocities of the gas particles.
-        vy_g : `np.ndarray(n_g,1)`
-            Rotated velocities of the gas particles.
-        vz_g : `np.ndarray(n_g,1)`
-            Rotated velocities of the gas particles.
 
     """
-    if (r_cut is not None) and (r_cut <= 0.0):
+    if r_cut is not None and r_cut <= 0.0:
         raise ValueError("r_cut must not be lower than 0.")
 
     pos = np.vstack((x_s, y_s, z_s)).T
     vel = np.vstack((vx[0], vy[0], vz[0])).T
 
-    A = get_rot_matrix(m[0], pos, vel, r_cut)
+    A = _get_rot_matrix(m[0], pos, vel, r_cut)
 
     pos_rot_s = np.dot(A, pos.T)
     vel_rot_s = np.dot(A, vel.T)

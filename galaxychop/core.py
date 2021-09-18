@@ -62,7 +62,13 @@ class ParticleSet:
     has_potential_: bool = uttr.ib(init=False)
     kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
     total_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
-    # UTTRS Orchectration =====================================================
+
+    # angular momentum
+    Jx_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+    Jy_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+    Jz_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+
+    # UTTRS Orchestration =====================================================
 
     @has_potential_.default
     def _has_potential__default(self):
@@ -84,6 +90,22 @@ class ParticleSet:
         penergy = arr.potential
 
         return kenergy + penergy
+
+    # angular momentum
+    @Jx_.default
+    def _Jx__default(self):
+        arr = self.arr_
+        return arr.y * arr.vz - arr.z * arr.vy  # x
+
+    @Jy_.default
+    def _Jy__default(self):
+        arr = self.arr_
+        return arr.z * arr.vx - arr.x * arr.vz  # y
+
+    @Jz_.default
+    def _Jz__default(self):
+        arr = self.arr_
+        return arr.x * arr.vy - arr.y * arr.vx  # z
 
     def __attrs_post_init__(self):
         """
@@ -116,6 +138,13 @@ class ParticleSet:
                 f"Lengths: {lengths}"
             )
 
+    # PROPERTIES ==============================================================
+
+    @property
+    def angular_momentum_(self):
+        arr = self.arr_
+        return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
+
     # REDEFINITIONS ===========================================================
 
     def __repr__(self):
@@ -143,9 +172,12 @@ class ParticleSet:
             "softening": self.softening,
             "potential": arr.potential if self.has_potential_ else np.nan,
             "kinetic_energy": arr.kinetic_energy_,
-            "total_energy": arr.total_energy_
-            if self.has_potential_
-            else np.nan,
+            "total_energy": (
+                arr.total_energy_ if self.has_potential_ else np.nan
+            ),
+            "Jx": arr.Jx_,
+            "Jy": arr.Jy_,
+            "Jz": arr.Jz_,
         }
         df = pd.DataFrame(data)
         if columns is not None:
@@ -280,13 +312,12 @@ class Galaxy:
 
     @property
     def potential_energy_(self):
-        if not self.has_potential_:
-            raise ValueError("Galaxy has not potential energy")
-        return (
-            self.stars.potential,
-            self.dark_matter.potential,
-            self.gas.potential,
-        )
+        if self.has_potential_:
+            return (
+                self.stars.potential,
+                self.dark_matter.potential,
+                self.gas.potential,
+            )
 
     @property
     def total_energy_(self):
@@ -311,146 +342,24 @@ class Galaxy:
         >>> galaxy = gchop.Galaxy(...)
         >>> E_s, E_dm, E_g = galaxy.energy
         """
-        if not self.has_potential_:
-            raise ValueError("Galaxy has not potential energy")
-        return (
-            self.stars.total_energy_,
-            self.dark_matter.total_energy_,
-            self.gas.total_energy_,
-        )
+        if self.has_potential_:
+            return (
+                self.stars.total_energy_,
+                self.dark_matter.total_energy_,
+                self.gas.total_energy_,
+            )
 
-    def angular_momentum(self, r_cut=None):
-        """
-        Specific angular momentum.
+    @property
+    def Jstar_(self):
+        return self.stars.angular_momentum_
 
-        Centers the particles with respect to the one with the lower specific
-        potential, then, calculates the specific angular momentum of
-        dark matter, stars and gas particles.
+    @property
+    def Jdark_matter_(self):
+        return self.dark_matter.angular_momentum_
 
-        Parameters
-        ----------
-        r_cut : `float`, optional
-            The default is ``None``; if provided, it must be
-            positive and the rotation matrix `A` is calculated
-            from the particles with radii smaller than r_cut.
-
-        Returns
-        -------
-        gx : `galaxy object`
-            New instanced galaxy with all particles centered respect to the
-            lowest specific energy one and the addition of J_part, J_star,
-            Jr_part and Jr_star.
-
-        Examples
-        --------
-        This returns the specific potential energy of stars, dark matter and
-        gas particles.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> g_J = galaxy.angular_momentum()
-        >>> J_part, J_star= g_J.J_part, g_J.J_star
-        >>> Jr_part, Jr_star =  g_J.Jr_part, g_J.Jr_star
-        """
-
-        if not self.has_potential_:
-            raise ValueError("Galaxy has not potential energy")
-
-        df = self.to_dataframe()
-        x = df.x.to_numpy()
-        y = df.y.to_numpy()
-        z = df.z.to_numpy()
-        vx = df.vx.to_numpy()
-        vy = df.vy.to_numpy()
-        vz = df.vz.to_numpy()
-        m = df.m.to_numpy()
-        potential = df.potential.to_numpy()
-
-        xs, ys, zs, xdm, ydm, zdm, xg, yg, zg = utils.center(
-            x,
-            y,
-            z,
-            potential,
-        )
-
-        (
-            pos_rot_s_x,
-            pos_rot_s_y,
-            pos_rot_s_z,
-            vel_rot_s_x,
-            vel_rot_s_y,
-            vel_rot_s_z,
-            pos_rot_dm_x,
-            pos_rot_dm_y,
-            pos_rot_dm_z,
-            vel_rot_dm_x,
-            vel_rot_dm_y,
-            vel_rot_dm_z,
-            pos_rot_g_x,
-            pos_rot_g_y,
-            pos_rot_g_z,
-            vel_rot_g_x,
-            vel_rot_g_y,
-            vel_rot_g_z,
-        ) = utils.align(
-            m,
-            xs,
-            ys,
-            zs,
-            xdm,
-            ydm,
-            zdm,
-            xg,
-            yg,
-            zg,
-            vx,
-            vy,
-            vz,
-            r_cut=r_cut,
-        )
-
-        J_star = np.array(
-            [
-                pos_rot_s_y * vel_rot_s_z - pos_rot_s_z * vel_rot_s_y,
-                pos_rot_s_z * vel_rot_s_x - pos_rot_s_x * vel_rot_s_z,
-                pos_rot_s_x * vel_rot_s_y - pos_rot_s_y * vel_rot_s_x,
-            ]
-        )
-
-        J_dark = np.array(
-            [
-                pos_rot_dm_y * vel_rot_dm_z - pos_rot_dm_z * vel_rot_dm_y,
-                pos_rot_dm_z * vel_rot_dm_x - pos_rot_dm_x * vel_rot_dm_z,
-                pos_rot_dm_x * vel_rot_dm_y - pos_rot_dm_y * vel_rot_dm_x,
-            ]
-        )
-
-        J_gas = np.array(
-            [
-                pos_rot_g_y * vel_rot_g_z - pos_rot_g_z * vel_rot_g_y,
-                pos_rot_g_z * vel_rot_g_x - pos_rot_g_x * vel_rot_g_z,
-                pos_rot_g_x * vel_rot_g_y - pos_rot_g_y * vel_rot_g_x,
-            ]
-        )
-
-        #   J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
-
-        #   Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
-
-        #   Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
-
-        #       new = attr.asdict(self, recurse=False)
-        #       del new["arr_"]
-        new = galaxy_as_kwargs(self)
-
-        new.update(
-            J_star=J_star,
-            J_dark=J_dark,
-            J_gas=J_gas,
-            #   * u.kpc * u.km / u.s
-        )
-
-        return Galaxy(**new)
+    @property
+    def Jgas_(self):
+        return self.gas.angular_momentum_
 
     def jcirc(self, bin0=0.05, bin1=0.005):
         """
@@ -499,6 +408,15 @@ class Galaxy:
         >>> x, y = g_Jcirc.x, g_Jcirc.y
 
         """
+        #   J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
+
+        #   Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
+
+        #   Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
+
+        #       new = attr.asdict(self, recurse=False)
+        #       del new["arr_"]
+
         Etot_s = self.energy[0].value
         Etot_dm = self.energy[1].value
         Etot_g = self.energy[2].value

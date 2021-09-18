@@ -83,4 +83,3 @@ def test_read_hdf5(data_path):
         and gala.gas.softening == 0.0
         and gala.gas.has_potential_
     )
-

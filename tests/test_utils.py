@@ -77,7 +77,7 @@ def test_center(galaxy):
     df = gal.to_dataframe()
     cdf = cgal.to_dataframe()
 
-    changed = ["x", "y", "z"]
+    changed = ["x", "y", "z", "Jx", "Jy", "Jz"]
 
     for colname in df.columns[~df.columns.isin(changed)]:
         ocol = df[colname]
