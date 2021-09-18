@@ -160,29 +160,33 @@ class ParticleSet:
 
     def to_dataframe(self, columns=None):
         arr = self.arr_
-        data = {
-            "ptype": self.ptype.value,
-            "m": arr.m,
-            "x": arr.x,
-            "y": arr.y,
-            "z": arr.z,
-            "vx": arr.vx,
-            "vy": arr.vy,
-            "vz": arr.vz,
-            "softening": self.softening,
-            "potential": arr.potential if self.has_potential_ else np.nan,
-            "kinetic_energy": arr.kinetic_energy_,
-            "total_energy": (
+        mkcolumns = {
+            "ptype": lambda: self.ptype.value,
+            "m": lambda: arr.m,
+            "x": lambda: arr.x,
+            "y": lambda: arr.y,
+            "z": lambda: arr.z,
+            "vx": lambda: arr.vx,
+            "vy": lambda: arr.vy,
+            "vz": lambda: arr.vz,
+            "softening": lambda: self.softening,
+            "potential": lambda: (
+                arr.potential if self.has_potential_ else np.nan
+            ),
+            "kinetic_energy": lambda: arr.kinetic_energy_,
+            "total_energy": lambda: (
                 arr.total_energy_ if self.has_potential_ else np.nan
             ),
-            "Jx": arr.Jx_,
-            "Jy": arr.Jy_,
-            "Jz": arr.Jz_,
+            "Jx": lambda: arr.Jx_,
+            "Jy": lambda: arr.Jy_,
+            "Jz": lambda: arr.Jz_,
         }
-        df = pd.DataFrame(data)
-        if columns is not None:
-            df = df[columns]
-        return df
+        columns = mkcolumns.keys() if columns is None else columns
+        data = {}
+        for colname in columns:
+            column_make = mkcolumns[colname]
+            data[colname] = column_make()
+        return pd.DataFrame(data)
 
 
 # =============================================================================
