@@ -126,7 +126,7 @@ def potential(galaxy, backend="numpy"):
     pot, postproc = backend_function(x_f32, y_f32, z_f32, m_f32, softening_f32)
 
     # apply the post process to the final potential
-    potential = postproc(pot)
+    pot = postproc(pot)
 
     # recreate a new galaxy
     num_s = len(galaxy.stars)

@@ -87,7 +87,7 @@ def test_center(galaxy):
     for colname in changed:
         ocol = df[colname]
         ccol = cdf[colname]
-        assert (ocol == ccol).all() == False
+        assert not (ocol == ccol).all()
 
 
 def test_is_centered_without_potential_energy(galaxy):
@@ -113,3 +113,41 @@ def test_is_centered(galaxy):
 
     assert not utils.is_centered(gal)
     assert utils.is_centered(cgal)
+
+
+# =============================================================================
+# ALIGN
+# =============================================================================
+
+
+def test_align(galaxy):
+    gal = galaxy(seed=42)
+
+    agal = utils.align(gal)
+
+    df = gal.to_dataframe()
+    adf = agal.to_dataframe()
+
+    changed = [
+        "x",
+        "y",
+        "z",
+        "vx",
+        "vy",
+        "vz",
+        "Jx",
+        "Jy",
+        "Jz",
+        "kinetic_energy",
+        "total_energy",
+    ]
+
+    for colname in df.columns[~df.columns.isin(changed)]:
+        ocol = df[colname]
+        acol = adf[colname]
+        assert (ocol == acol).all(), colname
+
+    for colname in changed:
+        ocol = df[colname]
+        acol = adf[colname]
+        assert not (ocol == acol).all(), colname

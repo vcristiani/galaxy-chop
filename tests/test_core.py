@@ -10,11 +10,9 @@
 # IMPORTS
 # =============================================================================
 
-from typing import Type
 import astropy.units as u
 
 from galaxychop import core
-from galaxychop import utils
 
 import numpy as np
 
@@ -635,7 +633,7 @@ def test_Galaxy_total_energy_without_potential(galaxy):
     gal = galaxy(
         stars_potential=False, dm_potential=False, gas_potential=False
     )
-    assert gal.total_energy_ == None
+    assert gal.total_energy_ is None
 
 
 # =============================================================================

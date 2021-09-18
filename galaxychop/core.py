@@ -614,10 +614,6 @@ def galaxy_as_kwargs(galaxy):
     gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
 
     del (
-        #   gkwargs["J_part"],
-        #   gkwargs["J_star"],
-        #   gkwargs["Jr_part"],
-        #   gkwargs["Jr_star"],
         gkwargs["x"],
         gkwargs["y"],
     )
