@@ -83,7 +83,7 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut=None):
     return A
 
 
-def align(galaxy, *, r_cut=None):
+def star_align(galaxy, *, r_cut=None):
     """Align the galaxy.
 
     Rotates the positions, velocities and angular momentum of the
@@ -157,3 +157,27 @@ def align(galaxy, *, r_cut=None):
     )
 
     return core.mkgalaxy(**new)
+
+
+def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
+
+    # Now we extract only the needed column to rotate the galaxy
+    df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
+
+    r = np.sqrt(df.x ** 2 + df.y ** 2 + df.z ** 2)
+
+    if r_cut is not None:
+        (mask,) = np.where(r < r_cut)
+    else:
+        mask = np.repeat(True, len(r))
+
+    Jxtot = np.sum(df.Jx[mask])
+    Jytot = np.sum(df.Jy[mask])
+    Jztot = np.sum(df.Jz[mask])
+    Jtot = np.sqrt(Jxtot ** 2 + Jytot ** 2 + Jztot ** 2)
+
+    return (
+        np.allclose(Jxtot, 0, rtol=rtol, atol=atol)
+        and np.allclose(Jytot, 0, rtol=rtol, atol=atol)
+        and np.allclose(Jztot, Jtot, rtol=rtol, atol=atol)
+    )

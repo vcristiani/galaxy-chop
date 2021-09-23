@@ -19,5 +19,6 @@ ___all__ = [
     "G",
     "center",
     "is_centered",
-    "align",
+    "star_align",
+    "is_star_aligned",
 ]
