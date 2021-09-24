@@ -429,7 +429,7 @@ class Galaxy:
         >>> g_Jcirc = galaxy.jcirc()
         >>> x, y = g_Jcirc.x, g_Jcirc.y
 
-        
+
         Circularity parameter calculation.
 
         Return
@@ -465,7 +465,7 @@ class Galaxy:
 
         df_star = self.stars.to_dataframe(["total_energy", "Jx","Jy","Jz"])
         Jr_star = np.sqrt(df_star.Jx **2 + df_star.Jy **2)
-        
+
         Etot_s = df.star.total_energy
         E_tot = df.total_energy
 
@@ -604,10 +604,6 @@ def galaxy_as_kwargs(galaxy):
 
     gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
 
-    del (
-        gkwargs["x"],
-        gkwargs["y"],
-    )
 
     return gkwargs
 

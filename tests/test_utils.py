@@ -120,10 +120,10 @@ def test_is_centered(galaxy):
 # =============================================================================
 
 
-def test_align(galaxy):
+def test_star_align(galaxy):
     gal = galaxy(seed=42)
 
-    agal = utils.align(gal)
+    agal = utils.star_align(gal)
 
     df = gal.to_dataframe()
     adf = agal.to_dataframe()
