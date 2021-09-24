@@ -161,7 +161,7 @@ class ParticleSet:
     def to_dataframe(self, columns=None):
         arr = self.arr_
         mkcolumns = {
-            "ptype" : lambda: self.ptype.name,
+            "ptype": lambda: self.ptype.name,
             "ptypev": lambda: self.ptype.value,
             "m": lambda: arr.m,
             "x": lambda: arr.x,
@@ -278,14 +278,22 @@ class Galaxy:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self, columns=None):
-        return pd.concat(
-            [
-                self.stars.to_dataframe(columns=columns),
-                self.dark_matter.to_dataframe(columns=columns),
-                self.gas.to_dataframe(columns=columns),
-            ]
-        )
+    def to_dataframe(self, *, ptypes=None, columns=None):
+        mkptypes = {
+            "stars": self.stars.to_dataframe,
+            "dark_matter": self.dark_matter.to_dataframe,
+            "gas": self.gas.to_dataframe,
+        }
+
+        ptypes = mkptypes.keys() if ptypes is None else ptypes
+
+        parts = []
+        for ptype in ptypes:
+            maker = mkptypes[ptype]
+            df = maker(columns=columns)
+            parts.append(df)
+
+        return pd.concat(parts)
 
     @property
     def plot(self):

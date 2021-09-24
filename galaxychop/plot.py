@@ -62,7 +62,7 @@ class GalaxyPlotter:
 
     # INTERNALS ===============================================================
 
-    def _get_df_and_hue(self, attributes, labels):
+    def _get_df_and_hue(self, ptypes, attributes, labels):
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
         # labels es la columna que se va a usar para "resaltar cosas" (hue)
@@ -74,7 +74,7 @@ class GalaxyPlotter:
             attributes = np.concatenate((attributes, [labels]))
 
         # saco todos los atributos en un df
-        df = self._galaxy.to_dataframe(attributes)
+        df = self._galaxy.to_dataframe(ptypes=ptypes, columns=attributes)
 
         # ahora puede ser los labels sean un np array y hay que agregarlo
         # como columna al dataframe y asignar hue al nombre de esta nueva
@@ -87,9 +87,11 @@ class GalaxyPlotter:
 
     # PLOTS==== ===============================================================
 
-    def pairplot(self, attributes=None, labels="ptype", ax=None, **kwargs):
+    def pairplot(
+        self, ptypes=None, attributes=None, labels="ptype", ax=None, **kwargs
+    ):
 
-        df, hue = self._get_df_and_hue(attributes, labels)
+        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
