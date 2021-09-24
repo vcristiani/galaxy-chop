@@ -242,8 +242,8 @@ class Galaxy:
     dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
-    x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
-    y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
+    #x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
+    #y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
 
     has_potential_: bool = attr.ib(init=False)
 
@@ -429,21 +429,45 @@ class Galaxy:
         >>> g_Jcirc = galaxy.jcirc()
         >>> x, y = g_Jcirc.x, g_Jcirc.y
 
+        
+        Circularity parameter calculation.
+
+        Return
+        ------
+        tuple : `float`
+            (E_star, eps, eps_r): Normalized specific energy of the stars,
+            circularity parameter (J_z/J_circ), J_p/J_circ.
+            Shape(n_s, 1). Unit: dimensionless
+
+        Notes
+        -----
+        J_z : z-component of normalized specific angular momentum.
+
+        J_circ : Specific circular angular momentum.
+
+        J_p : Projection on the xy plane of the normalized specific angular
+        momentum.
+
+        Examples
+        --------
+        This returns the normalized specific energy of stars (E_star), the
+        circularity parameter (eps : J_z/J_circ) and
+        eps_r: (J_p/J_circ).
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> E_star, eps, eps_r = galaxy.paramcirc
+
         """
-        #   J_part = np.concatenate([J_star, J_dark, J_gas], axis=1)
 
-        #   Jr_star = np.sqrt(J_star[0, :] ** 2 + J_star[1, :] ** 2)
+        df = self.to_dataframe(["total_energy", "Jx", "Jy", "Jz"])
+        Jr_part = np.sqrt(df.Jx **2 + df.Jy **2)
 
-        #   Jr_part = np.sqrt(J_part[0, :] ** 2 + J_part[1, :] ** 2)
-
-        #       new = attr.asdict(self, recurse=False)
-        #       del new["arr_"]
-
-        Etot_s = self.energy[0].value
-        Etot_dm = self.energy[1].value
-        Etot_g = self.energy[2].value
-
-        E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
+        df_star = self.stars.to_dataframe(["total_energy", "Jx","Jy","Jz"])
+        Jr_star = np.sqrt(df_star.Jx **2 + df_star.Jy **2)
+        
+        Etot_s = df.star.total_energy
+        E_tot = df.total_energy
 
         # Remove the particles that are not bound: E > 0.
         (neg,) = np.where(E_tot <= 0.0)
@@ -455,10 +479,7 @@ class Galaxy:
 
         # Normalize the two variables: E between 0 and 1; Jz between -1 and 1.
         E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
-
-        kk = self.angular_momentum().arr_.J_part[2, :][neg][fin]
-
-        Jz = kk / np.max(np.abs(kk))
+        Jz = df.Jz[neg][fin] / np.max(np.abs(df.Jz[neg][fin]))
 
         # Build the specific energy binning and select the Jz values to
         # calculate J_circ.
@@ -518,50 +539,10 @@ class Galaxy:
         x = x[zero]
         y = y[zero]
 
-        new = attr.asdict(self, recurse=False)
-        del new["arr_"]
-        new.update(x=u.Quantity(x), y=u.Quantity(y))
 
-        return Galaxy(**new)
 
-    @property
-    def paramcirc(self):
-        """
-        Circularity parameter calculation.
 
-        Return
-        ------
-        tuple : `float`
-            (E_star, eps, eps_r): Normalized specific energy of the stars,
-            circularity parameter (J_z/J_circ), J_p/J_circ.
-            Shape(n_s, 1). Unit: dimensionless
-
-        Notes
-        -----
-        J_z : z-component of normalized specific angular momentum.
-
-        J_circ : Specific circular angular momentum.
-
-        J_p : Projection on the xy plane of the normalized specific angular
-        momentum.
-
-        Examples
-        --------
-        This returns the normalized specific energy of stars (E_star), the
-        circularity parameter (eps : J_z/J_circ) and
-        eps_r: (J_p/J_circ).
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> E_star, eps, eps_r = galaxy.paramcirc
-
-        """
-        Etot_s = self.energy[0].value
-        Etot_dm = self.energy[1].value
-        Etot_g = self.energy[2].value
-
-        E_tot = np.hstack([Etot_s, Etot_dm, Etot_g])
-
+        #--------------------------------------------
         E_star_ = np.full(len(Etot_s), np.nan)
         eps_ = np.full(len(Etot_s), np.nan)
         eps_r_ = np.full(len(Etot_s), np.nan)
@@ -579,31 +560,19 @@ class Galaxy:
         down1 = np.abs(np.min(E_tot[neg][fin]))
         E_star = up1 / down1
 
-        ang_momentum = self.angular_momentum().arr_
-        up2 = ang_momentum.J_star[2, :][neg_star][fin_star]
-        down2 = np.max(np.abs(ang_momentum.J_part[2, :][neg][fin]))
-
+        up2 = df_star.Jz[neg_star][fin_star]
+        down2 = np.max(np.abs(df.Jz[neg][fin]))
         Jz_star_norm = up2 / down2
 
-        up3 = ang_momentum.Jr_star[neg_star][fin_star]
-        down3 = np.max(np.abs(ang_momentum.Jr_part[neg][fin]))
+        up3 = Jr_star[neg_star][fin_star]
+        down3 = np.max(np.abs(Jr_part[neg][fin]))
         Jr_star_norm = up3 / down3
 
-        # We do the interpolation to calculate the J_circ.
-        # spl = InterpolatedUnivariateSpline(
-        #    self.jcirc().arr_.x,
-        #    self.jcirc().arr_.y,
-        #    k=1,
-        # )
-
         # Calculates of the circularity parameter Lz/Lc.
-        # eps = J_star_ / spl(E_star)
-        jcir = self.jcirc().arr_
-        eps = Jz_star_norm / np.interp(E_star, jcir.x, jcir.y)
+        eps = Jz_star_norm / np.interp(E_star, x, y)
 
         # Calculates the same for Lp/Lc.
-        # eps_r = Jr_star_ / spl(E_star)
-        eps_r = Jr_star_norm / np.interp(E_star, jcir.x, jcir.y)
+        eps_r = Jr_star_norm / np.interp(E_star, x, y)
 
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
@@ -612,7 +581,7 @@ class Galaxy:
         eps_[neg_star[fin_star[mask]]] = eps[mask]
         eps_r_[neg_star[fin_star[mask]]] = eps_r[mask]
 
-        return (E_star_, eps_, eps_r_)
+        return (E_star_, eps_, eps_r_, x, y)
 
 
 # =============================================================================

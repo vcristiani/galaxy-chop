@@ -12,7 +12,7 @@
 
 import astropy.units as u
 
-from galaxychop import core
+from galaxychop import data
 from galaxychop import utils
 
 import numpy as np
@@ -56,7 +56,7 @@ def test_same_size_inputs(shorten, random_galaxy_params):
     params = random_galaxy_params(stars=10, dm=20, gas=30, seed=42)
     params[shorten] = params[shorten][:-1]
     with pytest.raises(ValueError):
-        core.Galaxy(**params)
+        data.Galaxy(**params)
 
 
 @pytest.mark.parametrize(
@@ -76,7 +76,7 @@ def test_all_potential_inputs(pot_name, npart, random_galaxy_params):
     params = random_galaxy_params(stars=10, dm=20, gas=30, seed=42)
     params[pot_name] = pot
     with pytest.raises(ValueError):
-        core.Galaxy(**params)
+        data.Galaxy(**params)
 
 
 @pytest.mark.xfail
@@ -91,7 +91,7 @@ def test_potential_validator(random_galaxy_params):
     params["pot_dm"] = pot_drk
     params["pot_g"] = pot_gas
     with pytest.raises(ValueError):
-        core.Galaxy(**params).potential_energy()
+        data.Galaxy(**params).potential_energy()
 
 
 @pytest.mark.xfail

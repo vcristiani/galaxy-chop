@@ -12,12 +12,13 @@
 
 from ._potential import potential, G
 from ._center import center, is_centered
-from ._align import align
+from ._align import star_align, is_star_aligned
 
 ___all__ = [
     "potential",
     "G",
     "center",
     "is_centered",
-    "align",
+    "star_align",
+    "is_star_aligned",
 ]
