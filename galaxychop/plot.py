@@ -54,10 +54,10 @@ class GalaxyPlotter:
 
         """
         if plot_kind.startswith("_"):
-            raise ValueError(f"invalid kind name '{kind}'")
+            raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         method = getattr(self, plot_kind, None)
         if not inspect.ismethod(method):
-            raise ValueError(f"invalid kind name '{kind}'")
+            raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         return method(**kwargs)
 
     # INTERNALS ===============================================================
