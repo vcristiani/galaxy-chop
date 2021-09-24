@@ -65,7 +65,7 @@ def center(galaxy):
         raise ValueError("galaxy must has the potential energy")
 
     # sacamos como dataframe lo unico que vamos a operar
-    df = galaxy.to_dataframe(columns=["ptype", "x", "y", "z", "potential"])
+    df = galaxy.to_dataframe(columns=["ptypev", "x", "y", "z", "potential"])
 
     # minimo indice de potencial de todo y sacamos cual es la fila
     minpot_idx = df.potential.argmin()
@@ -77,9 +77,9 @@ def center(galaxy):
     df[columns] = df[columns] - min_values[columns]
 
     # espliteamos el dataframe en tipos
-    stars = df[df.ptype == data.ParticleSetType.STARS.value]
-    dark_matter = df[df.ptype == data.ParticleSetType.DARK_MATTER.value]
-    gas = df[df.ptype == data.ParticleSetType.GAS.value]
+    stars = df[df.ptypev == data.ParticleSetType.STARS.value]
+    dark_matter = df[df.ptypev == data.ParticleSetType.DARK_MATTER.value]
+    gas = df[df.ptypev == data.ParticleSetType.GAS.value]
 
     # patch
     new = data.galaxy_as_kwargs(galaxy)

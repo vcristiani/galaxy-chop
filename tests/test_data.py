@@ -169,7 +169,8 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     )
     expected = pd.DataFrame(
         {
-            "ptype": data.ParticleSetType.STARS.value,
+            "ptype": data.ParticleSetType.STARS.name,
+            "ptypev": data.ParticleSetType.STARS.value,
             "m": m,
             "x": x,
             "y": y,

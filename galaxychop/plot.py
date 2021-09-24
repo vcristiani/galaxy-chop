@@ -18,6 +18,8 @@ import inspect
 
 import matplotlib.pyplot as plt
 
+import numpy as np
+
 import seaborn as sns
 
 # =============================================================================
@@ -58,15 +60,36 @@ class GalaxyPlotter:
             raise ValueError(f"invalid kind name '{kind}'")
         return method(**kwargs)
 
-    def pairplot(
-        self, attributes=None, hue="ptype", labels=None, ax=None, **kwargs
-    ):
+    # INTERNALS ===============================================================
 
+    def _get_df_and_hue(self, attributes, labels):
         attributes = ["x", "y", "z"] if attributes is None else attributes
-        if isinstance(hue, str) and hue not in attributes:
-            attributes = attributes + [hue]
 
-        df = self.to_dataframe(attributes)
+        # labels es la columna que se va a usar para "resaltar cosas" (hue)
+        hue = labels
+
+        # si es un str y no estaba en los atributos lo tengo que sacar
+        # del dataframe
+        if isinstance(labels, str) and labels not in attributes:
+            attributes = np.concatenate((attributes, [labels]))
+
+        # saco todos los atributos en un df
+        df = self._galaxy.to_dataframe(attributes)
+
+        # ahora puede ser los labels sean un np array y hay que agregarlo
+        # como columna al dataframe y asignar hue al nombre de esta nueva
+        # columna
+        if isinstance(labels, (list, np.ndarray)):
+            hue = "labels"  # labels no esta en pset por lo tanto sirve
+            df.insert(0, hue, labels)  # lo chanto como primer columna
+
+        return df, hue
+
+    # PLOTS==== ===============================================================
+
+    def pairplot(self, attributes=None, labels="ptype", ax=None, **kwargs):
+
+        df, hue = self._get_df_and_hue(attributes, labels)
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")

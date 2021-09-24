@@ -23,7 +23,7 @@ import pandas as pd
 
 import uttr
 
-from . import utils, plot
+from . import plot
 
 
 # =============================================================================
@@ -161,7 +161,8 @@ class ParticleSet:
     def to_dataframe(self, columns=None):
         arr = self.arr_
         mkcolumns = {
-            "ptype": lambda: self.ptype.value,
+            "ptype" : lambda: self.ptype.name,
+            "ptypev": lambda: self.ptype.value,
             "m": lambda: arr.m,
             "x": lambda: arr.x,
             "y": lambda: arr.y,
@@ -292,7 +293,7 @@ class Galaxy:
         return plot.GalaxyPlotter(self)
 
     # ENERGY ===============================================================
-    
+
     @property
     def is_aligned(self):
         return util.is_star_aligned(self)
