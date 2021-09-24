@@ -13,7 +13,7 @@
 
 import numpy as np
 
-from .. import core
+from .. import data
 
 # =============================================================================
 # BASE MIXIN
@@ -47,7 +47,7 @@ class GalaxyDecomposeMixin:
         clean: np.ndarray(n_m: number of particles with E<=0 and -1<eps<1).
             Mask: Index of valid stellar particles to operate the clustering.
         """
-        eps = X[:, core.Columns.eps.value]
+        eps = X[:, data.Columns.eps.value]
         (clean,) = np.where(~np.isnan(eps))
         return clean
 
@@ -71,7 +71,7 @@ class GalaxyDecomposeMixin:
             Complete index of the cluster each stellar particles belongs to.
             Particles which not fullfil E <= 0 or -1 < eps < 1 have index = -1.
         """
-        eps = X[:, core.Columns.eps.value]
+        eps = X[:, data.Columns.eps.value]
         complete = -np.ones(len(eps), dtype=int)
         complete[clean_mask] = labels
         return complete
@@ -105,9 +105,9 @@ class GalaxyDecomposeMixin:
 
         """
         return [
-            core.Columns.normalized_energy.value,
-            core.Columns.eps.value,
-            core.Columns.eps_r.value,
+            data.Columns.normalized_energy.value,
+            data.Columns.eps.value,
+            data.Columns.eps_r.value,
         ]
 
     def decompose(self, galaxy):
@@ -121,10 +121,10 @@ class GalaxyDecomposeMixin:
         galaxy :
             `galaxy object`
         """
-        if not isinstance(galaxy, core.Galaxy):
+        if not isinstance(galaxy, data.Galaxy):
             found = type(galaxy)
             raise TypeError(
-                f"'galaxy' must be a core.Galaxy instance. Found {found}"
+                f"'galaxy' must be a data.Galaxy instance. Found {found}"
             )
 
         # retrieve te galaxy as an array os star particles

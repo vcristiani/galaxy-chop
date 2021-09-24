@@ -22,7 +22,7 @@ import h5py
 import numpy as np
 
 
-from . import core
+from . import data
 
 # =============================================================================
 # UTILS
@@ -68,7 +68,7 @@ def read_hdf5(
     gas_kws = _table_to_dict(gas_table, "g")
     galaxy_kws.update(gas_kws)
 
-    galaxy = core.mkgalaxy(**galaxy_kws)
+    galaxy = data.mkgalaxy(**galaxy_kws)
 
     return galaxy
 
@@ -121,6 +121,6 @@ def read_npy(
     gas_kws = _table_to_dict(gas_table, "g")
     galaxy_kws.update(gas_kws)
 
-    galaxy = core.mkgalaxy(**galaxy_kws)
+    galaxy = data.mkgalaxy(**galaxy_kws)
 
     return galaxy

@@ -59,7 +59,7 @@ def center(galaxy):
             Centered gas positions.
 
     """
-    from .. import core
+    from .. import data
 
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
@@ -77,12 +77,12 @@ def center(galaxy):
     df[columns] = df[columns] - min_values[columns]
 
     # espliteamos el dataframe en tipos
-    stars = df[df.ptype == core.ParticleSetType.STARS.value]
-    dark_matter = df[df.ptype == core.ParticleSetType.DARK_MATTER.value]
-    gas = df[df.ptype == core.ParticleSetType.GAS.value]
+    stars = df[df.ptype == data.ParticleSetType.STARS.value]
+    dark_matter = df[df.ptype == data.ParticleSetType.DARK_MATTER.value]
+    gas = df[df.ptype == data.ParticleSetType.GAS.value]
 
     # patch
-    new = core.galaxy_as_kwargs(galaxy)
+    new = data.galaxy_as_kwargs(galaxy)
 
     new.update(
         x_s=stars.x.to_numpy(),
@@ -96,7 +96,7 @@ def center(galaxy):
         z_g=gas.z.to_numpy(),
     )
 
-    return core.mkgalaxy(**new)
+    return data.mkgalaxy(**new)
 
 
 def is_centered(galaxy, rtol=1e-05, atol=1e-08):

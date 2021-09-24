@@ -13,7 +13,7 @@
 import os
 from pathlib import Path
 
-from galaxychop import core
+from galaxychop import data
 
 import numpy as np
 
@@ -164,7 +164,7 @@ def galaxy(data_galaxy):
             potential_g,
         ) = data_galaxy(**kwargs)
 
-        gal = core.mkgalaxy(
+        gal = data.mkgalaxy(
             # stars
             m_s=m_s,
             x_s=x_s,

@@ -14,7 +14,7 @@ import numpy as np
 
 import pytest
 
-from galaxychop import core, utils
+from galaxychop import data, utils
 
 # =============================================================================
 #   POTENTIAL ENERGY
@@ -42,7 +42,7 @@ def test_Galaxy_potential_energy(galaxy):
 
     pgal = utils.potential(gal)
 
-    assert isinstance(pgal, core.Galaxy)
+    assert isinstance(pgal, data.Galaxy)
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
     assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
     assert np.all(pgal.gas.potential == pgal.potential_energy_[2])

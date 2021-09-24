@@ -12,7 +12,7 @@
 
 import astropy.units as u
 
-from galaxychop import core
+from galaxychop import data
 
 import numpy as np
 
@@ -29,8 +29,8 @@ def test_ParticleSet_creation_with_potential(data_particleset):
     m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
         seed=42, has_potential=True
     )
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -42,7 +42,7 @@ def test_ParticleSet_creation_with_potential(data_particleset):
         potential=pot,
     )
 
-    assert pset.ptype == core.ParticleSetType.STARS
+    assert pset.ptype == data.ParticleSetType.STARS
     assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
     assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
     assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
@@ -67,8 +67,8 @@ def test_ParticleSet_creation_without_potential(data_particleset):
     m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
         seed=42, has_potential=False
     )
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -80,7 +80,7 @@ def test_ParticleSet_creation_without_potential(data_particleset):
         potential=pot,
     )
 
-    assert pset.ptype == core.ParticleSetType.STARS
+    assert pset.ptype == data.ParticleSetType.STARS
     assert np.all(pset.arr_.m == m) and pset.m.unit == u.Msun
     assert np.all(pset.arr_.x == x) and pset.x.unit == u.kpc
     assert np.all(pset.arr_.y == y) and pset.y.unit == u.kpc
@@ -115,7 +115,7 @@ def test_ParticleSet_creation_bad_len(data_particleset, remove_one):
     params[remove_one] = params[remove_one][1:]
 
     with pytest.raises(ValueError):
-        core.ParticleSet(core.ParticleSetType.STARS, **params)
+        data.ParticleSet(data.ParticleSetType.STARS, **params)
 
 
 def test_ParticleSet_len(data_particleset):
@@ -123,8 +123,8 @@ def test_ParticleSet_len(data_particleset):
         seed=42, has_potential=True
     )
 
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -155,8 +155,8 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
         seed=42, has_potential=has_potential
     )
 
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -169,7 +169,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     )
     expected = pd.DataFrame(
         {
-            "ptype": core.ParticleSetType.STARS.value,
+            "ptype": data.ParticleSetType.STARS.value,
             "m": m,
             "x": x,
             "y": y,
@@ -201,8 +201,8 @@ def test_ParticleSet_repr(data_particleset, has_potential):
         seed=42, has_potential=has_potential
     )
 
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -225,8 +225,8 @@ def test_ParticleSet_repr(data_particleset, has_potential):
 def test_ParticleSet_angular_momentum(data_particleset):
     m, x, y, z, vx, vy, vz, soft, pot = data_particleset(seed=42)
 
-    pset = core.ParticleSet(
-        core.ParticleSetType.STARS,
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
         m=m,
         x=x,
         y=y,
@@ -258,15 +258,15 @@ def test_ParticleSet_angular_momentum(data_particleset):
 def test_Galaxy_invalid_ParticleSetType(data_particleset):
 
     bad_types = {
-        "stars": core.ParticleSetType.DARK_MATTER,  # WRONG
-        "dark_matter": core.ParticleSetType.GAS,
-        "gas": core.ParticleSetType.STARS,
+        "stars": data.ParticleSetType.DARK_MATTER,  # WRONG
+        "dark_matter": data.ParticleSetType.GAS,
+        "gas": data.ParticleSetType.STARS,
     }
 
     gal_kwargs = {}
     for pname, ptype in bad_types.items():
         m, x, y, z, vx, vy, vz, soft, pot = data_particleset()
-        pset = core.ParticleSet(
+        pset = data.ParticleSet(
             ptype,
             m=m,
             x=x,
@@ -281,7 +281,7 @@ def test_Galaxy_invalid_ParticleSetType(data_particleset):
         gal_kwargs[pname] = pset
 
     with pytest.raises(TypeError):
-        core.Galaxy(**gal_kwargs)
+        data.Galaxy(**gal_kwargs)
 
 
 # =============================================================================
@@ -325,7 +325,7 @@ def test_mkgakaxy(data_galaxy, has_potential):
         gas_potential=has_potential,
     )
 
-    gal = core.mkgalaxy(
+    gal = data.mkgalaxy(
         m_s=m_s,
         x_s=x_s,
         y_s=y_s,
@@ -471,7 +471,7 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
     params[remove_potential] = None
 
     with pytest.raises(ValueError):
-        core.mkgalaxy(**params)
+        data.mkgalaxy(**params)
 
 
 # =============================================================================
@@ -510,7 +510,7 @@ def test_galaxy_as_kwargs(data_galaxy):
         potential_g,
     ) = data_galaxy(seed=42)
 
-    gal = core.mkgalaxy(
+    gal = data.mkgalaxy(
         m_s=m_s,
         x_s=x_s,
         y_s=y_s,
@@ -540,7 +540,7 @@ def test_galaxy_as_kwargs(data_galaxy):
         potential_dm=potential_dm,
     )
 
-    gkwargs = core.galaxy_as_kwargs(gal)
+    gkwargs = data.galaxy_as_kwargs(gal)
 
     assert np.all(gkwargs["m_s"].to_value() == m_s)
     assert np.all(gkwargs["x_s"].to_value() == x_s)

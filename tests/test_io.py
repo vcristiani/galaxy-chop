@@ -11,7 +11,7 @@
 # =============================================================================
 
 
-from galaxychop import core
+from galaxychop import data
 from galaxychop import io
 
 
@@ -41,7 +41,7 @@ def test_read_npy(data_path):
         path_pot_g=path_pot_g,
     )
 
-    assert isinstance(gala, core.Galaxy) is True
+    assert isinstance(gala, data.Galaxy) is True
 
     assert (
         len(gala.stars) == 32067
@@ -65,7 +65,7 @@ def test_read_hdf5(data_path):
     path = data_path("gal394242.h5")
     gala = io.read_hdf5(path=path)
 
-    assert isinstance(gala, core.Galaxy) is True
+    assert isinstance(gala, data.Galaxy) is True
 
     assert (
         len(gala.stars) == 32067

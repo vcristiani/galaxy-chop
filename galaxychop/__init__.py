@@ -25,8 +25,7 @@ __version__ = "0.1.0"
 # IMPORTS
 # =============================================================================
 
-from .core import *  # noqa
+from .data import *  # noqa
 from .io import *  # noqa
 from .utils import *  # noqa
-from .models import *  # noqa
-from .dataset import *  # noqa
+from . import models, datasets

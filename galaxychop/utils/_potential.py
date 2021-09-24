@@ -99,7 +99,7 @@ def potential(galaxy, backend="numpy"):
     potential : `np.ndarray`
         Specific potential energy of particles. Shape(n,1)
     """
-    from .. import core
+    from .. import data
 
     if galaxy.has_potential_:
         raise ValueError("galaxy are already calculated")
@@ -136,7 +136,7 @@ def potential(galaxy, backend="numpy"):
     pot_dm = pot[num_s:num]
     pot_g = pot[num:]
 
-    new = core.galaxy_as_kwargs(galaxy)
+    new = data.galaxy_as_kwargs(galaxy)
 
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,
@@ -144,4 +144,4 @@ def potential(galaxy, backend="numpy"):
         potential_g=-pot_g * (u.km / u.s) ** 2,
     )
 
-    return core.mkgalaxy(**new)
+    return data.mkgalaxy(**new)

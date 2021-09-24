@@ -17,13 +17,13 @@ from astropy import units as u
 
 import attr
 
-from galaxychop import utils
-
 import numpy as np
 
 import pandas as pd
 
 import uttr
+
+from . import utils, plot
 
 
 # =============================================================================
@@ -286,7 +286,16 @@ class Galaxy:
             ]
         )
 
+    @property
+    def plot(self):
+        """Plot accessor."""
+        return plot.GalaxyPlotter(self)
+
     # ENERGY ===============================================================
+    
+    @property
+    def is_aligned(self):
+        return util.is_star_aligned(self)
 
     @property
     def kinetic_energy_(self):

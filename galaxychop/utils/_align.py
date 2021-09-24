@@ -93,7 +93,7 @@ def align(galaxy, *, r_cut=None):
 
 
     """
-    from .. import core
+    from .. import data
 
     if r_cut is not None and r_cut <= 0.0:
         raise ValueError("r_cut must not be lower than 0.")
@@ -133,7 +133,7 @@ def align(galaxy, *, r_cut=None):
     vel_rot_g = np.dot(A, gas_df[vel_columns].T.values)
 
     # recreate the valaxy
-    new = core.galaxy_as_kwargs(galaxy)
+    new = data.galaxy_as_kwargs(galaxy)
 
     new.update(
         x_s=pos_rot_s.T[:, 0],
@@ -156,4 +156,4 @@ def align(galaxy, *, r_cut=None):
         vz_g=vel_rot_g.T[:, 2],
     )
 
-    return core.mkgalaxy(**new)
+    return data.mkgalaxy(**new)
