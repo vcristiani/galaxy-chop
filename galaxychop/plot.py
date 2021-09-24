@@ -35,7 +35,7 @@ class GalaxyPlotter:
 
     # INTERNAL ================================================================
 
-    def __call__(self, kind="pairplot", **kwargs):
+    def __call__(self, plot_kind="pairplot", **kwargs):
         """Make plots of the galaxy
 
         Parameters
@@ -53,9 +53,9 @@ class GalaxyPlotter:
            The ax used by the plot
 
         """
-        if kind.startswith("_"):
+        if plot_kind.startswith("_"):
             raise ValueError(f"invalid kind name '{kind}'")
-        method = getattr(self, kind, None)
+        method = getattr(self, plot_kind, None)
         if not inspect.ismethod(method):
             raise ValueError(f"invalid kind name '{kind}'")
         return method(**kwargs)
@@ -65,12 +65,13 @@ class GalaxyPlotter:
     def _get_df_and_hue(self, ptypes, attributes, labels):
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
-        # labels es la columna que se va a usar para "resaltar cosas" (hue)
-        hue = labels
+        hue = None # by default not hue is selected
 
+        # labels es la columna que se va a usar para "resaltar cosas" (hue)
         # si es un str y no estaba en los atributos lo tengo que sacar
         # del dataframe
         if isinstance(labels, str) and labels not in attributes:
+            hue = labels
             attributes = np.concatenate((attributes, [labels]))
 
         # saco todos los atributos en un df
@@ -80,7 +81,7 @@ class GalaxyPlotter:
         # como columna al dataframe y asignar hue al nombre de esta nueva
         # columna
         if isinstance(labels, (list, np.ndarray)):
-            hue = "labels"  # labels no esta en pset por lo tanto sirve
+            hue = "__labels__"  # labels no esta en pset por lo tanto sirve
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
         return df, hue
