@@ -301,7 +301,7 @@ class Galaxy:
 
     @property
     def is_aligned(self):
-        return util.is_star_aligned(self)
+        return utils.is_star_aligned(self)
 
     @property
     def kinetic_energy_(self):
@@ -400,11 +400,12 @@ class Galaxy:
         Return
         ------
         tuple : `float`
-            (E_star_norm, eps, eps_r, x, y): Normalized specific energy of the stars,
-            circularity parameter (J_z/J_circ), projected circularity parameter
-            (J_p/J_circ), the normalized specific energy for the particle with
-            the maximum z-specific angular momentum component per the bin (x),
-            and the maximum of z-specific angular momentum component (y).
+            (E_star_norm, eps, eps_r, x, y): Normalized specific energy of
+            the stars, circularity parameter (J_z/J_circ), projected
+            circularity parameter (J_p/J_circ), the normalized specific
+            energy for the particle with the maximum z-specific angular
+            momentum component per the bin (x), and the maximum of z-specific
+            angular momentum component (y).
             See section Notes for more details.
             Shape(n_s, 1). Unit: dimensionless
 
@@ -420,9 +421,9 @@ class Galaxy:
         --------
         This returns the normalized specific energy of stars (E_star_norm), the
         circularity parameters (eps : J_z/J_circ and
-        eps_r: J_p/J_circ), and the normalized specific energy for the particle with
-        the maximum z-component of the normalized specific angular momentum
-        per bin (`x`) and the maximum value of the z-component of the
+        eps_r: J_p/J_circ), and the normalized specific energy for the particle
+        with the maximum z-component of the normalized specific angular
+        momentum per bin (`x`) and the maximum value of the z-component of the
         normalized specific angular momentum per bin (`y`).
 
         >>> import galaxychop as gchop
@@ -431,7 +432,7 @@ class Galaxy:
         """
 
         df = self.to_dataframe(["ptypev", "total_energy", "Jx", "Jy", "Jz"])
-        Jr_part = np.sqrt(df.Jx **2 + df.Jy **2)
+        Jr_part = np.sqrt(df.Jx ** 2 + df.Jy ** 2)
         E_tot = df.total_energy
 
         # Remove the particles that are not bound: E > 0 and with E = -inf.
@@ -498,12 +499,13 @@ class Galaxy:
         x = x[zero]
         y = y[zero]
 
-        #Stars particles
+        # Stars particles
         df_star = df[df.ptypev == ParticleSetType.STARS.value]
-        Jr_star = np.sqrt(df_star.Jx **2 + df_star.Jy **2)
+        Jr_star = np.sqrt(df_star.Jx ** 2 + df_star.Jy ** 2)
         Etot_s = df_star.total_energy
 
-        # Remove the star particles that are not bound: E > 0 and with E = -inf.
+        # Remove the star particles that are not bound:
+        # E > 0 and with E = -inf.
         (bound_star,) = np.where((Etot_s <= 0.0) & (Etot_s != -np.inf))
 
         # Normalize E, Jz and Jr for the stars.
@@ -549,7 +551,6 @@ def galaxy_as_kwargs(galaxy):
     gas_kws = _pset_as_kwargs(gkwargs.pop("gas"), "g")
 
     gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
-
 
     return gkwargs
 
