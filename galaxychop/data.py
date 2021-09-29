@@ -24,6 +24,7 @@ import pandas as pd
 import uttr
 
 from . import plot
+from . import utils
 
 
 # =============================================================================
