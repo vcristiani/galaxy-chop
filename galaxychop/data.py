@@ -242,9 +242,6 @@ class Galaxy:
     dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
-    #x = uttr.ib(default=None, unit=u.dimensionless_unscaled)
-    #y = uttr.ib(default=None, unit=u.dimensionless_unscaled)
-
     has_potential_: bool = attr.ib(init=False)
 
     @has_potential_.default
@@ -385,10 +382,11 @@ class Galaxy:
 
     def jcirc(self, bin0=0.05, bin1=0.005):
         """
-        Circular angular momentum.
+        Processing energy and angular momentum.
 
-        Calculation of the points to build the function of the circular
-        angular momentum.
+        Calculation of Normalized specific energy of the stars,
+        circularity parameter calculation, projected circularity parameter,
+        and the points to build the function of the circular angular momentum.
 
         Parameters
         ----------
@@ -399,93 +397,54 @@ class Galaxy:
             Size of the specific energy bin of the outer part of the galaxy,
             in the range of (-0.1, 0) of the normalized energy.
 
-        Returns
-        -------
-        gx : `galaxy object`
-            New instanced galaxy with `x`, being the normalized specific
-            energy for the particle with the maximum z-specific angular
-            momentum component per the bin, and `y` beign the maximum of
-            z-specific angular momentum component.
-            See section Notes for more details.
-
-        Notes
-        -----
-            The `x` and `y` are calculated from the binning in the
-            normalized specific energy. In each bin, the particle with the
-            maximum value of z-component of standardized specific angular
-            momentum is selected. This value is assigned to the `y` parameter
-            and its corresponding normalized specific energy pair value to
-            `x`.
-
-        Examples
-        --------
-        This returns the normalized specific energy for the particle with
-        the maximum z-component of the normalized specific angular momentum
-        per bin (`x`) and the maximum value of the z-component of the
-        normalized specific angular momentum per bin (`y`)
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> g_Jcirc = galaxy.jcirc()
-        >>> x, y = g_Jcirc.x, g_Jcirc.y
-
-
-        Circularity parameter calculation.
-
         Return
         ------
         tuple : `float`
-            (E_star, eps, eps_r): Normalized specific energy of the stars,
-            circularity parameter (J_z/J_circ), J_p/J_circ.
+            (E_star_norm, eps, eps_r, x, y): Normalized specific energy of the stars,
+            circularity parameter (J_z/J_circ), projected circularity parameter
+            (J_p/J_circ), the normalized specific energy for the particle with
+            the maximum z-specific angular momentum component per the bin (x),
+            and the maximum of z-specific angular momentum component (y).
+            See section Notes for more details.
             Shape(n_s, 1). Unit: dimensionless
 
         Notes
         -----
-        J_z : z-component of normalized specific angular momentum.
-
-        J_circ : Specific circular angular momentum.
-
-        J_p : Projection on the xy plane of the normalized specific angular
-        momentum.
+        The `x` and `y` are calculated from the binning in the
+        normalized specific energy. In each bin, the particle with the
+        maximum value of z-component of standardized specific angular
+        momentum is selected. This value is assigned to the `y` parameter
+        and its corresponding normalized specific energy pair value to `x`.
 
         Examples
         --------
-        This returns the normalized specific energy of stars (E_star), the
-        circularity parameter (eps : J_z/J_circ) and
-        eps_r: (J_p/J_circ).
+        This returns the normalized specific energy of stars (E_star_norm), the
+        circularity parameters (eps : J_z/J_circ and
+        eps_r: J_p/J_circ), and the normalized specific energy for the particle with
+        the maximum z-component of the normalized specific angular momentum
+        per bin (`x`) and the maximum value of the z-component of the
+        normalized specific angular momentum per bin (`y`).
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> E_star, eps, eps_r = galaxy.paramcirc
-
+        >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
         """
 
-        df = self.to_dataframe(["total_energy", "Jx", "Jy", "Jz"])
+        df = self.to_dataframe(["ptypev", "total_energy", "Jx", "Jy", "Jz"])
         Jr_part = np.sqrt(df.Jx **2 + df.Jy **2)
-
-        df_star = self.stars.to_dataframe(["total_energy", "Jx","Jy","Jz"])
-        Jr_star = np.sqrt(df_star.Jx **2 + df_star.Jy **2)
-
-        Etot_s = df.star.total_energy
         E_tot = df.total_energy
 
-        # Remove the particles that are not bound: E > 0.
-        (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(Etot_s <= 0.0)
-
-        # Remove the particles with E = -inf.
-        (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)
+        # Remove the particles that are not bound: E > 0 and with E = -inf.
+        (bound,) = np.where((E_tot <= 0.0) & (E_tot != -np.inf))
 
         # Normalize the two variables: E between 0 and 1; Jz between -1 and 1.
-        E = E_tot[neg][fin] / np.abs(np.min(E_tot[neg][fin]))
-        Jz = df.Jz[neg][fin] / np.max(np.abs(df.Jz[neg][fin]))
+        E = E_tot[bound] / np.abs(np.min(E_tot[bound]))
+        Jz = df.Jz[bound] / np.max(np.abs(df.Jz[bound]))
 
         # Build the specific energy binning and select the Jz values to
         # calculate J_circ.
         aux0 = np.arange(-1.0, -0.1, bin0)
         aux1 = np.arange(-0.1, 0.0, bin1)
-
         aux = np.concatenate([aux0, aux1], axis=0)
 
         x = np.zeros(len(aux) + 1)
@@ -539,49 +498,36 @@ class Galaxy:
         x = x[zero]
         y = y[zero]
 
+        #Stars particles
+        df_star = df[df.ptypev == ParticleSetType.STARS.value]
+        Jr_star = np.sqrt(df_star.Jx **2 + df_star.Jy **2)
+        Etot_s = df_star.total_energy
 
+        # Remove the star particles that are not bound: E > 0 and with E = -inf.
+        (bound_star,) = np.where((Etot_s <= 0.0) & (Etot_s != -np.inf))
 
+        # Normalize E, Jz and Jr for the stars.
+        E_star_norm = Etot_s[bound_star] / np.abs(np.min(E_tot[bound]))
+        Jz_star_norm = df_star.Jz[bound_star] / np.max(np.abs(df.Jz[bound]))
+        Jr_star_norm = Jr_star[bound_star] / np.max(np.abs(Jr_part[bound]))
 
-        #--------------------------------------------
-        E_star_ = np.full(len(Etot_s), np.nan)
-        eps_ = np.full(len(Etot_s), np.nan)
-        eps_r_ = np.full(len(Etot_s), np.nan)
-
-        # Remove the particles that are not bound: E > 0.
-        (neg,) = np.where(E_tot <= 0.0)
-        (neg_star,) = np.where(Etot_s <= 0.0)
-
-        # Remove the particles with E = -inf.
-        (fin,) = np.where(E_tot[neg] != -np.inf)
-        (fin_star,) = np.where(Etot_s[neg_star] != -np.inf)
-
-        # Normalize E, Lz and Lr for the stars.
-        up1 = Etot_s[neg_star][fin_star]
-        down1 = np.abs(np.min(E_tot[neg][fin]))
-        E_star = up1 / down1
-
-        up2 = df_star.Jz[neg_star][fin_star]
-        down2 = np.max(np.abs(df.Jz[neg][fin]))
-        Jz_star_norm = up2 / down2
-
-        up3 = Jr_star[neg_star][fin_star]
-        down3 = np.max(np.abs(Jr_part[neg][fin]))
-        Jr_star_norm = up3 / down3
-
-        # Calculates of the circularity parameter Lz/Lc.
-        eps = Jz_star_norm / np.interp(E_star, x, y)
-
-        # Calculates the same for Lp/Lc.
-        eps_r = Jr_star_norm / np.interp(E_star, x, y)
+        # Calculates of the circularity parameters Jz/Jcirc and Jproy/Jcirc.
+        j_circ = np.interp(E_star_norm, x, y)
+        eps = Jz_star_norm / j_circ
+        eps_r = Jr_star_norm / j_circ
 
         # We remove particles that have circularity < -1 and circularity > 1.
         (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-        E_star_[neg_star[fin_star[mask]]] = E_star[mask]
-        eps_[neg_star[fin_star[mask]]] = eps[mask]
-        eps_r_[neg_star[fin_star[mask]]] = eps_r[mask]
+        E_star_norm_ = np.full(len(Etot_s), np.nan)
+        eps_ = np.full(len(Etot_s), np.nan)
+        eps_r_ = np.full(len(Etot_s), np.nan)
 
-        return (E_star_, eps_, eps_r_, x, y)
+        E_star_norm_[bound_star[mask]] = E_star_norm[mask]
+        eps_[bound_star[mask]] = eps[mask]
+        eps_r_[bound_star[mask]] = eps_r[mask]
+
+        return (E_star_norm_, eps_, eps_r_, x, y)
 
 
 # =============================================================================
