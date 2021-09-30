@@ -16,6 +16,8 @@
 
 import inspect
 
+import attr
+
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -26,12 +28,12 @@ import seaborn as sns
 # ACCESSOR
 # =============================================================================
 
-
+@attr.s(frozen=True, slots=True, cmp=False)
 class GalaxyPlotter:
     """Make plots of DecisionMatrix."""
 
-    def __init__(self, galaxy):
-        self._galaxy = galaxy
+    _galaxy = attr.ib()
+
 
     # INTERNAL ================================================================
 
@@ -56,7 +58,7 @@ class GalaxyPlotter:
         if plot_kind.startswith("_"):
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         method = getattr(self, plot_kind, None)
-        if not inspect.ismethod(method):
+        if not callable(method):
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         return method(**kwargs)
 
