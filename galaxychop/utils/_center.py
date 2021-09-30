@@ -16,6 +16,8 @@
 
 import numpy as np
 
+from .. import data
+
 # =============================================================================
 # BACKENDS
 # =============================================================================
@@ -59,7 +61,6 @@ def center(galaxy):
             Centered gas positions.
 
     """
-    from .. import data
 
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")

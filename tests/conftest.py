@@ -13,7 +13,7 @@
 import os
 from pathlib import Path
 
-from galaxychop import data
+from galaxychop import data, io
 
 import numpy as np
 
@@ -37,6 +37,15 @@ TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 @pytest.fixture(scope="session")
 def data_path():
     return TEST_DATA_PATH.joinpath
+
+
+@pytest.fixture(scope="session")
+def read_hdf5_galaxy(data_path):
+    def read(filename):
+        path = data_path(filename)
+        return io.read_hdf5(path)
+
+    return read
 
 
 @pytest.fixture(scope="session")

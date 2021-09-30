@@ -13,12 +13,14 @@
 from ._potential import potential, G
 from ._center import center, is_centered
 from ._align import star_align, is_star_aligned
+from ._circ import jcirc
 
 ___all__ = [
     "potential",
     "G",
     "center",
     "is_centered",
+    "jcirc",
     "star_align",
     "is_star_aligned",
 ]

@@ -65,7 +65,7 @@ class GalaxyPlotter:
     def _get_df_and_hue(self, ptypes, attributes, labels):
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
-        hue = None # by default not hue is selected
+        hue = None  # by default not hue is selected
 
         # labels es la columna que se va a usar para "resaltar cosas" (hue)
         # si es un str y no estaba en los atributos lo tengo que sacar

@@ -19,6 +19,8 @@ import astropy.units as u
 
 import numpy as np
 
+from .. import data
+
 
 # =============================================================================
 # CONSTANTS
@@ -99,8 +101,6 @@ def potential(galaxy, backend="numpy"):
     potential : `np.ndarray`
         Specific potential energy of particles. Shape(n,1)
     """
-    from .. import data
-
     if galaxy.has_potential_:
         raise ValueError("galaxy are already calculated")
 

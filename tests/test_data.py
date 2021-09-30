@@ -12,7 +12,7 @@
 
 import astropy.units as u
 
-from galaxychop import data
+from galaxychop import data, plot
 
 import numpy as np
 
@@ -570,6 +570,17 @@ def test_galaxy_as_kwargs(data_galaxy):
     assert np.all(gkwargs["potential_s"].to_value() == potential_s)
     assert np.all(gkwargs["potential_g"].to_value() == potential_g)
     assert np.all(gkwargs["potential_dm"].to_value() == potential_dm)
+
+
+# =============================================================================
+# PLOTTER
+# =============================================================================
+
+
+def test_Galaxy_kinectic_plot(galaxy):
+    gal = galaxy()
+    assert isinstance(gal.plot, plot.GalaxyPlotter)
+    assert gal.plot._galaxy is gal
 
 
 # =============================================================================

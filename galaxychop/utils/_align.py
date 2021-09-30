@@ -16,6 +16,8 @@
 
 import numpy as np
 
+from .. import data
+
 # =============================================================================
 # API
 # =============================================================================
@@ -93,7 +95,6 @@ def star_align(galaxy, *, r_cut=None):
 
 
     """
-    from .. import data
 
     if r_cut is not None and r_cut <= 0.0:
         raise ValueError("r_cut must not be lower than 0.")
