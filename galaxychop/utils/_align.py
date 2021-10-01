@@ -54,10 +54,11 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut=None):
 
     r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
-    if r_cut is not None:
-        (mask,) = np.where(r < r_cut)
-    else:
+    if r_cut is None:
         mask = np.repeat(True, len(r))
+    else:
+        (mask,) = np.where(r < r_cut)
+
 
     mjx, mjy, mjz = m * Jx, m * Jy, m * Jz
 
