@@ -37,8 +37,22 @@ def image_paths(func, format):
 
 
 # =============================================================================
-# IO TESTS
+# TEST __call__
 # =============================================================================
+
+
+def test_plot_call_invalid_plot_kind(galaxy):
+    gal = galaxy(seed=42)
+
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    with pytest.raises(ValueError):
+        plotter("__call__")
+
+    # not callable
+    super(plot.GalaxyPlotter, plotter).__setattr__("zaraza", None)
+    with pytest.raises(ValueError):
+        plotter("zaraza")
 
 
 @pytest.mark.parametrize("plot_kind", ["pairplot"])
@@ -54,6 +68,11 @@ def test_plot_call_heatmap(galaxy, plot_kind):
         plotter(plot_kind=plot_kind)
 
     plot_method.assert_called_once()
+
+
+# =============================================================================
+# pairplot
+# =============================================================================
 
 
 @pytest.mark.slow
@@ -75,6 +94,34 @@ def test_plot_pairplot(galaxy, format):
     # EXPECTED
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
     g = sns.pairplot(data=df, hue="ptype", kind="hist", diag_kind="kde")
+    g.savefig(ref_path)
+
+    result = compare_images(test_path, ref_path, 0)
+    if result:
+        pytest.fail(result)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+def test_plot_pairplot_external_labels(galaxy, format):
+    # Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
+    # Usar las funciones de check_figures equals aca, asi que hay que hacer
+    # todo a mano...
+
+    test_path, ref_path = image_paths(test_plot_pairplot, format)
+
+    gal = galaxy(seed=42)
+
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
+    g = plotter.pairplot(attributes=df[["x", "y"]], labels=df.ptype.to_numpy())
+    g.savefig(test_path)
+
+    # EXPECTED
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
+    df.columns = ["x", "y", "Hue"]
+    g = sns.pairplot(data=df, hue="Hue", kind="hist", diag_kind="kde")
     g.savefig(ref_path)
 
     result = compare_images(test_path, ref_path, 0)

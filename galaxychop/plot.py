@@ -25,7 +25,7 @@ import seaborn as sns
 # =============================================================================
 
 
-@attr.s(frozen=True, slots=True, order=False)
+@attr.s(frozen=True, order=False)
 class GalaxyPlotter:
     """Make plots of DecisionMatrix."""
 
@@ -79,7 +79,7 @@ class GalaxyPlotter:
         # como columna al dataframe y asignar hue al nombre de esta nueva
         # columna
         if isinstance(labels, (list, np.ndarray)):
-            hue = "__labels__"  # labels no esta en pset por lo tanto sirve
+            hue = "Hue"  # labels no esta en pset por lo tanto sirve
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
         return df, hue

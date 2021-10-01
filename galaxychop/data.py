@@ -278,18 +278,18 @@ class Galaxy:
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
-        mkptypes = {
+        ptypes_makers = {
             "stars": self.stars.to_dataframe,
             "dark_matter": self.dark_matter.to_dataframe,
             "gas": self.gas.to_dataframe,
         }
 
-        ptypes = mkptypes.keys() if ptypes is None else ptypes
+        ptypes = ptypes_makers.keys() if ptypes is None else ptypes
 
         parts = []
         for ptype in ptypes:
-            maker = mkptypes[ptype]
-            df = maker(attributes=attributes)
+            mkptype = ptypes_makers[ptype]
+            df = mkptype(attributes=attributes)
             parts.append(df)
 
         return pd.concat(parts, ignore_index=True)
