@@ -164,16 +164,16 @@ def star_align(galaxy, *, r_cut=None):
     return data.mkgalaxy(**new)
 
 
-def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
+def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-04, atol=1e-03):
 
     # Now we extract only the needed column to rotate the galaxy
-    df = galaxy.stars.to_dataframe(["x", "y", "z", "Jx", "Jy", "Jz"])
+    df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
 
     mask = _make_mask(df.x.values, df.y.values, df.z.values, r_cut)
 
-    Jxtot = np.sum(df.Jx.values[mask])
-    Jytot = np.sum(df.Jy.values[mask])
-    Jztot = np.sum(df.Jz.values[mask])
+    Jxtot = np.sum(df.Jx.values[mask] * df.m.values[mask])
+    Jytot = np.sum(df.Jy.values[mask] * df.m.values[mask])
+    Jztot = np.sum(df.Jz.values[mask] * df.m.values[mask])
     Jtot = np.sqrt(Jxtot ** 2 + Jytot ** 2 + Jztot ** 2)
 
     return (

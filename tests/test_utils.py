@@ -194,19 +194,14 @@ def test_star_align_invalid_rcut(galaxy):
         utils.star_align(gal, r_cut=-1)
 
 
-@pytest.mark.xfail
-def test_is_star_aligned(galaxy):
-    gal = galaxy(
-        seed=42,
-        stars_potential=True,
-        dm_potential=True,
-        gas_potential=True,
-    )
+#@pytest.mark.xfail
+def test_is_star_aligned(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
 
-    agal = utils.star_align(gal)
+    agal = utils.star_align(gal, r_cut=5)
 
-    assert not utils.is_star_aligned(gal)
-    assert utils.is_star_aligned(agal)
+    assert not utils.is_star_aligned(gal, r_cut=5)
+    assert utils.is_star_aligned(agal, r_cut=5)
 
 
 # =============================================================================
