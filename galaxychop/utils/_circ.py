@@ -82,18 +82,18 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
 
     # extract only the needed columns
     df = galaxy.to_dataframe(
-        columns=["ptypev", "total_energy", "Jx", "Jy", "Jz"]
+        attributes=["ptypev", "total_energy", "Jx", "Jy", "Jz"]
     )
 
-    Jr_part = np.sqrt(df.Jx ** 2 + df.Jy ** 2)
-    E_tot = df.total_energy
+    Jr_part = np.sqrt(df.Jx.values ** 2 + df.Jy.values ** 2)
+    E_tot = df.total_energy.values
 
     # Remove the particles that are not bound: E > 0 and with E = -inf.
     (bound,) = np.where((E_tot <= 0.0) & (E_tot != -np.inf))
 
     # Normalize the two variables: E between 0 and 1; Jz between -1 and 1.
     E = E_tot[bound] / np.abs(np.min(E_tot[bound]))
-    Jz = df.Jz[bound] / np.max(np.abs(df.Jz[bound]))
+    Jz = df.Jz.values[bound] / np.max(np.abs(df.Jz.values[bound]))
 
     # Build the specific energy binning and select the Jz values to
     # calculate J_circ.
@@ -153,8 +153,8 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
 
     # Stars particles
     df_star = df[df.ptypev == ParticleSetType.STARS.value]
-    Jr_star = np.sqrt(df_star.Jx ** 2 + df_star.Jy ** 2)
-    Etot_s = df_star.total_energy
+    Jr_star = np.sqrt(df_star.Jx.values ** 2 + df_star.Jy.values ** 2)
+    Etot_s = df_star.total_energy.values
 
     # Remove the star particles that are not bound:
     # E > 0 and with E = -inf.
@@ -162,7 +162,7 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
 
     # Normalize E, Jz and Jr for the stars.
     E_star_norm = Etot_s[bound_star] / np.abs(np.min(E_tot[bound]))
-    Jz_star_norm = df_star.Jz[bound_star] / np.max(np.abs(df.Jz[bound]))
+    Jz_star_norm = df_star.Jz.values[bound_star] / np.max(np.abs(df.Jz.values[bound]))
     Jr_star_norm = Jr_star[bound_star] / np.max(np.abs(Jr_part[bound]))
 
     # Calculates of the circularity parameters Jz/Jcirc and Jproy/Jcirc.
