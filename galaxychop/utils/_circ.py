@@ -162,7 +162,9 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
 
     # Normalize E, Jz and Jr for the stars.
     E_star_norm = Etot_s[bound_star] / np.abs(np.min(E_tot[bound]))
-    Jz_star_norm = df_star.Jz.values[bound_star] / np.max(np.abs(df.Jz.values[bound]))
+    Jz_star_norm = df_star.Jz.values[bound_star] / np.max(
+        np.abs(df.Jz.values[bound])
+    )
     Jr_star_norm = Jr_star[bound_star] / np.max(np.abs(Jr_part[bound]))
 
     # Calculates of the circularity parameters Jz/Jcirc and Jproy/Jcirc.
@@ -173,12 +175,12 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     # We remove particles that have circularity < -1 and circularity > 1.
     (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
 
-    E_star_norm = np.full(len(Etot_s), np.nan)
-    eps = np.full(len(Etot_s), np.nan)
-    eps_r = np.full(len(Etot_s), np.nan)
+    E_star_norm_ = np.full(len(Etot_s), np.nan)
+    eps_ = np.full(len(Etot_s), np.nan)
+    eps_r_ = np.full(len(Etot_s), np.nan)
 
-    E_star_norm[bound_star[mask]] = E_star_norm[mask]
-    eps[bound_star[mask]] = eps[mask]
-    eps_r[bound_star[mask]] = eps_r[mask]
+    E_star_norm_[bound_star[mask]] = E_star_norm[mask]
+    eps_[bound_star[mask]] = eps[mask]
+    eps_r_[bound_star[mask]] = eps_r[mask]
 
     return JCirc(E_star_norm=E_star_norm, eps=eps, eps_r=eps_r, x=x, y=y)
