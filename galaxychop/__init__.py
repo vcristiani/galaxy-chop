@@ -28,4 +28,4 @@ __version__ = "0.1.0"
 from .data import *  # noqa
 from .io import *  # noqa
 from .utils import *  # noqa
-from . import models, datasets
+from . import models, datasets  # noqa

@@ -2,7 +2,7 @@
 line-length = 79
 target-version = ['py38', 'py39']
 
-
+[tool.pytest.ini_options]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]

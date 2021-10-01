@@ -14,11 +14,7 @@
 # IMPORTS
 # =============================================================================
 
-import inspect
-
 import attr
-
-import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -28,12 +24,12 @@ import seaborn as sns
 # ACCESSOR
 # =============================================================================
 
-@attr.s(frozen=True, slots=True, cmp=False)
+
+@attr.s(frozen=True, slots=True, order=False)
 class GalaxyPlotter:
     """Make plots of DecisionMatrix."""
 
     _galaxy = attr.ib()
-
 
     # INTERNAL ================================================================
 
@@ -90,15 +86,12 @@ class GalaxyPlotter:
 
     # PLOTS==== ===============================================================
 
-    def pairplot(
-        self, ptypes=None, attributes=None, labels="ptype", ax=None, **kwargs
-    ):
+    def pairplot(self, ptypes=None, attributes=None, labels="ptype", **kwargs):
 
         df, hue = self._get_df_and_hue(ptypes, attributes, labels)
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
-        kwargs.setdefault("corner", True)
 
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax

@@ -10,11 +10,12 @@
 # IMPORTS
 # =============================================================================
 
+from galaxychop import data, utils
+
 import numpy as np
 
 import pytest
 
-from galaxychop import data, utils
 
 # =============================================================================
 #   POTENTIAL ENERGY
@@ -157,13 +158,14 @@ def test_star_align(galaxy):
 # JCIRC
 # =============================================================================
 
+
 @pytest.mark.xfail
 def test_jcirc_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     result = utils.jcirc(gal)
 
     # validar result aca
-    assert False  # este assert False es para rellenar cuando result ande
+    assert result  # este assert False es para rellenar cuando result ande
 
 
 @pytest.mark.xfail
@@ -172,4 +174,4 @@ def test_jcirc_fake_galaxy(galaxy):
     result = utils.jcirc(gal)
 
     # validar result aca
-    assert False  # este assert False es para rellenar cuando result ande
+    assert result  # este assert False es para rellenar cuando result ande
