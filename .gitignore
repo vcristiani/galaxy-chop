@@ -113,3 +113,6 @@ dask-worker-space/
 .idea/src.iml
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
+
+
+result_images/
