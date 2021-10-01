@@ -121,6 +121,39 @@ def test_is_centered(galaxy):
 # =============================================================================
 
 
+def test_star_align_rcur0dot9(galaxy):
+    gal = galaxy(seed=42)
+
+    agal = utils.star_align(gal, r_cut=0.9)
+
+    df = gal.to_dataframe()
+    adf = agal.to_dataframe()
+
+    changed = [
+        "x",
+        "y",
+        "z",
+        "vx",
+        "vy",
+        "vz",
+        "Jx",
+        "Jy",
+        "Jz",
+        "kinetic_energy",
+        "total_energy",
+    ]
+
+    for colname in df.columns[~df.columns.isin(changed)]:
+        ocol = df[colname]
+        acol = adf[colname]
+        assert (ocol == acol).all(), colname
+
+    for colname in changed:
+        ocol = df[colname]
+        acol = adf[colname]
+        assert not (ocol == acol).all(), colname
+
+
 def test_star_align(galaxy):
     gal = galaxy(seed=42)
 
@@ -152,6 +185,28 @@ def test_star_align(galaxy):
         ocol = df[colname]
         acol = adf[colname]
         assert not (ocol == acol).all(), colname
+
+
+def test_star_align_invalid_rcut(galaxy):
+    gal = galaxy(seed=42)
+
+    with pytest.raises(ValueError):
+        utils.star_align(gal, r_cut=-1)
+
+
+@pytest.mark.xfail
+def test_is_star_aligned(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=True,
+        dm_potential=True,
+        gas_potential=True,
+    )
+
+    agal = utils.star_align(gal)
+
+    assert not utils.is_star_aligned(gal)
+    assert utils.is_star_aligned(agal)
 
 
 # =============================================================================

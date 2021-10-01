@@ -23,7 +23,16 @@ from .. import data
 # =============================================================================
 
 
-def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut=None):
+def _make_mask(x, y, z, r_cut):
+    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+
+    if r_cut is None:
+        return np.repeat(True, len(r))
+
+    return np.where(r < r_cut)
+
+
+def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     """
     Rotation matrix calculation.
 
@@ -52,13 +61,7 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut=None):
         Rotation matrix. Shape(3,3)
     """
 
-    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
-
-    if r_cut is None:
-        mask = np.repeat(True, len(r))
-    else:
-        (mask,) = np.where(r < r_cut)
-
+    mask = _make_mask(x, y, z, r_cut)
 
     mjx, mjy, mjz = m * Jx, m * Jy, m * Jz
 
@@ -164,18 +167,13 @@ def star_align(galaxy, *, r_cut=None):
 def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
 
     # Now we extract only the needed column to rotate the galaxy
-    df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
+    df = galaxy.stars.to_dataframe(["x", "y", "z", "Jx", "Jy", "Jz"])
 
-    r = np.sqrt(df.x ** 2 + df.y ** 2 + df.z ** 2)
+    mask = _make_mask(df.x.values, df.y.values, df.z.values, r_cut)
 
-    if r_cut is not None:
-        (mask,) = np.where(r < r_cut)
-    else:
-        mask = np.repeat(True, len(r))
-
-    Jxtot = np.sum(df.Jx[mask])
-    Jytot = np.sum(df.Jy[mask])
-    Jztot = np.sum(df.Jz[mask])
+    Jxtot = np.sum(df.Jx.values[mask])
+    Jytot = np.sum(df.Jy.values[mask])
+    Jztot = np.sum(df.Jz.values[mask])
     Jtot = np.sqrt(Jxtot ** 2 + Jytot ** 2 + Jztot ** 2)
 
     return (

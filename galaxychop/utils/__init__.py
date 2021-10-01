@@ -11,6 +11,6 @@
 # =============================================================================
 
 from ._potential import potential, G  # noqa
-from ._center import center, is_centered # noqa
-from ._align import star_align, is_star_aligned # noqa
-from ._circ import jcirc # noqa
+from ._center import center, is_centered  # noqa
+from ._align import star_align, is_star_aligned  # noqa
+from ._circ import jcirc  # noqa

@@ -79,7 +79,7 @@ class GalaxyPlotter:
         # como columna al dataframe y asignar hue al nombre de esta nueva
         # columna
         if isinstance(labels, (list, np.ndarray)):
-            hue = "Hue"  # labels no esta en pset por lo tanto sirve
+            hue = "Hue"  # Hue no esta en pset por lo tanto sirve
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
         return df, hue
