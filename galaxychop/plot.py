@@ -73,7 +73,7 @@ class GalaxyPlotter:
             attributes = np.concatenate((attributes, [labels]))
 
         # saco todos los atributos en un df
-        df = self._galaxy.to_dataframe(ptypes=ptypes, columns=attributes)
+        df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
 
         # ahora puede ser que los labels sean un np array y hay que agregarlo
         # como columna al dataframe y asignar hue al nombre de esta nueva

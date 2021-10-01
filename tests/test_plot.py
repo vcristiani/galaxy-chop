@@ -73,7 +73,7 @@ def test_plot_pairplot(galaxy, format):
     g.savefig(test_path)
 
     # EXPECTED
-    df = gal.to_dataframe(columns=["x", "y", "ptype"])
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
     g = sns.pairplot(data=df, hue="ptype", kind="hist", diag_kind="kde")
     g.savefig(ref_path)
 

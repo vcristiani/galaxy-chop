@@ -66,7 +66,7 @@ def center(galaxy):
         raise ValueError("galaxy must has the potential energy")
 
     # sacamos como dataframe lo unico que vamos a operar
-    df = galaxy.to_dataframe(columns=["ptypev", "x", "y", "z", "potential"])
+    df = galaxy.to_dataframe(attributes=["ptypev", "x", "y", "z", "potential"])
 
     # minimo indice de potencial de todo y sacamos cual es la fila
     minpot_idx = df.potential.argmin()
@@ -105,7 +105,7 @@ def is_centered(galaxy, rtol=1e-05, atol=1e-08):
         raise ValueError("galaxy must has the potential energy")
 
     # sacamos como dataframe lo unico que vamos a operar
-    df = galaxy.to_dataframe(columns=["x", "y", "z", "potential"])
+    df = galaxy.to_dataframe(attributes=["x", "y", "z", "potential"])
 
     # minimo indice de potencial de todo y sacamos cual es la fila
     minpot_idx = df.potential.argmin()

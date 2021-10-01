@@ -158,9 +158,9 @@ class ParticleSet:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self, columns=None):
+    def to_dataframe(self, attributes=None):
         arr = self.arr_
-        mkcolumns = {
+        columns_makers = {
             "ptype": lambda: self.ptype.name,
             "ptypev": lambda: self.ptype.value,
             "m": lambda: arr.m,
@@ -182,11 +182,13 @@ class ParticleSet:
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
         }
-        columns = mkcolumns.keys() if columns is None else columns
+        attributes = (
+            columns_makers.keys() if attributes is None else attributes
+        )
         data = {}
-        for colname in columns:
-            column_make = mkcolumns[colname]
-            data[colname] = column_make()
+        for aname in attributes:
+            mkcolumn = columns_makers[aname]
+            data[aname] = mkcolumn()
         return pd.DataFrame(data)
 
 
@@ -275,7 +277,7 @@ class Galaxy:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self, *, ptypes=None, columns=None):
+    def to_dataframe(self, *, ptypes=None, attributes=None):
         mkptypes = {
             "stars": self.stars.to_dataframe,
             "dark_matter": self.dark_matter.to_dataframe,
@@ -287,7 +289,7 @@ class Galaxy:
         parts = []
         for ptype in ptypes:
             maker = mkptypes[ptype]
-            df = maker(columns=columns)
+            df = maker(attributes=attributes)
             parts.append(df)
 
         return pd.concat(parts, ignore_index=True)
