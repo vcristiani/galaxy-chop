@@ -290,7 +290,7 @@ class Galaxy:
             df = maker(columns=columns)
             parts.append(df)
 
-        return pd.concat(parts)
+        return pd.concat(parts, ignore_index=True)
 
     @property
     def plot(self):
