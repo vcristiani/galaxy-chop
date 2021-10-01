@@ -9,15 +9,35 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import itertools as it
 from unittest import mock
 
 from galaxychop import plot
 
-from matplotlib.testing.decorators import check_figures_equal
+import matplotlib.pyplot as plt
+from matplotlib.testing.decorators import (
+    compare_images,
+    _image_directories as img_dir,
+)
 
 import pytest
 
 import seaborn as sns
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
+
+
+def image_paths(func, format):
+    idir = img_dir(test_plot_pairplot)[-1]
+    idir.mkdir(parents=True, exist_ok=True)
+
+    test = idir / f"{func.__name__}[{format}]-.{format}"
+    expected = idir / f"{func.__name__}[{format}]-expected.{format}"
+
+    return test, expected
+
 
 # =============================================================================
 # IO TESTS
@@ -39,28 +59,27 @@ def test_plot_call_heatmap(galaxy, plot_kind):
     plot_method.assert_called_once()
 
 
-@pytest.mark.slow
-@check_figures_equal()
-def test_plot_pairplot(galaxy, fig_test, fig_ref):
-    gal = galaxy(seed=42)
+# @pytest.mark.slow
+# @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+# def test_plot_pairplot(galaxy, format):
+#     """Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
 
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+#     Usar las
+#     """
+#     test_path, ref_path = image_paths(test_plot_pairplot, format)
 
-    # pairplot internamente llama a gcf (plt.subplots)
-    # para crear la grilla de plots (Pairgrid) por lo que la unica
-    # forma de pasarle la figura de testeo/referencia es con un mock
-    axes = fig_test.subplots(2, 2)
-    with mock.patch(
-        "matplotlib.pyplot.subplots", return_value=(fig_test, axes)
-    ):
-        plotter.pairplot(attributes=["x", "y"])
+#     gal = galaxy(seed=42)
 
-    # EXPECTED
-    axes = fig_ref.subplots(2, 2)
+#     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    df = gal.to_dataframe(columns=["x", "y", "ptype"])
+#     g = plotter.pairplot(attributes=["x", "y"])
+#     g.savefig(test_path)
 
-    with mock.patch(
-        "matplotlib.pyplot.subplots", return_value=(fig_ref, axes)
-    ):
-        sns.pairplot(data=df, hue="ptype", kind="hist", diag_kind="kde")
+#     # EXPECTED
+#     df = gal.to_dataframe(columns=["x", "y", "ptype"])
+#     g = sns.pairplot(data=df, hue="ptype", kind="hist", diag_kind="kde")
+#     g.savefig(ref_path)
+
+#     result = compare_images(test_path, ref_path, 0)
+#     if result:
+#         pytest.fail(result)
