@@ -39,6 +39,7 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
 
     Parameters
     ----------
+    galaxy : object of Galaxy class.
     bin0 : `float`. Default=0.05
         Size of the specific energy bin of the inner part of the galaxy,
         in the range of (-1, -0.1) of the normalized energy.

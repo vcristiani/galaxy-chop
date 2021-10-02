@@ -89,18 +89,15 @@ def potential(galaxy, backend="numpy"):
 
     Parameters
     ----------
-    x, y, z : `np.ndarray`
-        Positions of particles. Shape(n,1)
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    softening : `float`, default value = 0
-        Softening parameter. Shape(1,)
+    galaxy : object of Galaxy class.
 
     Returns
     -------
-    potential : `np.ndarray`
-        Specific potential energy of particles. Shape(n,1)
+    galaxy: new object of Galaxy class.
+        A new galaxy object the specific potential energy
+        of particles calculated.
     """
+
     if galaxy.has_potential_:
         raise ValueError("galaxy are already calculated")
 

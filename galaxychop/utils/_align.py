@@ -97,7 +97,20 @@ def star_align(galaxy, *, r_cut=None):
     Optionally, only particles within a cutting radius
     `(r_cut)` can be used to calculate the rotation matrix.
 
+    Parameters
+    ----------
+    galaxy : object of Galaxy class.
+    r_cut : `float`, optional
+        The default is ``None``; if provided, it must be
+        positive and the rotation matrix `A` is calculated
+        from the particles with radii smaller than
+        r_cut.
 
+    Returns
+    -------
+    galaxy: new object of Galaxy class.
+        A new galaxy object with their total angular momentum
+        aligned with the z-axis.
     """
 
     if r_cut is not None and r_cut <= 0.0:
@@ -165,6 +178,28 @@ def star_align(galaxy, *, r_cut=None):
 
 
 def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
+    """
+    Validates if the galaxy is aligned.
+
+    Parameters
+    ----------
+    galaxy : object of Galaxy class.
+    r_cut : `float`, optional
+        The default is ``None``; if provided, it must be
+        positive and the rotation matrix `A` is calculated
+        from the particles with radii smaller than
+        r_cut.
+    rtol : float
+        Relative tolerance.
+    atol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    bool
+        True if the total angular momentum of the galaxy is aligned
+        with the z-axis, False otherwise.
+    """
 
     # Now we extract only the needed column to rotate the galaxy
     df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
@@ -176,4 +211,4 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     Jztot = np.sum(df.Jz.values[mask] * df.m.values[mask])
     Jtot = np.sqrt(Jxtot ** 2 + Jytot ** 2 + Jztot ** 2)
 
-    return (np.allclose(Jztot, Jtot, rtol=rtol, atol=atol))
+    return np.allclose(Jztot, Jtot, rtol=rtol, atol=atol)

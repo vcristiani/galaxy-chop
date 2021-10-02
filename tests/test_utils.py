@@ -194,7 +194,7 @@ def test_star_align_invalid_rcut(galaxy):
         utils.star_align(gal, r_cut=-1)
 
 
-#@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_is_star_aligned(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
 
