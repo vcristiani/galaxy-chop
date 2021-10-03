@@ -173,15 +173,23 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     eps = Jz_star_norm / j_circ
     eps_r = Jr_star_norm / j_circ
 
-    # We remove particles that have circularity < -1 and circularity > 1.
-    (mask,) = np.where((eps <= 1.0) & (eps >= -1.0))
-
     E_star_norm_ = np.full(len(Etot_s), np.nan)
     eps_ = np.full(len(Etot_s), np.nan)
     eps_r_ = np.full(len(Etot_s), np.nan)
 
-    E_star_norm_[bound_star[mask]] = E_star_norm[mask]
-    eps_[bound_star[mask]] = eps[mask]
-    eps_r_[bound_star[mask]] = eps_r[mask]
+    E_star_norm_[bound_star] = E_star_norm
+    eps_[bound_star] = eps
+    eps_r_[bound_star] = eps_r
 
-    return JCirc(E_star_norm=E_star_norm, eps=eps, eps_r=eps_r, x=x, y=y)
+    # We remove particles that have circularity < -1 and circularity > 1.
+    mask = np.where(eps_ > 1.0)[0]
+    E_star_norm_[mask] = np.nan
+    eps_[mask] = np.nan
+    eps_r_[mask] = np.nan
+
+    mask = np.where(eps_ < -1.0)[0]
+    E_star_norm_[mask] = np.nan
+    eps_[mask] = np.nan
+    eps_r_[mask] = np.nan
+
+    return JCirc(E_star_norm=E_star_norm_, eps=eps_, eps_r=eps_r_, x=x, y=y)
