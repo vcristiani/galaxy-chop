@@ -224,26 +224,18 @@ def test_jcirc_real_galaxy(read_hdf5_galaxy):
     mask_energy = np.where(~np.isnan(result.E_star_norm))[0]
     mask_eps = np.where(~np.isnan(result.eps))[0]
 
-    assert (result.E_star_norm[mask_energy] != np.nan).all()
-    assert (result.E_star_norm[mask_energy] <= 0).all()
-    assert (result.eps[mask_eps] != np.nan).all()
-    assert (result.eps[mask_eps] <= 1).all()
-    assert (result.eps[mask_eps] >= -1).all()
+    assert np.all(result.E_star_norm[mask_energy] != np.nan)
+    assert np.all(result.E_star_norm[mask_energy] <= 0)
+    assert np.all(result.eps[mask_eps] != np.nan)
+    assert np.all(result.eps[mask_eps] <= 1)
+    assert np.all(result.eps[mask_eps] >= -1)
 
 
-@pytest.mark.xfail
 def test_jcirc_fake_galaxy(galaxy):
-    gal = galaxy(seed=42)
-    result = utils.jcirc(gal)
-
-    mask_energy = np.where(~np.isnan(result.E_star_norm))[0]
-    mask_eps = np.where(~np.isnan(result.eps))[0]
-
-    assert (result.E_star_norm[mask_energy] != np.nan).all()
-    assert (result.E_star_norm[mask_energy] <= 0).all()
-    assert (result.eps[mask_eps] != np.nan).all()
-    assert (result.eps[mask_eps] <= 1).all()
-    assert (result.eps[mask_eps] >= -1).all()
+    for seed in range(100):
+        gal = galaxy(seed=seed)
+        with pytest.raises(ValueError):
+            utils.jcirc(gal)
 
 
 def test_x_y_len(read_hdf5_galaxy):

@@ -127,8 +127,6 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
                 else:
                     x[i] = E[mask][s][-1]
                     y[i] = np.abs(Jz[mask][s][-1])
-        else:
-            pass
 
     # Mask to complete the last bin, in case there are no empty bins.
     (mask,) = np.where(E > aux[len(aux) - 1])
