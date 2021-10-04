@@ -56,7 +56,7 @@ def test_plot_call_invalid_plot_kind(galaxy):
 
 
 @pytest.mark.parametrize("plot_kind", ["pairplot"])
-def test_plot_call_heatmap(galaxy, plot_kind):
+def test_plot_call(galaxy, plot_kind):
 
     gal = galaxy(seed=42)
 
