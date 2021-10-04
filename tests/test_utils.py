@@ -255,4 +255,3 @@ def test_x_y_len(read_hdf5_galaxy):
     y = result.y
 
     assert len(x) == len(y)
-
