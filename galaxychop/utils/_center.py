@@ -24,60 +24,39 @@ from .. import data
 
 
 def center(galaxy):
-    """Centers the particles.
+    """
+    Particle centring.
 
-    Centers the position of all particles in the galaxy respect
-    to the position of the lowest potential dark matter particle.
+    Centers the position of all particle galaxies respect
+    to the position of the lowest potential particle.
 
     Parameters
     ----------
-    x_s, y_s, z_s : `np.ndarray(n_s,1)`
-        Star positions.
-    x_dm, y_dm, z_dm : `np.ndarray(n_dm,1)`
-        Dark matter positions.
-    x_g, y_g, z_g : `np.ndarray(n_g,1)`
-        Gas positions.
+    galaxy : object of Galaxy class.
 
     Returns
     -------
-    tuple : `np.ndarray`
-        x_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        y_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        z_s : `np.ndarray(n_s,1)`
-            Centered star positions.
-        x_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        y_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        z_dm : `np.ndarray(n_dm,1)`
-            Centered dark matter positions.
-        x_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-        y_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-        z_g : `np.ndarray(n_g,1)`
-            Centered gas positions.
-
+    galaxy: new object of Galaxy class.
+        A new galaxy object with centered positions respect
+        to the position of the lowest potential particle.
     """
 
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
 
-    # sacamos como dataframe lo unico que vamos a operar
+    # We extract only the needed column to centrer the galaxy
     df = galaxy.to_dataframe(attributes=["ptypev", "x", "y", "z", "potential"])
 
-    # minimo indice de potencial de todo y sacamos cual es la fila
+    # minimum potential index of all particles and we extract data frame row
     minpot_idx = df.potential.argmin()
     min_values = df.iloc[minpot_idx]
 
-    # restamos todas las columnas de posiciones por las de minimo valor de
-    # potencial y pisamos en df
+    # We subtract all position columns by the position with the lowest
+    # potential value and replace this new position columns on dataframe
     columns = ["x", "y", "z"]
     df[columns] = df[columns] - min_values[columns]
 
-    # espliteamos el dataframe en tipos
+    # We split the dataframe by particle type.
     stars = df[df.ptypev == data.ParticleSetType.STARS.value]
     dark_matter = df[df.ptypev == data.ParticleSetType.DARK_MATTER.value]
     gas = df[df.ptypev == data.ParticleSetType.GAS.value]
@@ -101,13 +80,31 @@ def center(galaxy):
 
 
 def is_centered(galaxy, rtol=1e-05, atol=1e-08):
+    """
+    Validates if the galaxy is centered.
+
+    Parameters
+    ----------
+    galaxy : object of Galaxy class.
+    rtol : float
+        Relative tolerance.
+    atol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    bool
+        True if galaxy is centered respect to the position of the lowest
+        potential particle, False otherwise.
+    """
+
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
 
-    # sacamos como dataframe lo unico que vamos a operar
+    # We extract only the needed column to centrer the galaxy
     df = galaxy.to_dataframe(attributes=["x", "y", "z", "potential"])
 
-    # minimo indice de potencial de todo y sacamos cual es la fila
+    # minimum potential index of all particles and we extract data frame row
     minpot_idx = df.potential.argmin()
     min_values = df.iloc[minpot_idx]
 

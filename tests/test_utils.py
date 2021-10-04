@@ -208,13 +208,18 @@ def test_is_star_aligned(read_hdf5_galaxy):
 # =============================================================================
 
 
-@pytest.mark.xfail
 def test_jcirc_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     result = utils.jcirc(gal)
 
-    # validar result aca
-    assert result  # este assert False es para rellenar cuando result ande
+    mask_energy = np.where(~np.isnan(result.E_star_norm))[0]
+    mask_eps = np.where(~np.isnan(result.eps))[0]
+
+    assert (result.E_star_norm[mask_energy] != np.nan).all()
+    assert (result.E_star_norm[mask_energy] <= 0).all()
+    assert (result.eps[mask_eps] != np.nan).all()
+    assert (result.eps[mask_eps] <= 1).all()
+    assert (result.eps[mask_eps] >= -1).all()
 
 
 @pytest.mark.xfail
