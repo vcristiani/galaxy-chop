@@ -221,6 +221,7 @@ def test_jcirc_real_galaxy(read_hdf5_galaxy):
     assert (result.eps[mask_eps] <= 1).all()
     assert (result.eps[mask_eps] >= -1).all()
 
+
 @pytest.mark.xfail
 def test_jcirc_fake_galaxy(galaxy):
     gal = galaxy(seed=42)
