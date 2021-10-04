@@ -194,8 +194,17 @@ def test_star_align_invalid_rcut(galaxy):
         utils.star_align(gal, r_cut=-1)
 
 
-def test_is_star_aligned(read_hdf5_galaxy):
+def test_is_star_aligned_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
+
+    agal = utils.star_align(gal, r_cut=5)
+
+    assert not utils.is_star_aligned(gal, r_cut=5)
+    assert utils.is_star_aligned(agal, r_cut=5)
+
+
+def test_is_star_aligned_fake_galaxy(galaxy):
+    gal = galaxy(seed=42)
 
     agal = utils.star_align(gal, r_cut=5)
 
