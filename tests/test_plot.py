@@ -43,8 +43,8 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 
     test_path, ref_path = image_paths(test_func, format)
 
-    test_img.savefig(test_path)
-    ref_img.savefig(ref_path)
+    test_img.savefig(test_path, format=format)
+    ref_img.savefig(ref_path, format=format)
 
     kwargs.setdefault("tol", 0)
     result = compare_images(test_path, ref_path, **kwargs)
