@@ -36,6 +36,22 @@ def image_paths(func, format):
     return test, expected
 
 
+def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
+    # Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
+    # Usar las funciones de check_figures equals aca, asi que hay que hacer
+    # todo a mano...
+
+    test_path, ref_path = image_paths(test_func, format)
+
+    test_img.savefig(test_path)
+    ref_img.savefig(ref_path)
+
+    kwargs.setdefault("tol", 0)
+    result = compare_images(test_path, ref_path, **kwargs)
+    if result:
+        pytest.fail(result)
+
+
 # =============================================================================
 # TEST __call__
 # =============================================================================
@@ -78,52 +94,41 @@ def test_plot_call(galaxy, plot_kind):
 @pytest.mark.slow
 @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
 def test_plot_pairplot(galaxy, format):
-    # Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
-    # Usar las funciones de check_figures equals aca, asi que hay que hacer
-    # todo a mano...
-
-    test_path, ref_path = image_paths(test_plot_pairplot, format)
 
     gal = galaxy(seed=42)
 
     plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    g = plotter.pairplot(attributes=["x", "y"])
-    g.savefig(test_path)
+    test_grid = plotter.pairplot(attributes=["x", "y"])
 
     # EXPECTED
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
-    g = sns.pairplot(data=df, hue="ptype", kind="hist", diag_kind="kde")
-    g.savefig(ref_path)
+    expected_grid = sns.pairplot(
+        data=df, hue="ptype", kind="hist", diag_kind="kde"
+    )
 
-    result = compare_images(test_path, ref_path, 0)
-    if result:
-        pytest.fail(result)
+    assert_same_image(test_plot_pairplot, format, test_grid, expected_grid)
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
 def test_plot_pairplot_external_labels(galaxy, format):
-    # Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
-    # Usar las funciones de check_figures equals aca, asi que hay que hacer
-    # todo a mano...
-
-    test_path, ref_path = image_paths(test_plot_pairplot, format)
 
     gal = galaxy(seed=42)
 
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
-    g = plotter.pairplot(attributes=df[["x", "y"]], labels=df.ptype.to_numpy())
-    g.savefig(test_path)
+    test_grid = plotter.pairplot(
+        attributes=df[["x", "y"]], labels=df.ptype.to_numpy()
+    )
 
     # EXPECTED
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
     df.columns = ["x", "y", "Hue"]
-    g = sns.pairplot(data=df, hue="Hue", kind="hist", diag_kind="kde")
-    g.savefig(ref_path)
+    expected_grid = sns.pairplot(
+        data=df, hue="Hue", kind="hist", diag_kind="kde"
+    )
 
-    result = compare_images(test_path, ref_path, 0)
-    if result:
-        pytest.fail(result)
+    assert_same_image(
+        test_plot_pairplot_external_labels, format, test_grid, expected_grid
+    )
