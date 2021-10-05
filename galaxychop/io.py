@@ -42,13 +42,13 @@ def _table_to_dict(table, key_suffix):
 
 
 def read_hdf5(
-    path,
+    path_or_stream,
     softening_s: float = 0.0,
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
 ):
 
-    with h5py.File(path, "r") as f:
+    with h5py.File(path_or_stream, "r") as f:
         star_table = Table.read(f["stars"])
         dark_table = Table.read(f["dark_matter"])
         gas_table = Table.read(f["gas"])
@@ -74,36 +74,36 @@ def read_hdf5(
 
 
 def read_npy(
-    path_star,
-    path_dark,
-    path_gas,
+    path_or_stream_star,
+    path_or_stream_dark,
+    path_or_stream_gas,
     columns,
-    path_pot_s=None,
-    path_pot_dm=None,
-    path_pot_g=None,
+    path_or_stream_pot_s=None,
+    path_or_stream_pot_dm=None,
+    path_or_stream_pot_g=None,
     softening_s: float = 0.0,
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
 ):
 
-    particles_star = np.load(path_star)
-    particles_dark = np.load(path_dark)
-    particles_gas = np.load(path_gas)
+    particles_star = np.load(path_or_stream_star)
+    particles_dark = np.load(path_or_stream_dark)
+    particles_gas = np.load(path_or_stream_gas)
 
     star_table = Table(particles_star, names=columns)
     dark_table = Table(particles_dark, names=columns)
     gas_table = Table(particles_gas, names=columns)
 
-    if path_pot_s is not None:
-        pot_s = np.load(path_pot_s)
+    if path_or_stream_pot_s is not None:
+        pot_s = np.load(path_or_stream_pot_s)
         star_table.add_column(pot_s, name="potential")
 
-    if path_pot_dm is not None:
-        pot_dm = np.load(path_pot_dm)
+    if path_or_stream_pot_dm is not None:
+        pot_dm = np.load(path_or_stream_pot_dm)
         dark_table.add_column(pot_dm, name="potential")
 
-    if path_pot_g is not None:
-        pot_g = np.load(path_pot_g)
+    if path_or_stream_pot_g is not None:
+        pot_g = np.load(path_or_stream_pot_g)
         gas_table.add_column(pot_g, name="potential")
 
     galaxy_kws = {
