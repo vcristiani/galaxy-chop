@@ -12,15 +12,12 @@
 
 from unittest import mock
 
-from numpy.core.shape_base import block
-
 from galaxychop import plot, utils
-
 
 from matplotlib.testing.decorators import (
     _image_directories,
-    compare_images,
     check_figures_equal,
+    compare_images,
 )
 
 import pytest
@@ -138,6 +135,21 @@ def test_plot_pairplot_external_labels(galaxy, format):
     assert_same_image(
         test_plot_pairplot_external_labels, format, test_grid, expected_grid
     )
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+def test_plot_dis(galaxy, format):
+    gal = galaxy(seed=42)
+
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+    test_grid = plotter.dis("x", "y", labels="ptype", ptypes=["gas"])
+
+    # EXPECTED
+    df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
+    expected_grid = sns.displot(x="x", y="y", data=df, hue="ptype")
+
+    assert_same_image(test_plot_dis, format, test_grid, expected_grid)
 
 
 # =============================================================================
