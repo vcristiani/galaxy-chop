@@ -181,6 +181,18 @@ class GalaxyDecomposer:
 
     bins = attr.ib(default=(0.05, 0.005))
 
+    def feature_matrix(self, galaxy):
+        """Retorna 3 elementos:
+        - Un numpy array X de 2d en el cual cada fila representa una
+          particula, y cada columna un feature.
+        - Un array 't' con la misma longitud que filas de X que representa
+          el tipo de particula en cada fila
+          (0 = STARS, 1=DM, 2=Gas)
+        - Un array 'f' de tantos elementos como columnas tiene X con el
+          nombre de cada feature.
+
+        """
+
     def decompose(self, galaxy):
         """Decompose method.
 
@@ -192,9 +204,8 @@ class GalaxyDecomposer:
         galaxy :
             `galaxy object`
         """
-
-        # retrieve te galaxy as an array os star particles
-        X, y = self.prepare_values(galaxy)
+        # prime
+        df = self.dataframe_values(galaxy)
 
         # calculate only the valid values to operate the clustering
         clean_mask = self.get_clean_mask(X)

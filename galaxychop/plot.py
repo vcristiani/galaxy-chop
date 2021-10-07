@@ -96,6 +96,12 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
+    def dis(self, x, y=None, ptypes=None, labels=None, **kwargs):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        ax = sns.displot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
     def scatter(self, x, y, ptypes=None, labels=None, **kwargs):
         attributes = [x, y]
         df, hue = self._get_df_and_hue(ptypes, attributes, labels)

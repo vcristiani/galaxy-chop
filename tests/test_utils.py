@@ -257,11 +257,11 @@ def test_x_values(read_hdf5_galaxy):
     aux1 = np.zeros(len(result.x) + 1)
 
     aux0[1:] = result.x
-    aux1[:len(result.x)] = result.x
+    aux1[: len(result.x)] = result.x
 
     diff = aux1[1:] - aux0[1:]
 
-    assert(diff > 0).all()
+    assert (diff > 0).all()
 
 
 def test_y_values(read_hdf5_galaxy):
