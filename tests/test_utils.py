@@ -247,3 +247,34 @@ def test_x_y_len(read_hdf5_galaxy):
     y = result.y
 
     assert len(x) == len(y)
+
+
+def test_x_values(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    result = utils.jcirc(gal)
+
+    aux0 = np.zeros(len(result.x) + 1)
+    aux1 = np.zeros(len(result.x) + 1)
+
+    aux0[1:] = result.x
+    aux1[:len(result.x)] = result.x
+
+    diff = aux1[1:] - aux0[1:]
+
+    assert(diff > 0).all()
+
+
+def test_y_values(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    result = utils.jcirc(gal)
+
+    df = gal.to_dataframe(attributes=["total_energy", "Jz"])
+
+    E = df.total_energy.values
+    Jz = df.Jz.values
+    mask_bound = np.where((E <= 0.0) & (E != -np.inf))[0]
+    Jz_max = np.max(np.abs(Jz[mask_bound]))
+
+    y_result = np.abs(Jz[mask_bound]) / Jz_max
+
+    assert np.isin(result.y, y_result).all()
