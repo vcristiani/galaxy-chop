@@ -25,9 +25,8 @@ import pytest
 
 PATH = Path(os.path.abspath(os.path.dirname(__file__)))
 
-TEST_DATA_PATH = PATH / "test_data"
+TEST_DATA_PATH = PATH / "datasets"
 
-TEST_DATA_REAL_PATH = TEST_DATA_PATH / "real"
 
 # =============================================================================
 # Fixtures
