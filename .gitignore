@@ -116,3 +116,4 @@ dask-worker-space/
 
 
 result_images/
+.mutmut-cache

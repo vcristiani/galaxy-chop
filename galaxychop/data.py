@@ -23,8 +23,6 @@ import pandas as pd
 
 import uttr
 
-from . import plot
-
 
 # =============================================================================
 # PARTICLE SET
@@ -297,6 +295,8 @@ class Galaxy:
     @property
     def plot(self):
         """Plot accessor."""
+        from . import plot  # noqa
+
         return plot.GalaxyPlotter(self)
 
     # ENERGY ===============================================================

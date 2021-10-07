@@ -20,6 +20,8 @@ import numpy as np
 
 import seaborn as sns
 
+from . import utils
+
 # =============================================================================
 # ACCESSOR
 # =============================================================================
@@ -58,7 +60,7 @@ class GalaxyPlotter:
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         return method(**kwargs)
 
-    # INTERNALS ===============================================================
+    # COMMON PLOTS ============================================================
 
     def _get_df_and_hue(self, ptypes, attributes, labels):
         attributes = ["x", "y", "z"] if attributes is None else attributes
@@ -78,13 +80,11 @@ class GalaxyPlotter:
         # ahora puede ser que los labels sean un np array y hay que agregarlo
         # como columna al dataframe y asignar hue al nombre de esta nueva
         # columna
-        if isinstance(labels, (list, np.ndarray)):
+        if hue is None and hasattr(labels, "__iter__"):
             hue = "Hue"  # Hue no esta en pset por lo tanto sirve
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
         return df, hue
-
-    # PLOTS==== ===============================================================
 
     def pairplot(self, ptypes=None, attributes=None, labels="ptype", **kwargs):
 
@@ -94,4 +94,36 @@ class GalaxyPlotter:
         kwargs.setdefault("diag_kind", "kde")
 
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
+        return ax
+
+    def scatter(self, x, y, ptypes=None, labels=None, **kwargs):
+        attributes = [x, y]
+        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    def hist(self, x, y=None, ptypes=None, labels=None, **kwargs):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    def kde(self, x, y=None, ptypes=None, labels=None, **kwargs):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        ax = sns.kdeplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    # CICULARITY ==============================================================
+
+    def circ_hist(self, cbins=(0.05, 0.005), **kwargs):
+        circ = utils.jcirc(self._galaxy, *cbins)
+        ax = sns.histplot(circ.eps, **kwargs)
+        ax.set_xlabel(r"$\epsilon$")
+        return ax
+
+    def circ_kde(self, cbins=(0.05, 0.005), **kwargs):
+        circ = utils.jcirc(self._galaxy, *cbins)
+        ax = sns.kdeplot(circ.eps, **kwargs)
+        ax.set_xlabel(r"$\epsilon$")
         return ax
