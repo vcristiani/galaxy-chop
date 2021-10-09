@@ -159,8 +159,8 @@ class ParticleSet:
     def to_dataframe(self, attributes=None):
         arr = self.arr_
         columns_makers = {
-            "ptype": lambda: self.ptype.name,
-            "ptypev": lambda: self.ptype.value,
+            "ptype": lambda: np.full(len(self), self.ptype.name),
+            "ptypev": lambda: np.full(len(self), self.ptype.value),
             "m": lambda: arr.m,
             "x": lambda: arr.x,
             "y": lambda: arr.y,
