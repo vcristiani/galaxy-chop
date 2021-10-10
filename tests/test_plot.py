@@ -159,6 +159,22 @@ def test_plot_dis(galaxy, format):
 
 @pytest.mark.slow
 @check_figures_equal()
+def test_plot_scatter(galaxy, fig_test, fig_ref):
+
+    gal = galaxy(seed=42)
+
+    test_ax = fig_test.subplots()
+    gal.plot.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
+    sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
+
+
+@pytest.mark.slow
+@check_figures_equal()
 def test_plot_hist(galaxy, fig_test, fig_ref):
 
     gal = galaxy(seed=42)
@@ -171,6 +187,22 @@ def test_plot_hist(galaxy, fig_test, fig_ref):
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
     sns.histplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
+
+
+@pytest.mark.slow
+@check_figures_equal()
+def test_plot_kde(galaxy, fig_test, fig_ref):
+
+    gal = galaxy(seed=42)
+
+    test_ax = fig_test.subplots()
+    gal.plot.kde("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
+    sns.kdeplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
 
 
 # =============================================================================
@@ -192,4 +224,21 @@ def test_plot_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
 
     circ = utils.jcirc(gal)
     sns.histplot(circ.eps, ax=exp_ax)
+    exp_ax.set_xlabel(r"$\epsilon$")
+
+
+@pytest.mark.slow
+@check_figures_equal()
+def test_plot_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+
+    test_ax = fig_test.subplots()
+    gal.plot.circ_kde(ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    circ = utils.jcirc(gal)
+    sns.kdeplot(circ.eps, ax=exp_ax)
     exp_ax.set_xlabel(r"$\epsilon$")
