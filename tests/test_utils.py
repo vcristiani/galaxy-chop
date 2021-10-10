@@ -221,11 +221,10 @@ def test_jcirc_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     result = utils.jcirc(gal)
 
-    mask_energy = np.where(~np.isnan(result.E_star_norm))[0]
+    mask_energy = np.where(~np.isnan(result.normalized_specific_energy))[0]
     mask_eps = np.where(~np.isnan(result.eps))[0]
 
-    assert np.all(result.E_star_norm[mask_energy] != np.nan)
-    assert np.all(result.E_star_norm[mask_energy] <= 0)
+    assert np.all(result.normalized_specific_energy[mask_energy] <= 0)
     assert np.all(result.eps[mask_eps] != np.nan)
     assert np.all(result.eps[mask_eps] <= 1)
     assert np.all(result.eps[mask_eps] >= -1)

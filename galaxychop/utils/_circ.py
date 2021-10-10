@@ -25,7 +25,9 @@ from ..data import ParticleSetType
 # API
 # =============================================================================
 
-JCirc = namedtuple("JCirc", ["E_star_norm", "eps", "eps_r", "x", "y"])
+JCirc = namedtuple(
+    "JCirc", ["normalized_specific_energy", "eps", "eps_r", "x", "y"]
+)
 
 
 def jcirc(galaxy, bin0=0.05, bin1=0.005):
@@ -190,4 +192,10 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     eps_[mask] = np.nan
     eps_r_[mask] = np.nan
 
-    return JCirc(E_star_norm=E_star_norm_, eps=eps_, eps_r=eps_r_, x=x, y=y)
+    return JCirc(
+        normalized_specific_energy=E_star_norm_,
+        eps=eps_,
+        eps_r=eps_r_,
+        x=x,
+        y=y,
+    )
