@@ -40,7 +40,6 @@ def center(galaxy):
         A new galaxy object with centered positions respect
         to the position of the lowest potential particle.
     """
-
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
 
@@ -81,7 +80,7 @@ def center(galaxy):
 
 def is_centered(galaxy, rtol=1e-05, atol=1e-08):
     """
-    Validates if the galaxy is centered.
+    Validate if the galaxy is centered.
 
     Parameters
     ----------
@@ -97,7 +96,6 @@ def is_centered(galaxy, rtol=1e-05, atol=1e-08):
         True if galaxy is centered respect to the position of the lowest
         potential particle, False otherwise.
     """
-
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
 
