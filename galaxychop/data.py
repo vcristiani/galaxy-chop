@@ -28,6 +28,12 @@ import uttr
 # PARTICLE SET
 # =============================================================================
 class ParticleSetType(enum.Enum):
+    """
+    Name of the particle type.
+
+    Name and number that are used to describe the particle
+    type in the ParticleSet class.
+    """
 
     STARS = 0
     DARK_MATTER = 1
@@ -36,6 +42,44 @@ class ParticleSetType(enum.Enum):
 
 @uttr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:
+    """
+    ParticleSet class.
+
+    Creates a set particles of a particular type (stars, dark matter or gas)
+    using masses, positions, velocities and potential energy.
+
+    Parameters
+    ----------
+    ptype :
+    m : `Quantity`
+        Masses. Shape: (n,1). Default unit: M_sun
+    x, y, z : `Quantity`
+        Positions. Shape: (n,1). Default unit: kpc.
+    vx, vy, vz : `Quantity`
+        Velocities. Shape: (n,1). Default unit: km/s.
+    potential : `Quantity`, default value = 0
+        Specific potential energy of particles.
+        Shape: (n,1). Default unit: (km/s)**2.
+    softening : `Quantity`, default value = 0
+        Softening radius of particles. Shape: (1,). Default unit: kpc.
+    kinetic_energy : `Quantity`
+        Specific kinetic energy of particles.
+        Shape: (n,1). Default unit: (km/s)**2.
+    total_energy : `Quantity`
+        Specific total energy of particles.
+        Shape: (n,1). Default unit: (km/s)**2.
+    Jx, Jy, Jz : `Quantity`
+        Components of angular momentum of particles.
+        Shape: (n,3). Default units: kpc*km/s.
+
+    Attributes
+    ----------
+    arr_: `uttr.ArrayAccessor`
+        Original array accessor object create by the *uttr* library.
+        Array accesor: it converts uttr attributes to the default unit and
+        afterward to a `numpy.ndarray`.
+        For more information see: https://pypi.org/project/uttrs/
+    """
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
@@ -107,7 +151,7 @@ class ParticleSet:
 
     def __attrs_post_init__(self):
         """
-        particle sets length validator.
+        Particle sets length validator.
 
         This method determines that the length of the different particle
         attributes are the same families are the same.
@@ -157,6 +201,24 @@ class ParticleSet:
     # UTILITIES ===============================================================
 
     def to_dataframe(self, attributes=None):
+        """
+        Data frame builder
+
+        This method builds a data frame of all parameters of ParticleSet class.
+
+        Parameters
+        ----------
+        attributes: tuple, default value = None
+            Dictionary keys of all ParticleSet class parameters.
+
+        Return
+        ------
+        DataFrame : pandas data frame
+            Data frame of all ParticleSet class parameters
+            of the particles.
+
+        """
+
         arr = self.arr_
         columns_makers = {
             "ptype": lambda: self.ptype.name,
@@ -200,42 +262,8 @@ class Galaxy:
     """
     Galaxy class.
 
-    Builds a galaxy object from masses, positions, and
-    velocities of particles (stars, dark matter and gas).
-
-    Parameters
-    ----------
-
-    J_part : `Quantity`
-        Total specific angular momentum of all particles (stars, dark matter
-        and gas).
-        Shape: (n,3). Default units: kpc*km/s
-    J_star : `Quantity`
-        Total specific angular momentum of stars.
-        Shape: (n_s,1). Default unit: kpc*km/s
-    Jr_part : `Quantity`
-        Projection of the total specific angular momentum in the xy plane for
-        all particles.
-        Shape: (n,1). Default unit: kpc*km/s
-    Jr_star : `Quantity`
-        Projection of the specific angular momentum of stars in the xy plane.
-        Shape: (n_s,1). Default unit: kpc*km/s
-    x : `Quantity`
-        Normalized specific energy for the particle with the maximum
-        z-component of the normalized specific angular momentum per bin.
-        Default unit: dimensionless
-    y : `Quantity`
-        Maximum value of the z-component of the normalized specific angular
-        momentum per bin.
-        Default units: dimensionless
-
-    Attributes
-    ----------
-    arr_: `uttr.ArrayAccessor`
-        Original array accessor object create by the *uttr* library.
-        Array accesor: it converts uttr attributes to the default unit and
-        afterward to a `numpy.ndarray`.
-        For more information see: https://pypi.org/project/uttrs/
+    Builds a galaxy object from a ParticleSet for each type
+    of particle (stars, dark matter and gas).
     """
 
     stars = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
@@ -431,6 +459,50 @@ def mkgalaxy(
     potential_dm: np.ndarray = None,
     potential_g: np.ndarray = None,
 ):
+    """
+    Galaxy builder
+
+    This function builds a galaxy object from a star,
+    dark matter and gas ParticleSet.
+
+    Parameters
+    ----------
+    m_s : float
+        Star masses
+    x_s, y_s, z_s : float
+        Star positions.
+    vx_s, vy_s, vz_s : float
+        Star velocities.
+    m_dm : float
+        Dark matter masses.
+    x_dm, y_dm, z_dm : float
+        Dark matter positions.
+    vx_dm, vy_dm, vz_dm : float
+        Dark matter velocities.
+    m_g : float
+        Gas masses.
+    x_g, y_g, z_g :  float
+        Gas positions.
+    vx_g, vy_g, vz_g : float
+        Gas velocities.
+    potential_s : float, default value = None
+        Specific potential energy of star particles.
+    potential_dm : float, default value = None
+        Specific potential energy of dark matter particles.
+    potential_g : float, default value = None
+        Specific potential energy of gas particles.
+    softening_s : float, default value = 0
+        Softening radius of stellar particles.
+    softening_dm : float, default value = 0
+        Softening radius of dark matter particles.
+    softening_g : float, default value = 0
+        Softening radius of gas particles.
+
+    Return
+    ------
+    galaxy: object of Galaxy class.
+    """
+
     stars = ParticleSet(
         ParticleSetType.STARS,
         m=m_s,
