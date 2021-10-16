@@ -31,9 +31,8 @@ JCirc = namedtuple(
 
 
 def jcirc(galaxy, bin0=0.05, bin1=0.005):
-
     """
-    Processing energy and angular momentum.
+    Process energy and angular momentum.
 
     Calculation of Normalized specific energy of the stars,
     circularity parameter calculation, projected circularity parameter,
@@ -82,7 +81,6 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     >>> galaxy = gchop.Galaxy(...)
     >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
     """
-
     # extract only the needed columns
     df = galaxy.to_dataframe(
         attributes=["ptypev", "total_energy", "Jx", "Jy", "Jz"]

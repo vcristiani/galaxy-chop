@@ -97,7 +97,6 @@ def potential(galaxy, backend="numpy"):
         A new galaxy object the specific potential energy
         of particles calculated.
     """
-
     if galaxy.has_potential_:
         raise ValueError("galaxy are already calculated")
 

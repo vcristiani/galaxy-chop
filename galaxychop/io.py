@@ -47,7 +47,28 @@ def read_hdf5(
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
 ):
+    """
+    h5py file reader.
 
+    Reads the file containing masses, positions, velocities of stellar, dark
+    matter and gas particles, and constructs a galaxy object. The file may
+    include particle potentials. The softening value can be included.
+
+    Parameters
+    ----------
+    path_or_stream : str
+        Path to the h5 file containing the properties of the galaxy particles.
+    softening_s : float, default value = 0
+        Softening radius of star particles.
+    softening_dm : float, default value = 0
+        Softening radius of dark matter particles.
+    softening_g : float, default value = 0
+        Softening radius of gas particles.
+
+    Returns
+    -------
+    galaxy : object of Galaxy class.
+    """
     with h5py.File(path_or_stream, "r") as f:
         star_table = Table.read(f["stars"])
         dark_table = Table.read(f["dark_matter"])
@@ -85,7 +106,43 @@ def read_npy(
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
 ):
+    """
+    Npy file reader.
 
+    Reads npy files containing the masses, positions and velocities of stellar
+    particles, dark matter and gas particles, and constructs a galaxy object.
+    Files containing particle potentials can be included. The softening value
+    can be included.
+
+    Parameters
+    ----------
+    path_or_stream_star : str
+        Path to the npy file containing the properties of the star particles.
+    path_or_stream_dark : str
+        Path to the npy file containing the properties of the dark matter
+        particles.
+    path_or_stream_gas : str
+        Path to the npy file containing the properties of the gas particles.
+    columns: list
+        Specify column names.
+    path_or_stream_pot_s : str
+        Path to the npy file containing the potentials of the star particles.
+    path_or_stream_pot_dm : str
+        Path to the npy file containing the potentials of the dark matter
+        particles.
+    path_or_stream_pot_g : str
+        Path to the npy file containing the potentials of the gas particles.
+    softening_s : float, default value = 0
+        Softening radius of star particles.
+    softening_dm : float, default value = 0
+        Softening radius of dark matter particles.
+    softening_g : float, default value = 0
+        Softening radius of gas particles.
+
+    Returns
+    -------
+    galaxy : object of Galaxy class.
+    """
     particles_star = np.load(path_or_stream_star)
     particles_dark = np.load(path_or_stream_dark)
     particles_gas = np.load(path_or_stream_gas)
