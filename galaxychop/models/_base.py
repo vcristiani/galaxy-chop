@@ -174,6 +174,10 @@ class GalaxyDecomposeMixin:
         return self
 
 
+# =============================================================================
+# NEW!
+# =============================================================================
+
 import abc
 
 import attr
@@ -182,7 +186,8 @@ import pandas as pd
 
 
 _CIRCULARITY_ATTRIBUTES = ("normalized_star_energy", "eps", "eps_r")
-_PTYPES_ORDER = ["stars", "dark_matter", "gas"]
+
+_PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
 
 @attr.s(frozen=True, repr=False)

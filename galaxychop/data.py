@@ -27,7 +27,7 @@ import uttr
 # =============================================================================
 # PARTICLE SET
 # =============================================================================
-class ParticleSetType(enum.Enum):
+class ParticleSetType(enum.IntEnum):
     """
     Name of the particle type.
 
