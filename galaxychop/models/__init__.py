@@ -11,7 +11,7 @@
 # IMPORTS
 # =============================================================================
 
-from ._base import GalaxyDecomposerABC
+from ._base import GalaxyDecomposerABC, hparam
 from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
 from ._histogram import JEHistogram, JHistogram
 from ._kmeans import KMeans
@@ -29,4 +29,5 @@ __all__ = [
     "KMeans",
     "GaussianMixture",
     "AutoGaussianMixture",
+    "hparam",
 ]

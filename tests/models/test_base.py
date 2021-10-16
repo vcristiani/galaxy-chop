@@ -1,12 +1,18 @@
 import warnings
 
+import attr
+
 import numpy as np
 
 import galaxychop as gchop
+from galaxychop import models
 
 
-def test_GalaxyDecomposerABC_attributes_repr():
-    class Decomposer(gchop.models.GalaxyDecomposerABC):
+def test_GalaxyDecomposerABC_repr():
+    class Decomposer(models.GalaxyDecomposerABC):
+
+        other = models.hparam(default=1)
+
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
 
@@ -16,16 +22,12 @@ def test_GalaxyDecomposerABC_attributes_repr():
         def split(self):
             ...
 
-        def valid_rows(self, X, t, attributes):
+        def get_rows_mask(self, X, y, attributes):
             ...
 
-    decomposer = Decomposer()
+    decomposer = Decomposer(bins=(0.3, 0.2), other="zaraza")
     result = repr(decomposer)
-    expected = (
-        "Decomposer(bins=(0.05, 0.005), "
-        "ptypes=['stars'], "
-        "attributes=['normalized_star_energy', 'eps', 'eps_r'])"
-    )
+    expected = "Decomposer(bins=(0.3, 0.2), other='zaraza')"
 
     assert result == expected
 
@@ -34,7 +36,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
 
-    class Decomposer(gchop.models.GalaxyDecomposerABC):
+    class Decomposer(models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
 
@@ -44,7 +46,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
         def split(self):
             ...
 
-        def valid_rows(self, X, t, attributes):
+        def get_rows_mask(self, X, y, attributes):
             ...
 
     decomposer = Decomposer()

@@ -53,25 +53,6 @@ class GalaxyDecomposeMixin:
         return clean
 
     def label_dirty(self, X, labels, clean_mask):
-        """Complete the labels of all stellar particles.
-
-        Parameters
-        ----------
-        X : `np.ndarray(n, 10)`
-            2D array where each file it is a diferent stellar particle and
-            each column is a parameter of the particles:
-            (m_s, x_s, y_s, z_s, vx_s, vy_s, vz_z, E_s, eps_s, eps_r_s)
-        labels: `np.ndarray(n)`, n: number of stellar particles.
-            Index of the cluster each stellar particles belongs to.
-        clean_mask: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
-            Mask: Only valid particles to operate the clustering.
-
-        Return
-        ------
-        complete: np.ndarray(n: number of particles with E<=0 and -1<eps<1).
-            Complete index of the cluster each stellar particles belongs to.
-            Particles which not fullfil E <= 0 or -1 < eps < 1 have index = -1.
-        """
         eps = X[:, data.Columns.eps.value]
         complete = -np.ones(len(eps), dtype=int)
         complete[clean_mask] = labels
@@ -190,36 +171,48 @@ _CIRCULARITY_ATTRIBUTES = ("normalized_star_energy", "eps", "eps_r")
 _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
 
+def hparam(default, **kwargs):
+    metadata = kwargs.pop("metadata", {})
+    metadata["__gchop_model_hparam__"] = True
+    return attr.ib(default=default, metadata=metadata, **kwargs)
+
+
 @attr.s(frozen=True, repr=False)
 class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
-    bins = attr.ib(default=(0.05, 0.005))
+    bins = hparam(default=(0.05, 0.005))
+
+    # block meta checks =======================================================
+    def __init_subclass__(cls):
+        model_config = getattr(cls, "__gchop_model_cls_config__", {})
+        attr.s(maybe_cls=cls, **model_config)
 
     # block  to implement in every method =====================================
 
     @abc.abstractmethod
     def get_attributes(self):
-        return ["normalized_star_energy", "eps", "eps_r"]
+        raise NotImplementedError()
 
     @abc.abstractmethod
-    def split(self, X, t, attributes):
-        pass
+    def split(self, X, y, attributes):
+        raise NotImplementedError()
 
     @abc.abstractmethod
-    def valid_rows(self, X, t, attributes):
-        # all the rows where every value is finite
-        return np.isfinite(X).all(axis=1)
+    def get_rows_mask(self, X, y, attributes):
+        raise NotImplementedError()
 
     # internal ================================================================
 
     def __repr__(self):
         clsname = type(self).__name__
-        bins = self.bins
-        ptypes = self.get_ptypes()
-        attributes = self.get_attributes()
-        return (
-            f"{clsname}(bins={bins}, ptypes={ptypes}, attributes={attributes})"
+
+        selfd = attr.asdict(
+            self,
+            recurse=False,
+            filter=lambda attr, _: attr.repr,
         )
+        attrs_str = ",".join([f"{k}={v}" for k, v in selfd.items()])
+        return f"{clsname}({attrs_str})"
 
     # API =====================================================================
 
@@ -259,7 +252,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """Retorna 2 elementos:
         - Un numpy array X de 2d en el cual cada fila representa una
           particula, y cada columna un attributo
-        - Un array 't' con la misma longitud que filas de X que representa
+        - Un array 'y' con la misma longitud que filas de X que representa
           el tipo de particula en cada fila
           (0 = STARS, 1=DM, 2=Gas)
 
@@ -310,10 +303,15 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         # separamos la matriz y las clases
         X = df[attributes].to_numpy()
-        t = df.ptypev.to_numpy()
+        y = df.ptypev.to_numpy()
 
         # retornamos
-        return X, t
+        return X, y
+
+    def complete_labels(self, X, labels, rows_mask):
+        new_labels = np.full(len(X), np.nan)
+        new_labels[rows_mask] = labels
+        return new_labels
 
     def decompose(self, galaxy):
         """Decompose method.
@@ -326,24 +324,32 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         galaxy :
             `galaxy object`
         """
-        # prime
-        df = self.dataframe_values(galaxy)
+        attributes = self.get_attributes()
+
+        X, y = self.attributes_matrix(galaxy, attributes=attributes)
 
         # calculate only the valid values to operate the clustering
-        clean_mask = self.get_clean_mask(X)
-        X_clean, y_clean = X[clean_mask], y[clean_mask]
+        rows_mask = self.get_rows_mask(X=X, y=y, attributes=attributes)
+        X_clean, y_clean = X[rows_mask], y[rows_mask]
 
-        # select only the needed columns
-        columns = self.get_columns()
-        X_ready = X_clean[:, columns]
-
-        # execute the cluster with the quantities of interest in dynamic
-        # decomposition
-        self.fit_transform(X_ready, y_clean)
+        # execute the cluster with the quantities of interest
+        labels = self.split(X=X_clean, y=y_clean, attributes=attributes)
 
         # retrieve and fix the labels
-        labels = self.labels_
-        self.labels_ = self.label_dirty(X, labels, clean_mask)
+        final_labels = self.complete_labels(
+            X=X, labels=labels, rows_mask=rows_mask
+        )
 
         # return the instance
-        return self
+        return final_labels, y
+
+
+class DynamicStarsDecomposerMixin:
+    def get_attributes(self):
+        return ["normalized_star_energy", "eps", "eps_r"]
+
+    def get_rows_mask(self, X, y, attributes):
+        # all the rows where every value is finite
+        only_stars = y == data.ParticleSetType.STARS.value
+        finite_values = y == data.ParticleSetType.STARS.value
+        return only_stars & finite_values
