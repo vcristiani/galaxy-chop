@@ -12,8 +12,9 @@
 # =============================================================================
 
 import numpy as np
+from numpy.core.shape_base import block
 
-from .. import data
+from .. import data, utils
 
 # =============================================================================
 # BASE MIXIN
@@ -173,25 +174,141 @@ class GalaxyDecomposeMixin:
         return self
 
 
+import abc
+
 import attr
 
+import pandas as pd
 
-@attr.s
-class GalaxyDecomposer:
+
+_CIRCULARITY_ATTRIBUTES = ("normalized_star_energy", "eps", "eps_r")
+_PTYPES_ORDER = ["stars", "dark_matter", "gas"]
+
+
+@attr.s(frozen=True, repr=False)
+class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     bins = attr.ib(default=(0.05, 0.005))
 
-    def feature_matrix(self, galaxy):
-        """Retorna 3 elementos:
+    # block  to implement in every method =====================================
+
+    @abc.abstractmethod
+    def get_attributes(self):
+        return ["normalized_star_energy", "eps", "eps_r"]
+
+    @abc.abstractmethod
+    def split(self, X, t, attributes):
+        pass
+
+    @abc.abstractmethod
+    def valid_rows(self, X, t, attributes):
+        # all the rows where every value is finite
+        return np.isfinite(X).all(axis=1)
+
+    # internal ================================================================
+
+    def __repr__(self):
+        clsname = type(self).__name__
+        bins = self.bins
+        ptypes = self.get_ptypes()
+        attributes = self.get_attributes()
+        return (
+            f"{clsname}(bins={bins}, ptypes={ptypes}, attributes={attributes})"
+        )
+
+    # API =====================================================================
+
+    def _get_jcirc_df(self, galaxy, attributes):
+
+        # STARS
+        # turn the galaxy into jcirc dict
+        # all the calculation cames together so we can't optimize here
+        jcirc = utils.jcirc(galaxy, *self.bins)._asdict()
+
+        # we add the colum with the types, all the values from jcirc
+        # are stars
+        jcirc["ptypev"] = data.ParticleSetType.STARS.value
+        stars_df = pd.DataFrame({attr: jcirc[attr] for attr in attributes})
+
+        # DARK_MATTER
+        dm_rows = len(galaxy.dark_matter)
+        dm_nans = np.full(dm_rows, np.nan)
+
+        dm_columns = {attr: dm_nans for attr in attributes}
+        dm_columns["ptypev"] = data.ParticleSetType.DARK_MATTER.value
+
+        dm_df = pd.DataFrame(dm_columns)
+
+        # GAS
+        gas_rows = len(galaxy.gas)
+        gas_nans = np.full(gas_rows, np.nan)
+
+        gas_columns = {attr: gas_nans for attr in attributes}
+        gas_columns["ptypev"] = data.ParticleSetType.DARK_MATTER.value
+
+        gas_df = pd.DataFrame(gas_columns)
+
+        return pd.concat([stars_df, dm_df, gas_df], ignore_index=True)
+
+    def attributes_matrix(self, galaxy, attributes):
+        """Retorna 2 elementos:
         - Un numpy array X de 2d en el cual cada fila representa una
-          particula, y cada columna un feature.
+          particula, y cada columna un attributo
         - Un array 't' con la misma longitud que filas de X que representa
           el tipo de particula en cada fila
           (0 = STARS, 1=DM, 2=Gas)
-        - Un array 'f' de tantos elementos como columnas tiene X con el
-          nombre de cada feature.
+
+        Tiene que haber tantas filas como el total de particulas de la galaxia.
 
         """
+
+        # first we split the attributes between the ones from circularity
+        # and the ones from "galaxy.to_dataframe()"
+        circ_attrs, df_attrs = [], []
+        for attr in attributes:
+            container = (
+                circ_attrs if attr in _CIRCULARITY_ATTRIBUTES else df_attrs
+            )
+            container.append(attr)
+
+        # this crap is going to have all the dataframes that contain as a
+        # column each attribute
+        result = []
+
+        # If we have attributes of "to_dataframe" =============================
+        #     now we take out all the attributes of "to_dataframe" and save
+        #     them in a list where all the resulting dataframes will be stored
+        if df_attrs:
+
+            # we need this to create the array of classes
+            if "ptypev" not in df_attrs:
+                df_attrs.append("ptypev")
+
+            dfgal = galaxy.to_dataframe(
+                ptypes=_PTYPES_ORDER, attributes=df_attrs
+            )
+            result.append(dfgal)
+
+        # If we have JCIRC attributes =========================================
+        #     I'm going to need a lot of NANs that represent that gas and dm
+        #     have no circularity.
+        if circ_attrs:
+            circ_attrs.append("ptypev")
+            dfcirc = self._get_jcirc_df(galaxy, circ_attrs)
+            result.append(dfcirc)
+
+        # the attributes as dataframe
+        df = pd.concat(result, axis=1)
+
+        # remove if ptypev is duplicated
+        df = df.loc[:, ~df.columns.duplicated()]
+
+        # separamos la matriz y las clases
+        X = df[attributes].to_numpy()
+        t = df.ptypev.to_numpy()
+
+        # retornamos
+        return X, t
 
     def decompose(self, galaxy):
         """Decompose method.

@@ -11,7 +11,7 @@
 # IMPORTS
 # =============================================================================
 
-from ._base import GalaxyDecomposeMixin
+from ._base import GalaxyDecomposerABC
 from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
 from ._histogram import JEHistogram, JHistogram
 from ._kmeans import KMeans
@@ -22,7 +22,7 @@ from ._threshold import JThreshold
 # =============================================================================
 
 __all__ = [
-    "GalaxyDecomposeMixin",
+    "GalaxyDecomposerABC",
     "JThreshold",
     "JHistogram",
     "JEHistogram",
