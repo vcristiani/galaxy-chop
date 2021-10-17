@@ -12,10 +12,11 @@
 # =============================================================================
 
 from ._base import GalaxyDecomposerABC, hparam
-from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
-from ._histogram import JEHistogram, JHistogram
-from ._kmeans import KMeans
-from ._threshold import JThreshold
+
+# from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
+# from ._histogram import JEHistogram, JHistogram
+# from ._kmeans import KMeans
+# from ._threshold import JThreshold
 
 # =============================================================================
 # MAKE IT PUBLIC!

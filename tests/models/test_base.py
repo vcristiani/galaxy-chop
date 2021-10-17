@@ -4,8 +4,33 @@ import attr
 
 import numpy as np
 
+import pytest
+
 import galaxychop as gchop
 from galaxychop import models
+
+
+def test_GalaxyDecomposerABC_not_implemethed():
+    class Decomposer(models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return super().get_attributes()
+
+        def split(self, X, y, attributes):
+            return super().split(X, y, attributes)
+
+        def get_rows_mask(self, X, y, attributes):
+            return super().get_rows_mask(X, y, attributes)
+
+    decomposer = Decomposer()
+
+    with pytest.raises(NotImplementedError):
+        decomposer.get_attributes()
+
+    with pytest.raises(NotImplementedError):
+        decomposer.split(None, None, None)
+
+    with pytest.raises(NotImplementedError):
+        decomposer.get_rows_mask(None, None, None)
 
 
 def test_GalaxyDecomposerABC_repr():
@@ -16,10 +41,7 @@ def test_GalaxyDecomposerABC_repr():
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
 
-        def get_ptypes(self):
-            return ["stars"]
-
-        def split(self):
+        def split(self, X, y, attributes):
             ...
 
         def get_rows_mask(self, X, y, attributes):
@@ -40,10 +62,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
         def get_attributes(self):
             ...
 
-        def get_ptypes(self):
-            ...
-
-        def split(self):
+        def split(self, X, y, attributes):
             ...
 
         def get_rows_mask(self, X, y, attributes):
@@ -81,3 +100,53 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 
     X_nostars = X[t != gchop.ParticleSetType.STARS.value]
     assert np.all(np.isnan(X_nostars[:, 1]))
+
+
+def test_GalaxyDecomposerABC_complete_labels():
+    class Decomposer(models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            ...
+
+        def split(self):
+            ...
+
+        def get_rows_mask(self, X, y, attributes):
+            ...
+
+    decomposer = Decomposer()
+
+    X = np.random.rand(3, 4)
+    labels = [1, 1]
+    rows_mask = [True, False, True]
+
+    result = decomposer.complete_labels(
+        X=X, labels=labels, rows_mask=rows_mask
+    )
+
+    assert np.array_equal(result, [1, np.nan, 1], equal_nan=True)
+
+
+def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.star_align(gchop.center(gal))
+
+    class Decomposer(models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["x"]
+
+        def split(self, X, y, attributes):
+            return np.full(len(X), 100)
+
+        def get_rows_mask(self, X, y, attributes):
+            return y == 2
+
+    decomposer = Decomposer()
+
+    labels, y = decomposer.decompose(gal)
+
+    assert (y == 0).sum() == len(gal.stars)
+    assert (y == 1).sum() == len(gal.dark_matter)
+    assert (y == 2).sum() == len(gal.gas)
+
+    assert np.all(labels[y == 2] == 100)
+    assert np.all(np.isnan(labels[y != 2]))
