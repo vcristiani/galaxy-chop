@@ -33,6 +33,24 @@ def test_GalaxyDecomposerABC_not_implemethed():
         decomposer.get_rows_mask(None, None, None)
 
 
+@pytest.mark.parametrize(
+    "bins_value", [None, (1.0,), (1.0, 2.0, 3.0), (1.0, 2)]
+)
+def test_GalaxyDecomposerABC_invalid_bins(bins_value):
+    class Decomposer(models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            ...
+
+        def split(self, X, y, attributes):
+            ...
+
+        def get_rows_mask(self, X, y, attributes):
+            ...
+
+    with pytest.raises(ValueError):
+        Decomposer(bins=bins_value)
+
+
 def test_GalaxyDecomposerABC_repr():
     class Decomposer(models.GalaxyDecomposerABC):
 

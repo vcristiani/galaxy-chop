@@ -50,6 +50,16 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     bins = hparam(default=(0.05, 0.005))
 
+    @bins.validator
+    def _bins_validator(self, attribute, value):
+        if not (
+            isinstance(value, tuple)
+            and len(value) == 2
+            and isinstance(value[0], float)
+            and isinstance(value[1], float)
+        ):
+            raise ValueError("bins must be a tuple of two floats.")
+
     # block meta checks =======================================================
     def __init_subclass__(cls):
         model_config = getattr(cls, "__gchop_model_cls_config__")
