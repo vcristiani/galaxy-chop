@@ -193,7 +193,7 @@ def test_DynamicStarDecomposer_get_attributes():
     ]
 
 
-def test_DynamicStarDecomposer_get_attributes():
+def test_DynamicStarDecomposer_get_rows_mask():
     class Decomposer(
         models.DynamicStarsDecomposerMixin,
         models.GalaxyDecomposerABC,
