@@ -3,6 +3,7 @@ import warnings
 import attr
 
 import numpy as np
+from numpy.core.shape_base import block
 
 import pytest
 
@@ -168,3 +169,45 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 
     assert np.all(labels[y == 2] == 100)
     assert np.all(np.isnan(labels[y != 2]))
+
+
+# =============================================================================
+# DYNAMIC STARS DECOMPOSER
+# =============================================================================
+
+
+def test_DynamicStarDecomposer_get_attributes():
+    class Decomposer(
+        models.DynamicStarsDecomposerMixin,
+        models.GalaxyDecomposerABC,
+    ):
+        def split(self, X, y, attributes):
+            ...
+
+    decomposer = Decomposer()
+
+    assert decomposer.get_attributes() == [
+        "normalized_star_energy",
+        "eps",
+        "eps_r",
+    ]
+
+
+def test_DynamicStarDecomposer_get_attributes():
+    class Decomposer(
+        models.DynamicStarsDecomposerMixin,
+        models.GalaxyDecomposerABC,
+    ):
+        def split(self, X, y, attributes):
+            ...
+
+    decomposer = Decomposer()
+
+    X = [[1, 2, 3], [np.nan, 2, 3], [1, 2, np.nan], [1, 2, 3]]
+
+    y = [0, 0, 1, 1]
+
+    attrs = ["a", "b", "c"]
+    result = decomposer.get_rows_mask(X, y, attrs)
+
+    assert np.all(result == [True, False, False, False])

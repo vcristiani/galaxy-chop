@@ -11,7 +11,7 @@
 # IMPORTS
 # =============================================================================
 
-from ._base import GalaxyDecomposerABC, hparam
+from ._base import GalaxyDecomposerABC, DynamicStarsDecomposerMixin, hparam
 
 # from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
 # from ._histogram import JEHistogram, JHistogram
@@ -24,6 +24,7 @@ from ._base import GalaxyDecomposerABC, hparam
 
 __all__ = [
     "GalaxyDecomposerABC",
+    "DynamicStarsDecomposerMixin",
     "JThreshold",
     "JHistogram",
     "JEHistogram",

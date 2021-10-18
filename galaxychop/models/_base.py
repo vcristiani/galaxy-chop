@@ -233,6 +233,6 @@ class DynamicStarsDecomposerMixin:
 
     def get_rows_mask(self, X, y, attributes):
         # all the rows where every value is finite
-        only_stars = y == data.ParticleSetType.STARS.value
-        finite_values = np.isfinite(X).all(axis=0)
+        only_stars = np.equal(y, data.ParticleSetType.STARS.value)
+        finite_values = np.isfinite(X).all(axis=1)
         return only_stars & finite_values
