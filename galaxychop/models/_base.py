@@ -72,11 +72,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def split(self, X, y, attributes):
+    def get_rows_mask(self, X, y, attributes):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def get_rows_mask(self, X, y, attributes):
+    def split(self, X, y, attributes):
         raise NotImplementedError()
 
     # internal ================================================================

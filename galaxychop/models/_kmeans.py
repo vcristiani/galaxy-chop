@@ -13,14 +13,14 @@
 
 from sklearn import cluster
 
-from ._base import GalaxyDecomposeMixin
+from ._base import GalaxyDecomposerABC, DynamicStarsDecomposerMixin, hparam
 
 # =============================================================================
 # KNN
 # =============================================================================
 
 
-class KMeans(GalaxyDecomposeMixin, cluster.KMeans):
+class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """GalaxyChop KMeans class.
 
     Implementation of Scikit-learn [6]_ K-means as a method for dynamically
@@ -78,18 +78,24 @@ class KMeans(GalaxyDecomposeMixin, cluster.KMeans):
         `<https://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html>`_
     """
 
-    def __init__(self, columns=None, **kwargs):
-        super().__init__(**kwargs)
-        self.columns = columns
+    n_clusters = hparam(default=2)
+    init = hparam(default="k-means++")
+    n_init = hparam(default=10)
+    max_iter = hparam(default=300)
+    tol = hparam(default=0.0001)
+    verbose = hparam(default=0)
+    random_state = hparam(default=None)
+    algorithm = hparam(default="auto")
 
-    def get_columns(self):
-        """Obtain the columns of the quantities to be used.
-
-        Returns
-        -------
-        columns: list
-            Only the needed columns used to decompose galaxies.
-        """
-        if self.columns is None:
-            return super().get_columns()
-        return self.columns
+    def split(self, X, y, attributes):
+        kmeans = cluster.KMeans(
+            n_clusters=self.n_clusters,
+            init=self.init,
+            n_init=self.n_init,
+            max_iter=self.max_iter,
+            tol=self.tol,
+            verbose=self.verbose,
+            random_state=self.random_state,
+            algorithm=self.algorithm,
+        )
+        return kmeans.fit_predict(X)

@@ -26,7 +26,7 @@ from ..data import ParticleSetType
 # =============================================================================
 
 JCirc = namedtuple(
-    "JCirc", ["normalized_specific_energy", "eps", "eps_r", "x", "y"]
+    "JCirc", ["normalized_star_energy", "eps", "eps_r", "x", "y"]
 )
 
 
@@ -191,7 +191,7 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     eps_r_[mask] = np.nan
 
     return JCirc(
-        normalized_specific_energy=E_star_norm_,
+        normalized_star_energy=E_star_norm_,
         eps=eps_,
         eps_r=eps_r_,
         x=x,
