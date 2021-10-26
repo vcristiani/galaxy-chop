@@ -217,9 +217,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         final_labels = self.complete_labels(
             X=X, labels=labels, rows_mask=rows_mask
         )
+        final_y = np.array([data.ParticleSetType.to_string(yi) for yi in y])
 
         # return the instance
-        return final_labels, y
+        return final_labels, final_y
 
 
 # =============================================================================

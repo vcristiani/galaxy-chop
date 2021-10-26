@@ -1,9 +1,6 @@
 import warnings
 
-import attr
-
 import numpy as np
-from numpy.core.shape_base import block
 
 import pytest
 
@@ -163,12 +160,12 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 
     labels, y = decomposer.decompose(gal)
 
-    assert (y == 0).sum() == len(gal.stars)
-    assert (y == 1).sum() == len(gal.dark_matter)
-    assert (y == 2).sum() == len(gal.gas)
+    assert (y == "stars").sum() == len(gal.stars)
+    assert (y == "dark_matter").sum() == len(gal.dark_matter)
+    assert (y == "gas").sum() == len(gal.gas)
 
-    assert np.all(labels[y == 2] == 100)
-    assert np.all(np.isnan(labels[y != 2]))
+    assert np.all(labels[y == "gas"] == 100)
+    assert np.all(np.isnan(labels[y != "gas"]))
 
 
 # =============================================================================

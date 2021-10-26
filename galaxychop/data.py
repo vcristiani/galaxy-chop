@@ -39,6 +39,16 @@ class ParticleSetType(enum.IntEnum):
     DARK_MATTER = 1
     GAS = 2
 
+    @classmethod
+    def to_string(cls, v):
+        if isinstance(v, str):
+            v = v.lower()
+        for p in ParticleSetType:
+            name = p.name.lower()
+            if v in (name, p.value):
+                return name
+        raise ValueError(f"Can't coherce {v} into particleset type string ")
+
 
 @uttr.s(frozen=True, slots=True, repr=False)
 class ParticleSet:

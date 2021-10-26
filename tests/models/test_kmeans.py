@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 
 import pytest
@@ -12,8 +13,10 @@ def test_KMeans(read_hdf5_galaxy):
 
     decomposer = models.KMeans()
 
-    labels, y = decomposer.decompose(gal)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        labels, y = decomposer.decompose(gal)
 
-    stars_mask = np.array_equal(y, gchop.ParticleSetType.STARS.value)
+    stars_mask = np.array_equal(y, "stars")
     assert np.isfinite(labels[stars_mask]).all()
     assert np.isnan(labels[~stars_mask]).all()
