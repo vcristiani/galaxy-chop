@@ -21,6 +21,41 @@ import pandas as pd
 import pytest
 
 # =============================================================================
+# PARTICLESET TYPE TESTS
+# =============================================================================
+
+
+def test_ParticleSetType():
+    assert (
+        data.ParticleSetType.mktype("stars")
+        == data.ParticleSetType.mktype("STARS")
+        == data.ParticleSetType.mktype(0)
+        == data.ParticleSetType.STARS
+    ) and data.ParticleSetType.STARS.to_string() == "stars"
+
+    assert (
+        data.ParticleSetType.mktype("dark_matter")
+        == data.ParticleSetType.mktype("DARK_MATTER")
+        == data.ParticleSetType.mktype(1)
+        == data.ParticleSetType.DARK_MATTER
+    ) and data.ParticleSetType.DARK_MATTER.to_string() == "dark_matter"
+
+    assert (
+        data.ParticleSetType.mktype("gas")
+        == data.ParticleSetType.mktype("GAS")
+        == data.ParticleSetType.mktype(2)
+        == data.ParticleSetType.GAS
+    ) and data.ParticleSetType.GAS.to_string() == "gas"
+
+    with pytest.raises(ValueError):
+        data.ParticleSetType.mktype(43)
+    with pytest.raises(ValueError):
+        data.ParticleSetType.mktype("foo")
+    with pytest.raises(ValueError):
+        data.ParticleSetType.mktype(None)
+
+
+# =============================================================================
 # PARTICLE_SET TESTS
 # =============================================================================
 
