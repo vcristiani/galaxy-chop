@@ -67,7 +67,7 @@ class GalaxyPlotter:
 
     # COMMON PLOTS ============================================================
 
-    def _get_df_and_hue(self, ptypes, attributes, labels, lmap):
+    def get_df_and_hue(self, ptypes, attributes, labels, lmap):
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
         hue = None  # by default not hue is selected
@@ -90,8 +90,7 @@ class GalaxyPlotter:
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
         if lmap is not None:
-            lmap_func = self.mklmap(lmap)
-            df[hue] = df[hue].apply(lmap_func)
+            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
 
         return df, hue
 
@@ -99,7 +98,7 @@ class GalaxyPlotter:
         self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
     ):
 
-        df, hue = self._get_df_and_hue(
+        df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
             labels=labels,
@@ -114,7 +113,7 @@ class GalaxyPlotter:
 
     def dis(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(
+        df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
             labels=labels,
@@ -125,7 +124,7 @@ class GalaxyPlotter:
 
     def scatter(self, x, y, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x, y]
-        df, hue = self._get_df_and_hue(
+        df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
             labels=labels,
@@ -136,7 +135,7 @@ class GalaxyPlotter:
 
     def hist(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(
+        df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
             labels=labels,
@@ -147,7 +146,7 @@ class GalaxyPlotter:
 
     def kde(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(
+        df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
             labels=labels,
