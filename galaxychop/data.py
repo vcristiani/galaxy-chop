@@ -236,7 +236,7 @@ class ParticleSet:
 
         arr = self.arr_
         columns_makers = {
-            "ptype": lambda: np.full(len(self), self.ptype.name),
+            "ptype": lambda: np.full(len(self), self.ptype.humanize()),
             "ptypev": lambda: np.full(len(self), self.ptype.value),
             "m": lambda: arr.m,
             "x": lambda: arr.x,

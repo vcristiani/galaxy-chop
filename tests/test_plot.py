@@ -65,7 +65,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
 
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    lmap = {"STARS": "S", "DARK_MATTER": "DM", "GAS": "G"}
+    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
 
     df, hue = plotter.get_df_and_hue(
         ptypes=None, attributes=None, labels="ptype", lmap=lmap
