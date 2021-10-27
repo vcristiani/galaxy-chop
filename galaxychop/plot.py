@@ -31,6 +31,8 @@ from . import utils
 class GalaxyPlotter:
     """Make plots of DecisionMatrix."""
 
+    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue",)
+
     _galaxy = attr.ib()
 
     # INTERNAL ================================================================
@@ -53,7 +55,10 @@ class GalaxyPlotter:
            The ax used by the plot
 
         """
-        if plot_kind.startswith("_"):
+        if (
+            plot_kind.startswith("_")
+            or plot_kind in self._P_KIND_FORBIDEN_METHODS
+        ):
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         method = getattr(self, plot_kind, None)
         if not callable(method):
@@ -62,7 +67,7 @@ class GalaxyPlotter:
 
     # COMMON PLOTS ============================================================
 
-    def _get_df_and_hue(self, ptypes, attributes, labels):
+    def _get_df_and_hue(self, ptypes, attributes, labels, lmap):
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
         hue = None  # by default not hue is selected
@@ -84,11 +89,22 @@ class GalaxyPlotter:
             hue = "Hue"  # Hue no esta en pset por lo tanto sirve
             df.insert(0, hue, labels)  # lo chanto como primer columna
 
+        if lmap is not None:
+            lmap_func = self.mklmap(lmap)
+            df[hue] = df[hue].apply(lmap_func)
+
         return df, hue
 
-    def pairplot(self, ptypes=None, attributes=None, labels="ptype", **kwargs):
+    def pairplot(
+        self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
+    ):
 
-        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        df, hue = self._get_df_and_hue(
+            ptypes=ptypes,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
@@ -96,27 +112,47 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
-    def dis(self, x, y=None, ptypes=None, labels=None, **kwargs):
+    def dis(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        df, hue = self._get_df_and_hue(
+            ptypes=ptypes,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
         ax = sns.displot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
-    def scatter(self, x, y, ptypes=None, labels=None, **kwargs):
+    def scatter(self, x, y, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x, y]
-        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        df, hue = self._get_df_and_hue(
+            ptypes=ptypes,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
         ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
-    def hist(self, x, y=None, ptypes=None, labels=None, **kwargs):
+    def hist(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        df, hue = self._get_df_and_hue(
+            ptypes=ptypes,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
         ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
-    def kde(self, x, y=None, ptypes=None, labels=None, **kwargs):
+    def kde(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         attributes = [x] if y is None else [x, y]
-        df, hue = self._get_df_and_hue(ptypes, attributes, labels)
+        df, hue = self._get_df_and_hue(
+            ptypes=ptypes,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
         ax = sns.kdeplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 

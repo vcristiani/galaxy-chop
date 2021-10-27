@@ -60,6 +60,16 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 # =============================================================================
 
 
+@pytest.mark.parametrize("pkind", plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS)
+def test_plot_call_invalid_forbiden_plot_kind(galaxy, pkind):
+    gal = galaxy(seed=42)
+
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    with pytest.raises(ValueError):
+        plotter(pkind)
+
+
 def test_plot_call_invalid_plot_kind(galaxy):
     gal = galaxy(seed=42)
 
