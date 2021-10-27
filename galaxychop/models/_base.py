@@ -218,7 +218,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             X=X, labels=labels, rows_mask=rows_mask
         )
         final_y = np.array(
-            [data.ParticleSetType.mktype(yi).to_string() for yi in y]
+            [data.ParticleSetType.mktype(yi).humanize() for yi in y]
         )
 
         # return the instance

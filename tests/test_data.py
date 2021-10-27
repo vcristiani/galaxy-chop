@@ -31,21 +31,21 @@ def test_ParticleSetType():
         == data.ParticleSetType.mktype("STARS")
         == data.ParticleSetType.mktype(0)
         == data.ParticleSetType.STARS
-    ) and data.ParticleSetType.STARS.to_string() == "stars"
+    ) and data.ParticleSetType.STARS.humanize() == "stars"
 
     assert (
         data.ParticleSetType.mktype("dark_matter")
         == data.ParticleSetType.mktype("DARK_MATTER")
         == data.ParticleSetType.mktype(1)
         == data.ParticleSetType.DARK_MATTER
-    ) and data.ParticleSetType.DARK_MATTER.to_string() == "dark_matter"
+    ) and data.ParticleSetType.DARK_MATTER.humanize() == "dark_matter"
 
     assert (
         data.ParticleSetType.mktype("gas")
         == data.ParticleSetType.mktype("GAS")
         == data.ParticleSetType.mktype(2)
         == data.ParticleSetType.GAS
-    ) and data.ParticleSetType.GAS.to_string() == "gas"
+    ) and data.ParticleSetType.GAS.humanize() == "gas"
 
     with pytest.raises(ValueError):
         data.ParticleSetType.mktype(43)

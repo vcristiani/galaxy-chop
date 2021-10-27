@@ -51,7 +51,7 @@ class ParticleSetType(enum.IntEnum):
                 return p
         raise ValueError(f"Can't coherce {v} into ParticleSetType ")
 
-    def to_string(self):
+    def humanize(self):
         return self.name.lower()
 
 
@@ -319,19 +319,13 @@ class Galaxy:
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
-        ptypes_makers = {
-            "stars": self.stars.to_dataframe,
-            "dark_matter": self.dark_matter.to_dataframe,
-            "gas": self.gas.to_dataframe,
-        }
-
-        ptypes = ptypes_makers.keys() if ptypes is None else ptypes
+        psets = [self.stars, self.dark_matter, self.gas]
 
         parts = []
-        for ptype in ptypes:
-            mkptype = ptypes_makers[ptype]
-            df = mkptype(attributes=attributes)
-            parts.append(df)
+        for pset in psets:
+            if ptypes is None or pset.ptype.humanize() in ptypes:
+                df = pset.to_dataframe(attributes=attributes)
+                parts.append(df)
 
         return pd.concat(parts, ignore_index=True)
 
