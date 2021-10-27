@@ -48,9 +48,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
 
-    bins = hparam(default=(0.05, 0.005))
+    cbins = hparam(default=(0.05, 0.005))
 
-    @bins.validator
+    @cbins.validator
     def _bins_validator(self, attribute, value):
         if not (
             isinstance(value, tuple)
@@ -58,7 +58,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             and isinstance(value[0], float)
             and isinstance(value[1], float)
         ):
-            raise ValueError("bins must be a tuple of two floats.")
+            raise ValueError("cbins must be a tuple of two floats.")
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
@@ -99,7 +99,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = utils.jcirc(galaxy, *self.bins)._asdict()
+        jcirc = utils.jcirc(galaxy, *self.cbins)._asdict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars
@@ -217,7 +217,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         final_labels = self.complete_labels(
             X=X, labels=labels, rows_mask=rows_mask
         )
-        final_y = np.array([data.ParticleSetType.to_string(yi) for yi in y])
+        final_y = np.array(
+            [data.ParticleSetType.mktype(yi).to_string() for yi in y]
+        )
 
         # return the instance
         return final_labels, final_y

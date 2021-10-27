@@ -46,7 +46,7 @@ def test_GalaxyDecomposerABC_invalid_bins(bins_value):
             ...
 
     with pytest.raises(ValueError):
-        Decomposer(bins=bins_value)
+        Decomposer(cbins=bins_value)
 
 
 def test_GalaxyDecomposerABC_repr():
@@ -63,9 +63,9 @@ def test_GalaxyDecomposerABC_repr():
         def get_rows_mask(self, X, y, attributes):
             ...
 
-    decomposer = Decomposer(bins=(0.3, 0.2), other="zaraza")
+    decomposer = Decomposer(cbins=(0.3, 0.2), other="zaraza")
     result = repr(decomposer)
-    expected = "Decomposer(bins=(0.3, 0.2), other='zaraza')"
+    expected = "Decomposer(cbins=(0.3, 0.2), other='zaraza')"
 
     assert result == expected
 

@@ -40,14 +40,19 @@ class ParticleSetType(enum.IntEnum):
     GAS = 2
 
     @classmethod
-    def to_string(cls, v):
+    def mktype(cls, v):
+        """Creates a ParticleSetType from name, or value."""
+        if isinstance(v, ParticleSetType):
+            return v
         if isinstance(v, str):
-            v = v.lower()
+            v = v.upper()
         for p in ParticleSetType:
-            name = p.name.lower()
-            if v in (name, p.value):
-                return name
-        raise ValueError(f"Can't coherce {v} into particleset type string ")
+            if v in (p.name, p.value):
+                return p
+        raise ValueError(f"Can't coherce {v} into ParticleSetType ")
+
+    def to_string(self):
+        return self.name.lower()
 
 
 @uttr.s(frozen=True, slots=True, repr=False)
