@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt-get install pandoc
       - name: Install tox
-        run: pip install tox tox-gh-actions
+        run: pip install numpy tox tox-gh-actions
       - name: Test with tox
         run: tox -r
       
