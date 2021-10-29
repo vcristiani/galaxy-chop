@@ -41,11 +41,11 @@ Contains
             do j = 1, n
                 if (i /= j) then
 
-                    dist = sqrt(
-                        (x(i) - x(j)) ** 2 +
-                        (y(i) - y(j)) ** 2 +
-                        (z(i) - z(j)) ** 2 +
-                        soft(i) ** 2
+                    dist = sqrt(                &
+                        (x(i) - x(j)) ** 2 +    &
+                        (y(i) - y(j)) ** 2 +    &
+                        (z(i) - z(j)) ** 2 +    &
+                        soft(i) ** 2            &
                     )
                     ep(i) = ep(i) + m(j) / dist
 
