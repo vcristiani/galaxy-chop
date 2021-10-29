@@ -12,9 +12,9 @@
 # =============================================================================
 import os
 
-from numpy.distutils.core import Extension, setup
+import setuptools  # noqa
 
-import setuptools
+from numpy.distutils.core import Extension, setup  # noqa
 
 
 # =============================================================================
