@@ -24,16 +24,18 @@ Contains
         use OMP_LIB
 
         integer              :: n
-        real, intent(in)     :: x(n), y(n), z(n), m(n), soft(n)
+        real, intent(in)     :: x(n), y(n), z(n), m(n), soft
         real, intent(out)    :: ep(n)
-        real                 :: dist
+        real                 :: dist, soft2
         integer              :: i, j
+
+        soft2 = soft ** 2
 
         ! ====================================================================
         ! Calcula la energia potencial especifica de cada particula
 
         !$OMP PARALLEL DEFAULT(NONE) &
-        !$OMP SHARED (x,y,z,m,soft,ep) &
+        !$OMP SHARED (x,y,z,m,soft2,ep) &
         !$OMP PRIVATE(i,j,dist)
         !$OMP DO SCHEDULE(DYNAMIC)
         do i = 1, n
@@ -45,7 +47,7 @@ Contains
                         (x(i) - x(j)) ** 2 +    &
                         (y(i) - y(j)) ** 2 +    &
                         (z(i) - z(j)) ** 2 +    &
-                        soft(i) ** 2            &
+                        soft2                   &
                     )
                     ep(i) = ep(i) + m(j) / dist
 

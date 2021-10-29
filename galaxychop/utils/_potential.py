@@ -58,7 +58,7 @@ def fortran_potential(x, y, z, m, softening):
     """
     from .fortran import potential
 
-    soft = np.full_like(x, softening)
+    soft = np.asarray(softening)
     epot = potential.fortran_potential(x, y, z, m, soft)
 
     return epot * G, np.asarray
