@@ -1,22 +1,22 @@
-name: Galaxy Chop Actions py3.7
+# ==============================================================
+# CI with GitHub Actions
+# ==============================================================
 
-on: [push]
+name: Galaxy Chop Actions
+
+on: 
+  - push
+  - pull_request
+
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.7]
-        env:
-          - TOXENV: style 
-          - TOXENV: coverage
-          - TOXENV: docstyle
-          - TOXENV: check-manifest
-          - TOXENV: py37
-          - TOXENV: docs
-
+        python-version: [3.7, 3.8, 3.9]
     
     steps:
       - uses: actions/checkout@master
@@ -28,8 +28,7 @@ jobs:
         run: |
           sudo apt-get install pandoc
       - name: Install tox
-        run: pip install tox
-      - name: Test with tox ${{ matrix.env.TOXENV }}
-        env: ${{ matrix.env }}
+        run: pip install numpy tox tox-gh-actions
+      - name: Test with tox
         run: tox -r
       

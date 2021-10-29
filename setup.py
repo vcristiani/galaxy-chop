@@ -12,7 +12,9 @@
 # =============================================================================
 import os
 
-import setuptools
+import setuptools  # noqa
+
+from numpy.distutils.core import Extension, setup  # noqa
 
 
 # =============================================================================
@@ -52,8 +54,21 @@ REQUIREMENTS = [
 # =============================================================================
 # DESCRIPTION
 # =============================================================================
+
 with open("README.md") as fp:
     LONG_DESCRIPTION = fp.read()
+
+# =============================================================================
+# FORTRAN EXTENSIONS
+# =============================================================================
+
+EXTENSIONS = [
+    Extension(
+        name="galaxychop.utils.fortran.potential",
+        sources=["galaxychop/utils/fortran/potential.f95"],
+    )
+]
+
 
 # =============================================================================
 # FUNCTIONS
@@ -61,7 +76,7 @@ with open("README.md") as fp:
 print(setuptools.find_packages())  # exclude=['test*']
 
 
-setuptools.setup(
+setup(
     name="galaxychop",
     version=VERSION,
     description="Galaxy dynamic de-composition",
@@ -75,7 +90,9 @@ setuptools.setup(
         "galaxychop.models",
         "galaxychop.datasets",
         "galaxychop.utils",
+        "galaxychop.utils.fortran",
     ],
+    ext_modules=EXTENSIONS,
     license="MIT",
     keywords="galaxy, dynamics",
     classifiers=[

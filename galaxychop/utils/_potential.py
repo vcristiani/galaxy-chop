@@ -38,6 +38,32 @@ G = c.G.to(G_UNIT).to_value()
 # =============================================================================
 
 
+def fortran_potential(x, y, z, m, softening):
+    """Fortran implementation for the gravitational potential energy calculation.
+
+    Parameters
+    ----------
+    x, y, z : `np.ndarray`
+        Positions of particles. Shape(n,1)
+    m : `np.ndarray`
+        Masses of particles. Shape(n,1)
+    softening : `float`, optional
+        Softening parameter. Shape(1,)
+
+    Returns
+    -------
+    np.ndarray : `float`
+    Specific potential energy of particles.
+
+    """
+    from .fortran import potential
+
+    soft = np.asarray(softening)
+    epot = potential.fortran_potential(x, y, z, m, soft)
+
+    return epot * G, np.asarray
+
+
 def numpy_potential(x, y, z, m, softening):
     """Numpy implementation for the gravitational potential energy calculation.
 
@@ -76,6 +102,7 @@ def numpy_potential(x, y, z, m, softening):
 # =============================================================================
 
 POTENTIAL_BACKENDS = {
+    "fortran": fortran_potential,
     "numpy": numpy_potential,
 }
 
