@@ -13,6 +13,7 @@
 from galaxychop import data, utils
 
 import numpy as np
+import numpy.testing as npt
 
 import pytest
 
@@ -47,6 +48,47 @@ def test_Galaxy_potential_energy(galaxy):
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
     assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
     assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
+
+
+def test_Galaxy_potential_energy_fortran_backend(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    pgal_f = utils.potential(gal, backend="fortran")
+
+    assert isinstance(pgal_f, data.Galaxy)
+    assert np.all(pgal_f.stars.potential == pgal_f.potential_energy_[0])
+    assert np.all(pgal_f.dark_matter.potential == pgal_f.potential_energy_[1])
+    assert np.all(pgal_f.gas.potential == pgal_f.potential_energy_[2])
+
+
+def test_Galaxy_potential_energy_backend_consistency(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    pgal_np = utils.potential(gal, backend="numpy")
+    pgal_f = utils.potential(gal, backend="fortran")
+
+    decimal = 8
+    npt.assert_almost_equal(
+        pgal_np.stars.potential.value, pgal_f.stars.potential.value, decimal
+    )
+    npt.assert_almost_equal(
+        pgal_np.dark_matter.potential.value,
+        pgal_f.dark_matter.potential.value,
+        decimal,
+    )
+    npt.assert_almost_equal(
+        pgal_np.gas.potential.value, pgal_f.gas.potential.value, decimal
+    )
 
 
 # =============================================================================
