@@ -29,7 +29,6 @@ jobs:
           sudo apt-get install pandoc
       - name: Install tox
         run: pip install tox tox-gh-actions
-      - name: Test with tox ${{ matrix.env.TOXENV }}
-        env: ${{ matrix.env }}
+      - name: Test with tox
         run: tox -r
       
