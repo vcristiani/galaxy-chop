@@ -40,9 +40,9 @@ def image_paths(func, format):
 
 
 def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
-    # Como la porqueria de pairplot no recibe ni ejes ni figuras no puedo
-    # Usar las funciones de check_figures equals aca, asi que hay que hacer
-    # todo a mano...
+    # As the pairplot crap doesn't get neither axes nor figures I can't
+    # use the check_figures_equals functions here, so we have to do
+    # everything by hand...
 
     test_path, ref_path = image_paths(test_func, format)
 
