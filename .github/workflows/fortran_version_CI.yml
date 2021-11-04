@@ -17,7 +17,7 @@ jobs:
       fail-fast: False
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
-        gfortran-version: [7, 8, 9]
+        #gfortran-version: [7, 8, 9]
         python-version: [3.8]
     
     steps:
@@ -29,7 +29,7 @@ jobs:
       - name: Reinstall gfortran
         run: |
           sudo apt-get remove gfortran
-          sudo apt-get install gfortran-${{ matrix.gfortran-version }}
+          sudo apt-get install gfortran
           echo "======================================================" 
           echo $(gfortran --version)
           echo "======================================================"
