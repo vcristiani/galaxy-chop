@@ -687,20 +687,9 @@ def test_Galaxy_total_energy_without_potential(galaxy):
 #   ANGULAR MOMENTUM
 # =============================================================================
 
-
 def test_Galaxy_angular_momentum(galaxy):
     gal = galaxy(seed=42)
-    assert (
-        gal.Jstar_.unit
-        == gal.Jdark_matter_.unit
-        == gal.Jgas_.unit
-        == (u.kpc * u.km / u.s)
-    )
-    assert np.all(
-        gal.Jstar_.to_value() == gal.stars.angular_momentum_.to_value()
-    )
-    assert np.all(
-        gal.Jdark_matter_.to_value()
-        == gal.dark_matter.angular_momentum_.to_value()
-    )
-    assert np.all(gal.Jgas_.to_value() == gal.gas.angular_momentum_.to_value())
+    gam = gal.angular_momentum_
+    assert np.all(gam[0] == gal.stars.angular_momentum_)
+    assert np.all(gam[1] == gal.dark_matter.angular_momentum_)
+    assert np.all(gam[2] == gal.gas.angular_momentum_)

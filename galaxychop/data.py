@@ -404,16 +404,12 @@ class Galaxy:
             )
 
     @property
-    def Jstar_(self):
-        return self.stars.angular_momentum_
-
-    @property
-    def Jdark_matter_(self):
-        return self.dark_matter.angular_momentum_
-
-    @property
-    def Jgas_(self):
-        return self.gas.angular_momentum_
+    def angular_momentum_(self):
+        return (
+            self.stars.angular_momentum_,
+            self.dark_matter.angular_momentum_,
+            self.gas.angular_momentum_,
+        )
 
 
 # =============================================================================
