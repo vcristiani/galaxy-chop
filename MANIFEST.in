@@ -3,6 +3,7 @@ include README.md
 
 recursive-include galaxychop *.dat
 recursive-include galaxychop *.npy
+recursive-include galaxychop *.f95
 
 recursive-exclude docs *
 recursive-exclude legacy *

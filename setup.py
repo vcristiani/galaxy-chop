@@ -12,10 +12,9 @@
 # =============================================================================
 import os
 
-import setuptools  # noqa
+#import setuptools  # noqa
 
-from numpy.distutils.core import Extension, setup  # noqa
-
+from numpy.distutils.core import Extension, setup
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -74,8 +73,6 @@ EXTENSIONS = [
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-print(setuptools.find_packages())  # exclude=['test*']
-
 
 setup(
     name="galaxychop",
