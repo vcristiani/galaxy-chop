@@ -17,22 +17,23 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.8]
+        gfortran-version: [7, 8, 9]
     
     steps:
       - uses: actions/checkout@master
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version}}
+          python-version: ${{ matrix.python-version }}
       - name: Install pandoc
         run: |
           sudo apt-get install pandoc
       - name: Reinstall gfortran
         run: |
           sudo apt-get remove gfortran
-          sudo apt-get install gfortran-7
+          sudo apt-get install gfortran-${{ matrix.gfortran-version }}
       - name: Install tox
         run: pip install numpy tox tox-gh-actions
-      - name: Test with tox
-        run: tox -r
+      - name: Test with tox only py38 env
+        run: tox -re py38
       
