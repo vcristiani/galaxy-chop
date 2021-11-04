@@ -687,6 +687,7 @@ def test_Galaxy_total_energy_without_potential(galaxy):
 #   ANGULAR MOMENTUM
 # =============================================================================
 
+
 def test_Galaxy_angular_momentum(galaxy):
     gal = galaxy(seed=42)
     gam = gal.angular_momentum_

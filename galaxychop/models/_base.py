@@ -14,6 +14,7 @@
 import abc
 
 import attr
+from attr import validators as vldt
 
 import numpy as np
 
@@ -28,6 +29,36 @@ from .. import data, utils
 _CIRCULARITY_ATTRIBUTES = ("normalized_star_energy", "eps", "eps_r")
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
+
+
+# =============================================================================
+# RESULT
+# =============================================================================
+
+
+@attr.s(frozen=True, slots=True, repr=False)
+class _Components:
+    labels = attr.ib(validator=vldt.instance_of(np.ndarray))
+    ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
+    probabilities = attr.ib(
+        validator=vldt.optional(vldt.instance_of(np.ndarray))
+    )
+
+    def __attrs_post_init__(self):
+        lens = {len(self.labels), len(self.ptypes)}
+        if self.probabilities is not None:
+            lens.add(len(self.probabilities))
+        if len(lens) > 1:
+            raise ValueError("All length must be the same")
+
+    def __repr__(self):
+        return (
+            "components("
+            f"labels={repr(self.labels)}, "
+            f"ptype={repr(self.ptypes)}, "
+            f"probabilities={repr(self.probabilities)})"
+        )
+
 
 # =============================================================================
 # FUNCTIONS
@@ -141,11 +172,13 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
         circ_attrs, df_attrs = [], []
-        for attr in attributes:
+        for attr_name in attributes:
             container = (
-                circ_attrs if attr in _CIRCULARITY_ATTRIBUTES else df_attrs
+                circ_attrs
+                if attr_name in _CIRCULARITY_ATTRIBUTES
+                else df_attrs
             )
-            container.append(attr)
+            container.append(attr_name)
 
         # this crap is going to have all the dataframes that contain as a
         # column each attribute
@@ -191,6 +224,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         new_labels[rows_mask] = labels
         return new_labels
 
+    def complete_probs(self, X, probs, rows_mask):
+        if probs is None:
+            return None
+        raise NotImplementedError()
+
     def decompose(self, galaxy):
         """Decompose method.
 
@@ -211,18 +249,25 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         X_clean, y_clean = X[rows_mask], y[rows_mask]
 
         # execute the cluster with the quantities of interest
-        labels = self.split(X=X_clean, y=y_clean, attributes=attributes)
+        labels, probs = self.split(X=X_clean, y=y_clean, attributes=attributes)
 
         # retrieve and fix the labels
         final_labels = self.complete_labels(
             X=X, labels=labels, rows_mask=rows_mask
+        )
+        final_probs = self.complete_probs(
+            X=X, probs=probs, rows_mask=rows_mask
         )
         final_y = np.array(
             [data.ParticleSetType.mktype(yi).humanize() for yi in y]
         )
 
         # return the instance
-        return final_labels, final_y
+        return _Components(
+            labels=final_labels,
+            ptypes=final_y,
+            probabilities=final_probs,
+        )
 
 
 # =============================================================================

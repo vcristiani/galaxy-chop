@@ -11,9 +11,11 @@
 # IMPORTS
 # =============================================================================
 
+import numpy as np
+
 from sklearn import cluster
 
-from ._base import GalaxyDecomposerABC, DynamicStarsDecomposerMixin, hparam
+from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 
 # =============================================================================
 # KNN
@@ -84,10 +86,11 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     max_iter = hparam(default=300)
     tol = hparam(default=0.0001)
     verbose = hparam(default=0)
-    random_state = hparam(default=None)
+    random_state = hparam(default=None, converter=np.random.RandomState)
     algorithm = hparam(default="auto")
 
     def split(self, X, y, attributes):
+
         kmeans = cluster.KMeans(
             n_clusters=self.n_clusters,
             init=self.init,
@@ -98,4 +101,5 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
             random_state=self.random_state,
             algorithm=self.algorithm,
         )
-        return kmeans.fit_predict(X)
+        labels = kmeans.fit_predict(X)
+        return labels, None

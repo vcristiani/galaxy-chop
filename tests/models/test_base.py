@@ -1,11 +1,11 @@
 import warnings
 
+import galaxychop as gchop
+from galaxychop import models
+
 import numpy as np
 
 import pytest
-
-import galaxychop as gchop
-from galaxychop import models
 
 
 def test_GalaxyDecomposerABC_not_implemethed():
@@ -95,11 +95,11 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     # check types stars-dm-gas
     assert np.all(t[: len(gal.stars)] == gchop.ParticleSetType.STARS.value)
     assert np.all(
-        t[len(gal.stars) : len(gal.dark_matter)]
+        t[len(gal.stars) : len(gal.dark_matter)]  # noqa
         == gchop.ParticleSetType.DARK_MATTER.value
     )
     assert np.all(
-        t[len(gal.stars) + len(gal.dark_matter) : len(gal.gas)]
+        t[len(gal.stars) + len(gal.dark_matter) : len(gal.gas)]  # noqa
         == gchop.ParticleSetType.GAS.value
     )
 
@@ -151,21 +151,21 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
             return ["x"]
 
         def split(self, X, y, attributes):
-            return np.full(len(X), 100)
+            return np.full(len(X), 100), None
 
         def get_rows_mask(self, X, y, attributes):
             return y == 2
 
     decomposer = Decomposer()
 
-    labels, y = decomposer.decompose(gal)
+    components = decomposer.decompose(gal)
 
-    assert (y == "stars").sum() == len(gal.stars)
-    assert (y == "dark_matter").sum() == len(gal.dark_matter)
-    assert (y == "gas").sum() == len(gal.gas)
+    assert (components.ptypes == "stars").sum() == len(gal.stars)
+    assert (components.ptypes == "dark_matter").sum() == len(gal.dark_matter)
+    assert (components.ptypes == "gas").sum() == len(gal.gas)
 
-    assert np.all(labels[y == "gas"] == 100)
-    assert np.all(np.isnan(labels[y != "gas"]))
+    assert np.all(components.labels[components.ptypes == "gas"] == 100)
+    assert np.all(np.isnan(components.labels[components.ptypes != "gas"]))
 
 
 # =============================================================================
