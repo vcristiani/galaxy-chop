@@ -68,7 +68,7 @@ class _Components:
 def hparam(default, **kwargs):
     metadata = kwargs.pop("metadata", {})
     metadata["__gchop_model_hparam__"] = True
-    return attr.ib(default=default, metadata=metadata, **kwargs)
+    return attr.ib(default=default, metadata=metadata, kw_only=True, **kwargs)
 
 
 # =============================================================================
