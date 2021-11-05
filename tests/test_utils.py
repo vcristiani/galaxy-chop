@@ -77,7 +77,7 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
     pgal_np = utils.potential(gal, backend="numpy")
     pgal_f = utils.potential(gal, backend="fortran")
 
-    decimal = 8
+    decimal = 5
     npt.assert_almost_equal(
         pgal_np.stars.potential.value, pgal_f.stars.potential.value, decimal
     )
