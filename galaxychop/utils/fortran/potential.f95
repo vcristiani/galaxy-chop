@@ -54,8 +54,8 @@ contains
             end if
          end do
       end do
-      ! $OMP END DO
-      ! $OMP END PARALLEL
+      !$OMP END DO
+      !$OMP END PARALLEL
    end subroutine fortran_potential
 
 end module potential
