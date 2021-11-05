@@ -65,7 +65,8 @@ EXTENSIONS = [
     Extension(
         name="galaxychop.utils.fortran.potential",
         sources=["galaxychop/utils/fortran/potential.f95"],
-        # extra_f90_compile_args=["-fopenmp"],
+        extra_f90_compile_args=["-fopenmp"],
+        extra_link_args=['-lgomp'],
     )
 ]
 
