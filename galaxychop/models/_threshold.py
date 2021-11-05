@@ -12,10 +12,7 @@
 
 import numpy as np
 
-from sklearn.base import ClusterMixin
-from sklearn.base import TransformerMixin
-
-from ._base import GalaxyDecomposeMixin
+from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 
 
 # =============================================================================
@@ -23,7 +20,7 @@ from ._base import GalaxyDecomposeMixin
 # =============================================================================
 
 
-class JThreshold(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
+class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """GalaxyChop Chop class.
 
     Implementation of galaxy dynamical decomposition model using
@@ -80,18 +77,22 @@ class JThreshold(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         vol. 883, no. 1, 2019. doi:10.3847/1538-4357/ab3afe.
         `<https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract>`_
     """
+    eps_cut = hparam(default=0.6)
 
-    def __init__(self, eps_cut=0.6):
-        """Init function."""
-        self.eps_cut = eps_cut
-        if self.eps_cut > 1.0 or self.eps_cut < -1.0:
+    @eps_cut.validator
+    def check_eps_cut(self, attribute, value):
+        eps_cut = self.eps_cut
+        if eps_cut > 1.0 or eps_cut < -1.0:
             raise ValueError(
                 "The cut-off value in the circularity parameter is not between"
                 "(-1,1)."
-                "Got eps_cut %d" % (self.eps_cut)
+                "Got eps_cut %d" % (eps_cut)
             )
 
-    def fit(self, X, y=None):
+    def get_attributes(self):
+        return ['eps']
+
+    def split(self, X, y, attributes):
         """Compute Chop clustering.
 
         Parameters
@@ -109,55 +110,11 @@ class JThreshold(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         """
         eps_cut = self.eps_cut
 
-        (esf_idx,) = np.where(X[:, 1] <= eps_cut)
-        (disk_idx,) = np.where(X[:, 1] > eps_cut)
+        esf_idx = np.where(X <= eps_cut)[0]
+        disk_idx = np.where(X > eps_cut)[0]
 
         labels = np.empty(len(X), dtype=int)
         labels[esf_idx] = 0
         labels[disk_idx] = 1
 
-        self.labels_ = labels
-
-        return self
-
-    def fit_predict(self, X, y=None, sample_weight=None):
-        """Predict cluster index for each sample.
-
-        Convenience method; equivalent to calling fit(X) followed by
-        predict(X).
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        sample_weight : array-like of shape (n_samples,), default=None
-            The weights for each observation in X. If None, all observations
-            are assigned equal weight.
-
-        Returns
-        -------
-        labels: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-            Index of the cluster each sample belongs to.
-        """
-        return self.fit(X, sample_weight=sample_weight).labels_
-
-    def transform(self, X, y=None):
-        """Transform method.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        X_new : ndarray of shape (n_samples, n_clusters)
-            X transformed.
-        """
-        return self
+        return labels, None
