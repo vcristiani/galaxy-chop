@@ -13,11 +13,11 @@
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 from ._kmeans import KMeans
+from ._threshold import JThreshold
 
 # from ._gaussian_mixture import AutoGaussianMixture, GaussianMixture
 # from ._histogram import JEHistogram, JHistogram
 
-from ._threshold import JThreshold
 
 # =============================================================================
 # MAKE IT PUBLIC!

@@ -77,6 +77,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         vol. 883, no. 1, 2019. doi:10.3847/1538-4357/ab3afe.
         `<https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract>`_
     """
+
     eps_cut = hparam(default=0.6)
 
     @eps_cut.validator
@@ -85,12 +86,11 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         if eps_cut > 1.0 or eps_cut < -1.0:
             raise ValueError(
                 "The cut-off value in the circularity parameter is not between"
-                "(-1,1)."
-                "Got eps_cut %d" % (eps_cut)
+                f"(-1,1). Got eps_cut {eps_cut}"
             )
 
     def get_attributes(self):
-        return ['eps']
+        return ["eps"]
 
     def split(self, X, y, attributes):
         """Compute Chop clustering.

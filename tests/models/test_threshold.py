@@ -34,4 +34,4 @@ def test_JThreshold(read_hdf5_galaxy):
 @pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
 def test_JThreshold_eps_cut_value_error(eps_cut):
     with pytest.raises(ValueError):
-        gchop.models.JThreshold(eps_cut)
+        gchop.models.JThreshold(eps_cut=eps_cut)
