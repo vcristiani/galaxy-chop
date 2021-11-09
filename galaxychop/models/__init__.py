@@ -15,9 +15,8 @@ from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 from ._kmeans import KMeans
 from ._threshold import JThreshold
 
-from ._gaussian_mixture import GaussianMixture
+from ._gaussian_mixture import GaussianMixture, AutoGaussianMixture
 
-# AutoGaussianMixture,
 # from ._histogram import JEHistogram, JHistogram
 
 

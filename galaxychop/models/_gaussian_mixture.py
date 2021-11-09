@@ -148,7 +148,7 @@ class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # =============================================================================
 
 
-class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+class AutoGaussianMixture(GaussianMixture):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -212,36 +212,33 @@ class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         `<https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract>`_
     """
 
-    def __init__(self, c_bic=0.1):
-        self.c_bic = c_bic
-        self.component_to_try = np.arange(2, 16)
-        # self.component_to_try = (
-        #     np.arange(2, 16) if component_to_try is None else
-        # component_to_try
-        # )
+    c_bic = hparam(default=0.1)
+    component_to_try = hparam(default=np.arange(2, 16))
 
-    def fit(self, X, y=None):
-        """Compute AutoGaussianMixture clustering.
+    def split(self, X, y, attributes):
+        c_bic = self.c_bic
+        component_to_try = self.component_to_try
 
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training instances to cluster.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        self
-            Fitted estimator.
-        """
-        bic_med = np.empty(len(self.component_to_try))
+        bic_med = np.empty(len(component_to_try))
         gausians = []
-        for i in self.component_to_try:
+
+        for i in component_to_try:
             # Implementation of gmm for all possible components of the method.
             gmm = mixture.GaussianMixture(
-                n_components=i, n_init=10, random_state=0
+                n_components=i,
+                covariance_type=self.covariance_type,
+                tol=self.tol,
+                reg_covar=self.reg_covar,
+                max_iter=self.max_iter,
+                n_init=self.n_init,
+                init_params=self.init_params,
+                weights_init=self.weights_init,
+                means_init=self.means_init,
+                precisions_init=self.precisions_init,
+                random_state=self.random_state,
+                warm_start=self.warm_start,
+                verbose=self.verbose,
+                verbose_interval=self.verbose_interval,
             )
             gmm.fit(X)
             bic_med[i - 2] = gmm.bic(X) / len(X)
@@ -255,45 +252,31 @@ class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         mask = np.where(delta_bic_ <= c_bic)[0]
 
         # Number of components
-        number_of_gaussians = np.min(self.component_to_try[mask])
+        number_of_gaussians = np.min(component_to_try[mask])
 
         # Clustering with gaussian mixture and the parameters obtained.
-        gcgmm_ = mixture.GaussianMixture(
+        gcgmm = mixture.GaussianMixture(
             n_components=number_of_gaussians,
-            random_state=0,
+            covariance_type=self.covariance_type,
+            tol=self.tol,
+            reg_covar=self.reg_covar,
+            max_iter=self.max_iter,
+            n_init=self.n_init,
+            init_params=self.init_params,
+            weights_init=self.weights_init,
+            means_init=self.means_init,
+            precisions_init=self.precisions_init,
+            random_state=self.random_state,
+            warm_start=self.warm_start,
+            verbose=self.verbose,
+            verbose_interval=self.verbose_interval,
         )
-        gcgmm_.fit(X)
 
-        # store all in the instances
-        self.bic_med_ = bic_med
-        self.gausians_ = tuple(gausians)
-        self.bic_min_ = bic_min
-        self.delta_bic_ = delta_bic_
-        self.c_bic_ = c_bic
-        self.mask_ = mask
-        self.n_components_ = number_of_gaussians
-        self.gcgmm_ = gcgmm_
+        gcgmm_ = gcgmm.fit(X)
 
-        return self
-
-    def transform(self, X, y=None):
-        """Transform method.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        X_new : ndarray of shape (n_samples, n_clusters)
-            X transformed.
-        """
-        n_components = self.n_components_
-        center = self.gcgmm_.means_
-        predict_proba = self.gcgmm_.predict_proba(X)
+        n_components = gcgmm_.n_components
+        center = gcgmm_.means_
+        predict_proba = gcgmm_.predict_proba(X)
 
         # We add up the probabilities to obtain the classification of the
         # different particles.
@@ -302,7 +285,7 @@ class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         cold_disk = np.zeros(len(X))
         warm_disk = np.zeros(len(X))
 
-        for i in range(0, n_components):
+        for i in range(n_components):
             if center[i, 1] >= 0.85:
                 cold_disk = cold_disk + predict_proba[:, i]
             if (center[i, 1] < 0.85) & (center[i, 1] >= 0.5):
@@ -318,8 +301,6 @@ class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         for i in range(len(X)):
             labels[i] = probability[i, :].argmax()
 
-        self.probability_of_gaussianmixture = predict_proba
-        self.probability = probability
-        self.labels_ = labels
+        probability = None
 
-        return self
+        return labels, probability
