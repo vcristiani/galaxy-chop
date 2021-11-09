@@ -13,6 +13,10 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
+
+      # continues even if an environment fails
+      fail-fast: false
+
       matrix:
 
         # all the tox with the default python version
@@ -39,9 +43,8 @@ jobs:
 
       # optionals
       - name: Install pandoc
-        run: sudo apt-get install pandoc
         if: ${{ matrix.tox_env == 'make-docs'}}
-
+        run: sudo apt-get install pandoc
 
       # tox steps
       - name: Set up Python
