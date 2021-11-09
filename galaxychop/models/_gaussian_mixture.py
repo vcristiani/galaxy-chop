@@ -14,16 +14,15 @@
 import numpy as np
 
 from sklearn import mixture
-from sklearn.base import ClusterMixin, TransformerMixin
 
-from ._base import GalaxyDecomposeMixin
+from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 
 # =============================================================================
 # GMM
 # =============================================================================
 
 
-class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
+class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -95,42 +94,53 @@ class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
         Monthly Notices of the Royal Astronomical Society, vol. 477, no. 4,
         pp. 4915-4930, 2018. doi:10.1093/mnras/sty1022.
         `<https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract>`_
+        Obtain the columns of the quantities to be used.
+
+    Returns
+    -------
+    columns: list
+        Only the needed columns used to decompose galaxies.
     """
 
-    def __init__(self, columns=None, **kwargs):
-        super().__init__(**kwargs)
-        self.columns = columns
+    n_components = hparam(default=2)
+    covariance_type = hparam(default="full")
+    tol = hparam(default=0.001)
+    reg_covar = hparam(default=1e-06)
+    max_iter = hparam(default=100)
+    n_init = hparam(default=1)
+    init_params = hparam(default="kmeans")
+    weights_init = hparam(default=None)
+    means_init = hparam(default=None)
+    precisions_init = hparam(default=None)
+    random_state = hparam(default=None, converter=np.random.RandomState)
+    warm_start = hparam(default=False)
+    verbose = hparam(default=0)
+    verbose_interval = hparam(default=10)
 
-    def get_columns(self):
-        """Obtain the columns of the quantities to be used.
+    def split(self, X, y, attributes):
 
-        Returns
-        -------
-        columns: list
-            Only the needed columns used to decompose galaxies.
-        """
-        if self.columns is None:
-            return super().get_columns()
-        return self.columns
+        gmm = mixture.GaussianMixture(
+            n_components=self.n_components,
+            covariance_type=self.covariance_type,
+            tol=self.tol,
+            reg_covar=self.reg_covar,
+            max_iter=self.max_iter,
+            n_init=self.n_init,
+            init_params=self.init_params,
+            weights_init=self.weights_init,
+            means_init=self.means_init,
+            precisions_init=self.precisions_init,
+            random_state=self.random_state,
+            warm_start=self.warm_start,
+            verbose=self.verbose,
+            verbose_interval=self.verbose_interval,
+        )
 
-    def fit_transform(self, X, y=None):
-        """Transform method.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        X_new : ndarray of shape (n_samples, n_clusters)
-            X transformed.
-        """
-        labels = self.fit(X).predict(X)
-        self.labels_ = labels
-        return self
+        gmm_ = gmm.fit(X)
+        labels = gmm_.predict(X)
+        # proba = gmm_.predict_proba(X)
+        proba = None
+        return labels, proba
 
 
 # =============================================================================
@@ -138,9 +148,7 @@ class GaussianMixture(GalaxyDecomposeMixin, mixture.GaussianMixture):
 # =============================================================================
 
 
-class AutoGaussianMixture(
-    GalaxyDecomposeMixin, ClusterMixin, TransformerMixin
-):
+class AutoGaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
