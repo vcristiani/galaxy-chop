@@ -12,10 +12,13 @@
 # =============================================================================
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ._gaussian_mixture import (
+    AutoGaussianMixture,
+    GaussianABC,
+    GaussianMixture,
+)
 from ._kmeans import KMeans
 from ._threshold import JThreshold
-
-from ._gaussian_mixture import GaussianMixture, AutoGaussianMixture
 
 # from ._histogram import JEHistogram, JHistogram
 
@@ -31,6 +34,7 @@ __all__ = [
     "JHistogram",
     "JEHistogram",
     "KMeans",
+    "GaussianABC",
     "GaussianMixture",
     "AutoGaussianMixture",
     "hparam",
