@@ -23,10 +23,10 @@ from .. import data
 
 try:
     from .fortran import potential as potential_f
-
-    POTENTIAL_BACKEND = "fortran"
 except ImportError:
-    POTENTIAL_BACKEND = "numpy"
+    potential_f = None
+
+POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
 
 
 # =============================================================================
