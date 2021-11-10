@@ -17,12 +17,30 @@ from sklearn import mixture
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 
+
+# =============================================================================
+# GAUSSIAN ABC
+# =============================================================================
+class GaussianABC(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+    covariance_type = hparam(default="full")
+    tol = hparam(default=0.001)
+    reg_covar = hparam(default=1e-06)
+    max_iter = hparam(default=100)
+    n_init = hparam(default=1)
+    init_params = hparam(default="kmeans")
+    weights_init = hparam(default=None)
+    means_init = hparam(default=None)
+    precisions_init = hparam(default=None)
+    random_state = hparam(default=None, converter=np.random.RandomState)
+    warm_start = hparam(default=False)
+    verbose = hparam(default=0)
+    verbose_interval = hparam(default=10)
+
+
 # =============================================================================
 # GMM
 # =============================================================================
-
-
-class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+class GaussianMixture(GaussianABC):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -103,19 +121,6 @@ class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """
 
     n_components = hparam(default=2)
-    covariance_type = hparam(default="full")
-    tol = hparam(default=0.001)
-    reg_covar = hparam(default=1e-06)
-    max_iter = hparam(default=100)
-    n_init = hparam(default=1)
-    init_params = hparam(default="kmeans")
-    weights_init = hparam(default=None)
-    means_init = hparam(default=None)
-    precisions_init = hparam(default=None)
-    random_state = hparam(default=None, converter=np.random.RandomState)
-    warm_start = hparam(default=False)
-    verbose = hparam(default=0)
-    verbose_interval = hparam(default=10)
 
     def split(self, X, y, attributes):
 
@@ -147,7 +152,7 @@ class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # =============================================================================
 
 
-class AutoGaussianMixture(GaussianMixture):
+class AutoGaussianMixture(GaussianABC):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -213,6 +218,10 @@ class AutoGaussianMixture(GaussianMixture):
 
     c_bic = hparam(default=0.1)
     component_to_try = hparam(default=np.arange(2, 16))
+
+    # @component_to_try.validator
+    # def _component_to_try_validator(self, attribute, value):
+    #     print("valeria completame")
 
     def split(self, X, y, attributes):
         c_bic = self.c_bic
@@ -295,11 +304,6 @@ class AutoGaussianMixture(GaussianMixture):
                 bulge = bulge + predict_proba[:, i]
 
         probability = np.column_stack((halo, bulge, cold_disk, warm_disk))
-        labels = np.empty(len(X), dtype=int)
-
-        for i in range(len(X)):
-            labels[i] = probability[i, :].argmax()
-
-        probability = None
+        labels = probability.argmax(axis=1)
 
         return labels, probability
