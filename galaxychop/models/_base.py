@@ -51,13 +51,14 @@ class _Components:
         if len(lens) > 1:
             raise ValueError("All length must be the same")
 
+    def __len__(self):
+        return len(self.labels)
+
     def __repr__(self):
-        return (
-            "components("
-            f"labels={repr(self.labels)}, "
-            f"ptype={repr(self.ptypes)}, "
-            f"probabilities={repr(self.probabilities)})"
-        )
+        length = len(self)
+        labels = np.unique(self.labels)
+        probs = self.probabilities is not None
+        return f"components({length}labels={labels}, probabilities={probs})"
 
 
 # =============================================================================
@@ -151,7 +152,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         gas_nans = np.full(gas_rows, np.nan)
 
         gas_columns = {attr: gas_nans for attr in attributes}
-        gas_columns["ptypev"] = data.ParticleSetType.DARK_MATTER.value
+        gas_columns["ptypev"] = data.ParticleSetType.GAS.value
 
         gas_df = pd.DataFrame(gas_columns)
 
@@ -227,7 +228,20 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     def complete_probs(self, X, probs, rows_mask):
         if probs is None:
             return None
-        raise NotImplementedError()
+
+        # the number of particles are incorrect so we simple remove the data
+        probs_shape = list(np.shape(probs)[1:])
+
+        # We need this many rows
+        complete_shape = tuple([len(X)] + probs_shape)
+
+        # now we create the container for the probabilities
+        new_probs = np.full(complete_shape, np.nan)
+
+        # and now we inject the probs in the correct order
+        new_probs[rows_mask] = probs
+
+        return new_probs
 
     def decompose(self, galaxy):
         """Decompose method.

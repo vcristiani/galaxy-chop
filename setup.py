@@ -12,7 +12,7 @@
 # =============================================================================
 import os
 
-#import setuptools  # noqa
+# import setuptools  # noqa
 
 from numpy.distutils.core import Extension, setup
 
@@ -66,7 +66,7 @@ EXTENSIONS = [
         name="galaxychop.utils.fortran.potential",
         sources=["galaxychop/utils/fortran/potential.f95"],
         extra_f90_compile_args=["-fopenmp"],
-        extra_link_args=['-lgomp'],
+        extra_link_args=["-lgomp"],
     )
 ]
 

@@ -316,6 +316,9 @@ class Galaxy:
             if pset.ptype != pstype:
                 raise TypeError(f"{psname} must be of type {pstype}")
 
+    def __len__(self):
+        return len(self.stars) + len(self.dark_matter) + len(self.gas)
+
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):

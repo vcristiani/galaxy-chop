@@ -138,8 +138,7 @@ class GaussianMixture(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
         gmm_ = gmm.fit(X)
         labels = gmm_.predict(X)
-        # proba = gmm_.predict_proba(X)
-        proba = None
+        proba = gmm_.predict_proba(X)
         return labels, proba
 
 
