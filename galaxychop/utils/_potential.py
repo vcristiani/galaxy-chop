@@ -21,6 +21,13 @@ import numpy as np
 
 from .. import data
 
+try:
+    from .fortran import potential as potential_f
+
+    POTENTIAL_BACKEND = "fortran"
+except ImportError:
+    POTENTIAL_BACKEND = "numpy"
+
 
 # =============================================================================
 # CONSTANTS
@@ -56,10 +63,9 @@ def fortran_potential(x, y, z, m, softening):
         Specific potential energy of particles.
 
     """
-    from .fortran import potential
 
     soft = np.asarray(softening)
-    epot = potential.fortran_potential(x, y, z, m, soft)
+    epot = potential_f.fortran_potential(x, y, z, m, soft)
 
     return epot * G, np.asarray
 
@@ -107,7 +113,7 @@ POTENTIAL_BACKENDS = {
 }
 
 
-def potential(galaxy, backend="numpy"):
+def potential(galaxy, backend=POTENTIAL_BACKEND):
     """
     Potential energy calculation.
 
