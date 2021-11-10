@@ -86,10 +86,11 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     max_iter = hparam(default=300)
     tol = hparam(default=0.0001)
     verbose = hparam(default=0)
-    random_state = hparam(default=None, converter=np.random.RandomState)
+    random_state = hparam(default=None, converter=np.random.default_rng)
     algorithm = hparam(default="auto")
 
     def split(self, X, y, attributes):
+        random_state = np.random.RandomState(self.random_state.bit_generator)
 
         kmeans = cluster.KMeans(
             n_clusters=self.n_clusters,
@@ -98,7 +99,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
             max_iter=self.max_iter,
             tol=self.tol,
             verbose=self.verbose,
-            random_state=self.random_state,
+            random_state=random_state,
             algorithm=self.algorithm,
         )
         labels = kmeans.fit_predict(X)

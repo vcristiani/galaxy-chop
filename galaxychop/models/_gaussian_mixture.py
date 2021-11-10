@@ -31,7 +31,7 @@ class GaussianABC(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     weights_init = hparam(default=None)
     means_init = hparam(default=None)
     precisions_init = hparam(default=None)
-    random_state = hparam(default=None, converter=np.random.RandomState)
+    random_state = hparam(default=None, converter=np.random.default_rng)
     warm_start = hparam(default=False)
     verbose = hparam(default=0)
     verbose_interval = hparam(default=10)
@@ -123,6 +123,7 @@ class GaussianMixture(GaussianABC):
     n_components = hparam(default=2)
 
     def split(self, X, y, attributes):
+        random_state = np.random.RandomState(self.random_state.bit_generator)
 
         gmm = mixture.GaussianMixture(
             n_components=self.n_components,
@@ -135,7 +136,7 @@ class GaussianMixture(GaussianABC):
             weights_init=self.weights_init,
             means_init=self.means_init,
             precisions_init=self.precisions_init,
-            random_state=self.random_state,
+            random_state=random_state,
             warm_start=self.warm_start,
             verbose=self.verbose,
             verbose_interval=self.verbose_interval,
@@ -226,6 +227,7 @@ class AutoGaussianMixture(GaussianABC):
     def split(self, X, y, attributes):
         c_bic = self.c_bic
         component_to_try = self.component_to_try
+        random_state = np.random.RandomState(self.random_state.bit_generator)
 
         bic_med = np.empty(len(component_to_try))
         gausians = []
@@ -243,7 +245,7 @@ class AutoGaussianMixture(GaussianABC):
                 weights_init=self.weights_init,
                 means_init=self.means_init,
                 precisions_init=self.precisions_init,
-                random_state=self.random_state,
+                random_state=random_state,
                 warm_start=self.warm_start,
                 verbose=self.verbose,
                 verbose_interval=self.verbose_interval,
@@ -274,7 +276,7 @@ class AutoGaussianMixture(GaussianABC):
             weights_init=self.weights_init,
             means_init=self.means_init,
             precisions_init=self.precisions_init,
-            random_state=self.random_state,
+            random_state=random_state,
             warm_start=self.warm_start,
             verbose=self.verbose,
             verbose_interval=self.verbose_interval,
