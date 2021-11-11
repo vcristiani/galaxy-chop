@@ -28,7 +28,7 @@ class DynamicStarsGaussianDecomposerABC(
     tol = hparam(default=0.001)
     reg_covar = hparam(default=1e-06)
     max_iter = hparam(default=100)
-    n_init = hparam(default=1)
+    n_init = hparam(default=10)
     init_params = hparam(default="kmeans")
     weights_init = hparam(default=None)
     means_init = hparam(default=None)
@@ -223,17 +223,17 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
     """
 
     c_bic = hparam(default=0.1)
-    component_to_try = hparam(default=np.arange(2, 16))
+    components_to_try = hparam(default=np.arange(2, 16), converter=np.asarray)
 
     def split(self, X, y, attributes):
         c_bic = self.c_bic
-        component_to_try = self.component_to_try
+        components_to_try = self.components_to_try
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
-        bic_med = np.empty(len(component_to_try))
+        bic_med = np.empty(len(components_to_try))
         gausians = []
 
-        for i in component_to_try:
+        for i in components_to_try:
             # Implementation of gmm for all possible components of the method.
             gmm = mixture.GaussianMixture(
                 n_components=i,
@@ -263,7 +263,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         mask = np.where(delta_bic_ <= c_bic)[0]
 
         # Number of components
-        number_of_gaussians = np.min(component_to_try[mask])
+        number_of_gaussians = np.min(components_to_try[mask])
 
         # Clustering with gaussian mixture and the parameters obtained.
         gcgmm = mixture.GaussianMixture(

@@ -57,8 +57,8 @@ class _Components:
     def __repr__(self):
         length = len(self)
         labels = np.unique(self.labels)
-        probs = self.probabilities is not None
-        return f"components({length}labels={labels}, probabilities={probs})"
+        probs = True if self.probabilities is not None else False
+        return f"components({length}, labels={labels}, probabilities={probs})"
 
 
 # =============================================================================
@@ -109,6 +109,21 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def split(self, X, y, attributes):
+        """Compute Chop clustering.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Training instances to cluster.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self
+            Fitted estimator.
+        """
         raise NotImplementedError()
 
     # internal ================================================================
@@ -287,10 +302,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 # =============================================================================
 # MIXIN
 # =============================================================================
-
-
-def get_attributes(self):
-    return ["normalized_star_energy", "eps", "eps_r"]
 
 
 class DynamicStarsDecomposerMixin:

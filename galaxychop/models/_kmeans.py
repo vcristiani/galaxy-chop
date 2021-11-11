@@ -16,6 +16,7 @@ import numpy as np
 from sklearn import cluster
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ..utils import doc_inherit
 
 # =============================================================================
 # KNN
@@ -92,6 +93,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     def get_attributes(self):
         return ["normalized_star_energy", "eps", "eps_r"]
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 

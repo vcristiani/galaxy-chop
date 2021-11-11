@@ -17,7 +17,7 @@ def test_GaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
 
-    decomposer = gchop.models.GaussianMixture(random_state=42)
+    decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -49,7 +49,7 @@ def test_GaussianMixture(read_hdf5_galaxy):
 
     # the total number of no nans must be <= the number of stars
     total_probs_no_nans = (
-        np.isfinite(components.probabilities).any(axis=1).sum()
+        np.isfinite(components.probabilities).all(axis=1).sum()
     )
     assert total_probs_no_nans <= len(gal.stars)
 
@@ -67,7 +67,9 @@ def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
 
-    decomposer = gchop.models.AutoGaussianMixture(random_state=42)
+    decomposer = gchop.models.AutoGaussianMixture(
+        random_state=42, n_init=1, components_to_try=[2, 3]
+    )
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)

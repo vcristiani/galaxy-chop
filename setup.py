@@ -12,9 +12,7 @@
 # =============================================================================
 import os
 
-# import setuptools  # noqa
-
-from numpy.distutils.core import Extension, setup
+from numpy.distutils.core import Extension
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -42,11 +40,11 @@ REQUIREMENTS = [
     "numpy >= 1.13.3",
     "scipy >= 1.0",
     "scikit-learn",
-    "dask[array]",
     "astropy",
     "uttrs",
     "pandas",
     "h5py",
+    "custom_inherit",
     "seaborn",
 ]
 
@@ -75,7 +73,9 @@ EXTENSIONS = [
 # FUNCTIONS
 # =============================================================================
 
-setup(
+import setuptools  # noqa
+
+setuptools.setup(
     name="galaxychop",
     version=VERSION,
     description="Galaxy dynamic de-composition",
