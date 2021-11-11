@@ -289,10 +289,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 # =============================================================================
 
 
-class DynamicStarsDecomposerMixin:
-    def get_attributes(self):
-        return ["normalized_star_energy", "eps", "eps_r"]
+def get_attributes(self):
+    return ["normalized_star_energy", "eps", "eps_r"]
 
+
+class DynamicStarsDecomposerMixin:
     def get_rows_mask(self, X, y, attributes):
         # all the rows where every value is finite
         only_stars = np.equal(y, data.ParticleSetType.STARS.value)

@@ -36,6 +36,9 @@ class GaussianABC(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     verbose = hparam(default=0)
     verbose_interval = hparam(default=10)
 
+    def get_attributes(self):
+        return ["normalized_star_energy", "eps", "eps_r"]
+
 
 # =============================================================================
 # GMM
@@ -219,10 +222,6 @@ class AutoGaussianMixture(GaussianABC):
 
     c_bic = hparam(default=0.1)
     component_to_try = hparam(default=np.arange(2, 16))
-
-    # @component_to_try.validator
-    # def _component_to_try_validator(self, attribute, value):
-    #     print("valeria completame")
 
     def split(self, X, y, attributes):
         c_bic = self.c_bic

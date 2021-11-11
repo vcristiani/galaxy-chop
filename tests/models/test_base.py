@@ -178,6 +178,9 @@ def test_DynamicStarDecomposer_get_attributes():
         models.DynamicStarsDecomposerMixin,
         models.GalaxyDecomposerABC,
     ):
+        def get_attributes(self):
+            return ["normalized_star_energy", "eps", "eps_r"]
+
         def split(self, X, y, attributes):
             ...
 
@@ -195,6 +198,9 @@ def test_DynamicStarDecomposer_get_rows_mask():
         models.DynamicStarsDecomposerMixin,
         models.GalaxyDecomposerABC,
     ):
+        def get_attributes(self):
+            return ["normalized_star_energy", "eps", "eps_r"]
+
         def split(self, X, y, attributes):
             ...
 

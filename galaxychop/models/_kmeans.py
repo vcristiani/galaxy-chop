@@ -89,6 +89,9 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     random_state = hparam(default=None, converter=np.random.default_rng)
     algorithm = hparam(default="auto")
 
+    def get_attributes(self):
+        return ["normalized_star_energy", "eps", "eps_r"]
+
     def split(self, X, y, attributes):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
