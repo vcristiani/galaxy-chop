@@ -233,7 +233,6 @@ class ParticleSet:
             of the particles.
 
         """
-
         arr = self.arr_
         columns_makers = {
             "ptype": lambda: np.full(len(self), self.ptype.humanize()),
@@ -343,8 +342,7 @@ class Galaxy:
 
     @property
     def kinetic_energy_(self):
-        """Specific kinetic energy
-        of stars, dark matter and gas particles.
+        """Specific kinetic energy of stars, dark matter and gas particles.
 
         Returns
         -------
@@ -510,7 +508,6 @@ def mkgalaxy(
     ------
     galaxy: object of Galaxy class.
     """
-
     stars = ParticleSet(
         ParticleSetType.STARS,
         m=m_s,

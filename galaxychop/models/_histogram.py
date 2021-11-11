@@ -12,10 +12,7 @@
 
 import numpy as np
 
-from sklearn.base import ClusterMixin
-from sklearn.base import TransformerMixin
-
-from ._base import GalaxyDecomposeMixin
+from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 
 
 # =============================================================================
@@ -23,7 +20,7 @@ from ._base import GalaxyDecomposeMixin
 # =============================================================================
 
 
-class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
+class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     """GalaxyChop Abadi class.
 
     Implementation of galaxy dynamical decomposition model described in
@@ -65,17 +62,13 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         `<https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract>`_
     """
 
-    def __init__(self, n_bin=100, digits=2, seed=None):
-        """Init function."""
-        self.n_bin = n_bin
-        self.digits = digits
-        self.seed = seed
-        self._random = np.random.default_rng(seed=seed)
+    n_bin = hparam(default=100)
+    digits = hparam(default=2)
+    random_state = hparam(default=None, converter=np.random.default_rng)
 
     def _make_histogram(self, X, n_bin):
         """Build the histrogram of the circularity parameter."""
-        eps = X[:, 1]
-
+        eps = X
         full_histogram = np.histogram(eps, n_bin, range=(-1.0, 1.0))
 
         hist = full_histogram[0]
@@ -107,7 +100,7 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
             ):
                 sph[corot_bin] = bin_to_particle[corot_bin]
             else:
-                sph[corot_bin] = self._random.choice(
+                sph[corot_bin] = self.random_state.choice(
                     bin_to_particle[corot_bin],
                     len(bin_to_particle[count_bin]),
                     replace=False,
@@ -127,7 +120,10 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
             dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
         return dsk
 
-    def fit(self, X, y=None, sample_weight=None):
+    def get_attributes(self):
+        return ["eps"]
+
+    def split(self, X, y, attributes):
         """Compute Abadi model clustering.
 
         Parameters
@@ -160,11 +156,11 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         bin_to_particle = {}
 
         for i in range(n_bin - 1):
-            (mask,) = np.where((eps >= edges[i]) & (eps < edges[i + 1]))
+            mask = np.where((eps >= edges[i]) & (eps < edges[i + 1]))[0]
             bin_to_particle[i] = X_ind[mask]
 
         # This considers the right edge of the last bin.
-        (mask,) = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))
+        mask = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))[0]
         bin_to_particle[len(center) - 1] = X_ind[mask]
 
         # Selection of the particles that belong to the spheroid according to
@@ -191,51 +187,7 @@ class JHistogram(GalaxyDecomposeMixin, ClusterMixin, TransformerMixin):
         labels[esf_idx] = 0
         labels[disk_idx] = 1
 
-        self.labels_ = labels
-
-        return self
-
-    def fit_predict(self, X, y=None, sample_weight=None):
-        """Predict cluster index for each sample.
-
-        Convenience method; equivalent to calling fit(X) followed by
-        predict(X).
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        sample_weight : array-like of shape (n_samples,), default=None
-            The weights for each observation in X. If None, all observations
-            are assigned equal weight.
-
-        Returns
-        -------
-        labels: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-            Index of the cluster each sample belongs to.
-        """
-        return self.fit(X, sample_weight=sample_weight).labels_
-
-    def transform(self, X, y=None):
-        """Transform method.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            New data to transform.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        X_new : ndarray of shape (n_samples, n_clusters)
-            X transformed.
-        """
-        return self
+        return labels, None
 
 
 # =============================================================================
@@ -276,9 +228,7 @@ class JEHistogram(JHistogram):
     array([-1, -1,  0, ...,  0,  0,  1])
     """
 
-    def __init__(self, n_bin_E=20, **kwargs):
-        super().__init__(**kwargs)
-        self.n_bin_E = n_bin_E
+    n_bin_E = hparam(default=20)
 
     def _make_corot_sph(
         self,
@@ -324,7 +274,7 @@ class JEHistogram(JHistogram):
                         # length contr, we add all particles from the corr
                         # energy bin to the list of particles in the corr bin.
                         if energy_hist_count[j] >= energy_hist_corr[j]:
-                            (energy_mask,) = np.where(
+                            energy_mask = np.where(
                                 (
                                     normalized_energy[
                                         np.int_(bin_to_particle[corot_bin])
@@ -337,7 +287,7 @@ class JEHistogram(JHistogram):
                                     ]
                                     < energy_edges_corr[j + 1]
                                 )
-                            )
+                            )[0]
 
                             aux1 = X_ind[np.int_(bin_to_particle[corot_bin])][
                                 energy_mask
@@ -346,7 +296,7 @@ class JEHistogram(JHistogram):
                         # Otherwise we make a random selection in the energy
                         # bin to add to the list.
                         else:
-                            (energy_mask,) = np.where(
+                            energy_mask = np.where(
                                 (
                                     normalized_energy[
                                         np.int_(bin_to_particle[corot_bin])
@@ -359,9 +309,9 @@ class JEHistogram(JHistogram):
                                     ]
                                     < energy_edges_corr[j + 1]
                                 )
-                            )
+                            )[0]
 
-                            aux1 = self._random.choice(
+                            aux1 = self.random_state.choice(
                                 X_ind[np.int_(bin_to_particle[corot_bin])][
                                     energy_mask
                                 ],
@@ -378,7 +328,10 @@ class JEHistogram(JHistogram):
                 # to the bin corr of the sph.
                 sph[corot_bin] = aux0
 
-    def fit(self, X, y=None):
+    def get_attributes(self):
+        return ["normalized_star_energy", "eps"]
+
+    def split(self, X, y, attributes):
         """Compute Cristiani clustering.
 
         Parameters
@@ -396,11 +349,10 @@ class JEHistogram(JHistogram):
         """
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E
-
         normalized_energy = X[:, 0]
 
         # Building the histogram of the circularity parameter.
-        eps, edges, center, bin0, hist = self._make_histogram(X, n_bin)
+        eps, edges, center, bin0, hist = self._make_histogram(X[:, 1], n_bin)
         X_ind = np.arange(len(eps))
 
         # Building a dictionary: bin_to_particle={} where the IDs of the
@@ -410,11 +362,11 @@ class JEHistogram(JHistogram):
         bin_to_particle = {}
 
         for i in range(n_bin - 1):
-            (mask,) = np.where((eps >= edges[i]) & (eps < edges[i + 1]))
+            mask = np.where((eps >= edges[i]) & (eps < edges[i + 1]))[0]
             bin_to_particle[i] = X_ind[mask]
 
         # This considers the right edge of the last bin.
-        (mask,) = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))
+        mask = np.where((eps >= edges[n_bin - 1]) & (eps <= edges[n_bin]))[0]
         bin_to_particle[len(center) - 1] = X_ind[mask]
 
         # Selection of the particles that belong to the spheroid according to
@@ -453,6 +405,4 @@ class JEHistogram(JHistogram):
         labels[esf_idx] = 0
         labels[disk_idx] = 1
 
-        self.labels_ = labels
-
-        return self
+        return labels, None

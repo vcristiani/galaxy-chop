@@ -19,8 +19,7 @@ from ._gaussian_mixture import (
 )
 from ._kmeans import KMeans
 from ._threshold import JThreshold
-
-# from ._histogram import JEHistogram, JHistogram
+from ._histogram import JHistogram, JEHistogram
 
 
 # =============================================================================

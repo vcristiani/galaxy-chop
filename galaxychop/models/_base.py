@@ -160,6 +160,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     def attributes_matrix(self, galaxy, attributes):
         """Retorna 2 elementos:
+
         - Un numpy array X de 2d en el cual cada fila representa una
           particula, y cada columna un attributo
         - Un array 'y' con la misma longitud que filas de X que representa
@@ -169,7 +170,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         Tiene que haber tantas filas como el total de particulas de la galaxia.
 
         """
-
         # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
         circ_attrs, df_attrs = [], []

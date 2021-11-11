@@ -63,7 +63,6 @@ def fortran_potential(x, y, z, m, softening):
         Specific potential energy of particles.
 
     """
-
     soft = np.asarray(softening)
     epot = potential_f.fortran_potential(x, y, z, m, soft)
 
