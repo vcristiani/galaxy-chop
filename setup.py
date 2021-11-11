@@ -12,7 +12,7 @@
 # =============================================================================
 import os
 
-from numpy.distutils.core import Extension
+from numpy.distutils.core import Extension, setup
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -73,9 +73,10 @@ EXTENSIONS = [
 # FUNCTIONS
 # =============================================================================
 
-import setuptools  # noqa
+# import setuptools  # noqa
+# setuptools.setup(
 
-setuptools.setup(
+setup(
     name="galaxychop",
     version=VERSION,
     description="Galaxy dynamic de-composition",
