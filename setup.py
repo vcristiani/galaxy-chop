@@ -59,8 +59,8 @@ with open("README.md") as fp:
 # FORTRAN EXTENSIONS
 # =============================================================================
 
-FORTRAN_DIR = os.path.join(PATH, 'galaxychop', 'utils', 'fortran')
-POTENTIAL_SOURCE = os.path.join(FORTRAN_DIR, 'potential.f95')
+FORTRAN_DIR = os.path.join(PATH, "galaxychop", "utils", "fortran")
+POTENTIAL_SOURCE = os.path.join(FORTRAN_DIR, "potential.f95")
 
 EXTENSIONS = [
     Extension(
