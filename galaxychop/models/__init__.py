@@ -14,7 +14,7 @@
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 from ._gaussian_mixture import (
     AutoGaussianMixture,
-    GaussianABC,
+    DynamicStarsGaussianDecomposerABC,
     GaussianMixture,
 )
 from ._histogram import JEHistogram, JHistogram
@@ -33,7 +33,7 @@ __all__ = [
     "JHistogram",
     "JEHistogram",
     "KMeans",
-    "GaussianABC",
+    "DynamicStarsGaussianDecomposerABC",
     "GaussianMixture",
     "AutoGaussianMixture",
     "hparam",

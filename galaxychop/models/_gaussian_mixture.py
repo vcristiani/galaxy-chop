@@ -21,7 +21,9 @@ from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 # =============================================================================
 # GAUSSIAN ABC
 # =============================================================================
-class GaussianABC(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+class DynamicStarsGaussianDecomposerABC(
+    DynamicStarsDecomposerMixin, GalaxyDecomposerABC
+):
     covariance_type = hparam(default="full")
     tol = hparam(default=0.001)
     reg_covar = hparam(default=1e-06)
@@ -43,7 +45,7 @@ class GaussianABC(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # =============================================================================
 # GMM
 # =============================================================================
-class GaussianMixture(GaussianABC):
+class GaussianMixture(DynamicStarsGaussianDecomposerABC):
     """GalaxyChop Gaussian Mixture Model class.
 
     Implementation of the method for dynamically decomposing galaxies
@@ -156,7 +158,7 @@ class GaussianMixture(GaussianABC):
 # =============================================================================
 
 
-class AutoGaussianMixture(GaussianABC):
+class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
     """GalaxyChop auto-gmm class.
 
     Implementation of the method for dynamically decomposing galaxies
