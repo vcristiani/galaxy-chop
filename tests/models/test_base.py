@@ -1,5 +1,3 @@
-import warnings
-
 import galaxychop as gchop
 from galaxychop import models
 

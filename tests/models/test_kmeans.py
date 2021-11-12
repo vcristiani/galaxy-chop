@@ -2,8 +2,6 @@
 # IMPORTS
 # =============================================================================
 
-import warnings
-
 import galaxychop as gchop
 
 import numpy as np
