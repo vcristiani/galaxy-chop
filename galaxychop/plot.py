@@ -19,6 +19,8 @@ import attr
 import numpy as np
 import pandas as pd
 
+import pandas as pd
+
 import seaborn as sns
 
 from . import utils
@@ -169,4 +171,38 @@ class GalaxyPlotter:
         circ = utils.jcirc(self._galaxy, *cbins)
         ax = sns.kdeplot(circ.eps, **kwargs)
         ax.set_xlabel(r"$\epsilon$")
+        return ax
+
+    def circularity_components(
+        self, cbins=(0.05, 0.005), labels=None, lmap=None, **kwargs
+    ):
+        circ = utils.jcirc(self._galaxy, *cbins)
+
+        mask = (
+            np.isfinite(circ.normalized_star_energy)
+            & np.isfinite(circ.eps)
+            & np.isfinite(circ.eps_r)
+        )
+
+        columns = {
+            "Normalized star energy": circ.normalized_star_energy[mask],
+            r"$\epsilon$": circ.eps[mask],
+            r"$\epsilon_r$": circ.eps_r[mask],
+        }
+
+        hue = None
+
+        if labels is not None:
+            hue = "Components"
+            columns[hue] = labels[np.isfinite(labels)]
+
+        df = pd.DataFrame(columns)
+
+        if labels is not None and lmap is not None:
+            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
+
+        kwargs.setdefault("kind", "hist")
+        kwargs.setdefault("diag_kind", "kde")
+
+        ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
