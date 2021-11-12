@@ -202,4 +202,7 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     >>> galaxy = gchop.Galaxy(...)
     >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
     """
+
+    # with warnings.catch_warnings():
+    #     warnings.simplefilter("ignore", category=RuntimeWarning)
     return _jcirc(galaxy, bin0, bin1)

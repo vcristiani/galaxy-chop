@@ -93,21 +93,6 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         return ["eps"]
 
     def split(self, X, y, attributes):
-        """Compute Chop clustering.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training instances to cluster.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        self
-            Fitted estimator.
-        """
         eps_cut = self.eps_cut
 
         esf_idx = np.where(X <= eps_cut)[0]

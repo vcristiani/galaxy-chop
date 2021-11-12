@@ -88,9 +88,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 
     attributes = ["x", "eps"]
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        X, t = decomposer.attributes_matrix(gal, attributes=attributes)
+    X, t = decomposer.attributes_matrix(gal, attributes=attributes)
 
     # check types stars-dm-gas
     assert np.all(t[: len(gal.stars)] == gchop.ParticleSetType.STARS.value)
@@ -107,9 +105,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     assert np.all(X[:, 0] == gal.to_dataframe(attributes=["x"])["x"])
 
     # check jcirc eps
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        jcirc = gchop.jcirc(gal)
+    jcirc = gchop.jcirc(gal)
 
     X_stars = X[t == gchop.ParticleSetType.STARS.value]
     assert np.array_equal(X_stars[:, 1], jcirc.eps, equal_nan=True)
