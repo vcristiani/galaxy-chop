@@ -17,10 +17,12 @@
 import attr
 
 import numpy as np
+import pandas as pd
 
 import seaborn as sns
 
 from . import utils
+from . import models
 
 # =============================================================================
 # ACCESSOR
