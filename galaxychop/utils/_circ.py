@@ -15,6 +15,7 @@
 # =============================================================================
 
 from collections import namedtuple
+import warnings
 
 import numpy as np
 
@@ -151,7 +152,7 @@ def _jcirc(galaxy, bin0=0.05, bin1=0.005):
     )
 
 
-def jcirc(galaxy, bin0=0.05, bin1=0.005):
+def jcirc(galaxy, bin0=0.05, bin1=0.005, runtime_warnings="ignore"):
     """
     Process energy and angular momentum.
 
@@ -168,6 +169,12 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     bin1 : `float`. Default=0.005
         Size of the specific energy bin of the outer part of the galaxy,
         in the range of (-0.1, 0) of the normalized energy.
+    runtime_warnings : Any warning filter action (default "ignore")
+        jcirc suele lanzar RuntimeWarning durante el calculo de eps debido
+        a que pueden haber particulas XXX. Por esto por defecto la funcion
+        decide ignorar estas advertencias. ``runtime_warnings`` puede valer
+        cualquier "action" valida en el modulo warnings de python.
+
 
     Return
     ------
@@ -203,6 +210,6 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
     >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
     """
 
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("ignore", category=RuntimeWarning)
-    return _jcirc(galaxy, bin0, bin1)
+    with warnings.catch_warnings():
+        warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
+        return _jcirc(galaxy, bin0, bin1)
