@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from galaxychop import models, plot, utils
+from galaxychop import plot, utils
 
 from matplotlib.testing.decorators import (
     _image_directories,
@@ -55,6 +55,7 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 
     kwargs.setdefault("tol", 0)
     result = compare_images(test_path, ref_path, **kwargs)
+
     if result:
         pytest.fail(result)
 
@@ -286,7 +287,7 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+@pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
 
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -296,7 +297,6 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
     test_grid = plotter.circularity_components()
 
     # expected
-    import ipdb; ipdb.set_trace()
     circ = utils.jcirc(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
@@ -306,13 +306,12 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
 
     df = pd.DataFrame(
         {
-            "eps": circ.eps[mask],
-            "eps_r": circ.eps_r[mask],
-            "E_s": circ.normalized_star_energy[mask],
+            "Normalized star energy": circ.normalized_star_energy[mask],
+            r"$\epsilon$": circ.eps[mask],
+            r"$\epsilon_r$": circ.eps_r[mask],
         }
     )
     expected_grid = sns.pairplot(df, kind="hist", diag_kind="kde")
-    # import ipdb; ipdb.set_trace()
 
     assert_same_image(
         test_GalaxyPlotter_circularity_components,
