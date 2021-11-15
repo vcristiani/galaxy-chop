@@ -12,13 +12,17 @@
 
 from unittest import mock
 
-from galaxychop import plot, utils
+from galaxychop import models, plot, utils
 
 from matplotlib.testing.decorators import (
     _image_directories,
     check_figures_equal,
     compare_images,
 )
+
+import numpy as np
+
+import pandas as pd
 
 import pytest
 
@@ -279,3 +283,40 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
     circ = utils.jcirc(gal)
     sns.kdeplot(circ.eps, ax=exp_ax)
     exp_ax.set_xlabel(r"$\epsilon$")
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    # test_ax = fig_test.subplots()
+    test_grid = plotter.circularity_components()
+
+    # expected
+    import ipdb; ipdb.set_trace()
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    df = pd.DataFrame(
+        {
+            "eps": circ.eps[mask],
+            "eps_r": circ.eps_r[mask],
+            "E_s": circ.normalized_star_energy[mask],
+        }
+    )
+    expected_grid = sns.pairplot(df, kind="hist", diag_kind="kde")
+    # import ipdb; ipdb.set_trace()
+
+    assert_same_image(
+        test_GalaxyPlotter_circularity_components,
+        format,
+        test_grid,
+        expected_grid,
+    )
