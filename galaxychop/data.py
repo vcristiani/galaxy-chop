@@ -382,7 +382,7 @@ class Galaxy:
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> k_s, k_dm, k_g = galaxy.kinetic_energy
+        >>> k_s, k_dm, k_g = galaxy.kinetic_energy_
         """
         return (
             self.stars.kinetic_energy_,
@@ -420,7 +420,7 @@ class Galaxy:
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> E_s, E_dm, E_g = galaxy.energy
+        >>> E_s, E_dm, E_g = galaxy.total_energy_
         """
         if self.has_potential_:
             return (
@@ -431,6 +431,27 @@ class Galaxy:
 
     @property
     def angular_momentum_(self):
+        """
+        Angular momentum calculation.
+
+        Compute the angular momentum of stars, dark matter and gas particles.
+
+        Returns
+        -------
+        tuple : `Quantity`
+            (J_s, J_dm, J_g): Angular momentum of stars, dark
+            matter and gas respectively.
+            Shape(n_s, n_dm, n_g). Unit: (kpc * km / s)
+
+        Examples
+        --------
+        This returns the angular momentum of stars, dark matter and gas
+        particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> J_s, J_dm, J_g = galaxy.angular_momentum_
+        """
         return (
             self.stars.angular_momentum_,
             self.dark_matter.angular_momentum_,
@@ -444,6 +465,19 @@ class Galaxy:
 
 
 def galaxy_as_kwargs(galaxy):
+    """Galaxy init attributes as dictionary.
+
+    Parameters
+    ----------
+    galaxy: Galaxy
+        Instance of Galaxy.
+
+    Returns
+    -------
+    kwargs: dict
+        Dictionary with `galaxy` attributes.
+    """
+
     def _filter_internals(attribute, value):
         return attribute.init
 
@@ -491,7 +525,7 @@ def mkgalaxy(
     potential_g: np.ndarray = None,
 ):
     """
-    Galaxy builder
+    Galaxy builder.
 
     This function builds a galaxy object from a star,
     dark matter and gas ParticleSet.
