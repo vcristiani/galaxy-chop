@@ -229,7 +229,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
 
     _COMPONENTS_TO_TRY = tuple(range(2, 16))
 
-    def _try_components(self, X, n_components, seed):
+    def _run_gmm(self, X, n_components, random_state):
         gmm = mixture.GaussianMixture(
             n_components=n_components,
             covariance_type=self.covariance_type,
@@ -241,12 +241,16 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
             weights_init=self.weights_init,
             means_init=self.means_init,
             precisions_init=self.precisions_init,
-            random_state=seed,
+            random_state=random_state,
             warm_start=self.warm_start,
             verbose=self.verbose,
             verbose_interval=self.verbose_interval,
         )
         gmm.fit(X)
+        return gmm
+
+    def _try_components(self, X, n_components, random_state):
+        gmm = self._run_gmm(X, n_components, random_state)
         return gmm.bic(X) / len(X)
 
     def split(self, X, y, attributes):
@@ -287,24 +291,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         number_of_gaussians = np.min(ctt[mask])
 
         # Clustering with gaussian mixture and the parameters obtained.
-        gcgmm = mixture.GaussianMixture(
-            n_components=number_of_gaussians,
-            covariance_type=self.covariance_type,
-            tol=self.tol,
-            reg_covar=self.reg_covar,
-            max_iter=self.max_iter,
-            n_init=self.n_init,
-            init_params=self.init_params,
-            weights_init=self.weights_init,
-            means_init=self.means_init,
-            precisions_init=self.precisions_init,
-            random_state=random_state,
-            warm_start=self.warm_start,
-            verbose=self.verbose,
-            verbose_interval=self.verbose_interval,
-        )
-
-        gcgmm_ = gcgmm.fit(X)
+        gcgmm_ = self._run_gmm(X, number_of_gaussians, random_state)
 
         n_components = gcgmm_.n_components
         center = gcgmm_.means_
