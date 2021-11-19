@@ -231,12 +231,11 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
         bic_med = np.empty(len(components_to_try))
-        gausians = []
 
-        for i in components_to_try:
+        for idx, comp in enumerate(components_to_try):
             # Implementation of gmm for all possible components of the method.
             gmm = mixture.GaussianMixture(
-                n_components=i,
+                n_components=comp,
                 covariance_type=self.covariance_type,
                 tol=self.tol,
                 reg_covar=self.reg_covar,
@@ -252,8 +251,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
                 verbose_interval=self.verbose_interval,
             )
             gmm.fit(X)
-            bic_med[i - 2] = gmm.bic(X) / len(X)
-            gausians.append(gmm)
+            bic_med[idx] = gmm.bic(X) / len(X)
 
         bic_min = np.sum(bic_med[-5:]) / 5.0
         delta_bic_ = bic_med - bic_min
