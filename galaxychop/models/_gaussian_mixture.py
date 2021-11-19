@@ -262,7 +262,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         seeds = random_state.randint(np.iinfo(np.int32).max, size=len(ctt))
 
         with joblib.Parallel(
-            n_jobs=8, verbose=self.verbose, prefer="processes"
+            n_jobs=self.n_jobs, verbose=self.verbose, prefer="processes"
         ) as P:
             # make the method delayed
             try_components = joblib.delayed(self._try_components)
