@@ -11,6 +11,8 @@
 # IMPORTS
 # =============================================================================
 
+import joblib
+
 import numpy as np
 
 from sklearn import mixture
@@ -223,45 +225,66 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
     """
 
     c_bic = hparam(default=0.1)
-    components_to_try = hparam(default=np.arange(2, 16), converter=np.asarray)
+    n_jobs = hparam(default=None)
+
+    _COMPONENTS_TO_TRY = tuple(range(2, 16))
+
+    def _try_components(self, X, n_components, seed):
+        gmm = mixture.GaussianMixture(
+            n_components=n_components,
+            covariance_type=self.covariance_type,
+            tol=self.tol,
+            reg_covar=self.reg_covar,
+            max_iter=self.max_iter,
+            n_init=self.n_init,
+            init_params=self.init_params,
+            weights_init=self.weights_init,
+            means_init=self.means_init,
+            precisions_init=self.precisions_init,
+            random_state=seed,
+            warm_start=self.warm_start,
+            verbose=self.verbose,
+            verbose_interval=self.verbose_interval,
+        )
+        gmm.fit(X)
+        return gmm.bic(X) / len(X)
 
     def split(self, X, y, attributes):
-        c_bic = self.c_bic
-        components_to_try = self.components_to_try
+
+        # for simplicity we conver the default_rng to a scikit-learn
+        # compatible RandomState
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
-        bic_med = np.empty(len(components_to_try))
+        # we copy self.components_to_try for simplicity
+        ctt = np.asarray(self._COMPONENTS_TO_TRY)
 
-        for idx, comp in enumerate(components_to_try):
-            # Implementation of gmm for all possible components of the method.
-            gmm = mixture.GaussianMixture(
-                n_components=comp,
-                covariance_type=self.covariance_type,
-                tol=self.tol,
-                reg_covar=self.reg_covar,
-                max_iter=self.max_iter,
-                n_init=self.n_init,
-                init_params=self.init_params,
-                weights_init=self.weights_init,
-                means_init=self.means_init,
-                precisions_init=self.precisions_init,
-                random_state=random_state,
-                warm_start=self.warm_start,
-                verbose=self.verbose,
-                verbose_interval=self.verbose_interval,
+        # no we need multiple seed to creates a parrallel run of the GMM
+        seeds = random_state.randint(np.iinfo(np.int32).max, size=len(ctt))
+
+        with joblib.Parallel(
+            n_jobs=8, verbose=self.verbose, prefer="processes"
+        ) as P:
+            # make the method delayed
+            try_components = joblib.delayed(self._try_components)
+
+            # excecute the trrys in parallel
+            bic_med = P(
+                try_components(X, n_components, seed)
+                for n_components, seed in zip(ctt, seeds)
             )
-            gmm.fit(X)
-            bic_med[idx] = gmm.bic(X) / len(X)
 
+        # convert bic_med to array
+        bic_med = np.asarray(bic_med)
+
+        # continue as normal
         bic_min = np.sum(bic_med[-5:]) / 5.0
         delta_bic_ = bic_med - bic_min
 
         # Criteria for the choice of the number of gaussians.
-        c_bic = self.c_bic
-        mask = np.where(delta_bic_ <= c_bic)[0]
+        mask = np.where(delta_bic_ <= self.c_bic)[0]
 
         # Number of components
-        number_of_gaussians = np.min(components_to_try[mask])
+        number_of_gaussians = np.min(ctt[mask])
 
         # Clustering with gaussian mixture and the parameters obtained.
         gcgmm = mixture.GaussianMixture(
