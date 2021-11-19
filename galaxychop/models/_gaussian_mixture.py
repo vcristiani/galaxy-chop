@@ -227,7 +227,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
     c_bic = hparam(default=0.1)
     n_jobs = hparam(default=None)
 
-    _COMPONENTS_TO_TRY = tuple(range(2, 16))
+    _COMPONENTS_TO_TRY = np.arange(2, 16)
 
     def _run_gmm(self, X, n_components, random_state):
         gmm = mixture.GaussianMixture(
@@ -260,7 +260,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
         # we copy self.components_to_try for simplicity
-        ctt = np.asarray(self._COMPONENTS_TO_TRY)
+        ctt = self._COMPONENTS_TO_TRY
 
         # no we need multiple seed to creates a parrallel run of the GMM
         seeds = random_state.randint(np.iinfo(np.int32).max, size=len(ctt))
