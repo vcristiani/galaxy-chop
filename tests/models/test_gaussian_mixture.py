@@ -2,8 +2,6 @@
 # IMPORTS
 # =============================================================================
 
-import warnings
-
 import galaxychop as gchop
 
 import numpy as np
@@ -19,9 +17,7 @@ def test_GaussianMixture(read_hdf5_galaxy):
 
     decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        components = decomposer.decompose(gal)
+    components = decomposer.decompose(gal)
 
     assert len(components) == len(gal)
     assert len(gal.stars) == np.sum(components.ptypes == "stars")
@@ -67,13 +63,9 @@ def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
 
-    decomposer = gchop.models.AutoGaussianMixture(
-        random_state=42, n_init=1, components_to_try=[2, 3]
-    )
+    decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        components = decomposer.decompose(gal)
+    components = decomposer.decompose(gal)
 
     assert len(components) == len(gal)
     assert len(gal.stars) == np.sum(components.ptypes == "stars")

@@ -2,8 +2,6 @@
 # IMPORTS
 # =============================================================================
 
-import warnings
-
 import galaxychop as gchop
 
 import numpy as np
@@ -21,9 +19,7 @@ def test_JThreshold(read_hdf5_galaxy):
 
     decomposer = gchop.models.JThreshold()
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        components = decomposer.decompose(gal)
+    components = decomposer.decompose(gal)
 
     assert len(components) == len(gal)
     assert len(gal.stars) == np.sum(components.ptypes == "stars")

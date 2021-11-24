@@ -14,6 +14,7 @@
 # IMPORTS
 # =============================================================================
 
+import warnings
 from collections import namedtuple
 
 import numpy as np
@@ -30,57 +31,9 @@ JCirc = namedtuple(
 )
 
 
-def jcirc(galaxy, bin0=0.05, bin1=0.005):
-    """
-    Process energy and angular momentum.
+def _jcirc(galaxy, bin0=0.05, bin1=0.005):
+    # this function exists to silence the warnings in the public one
 
-    Calculation of Normalized specific energy of the stars,
-    circularity parameter calculation, projected circularity parameter,
-    and the points to build the function of the circular angular momentum.
-
-    Parameters
-    ----------
-    galaxy : object of Galaxy class.
-    bin0 : `float`. Default=0.05
-        Size of the specific energy bin of the inner part of the galaxy,
-        in the range of (-1, -0.1) of the normalized energy.
-    bin1 : `float`. Default=0.005
-        Size of the specific energy bin of the outer part of the galaxy,
-        in the range of (-0.1, 0) of the normalized energy.
-
-    Return
-    ------
-    tuple : `float`
-        (E_star_norm, eps, eps_r, x, y): Normalized specific energy of
-        the stars, circularity parameter (J_z/J_circ), projected
-        circularity parameter (J_p/J_circ), the normalized specific
-        energy for the particle with the maximum z-specific angular
-        momentum component per the bin (x), and the maximum of z-specific
-        angular momentum component (y).
-        See section Notes for more details.
-        Shape(n_s, 1). Unit: dimensionless
-
-    Notes
-    -----
-    The `x` and `y` are calculated from the binning in the
-    normalized specific energy. In each bin, the particle with the
-    maximum value of z-component of standardized specific angular
-    momentum is selected. This value is assigned to the `y` parameter
-    and its corresponding normalized specific energy pair value to `x`.
-
-    Examples
-    --------
-    This returns the normalized specific energy of stars (E_star_norm), the
-    circularity parameters (eps : J_z/J_circ and
-    eps_r: J_p/J_circ), and the normalized specific energy for the particle
-    with the maximum z-component of the normalized specific angular
-    momentum per bin (`x`) and the maximum value of the z-component of the
-    normalized specific angular momentum per bin (`y`).
-
-    >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
-    """
     # extract only the needed columns
     df = galaxy.to_dataframe(
         attributes=["ptypev", "total_energy", "Jx", "Jy", "Jz"]
@@ -197,3 +150,66 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005):
         x=x,
         y=y,
     )
+
+
+def jcirc(galaxy, bin0=0.05, bin1=0.005, runtime_warnings="ignore"):
+    """
+    Process energy and angular momentum.
+
+    Calculation of Normalized specific energy of the stars,
+    circularity parameter calculation, projected circularity parameter,
+    and the points to build the function of the circular angular momentum.
+
+    Parameters
+    ----------
+    galaxy : object of Galaxy class.
+    bin0 : `float`. Default=0.05
+        Size of the specific energy bin of the inner part of the galaxy,
+        in the range of (-1, -0.1) of the normalized energy.
+    bin1 : `float`. Default=0.005
+        Size of the specific energy bin of the outer part of the galaxy,
+        in the range of (-0.1, 0) of the normalized energy.
+    runtime_warnings : Any warning filter action (default "ignore")
+        jcirc suele lanzar RuntimeWarning durante el calculo de eps debido
+        a que pueden haber particulas XXX. Por esto por defecto la funcion
+        decide ignorar estas advertencias. ``runtime_warnings`` puede valer
+        cualquier "action" valida en el modulo warnings de python.
+
+
+    Return
+    ------
+    tuple : `float`
+        (E_star_norm, eps, eps_r, x, y): Normalized specific energy of
+        the stars, circularity parameter (J_z/J_circ), projected
+        circularity parameter (J_p/J_circ), the normalized specific
+        energy for the particle with the maximum z-specific angular
+        momentum component per the bin (x), and the maximum of z-specific
+        angular momentum component (y).
+        See section Notes for more details.
+        Shape(n_s, 1). Unit: dimensionless
+
+    Notes
+    -----
+    The `x` and `y` are calculated from the binning in the
+    normalized specific energy. In each bin, the particle with the
+    maximum value of z-component of standardized specific angular
+    momentum is selected. This value is assigned to the `y` parameter
+    and its corresponding normalized specific energy pair value to `x`.
+
+    Examples
+    --------
+    This returns the normalized specific energy of stars (E_star_norm), the
+    circularity parameters (eps : J_z/J_circ and
+    eps_r: J_p/J_circ), and the normalized specific energy for the particle
+    with the maximum z-component of the normalized specific angular
+    momentum per bin (`x`) and the maximum value of the z-component of the
+    normalized specific angular momentum per bin (`y`).
+
+    >>> import galaxychop as gchop
+    >>> galaxy = gchop.Galaxy(...)
+    >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
+    """
+
+    with warnings.catch_warnings():
+        warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
+        return _jcirc(galaxy, bin0, bin1)
