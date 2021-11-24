@@ -63,9 +63,7 @@ def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
 
-    decomposer = gchop.models.AutoGaussianMixture(
-        random_state=42, n_init=1, components_to_try=[2, 3]
-    )
+    decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
 
     components = decomposer.decompose(gal)
 

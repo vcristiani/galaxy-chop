@@ -41,7 +41,7 @@ class ParticleSetType(enum.IntEnum):
 
     @classmethod
     def mktype(cls, v):
-        """Creates a ParticleSetType from name, or value."""
+        """Create a ParticleSetType from name, or value."""
         if isinstance(v, ParticleSetType):
             return v
         if isinstance(v, str):
@@ -52,6 +52,7 @@ class ParticleSetType(enum.IntEnum):
         raise ValueError(f"Can't coherce {v} into ParticleSetType ")
 
     def humanize(self):
+        """Particle type name in lower case."""
         return self.name.lower()
 
 
@@ -199,25 +200,28 @@ class ParticleSet:
 
     @property
     def angular_momentum_(self):
+        """Components of angular momentum in units of kpc*km/s."""
         arr = self.arr_
         return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
 
     # REDEFINITIONS ===========================================================
 
     def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
         return (
             f"ParticleSet({self.ptype.name}, size={len(self)}, "
             f"softening={self.softening}, potentials={self.has_potential_})"
         )
 
     def __len__(self):
+        """len(x) <=> x.__len__()."""
         return len(self.m)
 
     # UTILITIES ===============================================================
 
     def to_dataframe(self, attributes=None):
         """
-        Data frame builder
+        Convert to pandas data frame.
 
         This method builds a data frame of all parameters of ParticleSet class.
 
@@ -316,11 +320,32 @@ class Galaxy:
                 raise TypeError(f"{psname} must be of type {pstype}")
 
     def __len__(self):
+        """len(x) <=> x.__len__()."""
         return len(self.stars) + len(self.dark_matter) + len(self.gas)
 
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
+        """
+        Convert to pandas data frame.
+
+        This method builds a data frame from the particle components of the
+        galaxy.
+
+        Parameters
+        ----------
+        ptypes: tuple, default value = None
+            Strings indicating the ParticleSetType to include. If None,
+            all particle types are included.
+        attributes: tuple, default value = None
+            Dictionary keys of ParticleSet parameters.
+
+        Return
+        ------
+        DataFrame : pandas data frame
+            Data frame of all Galaxy class parameters.
+
+        """
         psets = [self.stars, self.dark_matter, self.gas]
 
         parts = []
@@ -357,7 +382,7 @@ class Galaxy:
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> k_s, k_dm, k_g = galaxy.kinetic_energy
+        >>> k_s, k_dm, k_g = galaxy.kinetic_energy_
         """
         return (
             self.stars.kinetic_energy_,
@@ -395,7 +420,7 @@ class Galaxy:
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> E_s, E_dm, E_g = galaxy.energy
+        >>> E_s, E_dm, E_g = galaxy.total_energy_
         """
         if self.has_potential_:
             return (
@@ -406,6 +431,27 @@ class Galaxy:
 
     @property
     def angular_momentum_(self):
+        """
+        Angular momentum calculation.
+
+        Compute the angular momentum of stars, dark matter and gas particles.
+
+        Returns
+        -------
+        tuple : `Quantity`
+            (J_s, J_dm, J_g): Angular momentum of stars, dark
+            matter and gas respectively.
+            Shape(n_s, n_dm, n_g). Unit: (kpc * km / s)
+
+        Examples
+        --------
+        This returns the angular momentum of stars, dark matter and gas
+        particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> J_s, J_dm, J_g = galaxy.angular_momentum_
+        """
         return (
             self.stars.angular_momentum_,
             self.dark_matter.angular_momentum_,
@@ -419,6 +465,19 @@ class Galaxy:
 
 
 def galaxy_as_kwargs(galaxy):
+    """Galaxy init attributes as dictionary.
+
+    Parameters
+    ----------
+    galaxy: Galaxy
+        Instance of Galaxy.
+
+    Returns
+    -------
+    kwargs: dict
+        Dictionary with `galaxy` attributes.
+    """
+
     def _filter_internals(attribute, value):
         return attribute.init
 
@@ -466,7 +525,7 @@ def mkgalaxy(
     potential_g: np.ndarray = None,
 ):
     """
-    Galaxy builder
+    Galaxy builder.
 
     This function builds a galaxy object from a star,
     dark matter and gas ParticleSet.

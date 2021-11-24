@@ -81,7 +81,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         `<https://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html>`_
     """
 
-    n_clusters = hparam(default=2)
+    n_components = hparam(default=2)
     init = hparam(default="k-means++")
     n_init = hparam(default=10)
     max_iter = hparam(default=300)
@@ -98,7 +98,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
         kmeans = cluster.KMeans(
-            n_clusters=self.n_clusters,
+            n_clusters=self.n_components,
             init=self.init,
             n_init=self.n_init,
             max_iter=self.max_iter,
