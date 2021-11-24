@@ -293,7 +293,6 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    # test_ax = fig_test.subplots()
     test_grid = plotter.circularity_components()
 
     # expected
@@ -315,6 +314,53 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
 
     assert_same_image(
         test_GalaxyPlotter_circularity_components,
+        format,
+        test_grid,
+        expected_grid,
+    )
+
+
+@pytest.mark.xfail
+@pytest.mark.slow
+@pytest.mark.parametrize("format", ["png"])
+def test_GalaxyPlotter_circularity_component_labels(read_hdf5_galaxy, format):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    circ = utils.jcirc(gal)
+    # decomposer = models.KMeans(n_clusters=2)
+    # labels = decomposer.decompose(gal)
+    # labels = labels.labels[labels.ptypes == 'stars']
+
+    # expected
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    labels1 = np.full((len(gal) - len(circ.eps)), np.nan)
+    labels2 = np.ones(len(circ.eps_r[mask]))
+    labels = np.hstack((labels1, labels2))
+
+    # import ipdb; ipdb.set_trace()
+
+    test_grid = plotter.circularity_components(labels=labels)
+
+    df = pd.DataFrame(
+        {
+            "Normalized star energy": circ.normalized_star_energy[mask],
+            r"$\epsilon$": circ.eps[mask],
+            r"$\epsilon_r$": circ.eps_r[mask],
+            # "Hue": labels,
+            "Hue": labels2,
+        }
+    )
+    expected_grid = sns.pairplot(df, hue="Hue", kind="hist", diag_kind="kde")
+
+    assert_same_image(
+        test_GalaxyPlotter_circularity_component_labels,
         format,
         test_grid,
         expected_grid,
