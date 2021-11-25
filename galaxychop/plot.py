@@ -17,14 +17,12 @@
 import attr
 
 import numpy as np
-import pandas as pd
 
 import pandas as pd
 
 import seaborn as sns
 
 from . import utils
-from . import models
 
 # =============================================================================
 # ACCESSOR
@@ -72,26 +70,46 @@ class GalaxyPlotter:
     # COMMON PLOTS ============================================================
 
     def get_df_and_hue(self, ptypes, attributes, labels, lmap):
+        """
+        DataFrama and Hue constructor for plot implementations
+
+        Parameters
+        ----------
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type.
+        attributes : keys of ``ParticleSet class`` parameters.
+            Names of ``ParticleSet class`` parameters.
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+        lmap :  dicts
+            Name assignment to the label.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            DataFrame of galaxy properties with labels added.
+        hue : keys of ``ParticleSet class`` parameters.
+            Labels of all galaxy particles.
+        """
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
         hue = None  # by default not hue is selected
 
-        # labels es la columna que se va a usar para "resaltar cosas" (hue)
-        # si es un str y no estaba en los atributos lo tengo que sacar
-        # del dataframe
+        # labels: column used to map plot aspects to different colors (hue).
+        # if is a str and it was not in the attributes I have to take it out
+        # of the dataframe.
         if isinstance(labels, str) and labels not in attributes:
             hue = labels
             attributes = np.concatenate((attributes, [labels]))
 
-        # saco todos los atributos en un df
+        # put all attributes in a df
         df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
 
-        # ahora puede ser que los labels sean un np array y hay que agregarlo
-        # como columna al dataframe y asignar hue al nombre de esta nueva
-        # columna
+        # labels can be an np array and must be added as a column to the
+        # dataframe and assign hue to the name of this new column.
         if hue is None and hasattr(labels, "__iter__"):
-            hue = "Hue"  # Hue no esta en pset por lo tanto sirve
-            df.insert(0, hue, labels)  # lo chanto como primer columna
+            hue = "Hue"  # Hue is not in ParticleSet, so it is useful
+            df.insert(0, hue, labels)  # I place it as the first column
 
         if lmap is not None:
             df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
@@ -101,7 +119,37 @@ class GalaxyPlotter:
     def pairplot(
         self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
     ):
+        """
+        Draw a pairplot of the galaxy properties.
 
+        By default, this function will create a grid of Axes such that each
+        numeric variable in data will by shared across the y-axes across a
+        single row and the x-axes across a single column. The diagonal
+        plots drow a univariate distribution to show the marginal distribution
+        of the data in each column.
+        This function groups the values of all galaxy particles according to
+        some ``ParticleSet class`` parameter.
+
+        Parameters
+        ----------
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        attributes : keys of ``ParticleSet class`` parameters.
+            Names of ``ParticleSet class`` parameters. Default value = None
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs :
+            Additional keyword arguments are passed and are documented in
+            ``seaborn.pairplot``.
+
+        Returns
+        -------
+        seaborn.axisgrid.PairGrid
+        """
         df, hue = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=attributes,
@@ -116,6 +164,34 @@ class GalaxyPlotter:
         return ax
 
     def dis(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
+        """Draw a distribution plots onto a FacetGrid.
+
+        Plot univariate or bivariate distributions of datasets using
+        different approachs for visualizing the galaxy parameters.
+        This function groups the values of all galaxy particles according
+        to some ``ParticleSet class`` parameter.
+
+        Parameters
+        ----------
+        x, y : keys of ``ParticleSet class`` parameters.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented in
+            ``seaborn.displot``.
+
+        Returns
+        -------
+        seaborn.axisgrid.PairGrid
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_df_and_hue(
             ptypes=ptypes,
@@ -127,6 +203,33 @@ class GalaxyPlotter:
         return ax
 
     def scatter(self, x, y, ptypes=None, labels=None, lmap=None, **kwargs):
+        """Draw a scatter plot of galaxy properties.
+
+        Shows the relationship between x and y.
+        This function groups the values of all galaxy particles according
+        to some ``ParticleSet class`` parameter.
+
+        Parameters
+        ----------
+        x, y : keys of ``ParticleSet class`` parameters.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.scatterplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x, y]
         df, hue = self.get_df_and_hue(
             ptypes=ptypes,
@@ -138,6 +241,33 @@ class GalaxyPlotter:
         return ax
 
     def hist(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
+        """Draw a histogram of galaxy properties.
+
+        Plot univariate or bivariate histograms to show distributions
+        of datasets. This function groups the values of all galaxy
+        particles according to some ``ParticleSet class`` parameter.
+
+        Parameters
+        ----------
+        x, y : keys of ``ParticleSet class`` parameters.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.histplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_df_and_hue(
             ptypes=ptypes,
@@ -149,6 +279,35 @@ class GalaxyPlotter:
         return ax
 
     def kde(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
+        """Draw a Kernel Density plot of galaxy properties.
+
+        Plot univariate or bivariate distributions using kernel density
+        estimation (KDE). This plot represents the galay properties using
+        a continuous probability density curve in one or more dimensions.
+        This function groups the values of all galaxy particles according
+        to some ``ParticleSet class`` parameter.
+
+        Parameters
+        ----------
+        x, y : keys of ``ParticleSet class`` parameters.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        labels : keys of ``ParticleSet class`` parameters.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.kdeplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_df_and_hue(
             ptypes=ptypes,
