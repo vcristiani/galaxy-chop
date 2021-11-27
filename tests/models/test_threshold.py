@@ -13,7 +13,6 @@ import pytest
 # =============================================================================
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_JThreshold(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -44,7 +43,6 @@ def test_JThreshold(read_hdf5_galaxy):
     assert components.probabilities is None
 
 
-@pytest.mark.slow
 @pytest.mark.model
 @pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
 def test_JThreshold_eps_cut_value_error(eps_cut):

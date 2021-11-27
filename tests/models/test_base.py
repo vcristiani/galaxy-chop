@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemethed():
     class Decomposer(models.GalaxyDecomposerABC):
@@ -31,7 +30,6 @@ def test_GalaxyDecomposerABC_not_implemethed():
         decomposer.get_rows_mask(None, None, None)
 
 
-@pytest.mark.slow
 @pytest.mark.model
 @pytest.mark.parametrize(
     "bins_value", [None, (1.0,), (1.0, 2.0, 3.0), (1.0, 2)]
@@ -51,7 +49,6 @@ def test_GalaxyDecomposerABC_invalid_bins(bins_value):
         Decomposer(cbins=bins_value)
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_GalaxyDecomposerABC_repr():
     class Decomposer(models.GalaxyDecomposerABC):
@@ -74,7 +71,6 @@ def test_GalaxyDecomposerABC_repr():
     assert result == expected
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -120,7 +116,6 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     assert np.all(np.isnan(X_nostars[:, 1]))
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_GalaxyDecomposerABC_complete_labels():
     class Decomposer(models.GalaxyDecomposerABC):
@@ -146,7 +141,6 @@ def test_GalaxyDecomposerABC_complete_labels():
     assert np.array_equal(result, [1, np.nan, 1], equal_nan=True)
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -179,7 +173,6 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 # =============================================================================
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_DynamicStarDecomposer_get_attributes():
     class Decomposer(
@@ -201,7 +194,6 @@ def test_DynamicStarDecomposer_get_attributes():
     ]
 
 
-@pytest.mark.slow
 @pytest.mark.model
 def test_DynamicStarDecomposer_get_rows_mask():
     class Decomposer(
