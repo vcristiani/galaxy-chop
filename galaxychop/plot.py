@@ -320,20 +320,22 @@ class GalaxyPlotter:
 
     # CICULARITY ==============================================================
 
-    def circ_hist(self, cbins=(0.05, 0.005), **kwargs):
+    def circ_hist(self, cbins=utils.DEFAULT_CBIN, **kwargs):
         circ = utils.jcirc(self._galaxy, *cbins)
         ax = sns.histplot(circ.eps, **kwargs)
         ax.set_xlabel(r"$\epsilon$")
         return ax
 
-    def circ_kde(self, cbins=(0.05, 0.005), **kwargs):
+    def circ_kde(self, cbins=utils.DEFAULT_CBIN, **kwargs):
         circ = utils.jcirc(self._galaxy, *cbins)
         ax = sns.kdeplot(circ.eps, **kwargs)
         ax.set_xlabel(r"$\epsilon$")
         return ax
 
-    def circularity_components(
-        self, cbins=(0.05, 0.005), labels=None, lmap=None, **kwargs
+    # self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
+
+    def circ_pairplot(
+        self, cbins=utils.DEFAULT_CBIN, labels=None, lmap=None, **kwargs
     ):
         circ = utils.jcirc(self._galaxy, *cbins)
 

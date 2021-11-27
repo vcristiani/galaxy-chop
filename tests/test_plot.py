@@ -301,12 +301,12 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
 @pytest.mark.slow
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
+def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
 
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    test_grid = plotter.circularity_components()
+    test_grid = plotter.circ_pairplot()
 
     # expected
     circ = utils.jcirc(gal)
@@ -326,7 +326,7 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
     expected_grid = sns.pairplot(df, kind="hist", diag_kind="kde")
 
     assert_same_image(
-        test_GalaxyPlotter_circularity_components,
+        test_GalaxyPlotter_circ_pairplot,
         format,
         test_grid,
         expected_grid,

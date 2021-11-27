@@ -30,8 +30,10 @@ JCirc = namedtuple(
     "JCirc", ["normalized_star_energy", "eps", "eps_r", "x", "y"]
 )
 
+DEFAULT_CBIN = (0.05, 0.005)
 
-def _jcirc(galaxy, bin0=0.05, bin1=0.005):
+
+def _jcirc(galaxy, bin0, bin1):
     # this function exists to silence the warnings in the public one
 
     # extract only the needed columns

@@ -80,7 +80,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
 
-    cbins = hparam(default=(0.05, 0.005))
+    cbins = hparam(default=utils.DEFAULT_CBIN)
 
     @cbins.validator
     def _bins_validator(self, attribute, value):
