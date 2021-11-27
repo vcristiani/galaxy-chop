@@ -65,6 +65,7 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 # =============================================================================
 
 
+@pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
     gal = galaxy(seed=42)
 
@@ -87,6 +88,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
 # =============================================================================
 
 
+@pytest.mark.plot
 @pytest.mark.parametrize("pkind", plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS)
 def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
     gal = galaxy(seed=42)
@@ -97,6 +99,7 @@ def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
         plotter(pkind)
 
 
+@pytest.mark.plot
 def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
     gal = galaxy(seed=42)
 
@@ -111,6 +114,7 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
         plotter("zaraza")
 
 
+@pytest.mark.plot
 @pytest.mark.parametrize("plot_kind", ["pairplot"])
 def test_GalaxyPlotter_call(galaxy, plot_kind):
 
@@ -132,6 +136,7 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
 def test_GalaxyPlotter_pairplot(galaxy, format):
 
@@ -152,6 +157,7 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
 def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
@@ -180,6 +186,7 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @pytest.mark.parametrize("format", ["png", "pdf", "svg"])
 def test_GalaxyPlotter_dis(galaxy, format):
     gal = galaxy(seed=42)
@@ -200,6 +207,7 @@ def test_GalaxyPlotter_dis(galaxy, format):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @check_figures_equal()
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 
@@ -216,6 +224,7 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @check_figures_equal()
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 
@@ -232,6 +241,7 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @check_figures_equal()
 def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
@@ -253,6 +263,7 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @check_figures_equal()
 def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
 
@@ -270,6 +281,7 @@ def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @check_figures_equal()
 def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
 
@@ -287,6 +299,7 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.slow
+@pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
 
@@ -322,6 +335,7 @@ def test_GalaxyPlotter_circularity_components(read_hdf5_galaxy, format):
 
 @pytest.mark.xfail
 @pytest.mark.slow
+@pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_circularity_component_labels(read_hdf5_galaxy, format):
 

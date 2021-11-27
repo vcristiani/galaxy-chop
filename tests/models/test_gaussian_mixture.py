@@ -6,11 +6,15 @@ import galaxychop as gchop
 
 import numpy as np
 
+import pytest
+
 # =============================================================================
 # TESTS
 # =============================================================================
 
 
+@pytest.mark.slow
+@pytest.mark.model
 def test_GaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
@@ -59,6 +63,8 @@ def test_GaussianMixture(read_hdf5_galaxy):
     )
 
 
+@pytest.mark.slow
+@pytest.mark.model
 def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.star_align(gchop.center(gal))
