@@ -105,6 +105,23 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_rows_mask(self, X, y, attributes):
+        """Gets the mask for the valid rows to operate clustering.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Training instances to cluster.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+    attributes
+
+        Returns
+        -------
+        self
+            Fitted estimator.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
