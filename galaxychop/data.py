@@ -282,6 +282,22 @@ class Galaxy:
 
     Builds a galaxy object from a ParticleSet for each type
     of particle (stars, dark matter and gas).
+
+    Parameters
+    ----------
+    stars : `ParticleSet`
+        Instance of ParticleSet with stars particles.
+    dark_matter : `ParticleSet`
+        Instance of ParticleSet with dark matter particles.
+    gas : `ParticleSet`
+        Instance of ParticleSet with gas particles.
+
+    Attributes
+    ----------
+    arr_: `uttr.ArrayAccessor`
+        Original array accessor object create by the *uttr* library.
+    has_potential_: bool
+        Indicates if this Galaxy instance has the potential energy computed.
     """
 
     stars = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
@@ -392,6 +408,28 @@ class Galaxy:
 
     @property
     def potential_energy_(self):
+        """Specific potential energy of stars, dark matter and gas particles.
+
+        This property doesn't compute the potential energy, only returns its
+        value if it is already computed, i.e. has_potential_ is True. To
+        compute the potential use the `galaxychop.potential` function.
+
+        Returns
+        -------
+        tuple : `Quantity`
+            (p_s, p_dm, p_g): Specific potential energy of stars, dark matter
+            and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+
+        Examples
+        --------
+        This returns the specific potential energy of stars, dark matter and
+        gas particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> galaxy_with_potential = gchop.potential(galaxy)
+        >>> p_s, p_dm, p_g = galaxy_with_potential.potential_energy_
+        """
         if self.has_potential_:
             return (
                 self.stars.potential,
