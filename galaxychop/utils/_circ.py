@@ -177,7 +177,6 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005, runtime_warnings="ignore"):
         decide ignorar estas advertencias. ``runtime_warnings`` puede valer
         cualquier "action" valida en el modulo warnings de python.
 
-
     Return
     ------
     tuple : `float`
@@ -211,7 +210,6 @@ def jcirc(galaxy, bin0=0.05, bin1=0.005, runtime_warnings="ignore"):
     >>> galaxy = gchop.Galaxy(...)
     >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
     """
-
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
         return _jcirc(galaxy, bin0, bin1)

@@ -46,7 +46,7 @@ G = c.G.to(G_UNIT).to_value()
 
 
 def fortran_potential(x, y, z, m, softening):
-    """Wrapper for the Fortran implementation of the gravitational potential.
+    """Wrap the Fortran implementation of the gravitational potential.
 
     Parameters
     ----------
