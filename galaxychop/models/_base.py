@@ -101,26 +101,40 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_attributes(self):
+        """Attributes for the parameter space.
+
+        Returns
+        -------
+        attributes : keys of ``ParticleSet class`` parameters
+            Particle attributes used to operate the clustering.
+        """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def get_rows_mask(self, X, y, attributes):
-        """Gets the mask for the valid rows to operate clustering.
+        """Mask for the valid rows to operate clustering.
+
+        This method gets the mask for the valid rows to operate clustering.
 
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training instances to cluster.
+        X : ``np.ndarray(n_particles, attributes)``
+            2D array where each file it is a diferent particle and each column
+            is a attribute of the particles. n_particles is the total number of
+            particles.
 
-        y : Ignored
-            Not used, present here for API consistency by convention.
+        y : ``np.ndarray(n_particles)``
+            1D array where is identified the nature of each particle:
+            0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
+            particles.
 
-    attributes
+        attributes: tuple, dictionary keys of ``ParticleSet class`` parameters
+            Particle attributes used to operate the clustering.
 
         Returns
         -------
-        self
-            Fitted estimator.
+        mask : ``nd.array(m_particles)``
+            Mask only with valid values to operate the clustering.
         """
         raise NotImplementedError()
 
@@ -191,16 +205,30 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return pd.concat([stars_df, dm_df, gas_df], ignore_index=True)
 
     def attributes_matrix(self, galaxy, attributes):
-        """Retorna 2 elementos:
+        """Matrix of particle attributes.
 
-        - Un numpy array X de 2d en el cual cada fila representa una
-          particula, y cada columna un attributo
-        - Un array 'y' con la misma longitud que filas de X que representa
-          el tipo de particula en cada fila
-          (0 = STARS, 1=DM, 2=Gas)
+        This method obtains the matrix with the particles and attributes
+        necessary to operate the clustering.
 
-        Tiene que haber tantas filas como el total de particulas de la galaxia.
+        Parameters
+        ----------
+        galaxy : ``galaxy object``
+            Instance of Galaxy class.
 
+        attributes : keys of ``ParticleSet class`` parameters
+            Particle attributes used to operate the clustering.
+
+        Returns
+        -------
+        X : ``np.ndarray(n_particles, attributes)``
+            2D array where each file it is a diferent particle and each column
+            is a attribute of the particles. n_particles is the total number of
+            particles.
+
+        y : ``np.ndarray(n_particles)``
+            1D array where is identified the nature of each particle:
+            0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
+            particles.
         """
         # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
@@ -253,11 +281,74 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return X, y
 
     def complete_labels(self, X, labels, rows_mask):
+        """Complete the labels of all particles.
+
+        This method assigns the labels obtained from clustering to the
+        particles used for this purpose. The rest are assigned as label=Nan.
+
+        Parameters
+        ----------
+        X : ``np.ndarray(n_particles, attributes)``
+            2D array where each file it is a diferent particle and each column
+            is a parameter of the particles. n_particles is the total number of
+            particles.
+
+        labels: ``np.ndarray(m_particles)``
+            1D array with the index of the clusters to which each particle
+            belongs. m_particles is the total number of particles with valid
+            values to operate the clustering.
+
+        rows_mask : ``nd.array(m_particles)``
+            Mask only with valid values to operate the clustering. m_particles
+            is the total number of particles with valid values to operate the
+            clustering.
+
+        Return
+        ------
+        new_labels: ``np.ndarray(n_particles)``
+            1D array with the index of the clusters to which each particle
+            belongs. Particles that do not belong to any of them are assigned
+            the label Nan. n_particles is the total number of particles.
+        """
         new_labels = np.full(len(X), np.nan)
         new_labels[rows_mask] = labels
         return new_labels
 
     def complete_probs(self, X, probs, rows_mask):
+        """Complete the probabilities of all particles.
+
+        This method assigns the probabilities obtained from clustering to the
+        particles used for this purpose, the rest are assigned as label=Nan.
+        This method returns None in case the clustering method returns None
+        probabilities.
+
+        Parameters
+        ----------
+        X : ``np.ndarray(n_particles, attributes)``
+            2D array where each file it is a diferent particle and each column
+            is a parameter of the particles. n_particles is the total number of
+            particles.
+
+        probs: ``np.ndarray(n_cluster, m_particles)``
+            2D array with probabilities of belonging to each component.
+            n_cluster is the number of components obtained. m_particles is the
+            total number of particles with valid values to operate the
+            clustering.
+
+        rows_mask : ``nd.array(m_particles)``
+            Mask only with valid values to operate the clustering. m_particles
+            is the total number of particles with valid values to operate the
+            clustering.
+
+        Return
+        ------
+        new_probs: ``np.ndarray(n_cluster, n_particles)``
+            2D array with probabilities of belonging to each component.
+            n_cluster is the number of components obtained. n_particles is the
+            total number of particles. Particles that do not belong to any
+            component are assigned the label Nan. This method returns None in
+            case the clustering method returns None probabilities.
+        """
         if probs is None:
             return None
 
@@ -283,8 +374,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        galaxy :
-            `galaxy object`
+        galaxy : ``galaxy object``
+            Instance of Galaxy class.
         """
         attributes = self.get_attributes()
 
