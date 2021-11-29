@@ -66,7 +66,8 @@ class ParticleSet:
 
     Parameters
     ----------
-    ptype :
+    ptype : `ParticleSetType`
+        Indicates if this set corresponds to stars, dark matter or gas.
     m : `Quantity`
         Masses. Shape: (n,1). Default unit: M_sun
     x, y, z : `Quantity`
