@@ -11,7 +11,7 @@
 # =============================================================================
 
 import enum
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
 from astropy import units as u
 
@@ -264,7 +264,7 @@ class ParticleSet:
         attributes = (
             columns_makers.keys() if attributes is None else attributes
         )
-        data = {}
+        data = OrderedDict()
         for aname in attributes:
             mkcolumn = columns_makers[aname]
             data[aname] = mkcolumn()

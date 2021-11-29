@@ -172,9 +172,9 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
     # EXPECTED
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
-    df.columns = ["x", "y", "Hue"]
+    df.columns = ["x", "y", "Labels"]
     expected_grid = sns.pairplot(
-        data=df, hue="Hue", kind="hist", diag_kind="kde"
+        data=df, hue="Labels", kind="hist", diag_kind="kde"
     )
 
     assert_same_image(
@@ -318,9 +318,9 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
 
     df = pd.DataFrame(
         {
-            "Normalized star energy": circ.normalized_star_energy[mask],
-            r"$\epsilon$": circ.eps[mask],
-            r"$\epsilon_r$": circ.eps_r[mask],
+            "normalized_star_energy": circ.normalized_star_energy[mask],
+            "eps": circ.eps[mask],
+            "eps_r": circ.eps_r[mask],
         }
     )
     expected_grid = sns.pairplot(df, kind="hist", diag_kind="kde")

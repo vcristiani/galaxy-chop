@@ -14,6 +14,8 @@
 # IMPORTS
 # =============================================================================
 
+from collections import OrderedDict
+
 import attr
 
 import numpy as np
@@ -107,8 +109,8 @@ class GalaxyPlotter:
 
         # labels can be an np array and must be added as a column to the
         # dataframe and assign hue to the name of this new column.
-        if hue is None and hasattr(labels, "__iter__"):
-            hue = "Hue"  # Hue is not in ParticleSet, so it is useful
+        if hue is None:
+            hue = "Labels"  # Hue is not in ParticleSet, so it is useful
             df.insert(0, hue, labels)  # I place it as the first column
 
         if lmap is not None:
@@ -320,6 +322,67 @@ class GalaxyPlotter:
 
     # CICULARITY ==============================================================
 
+    def get_circ_df_and_hue(self, cbins, attributes, labels, lmap):
+        # first we extract the circularity parameters from the galaxy
+        # as a dictionary
+        circ = utils.jcirc(self._galaxy, *cbins)._asdict()
+
+        mask = (
+            np.isfinite(circ["normalized_star_energy"])
+            & np.isfinite(circ["eps"])
+            & np.isfinite(circ["eps_r"])
+        )
+
+        # determine the correct number of attributes
+        attributes = (
+            [k for k in circ.keys() if k not in ("x", "y")]
+            if attributes is None
+            else attributes
+        )
+        hue = None  # by default no hue is selected
+
+        # labels: column used to map plot aspects to different colors (hue).
+        # if is a str and it was not in the attributes but we can retrieve from
+        # circ, we add as an attribute
+        if (
+            isinstance(labels, str)  # must be an string
+            and labels not in attributes  # is not in attributes
+            and labels in circ  # but is in circ
+        ):
+            attributes = np.concatenate((attributes, [labels]))
+            hue = labels
+
+        columns = OrderedDict()
+        for aname in attributes:
+            columns[aname] = circ[aname][mask]
+
+        df = pd.DataFrame(columns)  # here we create the dataframe
+
+        # At this point if "hue" is still "None" we can assume:
+        # 1. if labels is a str then labels is a column of space.
+        # real galaxy column
+        # 2. Or if it is an array simply paste it into the dataframe.
+        if hue is None and labels is not None:
+
+            if isinstance(labels, str):
+                hue = labels
+                sdf = self._galaxy.stars.to_dataframe(attributes=[labels])
+                labels = sdf[labels].values[mask]
+            else:
+                hue = "Labels"
+
+                # si me pasaron los labels como "array"
+                # solo borro los nans e inf
+                labels = labels[np.isfinite(labels)]
+
+            # I place it as the first column
+            df.insert(0, hue, labels)
+
+        if lmap is not None:
+            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
+
+        return df, hue
+
     def circ_hist(self, cbins=utils.DEFAULT_CBIN, **kwargs):
         circ = utils.jcirc(self._galaxy, *cbins)
         ax = sns.histplot(circ.eps, **kwargs)
@@ -335,32 +398,41 @@ class GalaxyPlotter:
     # self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
 
     def circ_pairplot(
-        self, cbins=utils.DEFAULT_CBIN, labels=None, lmap=None, **kwargs
+        self,
+        cbins=utils.DEFAULT_CBIN,
+        attributes=None,
+        labels=None,
+        lmap=None,
+        **kwargs,
     ):
-        circ = utils.jcirc(self._galaxy, *cbins)
+        # circ = utils.jcirc(self._galaxy, *cbins)
 
-        mask = (
-            np.isfinite(circ.normalized_star_energy)
-            & np.isfinite(circ.eps)
-            & np.isfinite(circ.eps_r)
+        # mask = (
+        #     np.isfinite(circ.normalized_star_energy)
+        #     & np.isfinite(circ.eps)
+        #     & np.isfinite(circ.eps_r)
+        # )
+
+        # columns = {
+        #     "Normalized star energy": circ.normalized_star_energy[mask],
+        #     r"$\epsilon$": circ.eps[mask],
+        #     r"$\epsilon_r$": circ.eps_r[mask],
+        # }
+
+        # hue = None
+
+        # if labels is not None:
+        #     hue = "Components"
+        #     columns[hue] = labels[np.isfinite(labels)]
+
+        # df = pd.DataFrame(columns)
+
+        # if labels is not None and lmap is not None:
+        #     df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
+
+        df, hue = self.get_circ_df_and_hue(
+            cbins=cbins, attributes=attributes, labels=labels, lmap=lmap
         )
-
-        columns = {
-            "Normalized star energy": circ.normalized_star_energy[mask],
-            r"$\epsilon$": circ.eps[mask],
-            r"$\epsilon_r$": circ.eps_r[mask],
-        }
-
-        hue = None
-
-        if labels is not None:
-            hue = "Components"
-            columns[hue] = labels[np.isfinite(labels)]
-
-        df = pd.DataFrame(columns)
-
-        if labels is not None and lmap is not None:
-            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
