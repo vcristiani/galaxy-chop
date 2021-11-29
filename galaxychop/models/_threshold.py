@@ -13,6 +13,7 @@
 import numpy as np
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ..utils import doc_inherit
 
 
 # =============================================================================
@@ -89,9 +90,11 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
                 f"(-1,1). Got eps_cut {eps_cut}"
             )
 
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
         return ["eps"]
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         eps_cut = self.eps_cut
 

@@ -18,6 +18,7 @@ import numpy as np
 from sklearn import mixture
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ..utils import doc_inherit
 
 
 # =============================================================================
@@ -40,6 +41,7 @@ class DynamicStarsGaussianDecomposerABC(
     verbose = hparam(default=0)
     verbose_interval = hparam(default=10)
 
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
         return ["normalized_star_energy", "eps", "eps_r"]
 
@@ -129,6 +131,7 @@ class GaussianMixture(DynamicStarsGaussianDecomposerABC):
 
     n_components = hparam(default=2)
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
@@ -253,6 +256,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         gmm = self._run_gmm(X, n_components, random_state)
         return gmm.bic(X) / len(X)
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
 
         # for simplicity we conver the default_rng to a scikit-learn

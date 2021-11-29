@@ -13,6 +13,7 @@
 import numpy as np
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ..utils import doc_inherit
 
 
 # =============================================================================
@@ -120,9 +121,11 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
             dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
         return dsk
 
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
         return ["eps"]
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         """Compute Abadi model clustering.
 
@@ -328,9 +331,11 @@ class JEHistogram(JHistogram):
                 # to the bin corr of the sph.
                 sph[corot_bin] = aux0
 
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
         return ["normalized_star_energy", "eps"]
 
+    @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         """Compute Cristiani clustering.
 

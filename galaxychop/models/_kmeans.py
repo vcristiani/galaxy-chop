@@ -29,19 +29,25 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     Implementation of Scikit-learn [6]_ K-means as a method for dynamically
     decomposing galaxies.
 
-    Parameters
-    ----------
-    columns: default=None
-        Physical quantities of stellars particles
-        used to decompose galaxies.
-
-    **kwargs: key, value mappings
-        Other optional keyword arguments are passed through to
-        :py:class:`GalaxyDecomposeMixin`, :py:class:`ClusterMixin` and
-        :py:class:`KMeans` classes.
-
     Attributes
     ----------
+    n_components : default=2
+
+    init : default="k-means++"
+
+    n_init : default=10
+
+    max_iter : default=300
+
+    tol : default=0.0001
+
+    verbose : default=0
+
+    random_state : default=None, converter=np.random.default_rng
+
+    algorithm : default="auto"
+
+
     labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
         Index of the cluster each stellar particles belongs to.
 
@@ -90,6 +96,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     random_state = hparam(default=None, converter=np.random.default_rng)
     algorithm = hparam(default="auto")
 
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
         return ["normalized_star_energy", "eps", "eps_r"]
 
