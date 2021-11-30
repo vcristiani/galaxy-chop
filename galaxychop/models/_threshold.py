@@ -95,10 +95,22 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
+        """
+        Notes
+        -----
+        In this model the parameter space is given by
+            eps: circularity parameter (J_z/J_circ)
+        """
         return ["eps"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
+        """
+        Notes
+        -----
+        The attributes used by the model are described in detail in the class
+        documentation.
+        """
         eps_cut = self.eps_cut
 
         esf_idx = np.where(X <= eps_cut)[0]

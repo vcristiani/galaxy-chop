@@ -139,7 +139,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def split(self, X, y, attributes):
-        """Compute Chop clustering.
+        """Compute clustering.
 
         Parameters
         ----------
