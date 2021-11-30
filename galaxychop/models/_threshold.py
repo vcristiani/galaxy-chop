@@ -22,37 +22,35 @@ from ..utils import doc_inherit
 
 
 class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """GalaxyChop Chop class.
+    """GalaxyChop JThreshold class.
 
-    Implementation of galaxy dynamical decomposition model using
-    only the circularity parameter. Tissera et al.(2012) [2]_,
+    Implementation of galaxy dynamical decomposition model using only the
+    circularity parameter. Tissera et al.(2012) [2]_,
     Marinacci et al.(2014) [3]_, Vogelsberger et al.(2014) [4]_,
     Park et al.(2019) [5]_ .
 
     Parameters
     ----------
     eps_cut : float, default=0.6
-        Cut-off value in the circularity parameter. Particles with
-        eps>eps_cut are assigned to the disk and particles with eps<=eps_cut
-        to the spheroid.
+        Cut-off value in the circularity parameter. Stellar particles with
+        eps>eps_cut are assigned to the disk and stellar particles with
+        eps<=eps_cut to the spheroid.
 
-    Attributes
-    ----------
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-        Index of the cluster each stellar particles belongs to.
+    Notes
+    -----
+    Index of the cluster each stellar particles belongs to:
         Index=0: correspond to galaxy spheroid.
         Index=1: correspond to galaxy disk.
 
     Examples
     --------
-    Example of implementation of Chop Model.
+    Example of implementation.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> gcchop = gchop.JThreshold(eps_cut=0.6)
-    >>> gcchop.decompose(galaxy)
-    >>> gcchop.labels_
-    array([-1, -1,  0, ...,  0,  0,  1])
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> chopper = gchop.JThreshold()
+    >>> chopper.decompose(galaxy)
 
     References
     ----------
@@ -83,6 +81,11 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     @eps_cut.validator
     def check_eps_cut(self, attribute, value):
+        """Eps_cut value validator.
+
+        This method validates that the value of eps_cut is in the interval
+        (-1,1).
+        """
         eps_cut = self.eps_cut
         if eps_cut > 1.0 or eps_cut < -1.0:
             raise ValueError(
