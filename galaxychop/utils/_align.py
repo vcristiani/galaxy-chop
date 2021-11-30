@@ -38,17 +38,16 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
 
     Calculates the rotation matrix that aligns the TOTAL
     angular momentum of the particles with the z-axis.
-    The positions, velocities and masses of the particles are used.
     Optionally, only particles within a cutting radius `(r_cut)` can be used.
 
     Parameters
     ----------
     m : `np.ndarray`
         Masses of particles. Shape(n,1)
-    pos : `np.ndarray`
-        Positions of particles. Shape(n,3)
-    vel : `np.ndarray`
-        Velocities of particles. Shape(n,3)
+    x, y, z : `np.ndarray`
+        Positions x, y, z of particles. Shape(n,1)
+    Jx, Jy, Jz : `np.ndarray`
+        Components of angular momentum of particles. Shape(n,1)
     r_cut : `float`, optional
         The default is ``None``; if provided, it must be
         positive and the rotation matrix `A` is calculated

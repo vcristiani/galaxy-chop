@@ -46,6 +46,13 @@ class Components:
     )
 
     def __attrs_post_init__(self):
+        """
+        Length validator.
+
+        This method determines that the length of the labels and ptypes
+        different particle are the same.
+
+        """
         lens = {len(self.labels), len(self.ptypes)}
         if self.probabilities is not None:
             lens.add(len(self.probabilities))
@@ -53,6 +60,7 @@ class Components:
             raise ValueError("All length must be the same")
 
     def __len__(self):
+        """len(labels) <=> labels.__len__()."""
         return len(self.labels)
 
     def __repr__(self):
