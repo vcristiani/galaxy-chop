@@ -11,7 +11,12 @@
 # IMPORTS
 # =============================================================================
 
-from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from ._base import (
+    Components,
+    DynamicStarsDecomposerMixin,
+    GalaxyDecomposerABC,
+    hparam,
+)
 from ._gaussian_mixture import (
     AutoGaussianMixture,
     DynamicStarsGaussianDecomposerABC,
@@ -27,6 +32,7 @@ from ._threshold import JThreshold
 # =============================================================================
 
 __all__ = [
+    "Components",
     "GalaxyDecomposerABC",
     "DynamicStarsDecomposerMixin",
     "JThreshold",

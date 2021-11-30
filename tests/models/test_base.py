@@ -6,6 +6,49 @@ import numpy as np
 import pytest
 
 
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+
+
+@pytest.mark.parametrize("probs", [True, False])
+def test_Components(probs):
+    random = np.random.default_rng(42)
+
+    labels = random.integers(0, 3, 100)
+    ptypes = np.ones(100)
+    probabilities = random.normal(size=100) if probs else None
+
+    components = models.Components(
+        labels=labels, ptypes=ptypes, probabilities=probabilities
+    )
+
+    assert len(components) == 100
+    assert (
+        repr(components)
+        == f"Components(100, labels=[0 1 2], probabilities={probs})"
+    )
+
+
+@pytest.mark.parametrize("probs", [True, False])
+def test_Components_bad_len(probs):
+    random = np.random.default_rng(42)
+
+    labels = random.integers(0, 3, 100)
+    ptypes = np.ones(99)
+    probabilities = random.normal(size=98) if probs else None
+
+    with pytest.raises(ValueError):
+        models.Components(
+            labels=labels, ptypes=ptypes, probabilities=probabilities
+        )
+
+
+# =============================================================================
+# DECOMPOSER ABC
+# =============================================================================
+
+
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemethed():
     class Decomposer(models.GalaxyDecomposerABC):
