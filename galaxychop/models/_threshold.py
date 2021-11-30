@@ -22,7 +22,7 @@ from ..utils import doc_inherit
 
 
 class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """GalaxyChop JThreshold class.
+    """JThreshold class.
 
     Implementation of galaxy dynamical decomposition model using only the
     circularity parameter. Tissera et al.(2012) [2]_,

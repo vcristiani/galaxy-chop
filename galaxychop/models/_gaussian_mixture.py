@@ -27,6 +27,49 @@ from ..utils import doc_inherit
 class DynamicStarsGaussianDecomposerABC(
     DynamicStarsDecomposerMixin, GalaxyDecomposerABC
 ):
+    """Dynamic Stars Gaussian Decomposer Class.
+
+    Parameters
+    ----------
+    covariance_type : {‘full’, ‘tied’, ‘diag’, ‘spherical’}, default="full"
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    tol : float, default=0.001
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    reg_covar : float, default=1e-06
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    max_iter : float, default=100
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    n_init : int, default=10
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    init_params : {‘kmeans’, ‘random’}, default="kmeans"
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    weights_init : array-like of shape (n_components, ),  default=None
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    means_init : array-like of shape (n_components, n_features), default=None
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    precisions_init : array-like, default=None
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    random_state : int, default=None
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    warm_start : bool, default=False
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    verbose : int, default=0
+        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        library.
+    verbose_interval : int, default=10
+    """
+
     covariance_type = hparam(default="full")
     tol = hparam(default=0.001)
     reg_covar = hparam(default=1e-06)
@@ -50,69 +93,34 @@ class DynamicStarsGaussianDecomposerABC(
 # GMM
 # =============================================================================
 class GaussianMixture(DynamicStarsGaussianDecomposerABC):
-    """GalaxyChop Gaussian Mixture Model class.
+    """GaussianMixture class.
 
     Implementation of the method for dynamically decomposing galaxies
     described by Obreja et al.(2018) [7]_ .
 
     Parameters
     ----------
-    columns: default=None
-        Physical quantities of stellars particles
-        used to decompose galaxies.
-
+    n_components: int, default=2
+        The number of mixture components. Parameter of
+        :py:class:`GaussianMixture` class into `scikit-learn` library.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GalaxyDecomposeMixin` and :py:class:`GaussianMixture`
-        classes.
-
-    Attributes
-    ----------
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-        Index of the cluster each stellar particles belongs to.
-    weights_ :
-        Original attribute create by the `GaussianMixture`
-        class into `scikit-learn` library.
-    means_ :
-        Original attribute create by the `GaussianMixture` class into
-        `scikit-learn` library.
-    covariances_ :
-        Original attribute create by the `GaussianMixture`
-        class into `scikit-learn` library.
-    precisions_ :
-        Original attribute create by the `GaussianMixture` class into
-        `scikit-learn` library.
-    precisions_cholesky_ :
-        Original attribute create by the `GaussianMixture`
-        class into `scikit-learn` library.
-    converged_ :
-        Original attribute create by the `GaussianMixture` class into
-        `scikit-learn` library.
-    n_iter_ :
-        Original attribute create by the `GaussianMixture` class into
-        `scikit-learn` library.
-    lower_bound_ :
-        Original attribute create by the `GaussianMixture`
-        class into `scikit-learn` library.
+        :py:class:`GaussianMixture` class into `scikit-learn` library.
 
     Notes
     -----
-    n_components : int, default=1
-        The number of mixture components. Parameter of
-        :py:class:`GaussianMixture` class.
     More information for `GaussianMixture` class:
         https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
 
     Examples
     --------
-    Example of implementation of CGGmm Model.
+    Example of implementation of Gaussian Mixture Model.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> chopper = gchop.GaussianMixture(n_components=3)
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> chopper = gchop.GaussianMixture()
     >>> chopper.decompose(galaxy)
-    >>> chopper.labels_
-    array([-1, -1,  2, ...,  1,  2,  1])
 
     References
     ----------
@@ -122,11 +130,6 @@ class GaussianMixture(DynamicStarsGaussianDecomposerABC):
         pp. 4915-4930, 2018. doi:10.1093/mnras/sty1022.
         `<https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract>`_
         Obtain the columns of the quantities to be used.
-
-    Returns
-    -------
-    columns: list
-        Only the needed columns used to decompose galaxies.
     """
 
     n_components = hparam(default=2)
@@ -164,60 +167,39 @@ class GaussianMixture(DynamicStarsGaussianDecomposerABC):
 
 
 class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
-    """GalaxyChop auto-gmm class.
+    """AutoGaussianMixture class.
 
-    Implementation of the method for dynamically decomposing galaxies
+    Implementation of the auto-gmm method for dynamically decomposing galaxies
     described by Du et al.(2019) [8]_ .
 
     Parameters
     ----------
     c_bic: float, default=0.1
-        Cut value of the criteria for the automatic choice of
-        the number of gaussians.
+        Cut value of the criteria for the automatic choice of the number of
+        gaussians.
+    n_jobs : int, default=None
+    **kwargs: key, value mappings
+        Other optional keyword arguments are passed through to
+        :py:class:`GaussianMixture` class into `scikit-learn` library.
 
-    Attributes
-    ----------
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
+    Notes
+    -----
+    Index of the cluster each stellar particles belongs to:
         Index of the cluster each stellar particles belongs to.
         Index=0: correspond to galaxy stellar halo.
         Index=1: correspond to galaxy bulge.
         Index=2: correspond to galaxy cold disk.
         Index=3: correspond to galaxy warm disk.
 
-    probability: np.ndarray(n,4), n:number of particles with E<=0 and -1<eps<1.
-        Probability of each stellar particle to belong to each
-        component of the galaxy.
-
-    probability_of_gaussianmixturey: `np.ndarray(n_particles, n_gaussians)`.
-        Probability of each stellar particle (with E<=0 and -1<eps<1) to belong
-        to each gaussian.
-
-    bic_med_: np.ndarray(number of component to try,1).
-        BIC parameter(len(X)).
-    gausians_: tuple(n_gausians).
-        Number of gaussians used to choise the number of clusters.
-    bic_min_: float.
-        Mean value of BIC(n_c>10).
-    delta_bic_: np.ndarray(number of component to try,1)
-        `bic_med_` - `bic_min_`.
-    mask_:  np.ndarray(number of gaussians).
-        Index of components to try that fulfil with c_BIC criteria.
-    n_components_: int.
-        Number of gaussians automatically selected.
-    gcgmm_: object.
-        Original `gcgmm_` object create by the `GaussianMixture` class
-        with number of cluster automatically selected.
-
     Examples
     --------
-    Example of implementation of CGAutogmm Model.
+    Example of implementation of auto-gmm model.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> chopper = gchop.AutoGaussianMixture(c_bic=0.1)
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> chopper = gchop.AutoGaussianMixture()
     >>> chopper.decompose(galaxy)
-    >>> chopper.labels_
-    array([-1, -1,  1, ...  0, 0, 3])
 
     References
     ----------

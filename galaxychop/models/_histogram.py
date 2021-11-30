@@ -22,7 +22,7 @@ from ..utils import doc_inherit
 
 
 class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """GalaxyChop JHistogram class.
+    """JHistogram class.
 
     Implementation of galaxy dynamical decomposition model described in
     Abadi et al. (2003) [1]_.
@@ -178,7 +178,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # CRISTIANI
 # =============================================================================
 class JEHistogram(JHistogram):
-    """GalaxyChop JEHistogram class.
+    """JEHistogram class.
 
     Implementation of a modification of Abadi galaxy dynamical decomposition
     model using the circularity parameter and specific energy distribution.
