@@ -154,7 +154,12 @@ def _jcirc(galaxy, bin0, bin1):
     )
 
 
-def jcirc(galaxy, bin0=0.05, bin1=0.005, runtime_warnings="ignore"):
+def jcirc(
+    galaxy,
+    bin0=DEFAULT_CBIN[0],
+    bin1=DEFAULT_CBIN[1],
+    runtime_warnings="ignore",
+):
     """
     Process energy and angular momentum.
 

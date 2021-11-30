@@ -46,11 +46,11 @@ class Components:
     )
 
     def __attrs_post_init__(self):
-        """
-        Length validator.
+        """Length validator.
 
-        This method determines that the length of the labels and ptypes
-        different particle are the same.
+        This method validates that the lengths of labels, ptypes are equal.
+        On the other hand, if probabilities is not None, its length must
+        be the same as ptypes and labels.
 
         """
         lens = {len(self.labels), len(self.ptypes)}
@@ -60,10 +60,12 @@ class Components:
             raise ValueError("All length must be the same")
 
     def __len__(self):
-        """len(labels) <=> labels.__len__()."""
+        """x.__len__() <==> len(x)."""
+
         return len(self.labels)
 
     def __repr__(self):
+        """x.__repr__() <==> repr(x)."""
         length = len(self)
         labels = np.unique(self.labels)
         probs = True if self.probabilities is not None else False
@@ -76,6 +78,22 @@ class Components:
 
 
 def hparam(default, **kwargs):
+    """Crea un hiper parametro para los descomponedores.
+
+    Por decision de diseño se requiere que hiper-parametro tenga un valor
+    sensible por defecto.
+
+    Parameters
+    ----------
+
+    Return
+    ------
+
+    Notes
+    -----
+    Esta function es un thin-wrapper sobre la funcion de attrs ``attr.ib()``
+
+    """
     metadata = kwargs.pop("metadata", {})
     metadata["__gchop_model_hparam__"] = True
     return attr.ib(default=default, metadata=metadata, kw_only=True, **kwargs)
@@ -86,6 +104,14 @@ def hparam(default, **kwargs):
 # =============================================================================
 @attr.s(frozen=True, repr=False)
 class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
+    """Clase abstracta para facilitar la creacion de descomponedores.
+
+    Esta clase solicita la redefinicion de tres métodos: este, aquiel y el otro
+
+    Parameters
+
+
+    """
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
 
@@ -103,6 +129,21 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
+        """Iniciacilizacion de las subclases.
+
+        Garantiza que toda clase herededada sea decorada por ``attr.s()``
+        y le asigna como configuración de la clase los parametros definidos en
+        la variable de clase `__gchop_model_cls_config__`.
+
+        Es otras palabras es ligeramente equivalente a:
+
+        .. code-block:: python
+
+            @attr.s(**GalaxyDecomposerABC.__gchop_model_cls_config__)
+            class Decomposer(GalaxyDecomposerABC):
+                pass
+
+        """
         model_config = getattr(cls, "__gchop_model_cls_config__")
         attr.s(maybe_cls=cls, **model_config)
 
@@ -413,7 +454,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
 
 class DynamicStarsDecomposerMixin:
-    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    @doc_inherit(GalaxyDecomposerABC.get_rows_mask)
     def get_rows_mask(self, X, y, attributes):
         # all the rows where every value is finite
         only_stars = np.equal(y, data.ParticleSetType.STARS.value)

@@ -18,7 +18,7 @@ Implementation of a few galaxy dynamic decomposition methods.
 # META
 # =============================================================================
 
-__version__ = "0.1.0"
+__version__ = "0.2"
 
 
 # =============================================================================
@@ -28,4 +28,4 @@ __version__ = "0.1.0"
 from .data import *  # noqa
 from .io import *  # noqa
 from .utils import *  # noqa
-from . import models, datasets  # noqa
+from . import models  # noqa

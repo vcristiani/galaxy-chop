@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from . import utils
+from . import models, utils
 
 # =============================================================================
 # ACCESSOR
@@ -93,6 +93,10 @@ class GalaxyPlotter:
         hue : keys of ``ParticleSet class`` parameters.
             Labels of all galaxy particles.
         """
+        # if we use the components as laberls we need to extract the labels
+        if isinstance(labels, models.Components):
+            labels = labels.labels
+
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
         hue = None  # by default labels is None
@@ -324,7 +328,6 @@ class GalaxyPlotter:
         return ax
 
     # CICULARITY ==============================================================
-    # 94%   348-349, 362-366, 369
 
     def get_circ_df_and_hue(self, cbins, attributes, labels, lmap):
         """
@@ -351,6 +354,11 @@ class GalaxyPlotter:
         hue : keys of ``JCirc`` tuple.
             Labels of stellar particles.
         """
+
+        # if we use the components as laberls we need to extract the labels
+        if isinstance(labels, models.Components):
+            labels = labels.labels
+
         # first we extract the circularity parameters from the galaxy
         # as a dictionary
         circ = utils.jcirc(self._galaxy, *cbins)._asdict()
@@ -387,6 +395,7 @@ class GalaxyPlotter:
         if hue is None and labels is not None:
             # if the labels are passed to me as an array,
             # I only delete the nans and inf.
+            labels = np.asarray(labels)
             labels = labels[np.isfinite(labels)]
             hue = "Labels"
 
