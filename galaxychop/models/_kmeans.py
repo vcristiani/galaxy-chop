@@ -34,32 +34,25 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     n_components : int, default=2
         The number of clusters to form as well as the number of centroids to
         generate.
-
     init : {‘k-means++’, ‘random’}, callable or array-like of shape
     (n_clusters, n_features), default="k-means++"
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     n_init : int, default=10
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     max_iter : int, default=300
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     tol : float, default=0.0001
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     verbose : int, default=0
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     random_state : int, default=None
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-
     algorithm : {“auto”, “full”, “elkan”}, default="auto"
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.

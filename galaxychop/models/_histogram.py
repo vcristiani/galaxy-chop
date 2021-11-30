@@ -22,24 +22,23 @@ from ..utils import doc_inherit
 
 
 class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """GalaxyChop Abadi class.
+    """GalaxyChop JHistogram class.
 
     Implementation of galaxy dynamical decomposition model described in
     Abadi et al. (2003) [1]_.
 
     Parameters
     ----------
-    n_bin: default=100
+    n_bin: int, default=100
         Number of bins needed to build the circularity parameter histogram.
     digits: int, default=2
         Number of decimals to which an array is rounded.
     seed: int, default=None
         Seed to initialize the random generator.
 
-    Attributes
-    ----------
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-        Index of the cluster each stellar particles belongs to.
+    Notes
+    -----
+    Index of the cluster each stellar particles belongs to:
         Index=0: correspond to galaxy spheroid.
         Index=1: correspond to galaxy disk.
 
@@ -48,11 +47,10 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     Example of implementation of Abadi Model.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> chopper = gchop.JHistogram(n_bin=100, digits=2, seed=None)
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> chopper = gchop.JHistogram()
     >>> chopper.decompose(galaxy)
-    >>> chopper.labels_
-    array([-1, -1,  0, ...,  0,  0,  1])
 
     References
     ----------
@@ -128,23 +126,6 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
         """Compute Abadi model clustering.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training instances to cluster.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        sample_weight : array-like of shape (n_samples,), default=None
-            The weights for each observation in X. If None, all observations
-            are assigned equal weight.
-
-        Returns
-        -------
-        self
-            Fitted estimator.
         """
         n_bin = self.n_bin
 
@@ -197,38 +178,35 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # CRISTIANI
 # =============================================================================
 class JEHistogram(JHistogram):
-    """GalaxyChop Cristiani class.
+    """GalaxyChop JEHistogram class.
 
-    Implementation of a modification of Abadi galaxy dynamical
-    decomposition model using the circularity parameter and
-    specific energy distribution.
+    Implementation of a modification of Abadi galaxy dynamical decomposition
+    model using the circularity parameter and specific energy distribution.
 
     Parameters
     ----------
-    n_bin_E: default=20
+    n_bin_E: int, default=20
         Number of bins needed to build the normalised specific
         energy histogram.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
         :py:class:`JHistogram` classes.
 
-    Attributes
-    ----------
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-        Index of the cluster each stellar particles belongs to.
+    Notes
+    -----
+    Index of the cluster each stellar particles belongs to:
         Index=0: correspond to galaxy spheroid.
         Index=1: correspond to galaxy disk.
 
     Examples
     --------
-    Example of implementation of Cristini Model.
+    Example of the implementation of the modified Abadi model.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
     >>> chopper = gchop.JEHistogram()
     >>> chopper.decompose(galaxy)
-    >>> gcristiani.labels_
-    array([-1, -1,  0, ...,  0,  0,  1])
     """
 
     n_bin_E = hparam(default=20)
@@ -337,20 +315,7 @@ class JEHistogram(JHistogram):
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
-        """Compute Cristiani clustering.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Training instances to cluster.
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        self
-            Fitted estimator.
+        """Compute clustering with the modified Abadi model.
         """
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E
