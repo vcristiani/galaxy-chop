@@ -67,8 +67,8 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
-    gal = galaxy(seed=42)
 
+    gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
@@ -91,8 +91,8 @@ def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
 @pytest.mark.plot
 @pytest.mark.parametrize("pkind", plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS)
 def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
-    gal = galaxy(seed=42)
 
+    gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     with pytest.raises(ValueError):
@@ -101,8 +101,8 @@ def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
-    gal = galaxy(seed=42)
 
+    gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     with pytest.raises(ValueError):
@@ -119,7 +119,6 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
 def test_GalaxyPlotter_call(galaxy, plot_kind):
 
     gal = galaxy(seed=42)
-
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     method_name = f"galaxychop.plot.GalaxyPlotter.{plot_kind}"
@@ -131,18 +130,18 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 
 # =============================================================================
-# pairplot
+# REAL SPACE PLOT
 # =============================================================================
 
 
 @pytest.mark.slow
 @pytest.mark.plot
-@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+@pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot(galaxy, format):
 
     gal = galaxy(seed=42)
-
     plotter = plot.GalaxyPlotter(galaxy=gal)
+
     test_grid = plotter.pairplot(attributes=["x", "y"])
 
     # EXPECTED
@@ -158,11 +157,10 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
 
 @pytest.mark.slow
 @pytest.mark.plot
-@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+@pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
     gal = galaxy(seed=42)
-
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
@@ -187,11 +185,12 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
 @pytest.mark.slow
 @pytest.mark.plot
-@pytest.mark.parametrize("format", ["png", "pdf", "svg"])
+@pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_dis(galaxy, format):
-    gal = galaxy(seed=42)
 
+    gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
+
     test_grid = plotter.dis("x", "y", labels="ptype", ptypes=["gas"])
 
     # EXPECTED
@@ -201,20 +200,16 @@ def test_GalaxyPlotter_dis(galaxy, format):
     assert_same_image(test_GalaxyPlotter_dis, format, test_grid, expected_grid)
 
 
-# =============================================================================
-#
-# =============================================================================
-
-
 @pytest.mark.slow
 @pytest.mark.plot
-@check_figures_equal()
+@check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 
     gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    gal.plot.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
     # expected
     exp_ax = fig_ref.subplots()
@@ -225,13 +220,14 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 
 @pytest.mark.slow
 @pytest.mark.plot
-@check_figures_equal()
+@check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 
     gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    gal.plot.hist("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.hist("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
     # expected
     exp_ax = fig_ref.subplots()
@@ -242,13 +238,14 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 
 @pytest.mark.slow
 @pytest.mark.plot
-@check_figures_equal()
+@check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
     gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    gal.plot.kde("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.kde("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
     # expected
     exp_ax = fig_ref.subplots()
@@ -258,44 +255,8 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
 
 # =============================================================================
-# CIRCULARITY
+# CIRCULARITY PLOTS
 # =============================================================================
-
-
-@pytest.mark.slow
-@pytest.mark.plot
-@check_figures_equal()
-def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
-
-    gal = read_hdf5_galaxy("gal394242.h5")
-
-    test_ax = fig_test.subplots()
-    gal.plot.circ_hist(ax=test_ax)
-
-    # expected
-    exp_ax = fig_ref.subplots()
-
-    circ = utils.jcirc(gal)
-    sns.histplot(circ.eps, ax=exp_ax)
-    exp_ax.set_xlabel(r"$\epsilon$")
-
-
-@pytest.mark.slow
-@pytest.mark.plot
-@check_figures_equal()
-def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
-
-    gal = read_hdf5_galaxy("gal394242.h5")
-
-    test_ax = fig_test.subplots()
-    gal.plot.circ_kde(ax=test_ax)
-
-    # expected
-    exp_ax = fig_ref.subplots()
-
-    circ = utils.jcirc(gal)
-    sns.kdeplot(circ.eps, ax=exp_ax)
-    exp_ax.set_xlabel(r"$\epsilon$")
 
 
 @pytest.mark.slow
@@ -333,49 +294,106 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
     )
 
 
-@pytest.mark.xfail
 @pytest.mark.slow
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_circularity_component_labels(read_hdf5_galaxy, format):
+def test_GalaxyPlotter_circ_dis(read_hdf5_galaxy, format):
 
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    circ = utils.jcirc(gal)
-    # decomposer = models.KMeans(n_clusters=2)
-    # labels = decomposer.decompose(gal)
-    # labels = labels.labels[labels.ptypes == 'stars']
+    test_grid = plotter.circ_dis("eps")
 
     # expected
+    circ = utils.jcirc(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
         & np.isfinite(circ.eps_r)
     )
 
-    labels1 = np.full((len(gal) - len(circ.eps)), np.nan)
-    labels2 = np.ones(len(circ.eps_r[mask]))
-    labels = np.hstack((labels1, labels2))
-
-    # import ipdb; ipdb.set_trace()
-
-    test_grid = plotter.circularity_components(labels=labels)
-
-    df = pd.DataFrame(
-        {
-            "Normalized star energy": circ.normalized_star_energy[mask],
-            r"$\epsilon$": circ.eps[mask],
-            r"$\epsilon_r$": circ.eps_r[mask],
-            # "Hue": labels,
-            "Hue": labels2,
-        }
-    )
-    expected_grid = sns.pairplot(df, hue="Hue", kind="hist", diag_kind="kde")
+    df = pd.DataFrame({"eps": circ.eps[mask]})
+    expected_grid = sns.displot(x="eps", data=df)
 
     assert_same_image(
-        test_GalaxyPlotter_circularity_component_labels,
-        format,
-        test_grid,
-        expected_grid,
+        test_GalaxyPlotter_circ_dis, format, test_grid, expected_grid
     )
+
+
+@pytest.mark.slow
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.circ_scatter("eps", "eps_r", ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    df = pd.DataFrame({"eps": circ.eps[mask], "eps_r": circ.eps_r[mask]})
+    sns.scatterplot(x="eps", y="eps_r", data=df, ax=exp_ax)
+    exp_ax.set_xlabel("eps")
+    exp_ax.set_ylabel("eps_r")
+
+
+@pytest.mark.slow
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.circ_hist("eps", ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    df = pd.DataFrame({"eps": circ.eps[mask]})
+    sns.histplot(x="eps", data=df, ax=exp_ax)
+    exp_ax.set_xlabel("eps")
+
+
+@pytest.mark.slow
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.circ_kde("eps", ax=test_ax)
+
+    # expected
+    exp_ax = fig_ref.subplots()
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    df = pd.DataFrame({"eps": circ.eps[mask]})
+    sns.kdeplot(x="eps", data=df, ax=exp_ax)
+    exp_ax.set_xlabel("eps")

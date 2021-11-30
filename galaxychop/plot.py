@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from . import models, utils
+from . import utils
 
 # =============================================================================
 # ACCESSOR
@@ -383,20 +383,6 @@ class GalaxyPlotter:
 
         return df, hue
 
-    def circ_hist(self, cbins=utils.DEFAULT_CBIN, **kwargs):
-        circ = utils.jcirc(self._galaxy, *cbins)
-        ax = sns.histplot(circ.eps, **kwargs)
-        ax.set_xlabel(r"$\epsilon$")
-        return ax
-
-    def circ_kde(self, cbins=utils.DEFAULT_CBIN, **kwargs):
-        circ = utils.jcirc(self._galaxy, *cbins)
-        ax = sns.kdeplot(circ.eps, **kwargs)
-        ax.set_xlabel(r"$\epsilon$")
-        return ax
-
-
-
     def circ_pairplot(
         self,
         cbins=utils.DEFAULT_CBIN,
@@ -414,4 +400,80 @@ class GalaxyPlotter:
         kwargs.setdefault("diag_kind", "kde")
 
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
+        return ax
+
+    def circ_dis(
+        self,
+        x,
+        y=None,
+        cbins=utils.DEFAULT_CBIN,
+        labels=None,
+        lmap=None,
+        **kwargs,
+    ):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self.get_circ_df_and_hue(
+            cbins=cbins,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
+        ax = sns.displot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    def circ_scatter(
+        self,
+        x,
+        y,
+        cbins=utils.DEFAULT_CBIN,
+        labels=None,
+        lmap=None,
+        **kwargs,
+    ):
+        attributes = [x, y]
+        df, hue = self.get_circ_df_and_hue(
+            cbins=cbins,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
+        ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    def circ_hist(
+        self,
+        x,
+        y=None,
+        cbins=utils.DEFAULT_CBIN,
+        labels=None,
+        lmap=None,
+        **kwargs,
+    ):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self.get_circ_df_and_hue(
+            cbins=cbins,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
+        ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        return ax
+
+    def circ_kde(
+        self,
+        x,
+        y=None,
+        cbins=utils.DEFAULT_CBIN,
+        labels=None,
+        lmap=None,
+        **kwargs,
+    ):
+        attributes = [x] if y is None else [x, y]
+        df, hue = self.get_circ_df_and_hue(
+            cbins=cbins,
+            attributes=attributes,
+            labels=labels,
+            lmap=lmap,
+        )
+        ax = sns.kdeplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax

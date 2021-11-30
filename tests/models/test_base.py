@@ -11,6 +11,7 @@ import pytest
 # =============================================================================
 
 
+@pytest.mark.model
 @pytest.mark.parametrize("probs", [True, False])
 def test_Components(probs):
     random = np.random.default_rng(42)
@@ -30,6 +31,7 @@ def test_Components(probs):
     )
 
 
+@pytest.mark.model
 @pytest.mark.parametrize("probs", [True, False])
 def test_Components_bad_len(probs):
     random = np.random.default_rng(42)
