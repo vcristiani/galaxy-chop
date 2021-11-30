@@ -354,7 +354,6 @@ class GalaxyPlotter:
         hue : keys of ``JCirc`` tuple.
             Labels of stellar particles.
         """
-
         # if we use the components as laberls we need to extract the labels
         if isinstance(labels, models.Components):
             labels = labels.labels

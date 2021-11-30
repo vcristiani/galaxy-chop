@@ -39,6 +39,8 @@ _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
 @attr.s(frozen=True, slots=True, repr=False)
 class Components:
+    """Class of components resulting from dynamic decomposition."""
+
     labels = attr.ib(validator=vldt.instance_of(np.ndarray))
     ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
     probabilities = attr.ib(
@@ -61,7 +63,6 @@ class Components:
 
     def __len__(self):
         """x.__len__() <==> len(x)."""
-
         return len(self.labels)
 
     def __repr__(self):
@@ -78,20 +79,18 @@ class Components:
 
 
 def hparam(default, **kwargs):
-    """Crea un hiper parametro para los descomponedores.
+    """Create a hyper parameter for decomposers.
 
-    Por decision de diseño se requiere que hiper-parametro tenga un valor
-    sensible por defecto.
+    By design decision, hyper-parameter is required to have a sensitive default
+    value. sensitive default value.
 
     Parameters
     ----------
-
     Return
     ------
-
     Notes
     -----
-    Esta function es un thin-wrapper sobre la funcion de attrs ``attr.ib()``
+    This function is a thin-wrapper over the attrs function ``attr.ib()``.
 
     """
     metadata = kwargs.pop("metadata", {})
@@ -104,13 +103,13 @@ def hparam(default, **kwargs):
 # =============================================================================
 @attr.s(frozen=True, repr=False)
 class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
-    """Clase abstracta para facilitar la creacion de descomponedores.
+    """Abstract class to facilitate the creation of decomposers.
 
-    Esta clase solicita la redefinicion de tres métodos: este, aquiel y el otro
-
+    This class requests the redefinition of three methods: get_attributes,
+    get_rows_mask and split.
+    
     Parameters
-
-
+    ----------
     """
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
@@ -199,14 +198,22 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        self
-            Fitted estimator.
+        labels : ``np.ndarray(m_particles)`` 
+            1D array with the index of the clusters to which each particle
+            belongs. m_particles is the total number of particles with valid
+            values to operate the clustering.
+
+        probs : ``np.ndarray(m_particles)``
+            Probabilities of the particles to belong to each component, in case
+            the dynamic decomposition model includes them. Otherwise it adopts
+            the value None.
         """
         raise NotImplementedError()
 
     # internal ================================================================
 
     def __repr__(self):
+        """x.__repr__() <==> repr(x)."""
         clsname = type(self).__name__
 
         selfd = attr.asdict(
