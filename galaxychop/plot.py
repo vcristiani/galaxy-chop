@@ -95,7 +95,7 @@ class GalaxyPlotter:
         """
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
-        hue = None  # by default not hue is selected
+        hue = labels if labels in attributes else None
 
         # labels: column used to map plot aspects to different colors (hue).
         # if is a str and it was not in the attributes I have to take it out
@@ -114,7 +114,9 @@ class GalaxyPlotter:
             df.insert(0, hue, labels)  # I place it as the first column
 
         if lmap is not None:
-            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
+            if isinstance(lmap, dict):
+                lmap = lambda l: lmap.get(l, l)
+            df[hue] = df[hue].apply(lmap)
 
         return df, hue
 
@@ -321,6 +323,7 @@ class GalaxyPlotter:
         return ax
 
     # CICULARITY ==============================================================
+    # 94%   348-349, 362-366, 369
 
     def get_circ_df_and_hue(self, cbins, attributes, labels, lmap):
         # first we extract the circularity parameters from the galaxy
@@ -339,16 +342,12 @@ class GalaxyPlotter:
             if attributes is None
             else attributes
         )
-        hue = None  # by default no hue is selected
+        hue = labels if labels in attributes else None
 
         # labels: column used to map plot aspects to different colors (hue).
         # if is a str and it was not in the attributes but we can retrieve from
         # circ, we add as an attribute
-        if (
-            isinstance(labels, str)  # must be an string
-            and labels not in attributes  # is not in attributes
-            and labels in circ  # but is in circ
-        ):
+        if isinstance(labels, str) and labels not in attributes:
             attributes = np.concatenate((attributes, [labels]))
             hue = labels
 
@@ -359,27 +358,20 @@ class GalaxyPlotter:
         df = pd.DataFrame(columns)  # here we create the dataframe
 
         # At this point if "hue" is still "None" we can assume:
-        # 1. if labels is a str then labels is a column of space.
-        # real galaxy column
-        # 2. Or if it is an array simply paste it into the dataframe.
+        # is an array simply paste it into the dataframe.
         if hue is None and labels is not None:
-
-            if isinstance(labels, str):
-                hue = labels
-                sdf = self._galaxy.stars.to_dataframe(attributes=[labels])
-                labels = sdf[labels].values[mask]
-            else:
-                hue = "Labels"
-
-                # si me pasaron los labels como "array"
-                # solo borro los nans e inf
-                labels = labels[np.isfinite(labels)]
+            # if the labels are passed to me as an array,
+            # I only delete the nans and inf.
+            labels = labels[np.isfinite(labels)]
+            hue = "Labels"
 
             # I place it as the first column
             df.insert(0, hue, labels)
 
         if lmap is not None:
-            df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
+            if isinstance(lmap, dict):
+                lmap = lambda l: lmap.get(l, l)
+            df[hue] = df[hue].apply(lmap)
 
         return df, hue
 
