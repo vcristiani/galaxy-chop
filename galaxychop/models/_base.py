@@ -37,7 +37,7 @@ _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
 
 @attr.s(frozen=True, slots=True, repr=False)
-class _Components:
+class Components:
     labels = attr.ib(validator=vldt.instance_of(np.ndarray))
     ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
     probabilities = attr.ib(
@@ -58,7 +58,7 @@ class _Components:
         length = len(self)
         labels = np.unique(self.labels)
         probs = True if self.probabilities is not None else False
-        return f"components({length}, labels={labels}, probabilities={probs})"
+        return f"Components({length}, labels={labels}, probabilities={probs})"
 
 
 # =============================================================================
@@ -400,7 +400,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         )
 
         # return the instance
-        return _Components(
+        return Components(
             labels=final_labels,
             ptypes=final_y,
             probabilities=final_probs,

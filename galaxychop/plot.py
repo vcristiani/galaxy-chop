@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from . import utils
+from . import models, utils
 
 # =============================================================================
 # ACCESSOR
@@ -35,7 +35,7 @@ from . import utils
 class GalaxyPlotter:
     """Make plots of DecisionMatrix."""
 
-    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue",)
+    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
 
     _galaxy = attr.ib()
 
@@ -395,7 +395,7 @@ class GalaxyPlotter:
         ax.set_xlabel(r"$\epsilon$")
         return ax
 
-    # self, ptypes=None, attributes=None, labels="ptype", lmap=None, **kwargs
+
 
     def circ_pairplot(
         self,
@@ -405,30 +405,6 @@ class GalaxyPlotter:
         lmap=None,
         **kwargs,
     ):
-        # circ = utils.jcirc(self._galaxy, *cbins)
-
-        # mask = (
-        #     np.isfinite(circ.normalized_star_energy)
-        #     & np.isfinite(circ.eps)
-        #     & np.isfinite(circ.eps_r)
-        # )
-
-        # columns = {
-        #     "Normalized star energy": circ.normalized_star_energy[mask],
-        #     r"$\epsilon$": circ.eps[mask],
-        #     r"$\epsilon_r$": circ.eps_r[mask],
-        # }
-
-        # hue = None
-
-        # if labels is not None:
-        #     hue = "Components"
-        #     columns[hue] = labels[np.isfinite(labels)]
-
-        # df = pd.DataFrame(columns)
-
-        # if labels is not None and lmap is not None:
-        #     df[hue] = df[hue].apply(lambda l: lmap.get(l, l))
 
         df, hue = self.get_circ_df_and_hue(
             cbins=cbins, attributes=attributes, labels=labels, lmap=lmap
