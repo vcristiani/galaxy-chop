@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from galaxychop import plot, utils
+from galaxychop import models, plot, utils
 
 from matplotlib.testing.decorators import (
     _image_directories,
@@ -111,6 +111,25 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 # =============================================================================
 
 # get_df_and_hue ==============================================================
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
+
+    gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    components = models.Components(
+        labels=np.full(len(gal), 100),
+        ptypes=np.full(len(gal), "foo"),
+        probabilities=None,
+    )
+
+    df, hue = plotter.get_df_and_hue(
+        ptypes=None, attributes=None, labels=components, lmap=None
+    )
+
+    assert (df[hue] == components.labels).all()
 
 
 @pytest.mark.plot
@@ -293,6 +312,62 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 # =============================================================================
 
 # get_circ_df_and_hue =========================================================
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
+    read_hdf5_galaxy,
+):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    circ = utils.jcirc(gal)
+
+    components = models.Components(
+        labels=circ.eps,
+        ptypes=np.full(len(circ.eps), "foo"),
+        probabilities=None,
+    )
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN,
+        attributes=None,
+        labels=components,
+        lmap=None,
+    )
+
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == circ.eps[mask]).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
+    read_hdf5_galaxy,
+):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    circ = utils.jcirc(gal)
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN,
+        attributes=None,
+        labels=circ.eps_r,
+        lmap=None,
+    )
+
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == circ.eps_r[mask]).all()
 
 
 @pytest.mark.plot
@@ -340,6 +415,52 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
     )
 
     assert (df[hue] == circ.eps_r[mask]).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    circ = utils.jcirc(gal)
+
+    lmap = dict.fromkeys(circ.eps_r, 1)
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
+    )
+
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == 1).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    def lmap(label):
+        return 1
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
+    )
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == 1).all()
 
 
 # PLOTS =======================================================================
