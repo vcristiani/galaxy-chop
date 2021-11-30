@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from .. import data, utils
+from ..utils import doc_inherit
 
 # =============================================================================
 # CONSTANTS
@@ -413,6 +414,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
 
 class DynamicStarsDecomposerMixin:
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_rows_mask(self, X, y, attributes):
         # all the rows where every value is finite
         only_stars = np.equal(y, data.ParticleSetType.STARS.value)

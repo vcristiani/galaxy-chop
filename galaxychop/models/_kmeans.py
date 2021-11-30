@@ -29,56 +29,55 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     Implementation of Scikit-learn [6]_ K-means as a method for dynamically
     decomposing galaxies.
 
-    Attributes
+    Parameters
     ----------
-    n_components : default=2
+    n_components : int, default=2
+        The number of clusters to form as well as the number of centroids to
+        generate.
 
-    init : default="k-means++"
-
-    n_init : default=10
-
-    max_iter : default=300
-
-    tol : default=0.0001
-
-    verbose : default=0
-
-    random_state : default=None, converter=np.random.default_rng
-
-    algorithm : default="auto"
-
-
-    labels_: `np.ndarray(n)`, n: number of particles with E<=0 and -1<eps<1.
-        Index of the cluster each stellar particles belongs to.
-
-    cluster_centers_:
+    init : {‘k-means++’, ‘random’}, callable or array-like of shape
+    (n_clusters, n_features), default="k-means++"
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-    inertia_:
+
+    n_init : int, default=10
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
-    n_iter_ :
+
+    max_iter : int, default=300
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+
+    tol : float, default=0.0001
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+
+    verbose : int, default=0
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+
+    random_state : int, default=None
+        Original attribute create by the `k-Means` class into
+        `scikit-learn` library.
+
+    algorithm : {“auto”, “full”, “elkan”}, default="auto"
         Original attribute create by the `k-Means` class into
         `scikit-learn` library.
 
     Notes
     -----
-    n_clusters: type:int.
-        The number of clusters to form. Parameter of :py:class:`KMeans` class.
     More information for `KMeans` class:
         https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 
     Examples
     --------
-    Example of implementation of CGKMeans Model.
+    Example of implementation of KMeans Model.
 
     >>> import galaxychop as gchop
-    >>> galaxy = gchop.Galaxy(...)
-    >>> chopper = gchop.KMeans(n_clusters=3)
+    >>> galaxy = gchop.read_hdf5(...)
+    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> chopper = gchop.KMeans()
     >>> chopper.decompose(galaxy)
-    >>> chopper.labels_
-    array([-1, -1,  2, ...,  1,  2,  1])
-
 
     References
     ----------
