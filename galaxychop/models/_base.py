@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from .. import data, utils
+from ..utils import doc_inherit
 
 # =============================================================================
 # CONSTANTS
@@ -122,12 +123,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             2D array where each file it is a diferent particle and each column
             is a attribute of the particles. n_particles is the total number of
             particles.
-
         y : ``np.ndarray(n_particles)``
             1D array where is identified the nature of each particle:
             0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
             particles.
-
         attributes: tuple, dictionary keys of ``ParticleSet class`` parameters
             Particle attributes used to operate the clustering.
 
@@ -146,7 +145,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             Training instances to cluster.
-
         y : Ignored
             Not used, present here for API consistency by convention.
 
@@ -214,7 +212,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         ----------
         galaxy : ``galaxy object``
             Instance of Galaxy class.
-
         attributes : keys of ``ParticleSet class`` parameters
             Particle attributes used to operate the clustering.
 
@@ -224,7 +221,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             2D array where each file it is a diferent particle and each column
             is a attribute of the particles. n_particles is the total number of
             particles.
-
         y : ``np.ndarray(n_particles)``
             1D array where is identified the nature of each particle:
             0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
@@ -292,12 +288,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             2D array where each file it is a diferent particle and each column
             is a parameter of the particles. n_particles is the total number of
             particles.
-
         labels: ``np.ndarray(m_particles)``
             1D array with the index of the clusters to which each particle
             belongs. m_particles is the total number of particles with valid
             values to operate the clustering.
-
         rows_mask : ``nd.array(m_particles)``
             Mask only with valid values to operate the clustering. m_particles
             is the total number of particles with valid values to operate the
@@ -328,13 +322,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             2D array where each file it is a diferent particle and each column
             is a parameter of the particles. n_particles is the total number of
             particles.
-
         probs: ``np.ndarray(n_cluster, m_particles)``
             2D array with probabilities of belonging to each component.
             n_cluster is the number of components obtained. m_particles is the
             total number of particles with valid values to operate the
             clustering.
-
         rows_mask : ``nd.array(m_particles)``
             Mask only with valid values to operate the clustering. m_particles
             is the total number of particles with valid values to operate the
@@ -413,6 +405,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
 
 class DynamicStarsDecomposerMixin:
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_rows_mask(self, X, y, attributes):
         # all the rows where every value is finite
         only_stars = np.equal(y, data.ParticleSetType.STARS.value)

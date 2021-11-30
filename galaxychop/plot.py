@@ -42,7 +42,7 @@ class GalaxyPlotter:
     # INTERNAL ================================================================
 
     def __call__(self, plot_kind="pairplot", **kwargs):
-        """Make plots of the galaxy
+        """Make plots of the galaxy.
 
         Parameters
         ----------
@@ -73,7 +73,7 @@ class GalaxyPlotter:
 
     def get_df_and_hue(self, ptypes, attributes, labels, lmap):
         """
-        DataFrama and Hue constructor for plot implementations
+        Dataframe and Hue constructor for plot implementations.
 
         Parameters
         ----------
