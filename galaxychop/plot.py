@@ -284,7 +284,7 @@ class GalaxyPlotter:
         """Draw a Kernel Density plot of galaxy properties.
 
         Plot univariate or bivariate distributions using kernel density
-        estimation (KDE). This plot represents the galay properties using
+        estimation (KDE). This plot represents the galaxy properties using
         a continuous probability density curve in one or more dimensions.
         This function groups the values of all galaxy particles according
         to some ``ParticleSet class`` parameter.
@@ -411,6 +411,36 @@ class GalaxyPlotter:
         lmap=None,
         **kwargs,
     ):
+        """Draw a distribution plots onto a FacetGrid.
+
+        Plot univariate or bivariate distributions of datasets using
+        different approachs for visualizing the normalized specific energy, the
+        circularity parameter (J_z/J_circ) and/or the projected circularity
+        parameter (J_p/J_circ)  of the stellar particles.
+        This function groups the values of stellar particles according to some
+        keys of ``JCirc`` tuple.
+
+
+        Parameters
+        ----------
+        x, y : keys of ``JCirc`` tuple.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        cbins :
+        labels : keys of ``JCirc`` tuple.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented in
+            ``seaborn.displot``.
+
+        Returns
+        -------
+        seaborn.axisgrid.PairGrid
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_circ_df_and_hue(
             cbins=cbins,
@@ -430,6 +460,32 @@ class GalaxyPlotter:
         lmap=None,
         **kwargs,
     ):
+        """Draw a scatter plot of circularity and normalized energy.
+
+        Shows the relationship between x and y.
+        This function groups the values of stellar particles according to some
+        keys of ``JCirc`` tuple.
+
+        Parameters
+        ----------
+        x, y : keys of ``JCirc`` tuple.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        cbins :
+        labels : keys of ``JCirc`` tuple.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.scatterplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x, y]
         df, hue = self.get_circ_df_and_hue(
             cbins=cbins,
@@ -449,6 +505,32 @@ class GalaxyPlotter:
         lmap=None,
         **kwargs,
     ):
+        """Draw a histogram of circularity and normalized energy.
+
+        Plot univariate or bivariate histograms to show distributions
+        of datasets. This function groups the values of stellar particles
+        according to some keys of ``JCirc`` tuple.
+
+        Parameters
+        ----------
+        x, y : keys of ``JCirc`` tuple.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        cbins :
+        labels : keys of ``JCirc`` tuple.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.histplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_circ_df_and_hue(
             cbins=cbins,
@@ -468,6 +550,36 @@ class GalaxyPlotter:
         lmap=None,
         **kwargs,
     ):
+        """Draw a Kernel Density plot of circularity and normalized energy.
+
+        Plot univariate or bivariate distributions using kernel density
+        estimation (KDE). This plot represents normalized specific energy, the
+        circularity parameter (J_z/J_circ) and/or the projected circularity
+        parameter (J_p/J_circ)  of the stellar particles using a continuous
+        probability density curve in one or more dimensions.
+        This function groups the values of stellar particles according
+        to some keys of ``JCirc`` tuple.
+
+        Parameters
+        ----------
+        x, y : keys of ``JCirc`` tuple.
+            Variables that specify positions on the x and y axes.
+            Default value y = None.
+        cbins :
+        labels : keys of ``JCirc`` tuple.
+            Variable to map plot aspects to different colors.
+            Default value = None
+        lmap :  dicts
+            Name assignment to the label.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.kdeplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_circ_df_and_hue(
             cbins=cbins,
