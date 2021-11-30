@@ -345,6 +345,32 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
 
 
 @pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
+    read_hdf5_galaxy,
+):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    circ = utils.jcirc(gal)
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN,
+        attributes=None,
+        labels=list(circ.eps_r),
+        lmap=None,
+    )
+
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == circ.eps_r[mask]).all()
+
+
+@pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
     read_hdf5_galaxy,
 ):
@@ -431,12 +457,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
         cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
     )
 
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
     assert (df[hue] == 1).all()
 
 
@@ -451,13 +471,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
-    )
-
-    circ = utils.jcirc(gal)
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
     )
 
     assert (df[hue] == 1).all()

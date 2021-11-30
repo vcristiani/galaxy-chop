@@ -328,7 +328,6 @@ class GalaxyPlotter:
         return ax
 
     # CICULARITY ==============================================================
-    # 94%   348-349, 362-366, 369
 
     def get_circ_df_and_hue(self, cbins, attributes, labels, lmap):
         """
@@ -396,6 +395,7 @@ class GalaxyPlotter:
         if hue is None and labels is not None:
             # if the labels are passed to me as an array,
             # I only delete the nans and inf.
+            labels = np.asarray(labels)
             labels = labels[np.isfinite(labels)]
             hue = "Labels"
 
