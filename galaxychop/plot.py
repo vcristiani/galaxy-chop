@@ -95,14 +95,14 @@ class GalaxyPlotter:
         """
         attributes = ["x", "y", "z"] if attributes is None else attributes
 
-        hue = labels if labels in attributes else None
+        hue = None  # by default labels is None
 
         # labels: column used to map plot aspects to different colors (hue).
         # if is a str and it was not in the attributes I have to take it out
         # of the dataframe.
-        if isinstance(labels, str) and labels not in attributes:
+        if isinstance(labels, str):
             hue = labels
-            attributes = np.concatenate((attributes, [labels]))
+            attributes = np.unique(list(attributes) + [labels])
 
         # put all attributes in a df
         df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
@@ -114,9 +114,10 @@ class GalaxyPlotter:
             df.insert(0, hue, labels)  # I place it as the first column
 
         if lmap is not None:
-            if isinstance(lmap, dict):
-                lmap = lambda l: lmap.get(l, l)
-            df[hue] = df[hue].apply(lmap)
+            lmap_func = (
+                (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
+            )
+            df[hue] = df[hue].apply(lmap_func)
 
         return df, hue
 
@@ -366,14 +367,14 @@ class GalaxyPlotter:
             if attributes is None
             else attributes
         )
-        hue = labels if labels in attributes else None
+        hue = None
 
         # labels: column used to map plot aspects to different colors (hue).
         # if is a str and it was not in the attributes but we can retrieve from
         # circ, we add as an attribute
-        if isinstance(labels, str) and labels not in attributes:
-            attributes = np.concatenate((attributes, [labels]))
+        if isinstance(labels, str):
             hue = labels
+            attributes = np.unique(list(attributes) + [labels])
 
         columns = OrderedDict()
         for aname in attributes:
@@ -393,9 +394,10 @@ class GalaxyPlotter:
             df.insert(0, hue, labels)
 
         if lmap is not None:
-            if isinstance(lmap, dict):
-                lmap = lambda l: lmap.get(l, l)
-            df[hue] = df[hue].apply(lmap)
+            lmap_func = (
+                (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
+            )
+            df[hue] = df[hue].apply(lmap_func)
 
         return df, hue
 

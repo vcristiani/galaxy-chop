@@ -61,78 +61,6 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 
 
 # =============================================================================
-# TEST get_*_df_and_hue
-# =============================================================================
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_lmap(galaxy):
-
-    gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
-
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="ptype", lmap=lmap
-    )
-
-    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
-    mapped = ptype.apply(lmap.get)
-
-    assert (df[hue] == mapped).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
-
-    gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="x", lmap=None
-    )
-
-    x = gal.to_dataframe(attributes=["x"]).x
-
-    assert (df[hue] == x).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
-
-    gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
-    lmap_func = lambda l: lmap.get(l, l)
-
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="ptype", lmap=lmap_func
-    )
-
-    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
-    mapped = ptype.apply(lmap_func)
-
-    assert (df[hue] == mapped).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
-
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    lmap = lambda x: 1
-
-    df, hue = plotter.get_circ_df_and_hue(
-        cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
-    )
-
-    assert (df[hue] == 1).all()
-
-
-# =============================================================================
 # TEST __call__
 # =============================================================================
 
@@ -182,7 +110,64 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 # REAL SPACE PLOT
 # =============================================================================
 
+# get_df_and_hue ==============================================================
 
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
+
+    gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    df, hue = plotter.get_df_and_hue(
+        ptypes=None, attributes=None, labels="x", lmap=None
+    )
+
+    x = gal.to_dataframe(attributes=["x"]).x
+
+    assert (df[hue] == x).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
+
+    gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
+
+    df, hue = plotter.get_df_and_hue(
+        ptypes=None, attributes=None, labels="ptype", lmap=lmap
+    )
+
+    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
+    mapped = ptype.apply(lmap.get)
+
+    assert (df[hue] == mapped).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
+
+    gal = galaxy(seed=42)
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
+
+    def lmap_func(label):
+        return lmap.get(label, label)
+
+    df, hue = plotter.get_df_and_hue(
+        ptypes=None, attributes=None, labels="ptype", lmap=lmap_func
+    )
+
+    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
+    mapped = ptype.apply(lmap_func)
+
+    assert (df[hue] == mapped).all()
+
+
+# PLOTS =======================================================================
 @pytest.mark.slow
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
@@ -306,6 +291,58 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 # =============================================================================
 # CIRCULARITY PLOTS
 # =============================================================================
+
+# get_circ_df_and_hue =========================================================
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
+    read_hdf5_galaxy,
+):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN,
+        attributes=["normalized_star_energy", "eps"],
+        labels="eps_r",
+        lmap=None,
+    )
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == circ.eps_r[mask]).all()
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
+    read_hdf5_galaxy,
+):
+
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = plot.GalaxyPlotter(galaxy=gal)
+
+    df, hue = plotter.get_circ_df_and_hue(
+        cbins=utils.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=None
+    )
+
+    circ = utils.jcirc(gal)
+    mask = (
+        np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.eps)
+        & np.isfinite(circ.eps_r)
+    )
+
+    assert (df[hue] == circ.eps_r[mask]).all()
+
+
+# PLOTS =======================================================================
 
 
 @pytest.mark.slow
