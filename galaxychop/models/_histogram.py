@@ -121,11 +121,21 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
+        """
+        Notes
+        -----
+        In this model the parameter space is given by
+            eps: circularity parameter (J_z/J_circ)
+        """
         return ["eps"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
-        """Compute Abadi model clustering.
+        """
+        Notes
+        -----
+        The attributes used by the Abadi model are described in detail in the
+        class documentation.
         """
         n_bin = self.n_bin
 
@@ -311,11 +321,22 @@ class JEHistogram(JHistogram):
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
+        """
+        Notes
+        -----
+        In this model the parameter space is given by
+            normalized_star_energy: normalized specific energy of the stars
+            eps: circularity parameter (J_z/J_circ).
+        """
         return ["normalized_star_energy", "eps"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
-        """Compute clustering with the modified Abadi model.
+        """
+        Notes
+        -----
+        The attributes used by the modified Abadi model are described in detail
+        in the class documentation.
         """
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E

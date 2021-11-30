@@ -83,10 +83,24 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
+        """
+        Notes
+        -----
+        In this model the parameter space is given by
+            normalized_star_energy: normalized specific energy of the stars
+            eps: circularity parameter (J_z/J_circ)
+            eps_r: projected circularity parameter (J_p/J_circ).
+        """
         return ["normalized_star_energy", "eps", "eps_r"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
+        """
+        Notes
+        -----
+        The attributes used by the kmeans model are described in detail in the
+        class documentation.
+        """
         random_state = np.random.RandomState(self.random_state.bit_generator)
 
         kmeans = cluster.KMeans(
