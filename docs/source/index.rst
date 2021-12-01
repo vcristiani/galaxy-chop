@@ -6,13 +6,13 @@
 Welcome to GalaxyChop's documentation!
 =======================================
 
-.. image:: .. /galaxychop_logo.png
+.. image:: _static/galaxychop_logo.png
    :scale: 35
 
 .. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg
    :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.8%22
    :alt: Galaxy Chop Actions py3.8
-   
+
 .. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.7/badge.svg
    :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.7%22
    :alt: Galaxy Chop Actions py3.7
@@ -30,7 +30,7 @@ Welcome to GalaxyChop's documentation!
    :alt: Curso doctoral FAMAF: Diseño de software para cómputo científico
 
 **GalaxyChop** is a Python package that tackles the dynamical decomposition problem
-by using clustering techniques in phase space for stellar galactic 
+by using clustering techniques in phase space for stellar galactic
 components.
 
 It runs in numerical N-body simulations populated with semi-analytical models
@@ -46,15 +46,29 @@ Repository
 
 https://github.com/vcristiani/galaxy-chop
 
+Contents
+--------
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Tutorials
 
    installation.rst
    tutorial.ipynb
-   license.rst
+
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Reference
+
    api/galaxychop.rst
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Misc
+
+   license.rst
 
 Indices and tables
 ==================

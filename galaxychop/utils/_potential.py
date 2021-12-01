@@ -26,7 +26,8 @@ try:
 except ImportError:
     potential_f = None
 
-POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
+#: The default potential backend to use.
+DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
 
 
 # =============================================================================
@@ -112,7 +113,8 @@ POTENTIAL_BACKENDS = {
 }
 
 
-def potential(galaxy, backend=POTENTIAL_BACKEND):
+#: The default potential backend to use.
+def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
     """
     Potential energy calculation.
 

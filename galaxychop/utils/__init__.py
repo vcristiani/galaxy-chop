@@ -10,8 +10,28 @@
 # IMPORTS
 # =============================================================================
 
-from ._potential import potential, G  # noqa
-from ._center import center, is_centered  # noqa
-from ._align import star_align, is_star_aligned  # noqa
-from ._circ import jcirc, DEFAULT_CBIN  # noqa
-from ._decorators import doc_inherit  # noqa
+from ._potential import (
+    potential,
+    G,
+    POTENTIAL_BACKENDS,
+    DEFAULT_POTENTIAL_BACKEND,
+)
+from ._center import center, is_centered
+from ._align import star_align, is_star_aligned
+from ._circ import jcirc, DEFAULT_CBIN
+from ._decorators import doc_inherit
+
+
+__all__ = [
+    "potential",
+    "POTENTIAL_BACKENDS",
+    "DEFAULT_POTENTIAL_BACKEND",
+    "G",
+    "center",
+    "is_centered",
+    "star_align",
+    "is_star_aligned",
+    "jcirc",
+    "DEFAULT_CBIN",
+    "doc_inherit",
+]
