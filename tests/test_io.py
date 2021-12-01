@@ -10,9 +10,12 @@
 # IMPORTS
 # =============================================================================
 
+from io import BytesIO
 
 from galaxychop import data
 from galaxychop import io
+
+import pandas as pd
 
 
 # =============================================================================
@@ -149,3 +152,20 @@ def test_read_hdf5_stream(data_path):
         and gala.gas.softening == 0.0
         and gala.gas.has_potential_
     )
+
+
+def test_to_hdf5(galaxy):
+
+    gal = galaxy(seed=42)
+
+    buff = BytesIO()
+
+    io.to_hdf5(buff, gal)
+    result = io.read_hdf5(buff)
+
+    stored_attributes = ["m", "x", "y", "z", "vx", "vy", "vz"]
+
+    result_df = result.to_dataframe(attributes=stored_attributes)
+    expected_df = gal.to_dataframe(attributes=stored_attributes)
+
+    pd.testing.assert_frame_equal(result_df, expected_df)

@@ -14,15 +14,37 @@
 # IMPORTS
 # =============================================================================
 
+import datetime as dt
+import platform
+import sys
 
+from astropy.io.misc.hdf5 import write_table_hdf5
 from astropy.table import Table
+
 
 import h5py
 
+
 import numpy as np
 
-
+from . import __version__ as VERSION
 from . import data
+
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+_DEFAULT_METADATA = {
+    "GalaxyChop": VERSION,
+    "author_email": "valeria.cristiani@unc.edu.ar ",
+    "affiliation": "IATE-OAC-CONICET",
+    "url": "https://github.com/vcristiani/galaxy-chop/",
+    "platform": platform.platform(),
+    "system_encoding": sys.getfilesystemencoding(),
+    "Python": sys.version,
+}
+
 
 # =============================================================================
 # UTILS
@@ -32,12 +54,17 @@ from . import data
 def _table_to_dict(table, key_suffix):
     kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
     kws[f"potential_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
-
     return kws
 
 
+def _df_to_table(df, ptype):
+    table_df = df[df.ptype == ptype.humanize()]
+    del table_df["ptype"]
+    return Table.from_pandas(table_df)
+
+
 # =============================================================================
-# API
+# HDF 5
 # =============================================================================
 
 
@@ -92,6 +119,65 @@ def read_hdf5(
     galaxy = data.mkgalaxy(**galaxy_kws)
 
     return galaxy
+
+
+def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
+    """HDF5 file writer.
+
+    It is responsible for storing a galaxy in HDF5 format. The procedure only
+    only stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy`` and
+    ``vz``,  since all the other attributes can be derived from these, and
+    the ``softenings`` can be arbitrarily changed at the galaxy
+    creation/reading process
+
+    Parameters
+    ----------
+    path_or_stream : str
+        Path to the h5 to store the galaxy.
+    metadata : dict or None (default None)
+        Extra metadata to store in the h5 file.
+    kwargs :
+        Extra arguments to the function
+        ``astropy.io.misc.hdf5.write_table_hdf5()``
+
+
+    """
+
+    attributes = ["ptype", "m", "x", "y", "z", "vx", "vy", "vz"]
+    if galaxy.has_potential_:
+        attributes.append("potential")
+
+    df = galaxy.to_dataframe(attributes=attributes)
+
+    # create the id column for all the
+    df.insert(0, "id", df.index.to_numpy())
+
+    stars_table = _df_to_table(df, data.ParticleSetType.STARS)
+    dm_table = _df_to_table(df, data.ParticleSetType.DARK_MATTER)
+    gas_table = _df_to_table(df, data.ParticleSetType.GAS)
+
+    # prepare metadata
+    metadata = _DEFAULT_METADATA.copy()
+    metadata["utc_timestamp"] = dt.datetime.utcnow().isoformat()
+    metadata.update(metadata or {})
+
+    # prepare kwargs
+    kwargs.setdefault("append", True)
+    kwargs.setdefault("overwrite", True)
+    kwargs.setdefault("compression", "gzip")
+    kwargs.setdefault("compression_opts", 9)
+
+    with h5py.File(path_or_stream, "a") as h5:
+        write_table_hdf5(stars_table, h5, path="stars", **kwargs)
+        write_table_hdf5(dm_table, h5, path="dark_matter", **kwargs)
+        write_table_hdf5(gas_table, h5, path="gas", **kwargs)
+
+        h5.attrs.update(metadata)
+
+
+# =============================================================================
+# NUMPY
+# =============================================================================
 
 
 def read_npy(
