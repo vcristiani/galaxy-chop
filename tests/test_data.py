@@ -10,9 +10,11 @@
 # IMPORTS
 # =============================================================================
 
+from io import BytesIO
+
 import astropy.units as u
 
-from galaxychop import data, plot
+from galaxychop import data, io, plot
 
 import numpy as np
 
@@ -30,6 +32,7 @@ def test_ParticleSetType():
         data.ParticleSetType.mktype("stars")
         == data.ParticleSetType.mktype("STARS")
         == data.ParticleSetType.mktype(0)
+        == data.ParticleSetType.mktype(data.ParticleSetType.STARS)
         == data.ParticleSetType.STARS
     ) and data.ParticleSetType.STARS.humanize() == "stars"
 
@@ -37,6 +40,7 @@ def test_ParticleSetType():
         data.ParticleSetType.mktype("dark_matter")
         == data.ParticleSetType.mktype("DARK_MATTER")
         == data.ParticleSetType.mktype(1)
+        == data.ParticleSetType.mktype(data.ParticleSetType.DARK_MATTER)
         == data.ParticleSetType.DARK_MATTER
     ) and data.ParticleSetType.DARK_MATTER.humanize() == "dark_matter"
 
@@ -44,6 +48,7 @@ def test_ParticleSetType():
         data.ParticleSetType.mktype("gas")
         == data.ParticleSetType.mktype("GAS")
         == data.ParticleSetType.mktype(2)
+        == data.ParticleSetType.mktype(data.ParticleSetType.GAS)
         == data.ParticleSetType.GAS
     ) and data.ParticleSetType.GAS.humanize() == "gas"
 
@@ -613,10 +618,31 @@ def test_galaxy_as_kwargs(data_galaxy):
 # =============================================================================
 
 
-def test_Galaxy_kinectic_plot(galaxy):
+def test_Galaxy_plot(galaxy):
     gal = galaxy()
     assert isinstance(gal.plot, plot.GalaxyPlotter)
     assert gal.plot._galaxy is gal
+
+
+# =============================================================================
+# TO HDF5
+# =============================================================================
+
+
+def test_Galaxy_to_hdf5(galaxy):
+    gal = galaxy()
+
+    stream = BytesIO()
+    gal.to_hdf5(stream)
+    stream.seek(0)
+    result = io.read_hdf5(stream)
+
+    stored_attributes = ["m", "x", "y", "z", "vx", "vy", "vz"]
+
+    result_df = result.to_dataframe(attributes=stored_attributes)
+    expected_df = gal.to_dataframe(attributes=stored_attributes)
+
+    pd.testing.assert_frame_equal(result_df, expected_df)
 
 
 # =============================================================================

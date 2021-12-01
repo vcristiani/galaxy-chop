@@ -373,6 +373,35 @@ class Galaxy:
 
         return pd.concat(parts, ignore_index=True)
 
+    def to_hdf5(self, path_or_stream, metadata=None, **kwargs):
+        """Shortcut to ``galaxychop.io.to_hdf5()`.
+
+        It is responsible for storing a galaxy in HDF5 format. The procedure
+        only stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy``
+        and ``vz``,  since all the other attributes can be derived from these,
+        and the ``softenings`` can be arbitrarily changed at the galaxy
+        creation/reading process
+
+        Parameters
+        ----------
+        path_or_stream : str or file like.
+            Path or file like objet to the h5 to store the galaxy.
+        metadata : dict or None (default None)
+            Extra metadata to store in the h5 file.
+        kwargs :
+            Extra arguments to the function
+            ``astropy.io.misc.hdf5.write_table_hdf5()``
+
+        """
+        from . import io
+
+        return io.to_hdf5(
+            path_or_stream=path_or_stream,
+            galaxy=self,
+            metadata=metadata,
+            **kwargs,
+        )
+
     @property
     def plot(self):
         """Plot accessor."""
