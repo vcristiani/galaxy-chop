@@ -83,7 +83,7 @@ def read_hdf5(
 
     Parameters
     ----------
-    path_or_stream : str
+    path_or_stream : str or file-like.
         Path to the h5 file containing the properties of the galaxy particles.
     softening_s : float, default value = 0
         Softening radius of star particles.
@@ -125,24 +125,24 @@ def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
     """HDF5 file writer.
 
     It is responsible for storing a galaxy in HDF5 format. The procedure only
-    only stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy`` and
+    stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy`` and
     ``vz``,  since all the other attributes can be derived from these, and
     the ``softenings`` can be arbitrarily changed at the galaxy
     creation/reading process
 
     Parameters
     ----------
-    path_or_stream : str
-        Path to the h5 to store the galaxy.
+    path_or_stream : str or file-like.
+        Path or file like objet to the h5 to store the galaxy.
+    galaxy : galaxychop.data.Galaxy
+        The galaxy to store.
     metadata : dict or None (default None)
         Extra metadata to store in the h5 file.
     kwargs :
         Extra arguments to the function
         ``astropy.io.misc.hdf5.write_table_hdf5()``
 
-
     """
-
     attributes = ["ptype", "m", "x", "y", "z", "vx", "vy", "vz"]
     if galaxy.has_potential_:
         attributes.append("potential")
@@ -202,21 +202,21 @@ def read_npy(
 
     Parameters
     ----------
-    path_or_stream_star : str
+    path_or_stream_star : str or file like.
         Path to the npy file containing the properties of the star particles.
-    path_or_stream_dark : str
+    path_or_stream_dark : str or file like.
         Path to the npy file containing the properties of the dark matter
         particles.
-    path_or_stream_gas : str
+    path_or_stream_gas : str or file like.
         Path to the npy file containing the properties of the gas particles.
     columns: list
         Specify column names.
-    path_or_stream_pot_s : str
+    path_or_stream_pot_s : str or file like.
         Path to the npy file containing the potentials of the star particles.
-    path_or_stream_pot_dm : str
+    path_or_stream_pot_dm : str or file like.
         Path to the npy file containing the potentials of the dark matter
         particles.
-    path_or_stream_pot_g : str
+    path_or_stream_pot_g : str or file like.
         Path to the npy file containing the potentials of the gas particles.
     softening_s : float, default value = 0
         Softening radius of star particles.

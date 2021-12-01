@@ -159,8 +159,8 @@ def test_to_hdf5(galaxy):
     gal = galaxy(seed=42)
 
     buff = BytesIO()
-
     io.to_hdf5(buff, gal)
+    buff.seek(0)
     result = io.read_hdf5(buff)
 
     stored_attributes = ["m", "x", "y", "z", "vx", "vy", "vz"]
