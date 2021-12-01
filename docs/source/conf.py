@@ -84,6 +84,26 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_favicon = "_static/favicon.ico"
 
-# -- Options for nbsphinx output -------------------------------------------------
+# -- Options for nbsphinx output ----------------------------------------------
 nbsphinx_prompt_width = "0pt"
+
+
+# =============================================================================
+# INJECT REAMDE INTO THE RESTRUCTURED TEXT
+# =============================================================================
+
+import m2r
+
+with open(CHOP_PATH / "README.md") as fp:
+    readme_md = fp.read().split("<!-- BODY -->")[-1]
+
+
+README_RST_PATH = CURRENT_PATH / "_dynamic" / "README"
+
+
+with open(README_RST_PATH, "w") as fp:
+    fp.write(".. FILE AUTO GENERATED !! \n")
+    fp.write(m2r.convert(readme_md))
+    print(f"{README_RST_PATH} regenerated!")

@@ -118,3 +118,4 @@ dask-worker-space/
 
 result_images/
 .mutmut-cache
+docs/source/_dynamic/README
