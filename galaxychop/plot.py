@@ -335,7 +335,9 @@ class GalaxyPlotter:
 
         Parameters
         ----------
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         attributes : keys of ``JCirc`` tuple.
             Keys of the normalized specific energy, the circularity parameter
             (J_z/J_circ) and/or the projected circularity parameter
@@ -354,7 +356,6 @@ class GalaxyPlotter:
         hue : keys of ``JCirc`` tuple.
             Labels of stellar particles.
         """
-
         # if we use the components as laberls we need to extract the labels
         if isinstance(labels, models.Components):
             labels = labels.labels
@@ -431,7 +432,9 @@ class GalaxyPlotter:
 
         Parameters
         ----------
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters. Default value = None
         labels : keys of ``JCirc`` tuple.
@@ -482,7 +485,9 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
@@ -527,7 +532,9 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
@@ -572,7 +579,9 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
@@ -621,7 +630,9 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins :
+        cbins : tuple
+            It contains the two widths of bins necessary for the calculation of
+            the circular angular momentum.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None

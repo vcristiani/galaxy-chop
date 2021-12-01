@@ -39,6 +39,24 @@ _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
 @attr.s(frozen=True, slots=True, repr=False)
 class Components:
+    """Class of components resulting from dynamic decomposition.
+
+    This class creates the components of the galaxy from the result of the
+    dynamic decomposition.
+
+    Parameters
+    ----------
+    labels : `np.ndarray`
+        1D array with the index of the component to which each particle
+        belongs.
+    ptypes : `np.ndarray`
+        Indicates the type of particle: stars = 0, dark matter = 1, gas = 2.
+    probabilities : `np.ndarray`
+       1D array with probabilities of the particles to belong to each
+       component, in case the dynamic decomposition model includes them.
+       Otherwise it adopts the value None.
+    """
+
     labels = attr.ib(validator=vldt.instance_of(np.ndarray))
     ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
     probabilities = attr.ib(
@@ -77,21 +95,26 @@ class Components:
 
 
 def hparam(default, **kwargs):
-    """Crea un hiper parametro para los descomponedores.
+    """Create a hyper parameter for decomposers.
 
-    Por decision de diseño se requiere que hiper-parametro tenga un valor
-    sensible por defecto.
+    By design decision, hyper-parameter is required to have a sensitive default
+    value.
 
     Parameters
     ----------
+    default :
+        Sensitive default value of the hyper-parameter.
+    **kwargs :
+        Additional keyword arguments are passed and are documented in
+        ``attr.ib()``.
 
     Return
     ------
+    Hyper parameter with a default value.
 
     Notes
     -----
-    Esta function es un thin-wrapper sobre la funcion de attrs ``attr.ib()``
-
+    This function is a thin-wrapper over the attrs function ``attr.ib()``.
     """
     metadata = kwargs.pop("metadata", {})
     metadata["__gchop_model_hparam__"] = True
@@ -103,13 +126,16 @@ def hparam(default, **kwargs):
 # =============================================================================
 @attr.s(frozen=True, repr=False)
 class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
-    """Clase abstracta para facilitar la creacion de descomponedores.
+    """Abstract class to facilitate the creation of decomposers.
 
-    Esta clase solicita la redefinicion de tres métodos: este, aquiel y el otro
+    This class requests the redefinition of three methods: get_attributes,
+    get_rows_mask and split.
 
     Parameters
-
-
+    ----------
+    cbins : tuple
+        It contains the two widths of bins necessary for the calculation of the
+        circular angular momentum.
     """
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
@@ -128,13 +154,13 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
-        """Iniciacilizacion de las subclases.
+        """Initiate of subclasses.
 
-        Garantiza que toda clase herededada sea decorada por ``attr.s()``
-        y le asigna como configuración de la clase los parametros definidos en
-        la variable de clase `__gchop_model_cls_config__`.
+        It ensures that every inherited class is decorated by ``attr.s()`` and
+        assigns as class configuration the parameters defined in the class
+        variable `__gchop_model_cls_config__`.
 
-        Es otras palabras es ligeramente equivalente a:
+        In other words it is slightly equivalent to:
 
         .. code-block:: python
 
@@ -173,8 +199,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             particles.
         y : ``np.ndarray(n_particles)``
             1D array where is identified the nature of each particle:
-            0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
-            particles.
+            0 = stars, 1 = dark matter, 2 = gas. n_particles is the total
+            number of particles.
         attributes: tuple, dictionary keys of ``ParticleSet class`` parameters
             Particle attributes used to operate the clustering.
 
@@ -198,14 +224,22 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        self
-            Fitted estimator.
+        labels : ``np.ndarray(m_particles)``
+            1D array with the index of the clusters to which each particle
+            belongs. m_particles is the total number of particles with valid
+            values to operate the clustering.
+
+        probs : ``np.ndarray(m_particles)``
+            Probabilities of the particles to belong to each component, in case
+            the dynamic decomposition model includes them. Otherwise it adopts
+            the value None.
         """
         raise NotImplementedError()
 
     # internal ================================================================
 
     def __repr__(self):
+        """x.__repr__() <==> repr(x)."""
         clsname = type(self).__name__
 
         selfd = attr.asdict(
@@ -453,8 +487,21 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
 
 class DynamicStarsDecomposerMixin:
+    """Dynamic Stars Decomposer Mixin Class.
+
+    This class redefines the get_row_mask method so that dynamic decomposition
+    is performed using only stellar particles.
+    """
+
     @doc_inherit(GalaxyDecomposerABC.get_rows_mask)
     def get_rows_mask(self, X, y, attributes):
+        """
+        Note
+        ----
+        Only stellar particles are used to carry out the dynamic decomposition.
+        In addition, the parameters of the parameter space, where the dynamic
+        decomposition is carried out, must have finite values.
+        """
         # all the rows where every value is finite
         only_stars = np.equal(y, data.ParticleSetType.STARS.value)
         finite_values = np.isfinite(X).all(axis=1)
