@@ -10,17 +10,16 @@
 # IMPORTS
 # =============================================================================
 
+from ._align import is_star_aligned, star_align
+from ._center import center, is_centered
+from ._circ import DEFAULT_CBIN, jcirc
+from ._decorators import doc_inherit
 from ._potential import (
-    potential,
+    DEFAULT_POTENTIAL_BACKEND,
     G,
     POTENTIAL_BACKENDS,
-    DEFAULT_POTENTIAL_BACKEND,
+    potential,
 )
-from ._center import center, is_centered
-from ._align import star_align, is_star_aligned
-from ._circ import jcirc, DEFAULT_CBIN
-from ._decorators import doc_inherit
-
 
 __all__ = [
     "potential",

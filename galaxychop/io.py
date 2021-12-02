@@ -37,7 +37,7 @@ from . import data
 
 _DEFAULT_METADATA = {
     "GalaxyChop": VERSION,
-    "author_email": "valeria.cristiani@unc.edu.ar ",
+    "author_email": "valeria.cristiani@unc.edu.ar",
     "affiliation": "IATE-OAC-CONICET",
     "url": "https://github.com/vcristiani/galaxy-chop/",
     "platform": platform.platform(),
@@ -157,9 +157,9 @@ def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
     gas_table = _df_to_table(df, data.ParticleSetType.GAS)
 
     # prepare metadata
-    metadata = _DEFAULT_METADATA.copy()
-    metadata["utc_timestamp"] = dt.datetime.utcnow().isoformat()
-    metadata.update(metadata or {})
+    h5_metadata = _DEFAULT_METADATA.copy()
+    h5_metadata["utc_timestamp"] = dt.datetime.utcnow().isoformat()
+    h5_metadata.update(metadata or {})
 
     # prepare kwargs
     kwargs.setdefault("append", True)
@@ -172,7 +172,7 @@ def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
         write_table_hdf5(dm_table, h5, path="dark_matter", **kwargs)
         write_table_hdf5(gas_table, h5, path="gas", **kwargs)
 
-        h5.attrs.update(metadata)
+        h5.attrs.update(h5_metadata)
 
 
 # =============================================================================

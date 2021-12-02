@@ -38,7 +38,7 @@ def doc_inherit(parent):
     This decorator is a thin layer over
     py:function:`custom_inherit.doc_inherit decorator`.
 
-    Check: `https://github.com/rsokl/custom_inherit`_
+    Check: <github `https://github.com/rsokl/custom_inherit`>__
 
 
     """

@@ -89,13 +89,6 @@ class ParticleSet:
         Components of angular momentum of particles.
         Shape: (n,3). Default units: kpc*km/s.
 
-    Attributes
-    ----------
-    arr_: `uttr.ArrayAccessor`
-        Original array accessor object create by the *uttr* library.
-        Array accesor: it converts uttr attributes to the default unit and
-        afterward to a `numpy.ndarray`.
-        For more information see: https://pypi.org/project/uttrs/
     """
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
@@ -295,8 +288,6 @@ class Galaxy:
 
     Attributes
     ----------
-    arr_: `uttr.ArrayAccessor`
-        Original array accessor object create by the *uttr* library.
     has_potential_: bool
         Indicates if this Galaxy instance has the potential energy computed.
     """
@@ -305,7 +296,7 @@ class Galaxy:
     dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
-    has_potential_: bool = attr.ib(init=False)
+    has_potential_ = attr.ib(init=False)
 
     @has_potential_.default
     def _has_potential__default(self):
@@ -374,7 +365,7 @@ class Galaxy:
         return pd.concat(parts, ignore_index=True)
 
     def to_hdf5(self, path_or_stream, metadata=None, **kwargs):
-        """Shortcut to ``galaxychop.io.to_hdf5()`.
+        """Shortcut to ``galaxychop.io.to_hdf5()``.
 
         It is responsible for storing a galaxy in HDF5 format. The procedure
         only stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy``
@@ -441,7 +432,7 @@ class Galaxy:
         """Specific potential energy of stars, dark matter and gas particles.
 
         This property doesn't compute the potential energy, only returns its
-        value if it is already computed, i.e. has_potential_ is True. To
+        value if it is already computed, i.e. ``has_potential_`` is True. To
         compute the potential use the `galaxychop.potential` function.
 
         Returns
