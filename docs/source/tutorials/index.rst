@@ -14,8 +14,6 @@ capabilities and many other topics related to dynamic decomposition.
 .. toctree::
    :maxdepth: 2
 
-   installation.rst
-
    quickstart.ipynb
    galaxies.ipynb
    plotting.ipynb

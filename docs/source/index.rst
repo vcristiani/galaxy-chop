@@ -20,8 +20,9 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: - Tutorials
+   :caption: - User Guide
 
+   installation.rst
    tutorials/index.rst
 
 
