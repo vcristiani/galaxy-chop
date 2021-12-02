@@ -3,4 +3,5 @@ ipython
 Sphinx
 sphinx-rtd-theme
 nbsphinx
-Cython >= 0.28.5 
+Cython >= 0.28.5
+m2r

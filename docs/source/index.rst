@@ -6,55 +6,37 @@
 Welcome to GalaxyChop's documentation!
 =======================================
 
-.. image:: .. /galaxychop_logo.png
+.. image:: _static/galaxychop_logo.png
    :scale: 35
 
-.. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg
-   :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.8%22
-   :alt: Galaxy Chop Actions py3.8
-   
-.. image:: https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.7/badge.svg
-   :target: https://github.com/vcristiani/galaxy-chop/actions?query=workflow%3A%22Galaxy+Chop+Actions+py3.7%22
-   :alt: Galaxy Chop Actions py3.7
+|
 
-.. image:: https://travis-ci.com/vcristiani/galaxy-chop.svg?branch=master
-   :target: https://travis-ci.com/vcristiani/galaxy-chop
-   :alt: Build Status
-
-.. image:: https://readthedocs.org/projects/galaxy-chop/badge/?version=latest
-   :target: https://galaxy-chop.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00
-   :target: https://github.com/leliel12/diseno_sci_sfw
-   :alt: Curso doctoral FAMAF: Diseño de software para cómputo científico
-
-**GalaxyChop** is a Python package that tackles the dynamical decomposition problem
-by using clustering techniques in phase space for stellar galactic 
-components.
-
-It runs in numerical N-body simulations populated with semi-analytical models
-and full hydrodynamical simulations, such as Illustris TNG.
+.. Here we render the README.md of the repository as a main page
+.. include:: _dynamic/README
 
 
-| **Authors**
-| Valeria Cristiani (E-mail: valeria.cristiani@unc.edu.ar),
-| Ornela Marioni, Nelson Villagra, Antonela Taverna, Rafael Pignata and Bruno Sanchez.
+Contents
+--------
 
-Repository
-----------
+.. toctree::
+   :maxdepth: 2
+   :caption: - Tutorials
 
-https://github.com/vcristiani/galaxy-chop
+   tutorials/index.rst
+
+
+.. toctree::
+   :maxdepth: 3
+   :caption: - Reference
+
+   api/galaxychop.rst
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: - Misc
 
-   installation.rst
-   tutorial.ipynb
    license.rst
-   api/galaxychop.rst
 
 Indices and tables
 ==================
