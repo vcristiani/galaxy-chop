@@ -91,7 +91,7 @@ nbsphinx_prompt_width = "0pt"
 
 
 # =============================================================================
-# INJECT REAMDE INTO THE RESTRUCTURED TEXT
+# INJECT README INTO THE RESTRUCTURED TEXT index.rst
 # =============================================================================
 
 import m2r

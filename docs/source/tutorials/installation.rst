@@ -1,14 +1,8 @@
-Requirements
-============
-
-You need Python 3.7 or 3.8 to run `GalaxyChop`.
-
-
 Installation
 ============
 
+You need Python 3.7, 3.8 or 3.9 to run `GalaxyChop`.
 
-This is the recommended way to install `GalaxyChop`.
 
 Installing  with pip
 ^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +34,7 @@ Check out `GalaxyChop` main development branch like so:
 .. code-block:: console
 
    $ git clone https://github.com/vcristiani/galaxy-chop.git
-   
+
 
 This will create a directory *galaxy-chop* in your current directory.
 
