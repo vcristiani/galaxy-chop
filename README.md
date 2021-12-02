@@ -4,7 +4,7 @@
 
 <!-- BODY -->
 
-![Gihub Actions CI](https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg)
+[![GalaxyChop CI](https://github.com/vcristiani/galaxy-chop/actions/workflows/CI.yml/badge.svg)](https://github.com/vcristiani/galaxy-chop/actions/workflows/CI.yml)
 [![Documentation Status](https://readthedocs.org/projects/galaxy-chop/badge/?version=latest)](https://galaxy-chop.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/galaxychop)](https://pypi.org/project/galaxychop/)
 [![https://github.com/leliel12/diseno_sci_sfw](https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00)](https://github.com/leliel12/diseno_sci_sfw)
