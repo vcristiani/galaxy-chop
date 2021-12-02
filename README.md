@@ -1,6 +1,4 @@
-![Galaxy Chop Actions py3.8](https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.8/badge.svg)
-![Galaxy Chop Actions py3.7](https://github.com/vcristiani/galaxy-chop/workflows/Galaxy%20Chop%20Actions%20py3.7/badge.svg)
-[![Build Status](https://travis-ci.com/vcristiani/galaxy-chop.svg?branch=master)](https://travis-ci.com/vcristiani/galaxy-chop)
+[![GalaxyChop CI](https://github.com/vcristiani/galaxy-chop/actions/workflows/CI.yml/badge.svg)](https://github.com/vcristiani/galaxy-chop/actions/workflows/CI.yml)
 [![Documentation Status](https://readthedocs.org/projects/galaxy-chop/badge/?version=latest)](https://galaxy-chop.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/galaxychop)](https://pypi.org/project/galaxychop/)
 [![https://github.com/leliel12/diseno_sci_sfw](https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00)](https://github.com/leliel12/diseno_sci_sfw)
