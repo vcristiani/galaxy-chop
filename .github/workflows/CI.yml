@@ -9,7 +9,7 @@ on:
   - pull_request
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
     strategy:
@@ -45,7 +45,6 @@ jobs:
       - name: Install pandoc
         if: ${{ matrix.tox_env == 'make-docs'}}
         run: sudo apt-get install pandoc
-
       # tox steps
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -55,3 +54,29 @@ jobs:
         run: pip install tox
       - name: tox -e ${{ matrix.tox_env }}
         run: tox -re ${{ matrix.tox_env }}
+
+  build:
+       needs: test
+       runs-on: ${{ matrix.os }}
+       strategy:
+         matrix:
+           os: [ubuntu-latest, windows-latest]
+           python-version: ['3.7', '3.8', '3.9']
+       steps:
+       - uses: actions/checkout@v2
+       - name: Set up Python
+         uses: actions/setup-python@v2
+         with:
+           python-version: ${{ matrix.python-version }}
+       - name: Install dependencies
+         run: |
+           python -m pip install --upgrade pip
+           pip install setuptools wheel numpy
+       - uses: knicknic/os-specific-run@v1
+         with:
+           linux: python setup.py sdist
+           windows: python setup.py bdist_wheel build_ext --fcompiler=gnu95 --compiler=mingw32
+       - uses: actions/upload-artifact@v2
+         with:
+           name: dist
+           path: dist

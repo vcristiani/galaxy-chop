@@ -14,5 +14,4 @@ testpaths = [
 
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools==58.4.0", "numpy"]
-
+requires = ["setuptools==58.4.0", "numpy", "wheel"]
