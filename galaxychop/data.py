@@ -64,6 +64,8 @@ class ParticleSet:
     Creates a set particles of a particular type (stars, dark matter or gas)
     using masses, positions, velocities and potential energy.
 
+    :param m: zaraza
+    :type m: Quantity
     Parameters
     ----------
     ptype : ParticleSetType
@@ -91,8 +93,6 @@ class ParticleSet:
         Components of angular momentum of particles.
         Shape: (n,1). Default units: kpc*km/s.
 
-    Return
-    ----------
     arr_ : Instances of `ArrayAccessor`
         Access to the attributes (defined with uttrs) of the provided instance,
         and if they are of atropy.units.Quantity type it converts them into
