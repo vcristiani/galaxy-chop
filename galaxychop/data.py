@@ -66,10 +66,10 @@ class ParticleSet:
 
     Parameters
     ----------
-    ptype : `ParticleSetType`
+    ptype : ParticleSetType
         Indicates if this set corresponds to stars, dark matter or gas.
-    m : `Quantity`
-        Masses. Shape: (n,1). Default unit: M_sun
+    m : `np.ndarray`
+        Particle masses. Shape: (n,1). Default unit: M_sun
     x, y, z : `Quantity`
         Positions. Shape: (n,1). Default unit: kpc.
     vx, vy, vz : `Quantity`
@@ -79,15 +79,17 @@ class ParticleSet:
         Shape: (n,1). Default unit: (km/s)**2.
     softening : `Quantity`, default value = 0
         Softening radius of particles. Shape: (1,). Default unit: kpc.
+    has_potential_ : bool.
+        Indicates whether the potential is charged or not.
     kinetic_energy : `Quantity`
         Specific kinetic energy of particles.
         Shape: (n,1). Default unit: (km/s)**2.
     total_energy : `Quantity`
         Specific total energy of particles.
         Shape: (n,1). Default unit: (km/s)**2.
-    Jx, Jy, Jz : `Quantity`
+    Jx_, Jy_, Jz_ : `Quantity`
         Components of angular momentum of particles.
-        Shape: (n,3). Default units: kpc*km/s.
+        Shape: (n,1). Default units: kpc*km/s.
 
     """
 
