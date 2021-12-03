@@ -12,6 +12,7 @@
 # =============================================================================
 
 import abc
+from collections import OrderedDict
 
 import attr
 from attr import validators as vldt
@@ -87,6 +88,46 @@ class Components:
         labels = np.unique(self.labels)
         probs = True if self.probabilities is not None else False
         return f"Components({length}, labels={labels}, probabilities={probs})"
+
+    def to_dataframe(self, attributes=None):
+        """
+        Convert to pandas data frame.
+
+        This method builds a data frame of all parameters of Components..
+
+        Return
+        ------
+        DataFrame : pandas.DataFrame
+            DataFrame of all Components data.
+
+        """
+        columns_makers = {
+            "labels": lambda: self.labels,
+            "ptypes": lambda: self.ptypes,
+        }
+
+        attributes = (
+            list(columns_makers) + ["probabilities"]
+            if attributes is None
+            else attributes
+        )
+
+        data = OrderedDict()
+        probs_df = None
+        for aname in attributes:
+            if aname == "probabilities":
+                if self.probabilities is not None:
+                    probs_df = pd.DataFrame(self.probabilities)
+                    probs_df.columns = [f"probs_{c}" for c in probs_df.columns]
+            else:
+                mkcolumn = columns_makers[aname]
+                data[aname] = mkcolumn()
+
+        df = pd.DataFrame(data)
+        if probs_df is not None:
+            df = pd.concat([df, probs_df], axis=1)
+
+        return df
 
 
 # =============================================================================

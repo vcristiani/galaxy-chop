@@ -269,7 +269,7 @@ class ParticleSet:
 # =============================================================================
 
 
-@uttr.s(frozen=True)
+@uttr.s(frozen=True, repr=False)
 class Galaxy:
     """
     Galaxy class.
@@ -330,6 +330,14 @@ class Galaxy:
     def __len__(self):
         """len(x) <=> x.__len__()."""
         return len(self.stars) + len(self.dark_matter) + len(self.gas)
+
+    def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
+        stars_repr = f"stars={len(self.stars)}"
+        dm_repr = f"dark_matter={len(self.dark_matter)}"
+        gas_repr = f"gas={len(self.gas)}"
+        has_pot = f"potential={self.has_potential_}"
+        return f"Galaxy({stars_repr}, {dm_repr}, {gas_repr}, {has_pot})"
 
     # UTILITIES ===============================================================
 

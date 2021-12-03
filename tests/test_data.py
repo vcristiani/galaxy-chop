@@ -618,6 +618,25 @@ def test_galaxy_as_kwargs(data_galaxy):
 # =============================================================================
 
 
+def test_Galaxy_repr(galaxy):
+    gal = galaxy(
+        stars_min=100,
+        stars_max=100,
+        dm_min=100,
+        dm_max=100,
+        gas_min=100,
+        gas_max=100,
+    )
+
+    expected = "Galaxy(stars=100, dark_matter=100, gas=100, potential=True)"
+    assert repr(gal) == expected
+
+
+# =============================================================================
+# PLOTTER
+# =============================================================================
+
+
 def test_Galaxy_plot(galaxy):
     gal = galaxy()
     assert isinstance(gal.plot, plot.GalaxyPlotter)
