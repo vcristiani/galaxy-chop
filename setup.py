@@ -11,8 +11,9 @@
 # IMPORTS
 # =============================================================================
 import os
+import setuptools  # noqa
 
-from numpy.distutils.core import Extension, setup
+from numpy.distutils.core import Extension, setup  # noqa
 
 # =============================================================================
 # PATH TO THIS MODULE
