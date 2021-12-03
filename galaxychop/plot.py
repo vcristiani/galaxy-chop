@@ -113,11 +113,11 @@ class GalaxyPlotter:
 
         # labels can be an np array and must be added as a column to the
         # dataframe and assign hue to the name of this new column.
-        if hue is None:
+        if hue is None and labels is not None:
             hue = "Labels"  # Hue is not in ParticleSet, so it is useful
             df.insert(0, hue, labels)  # I place it as the first column
 
-        if lmap is not None:
+        if hue and lmap is not None:
             lmap_func = (
                 (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
             )
@@ -403,7 +403,7 @@ class GalaxyPlotter:
             # I place it as the first column
             df.insert(0, hue, labels)
 
-        if lmap is not None:
+        if hue and lmap is not None:
             lmap_func = (
                 (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
             )

@@ -61,6 +61,8 @@ with open("README.md") as fp:
 
 FORTRAN_DIR = os.path.join(PATH, "galaxychop", "utils", "fortran")
 
+ON_RTD = os.environ.get("READTHEDOCS") == "True"
+
 EXTENSIONS = [
     Extension(
         name="galaxychop.utils.fortran.potential",
@@ -90,7 +92,7 @@ setup(
         "galaxychop.utils",
         "galaxychop.utils.fortran",
     ],
-    ext_modules=EXTENSIONS,
+    ext_modules=EXTENSIONS if not ON_RTD else [],
     license="MIT",
     keywords="galaxy, dynamics",
     classifiers=[

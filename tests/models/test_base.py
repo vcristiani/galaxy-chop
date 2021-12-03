@@ -3,6 +3,8 @@ from galaxychop import models
 
 import numpy as np
 
+import pandas as pd
+
 import pytest
 
 
@@ -44,6 +46,28 @@ def test_Components_bad_len(probs):
         models.Components(
             labels=labels, ptypes=ptypes, probabilities=probabilities
         )
+
+
+@pytest.mark.model
+@pytest.mark.parametrize("probs", [True, False])
+def test_Components_to_dataframe(probs):
+    random = np.random.default_rng(42)
+
+    labels = random.integers(0, 3, 100)
+    ptypes = np.ones(100)
+    probabilities = random.normal(size=100) if probs else None
+
+    components = models.Components(
+        labels=labels, ptypes=ptypes, probabilities=probabilities
+    )
+
+    expected = pd.DataFrame({"labels": labels, "ptypes": ptypes})
+
+    if probs:
+        probs_df = pd.DataFrame({"probs_0": probabilities})
+        expected = pd.concat([expected, probs_df], axis=1)
+
+    pd.testing.assert_frame_equal(components.to_dataframe(), expected)
 
 
 # =============================================================================
