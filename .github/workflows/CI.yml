@@ -84,7 +84,7 @@ jobs:
   
   # build many-linux wheel
   build-manylinux:
-    needs: linux-test
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
