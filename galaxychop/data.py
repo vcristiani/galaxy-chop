@@ -91,17 +91,23 @@ class ParticleSet:
         Components of angular momentum of particles.
         Shape: (n,1). Default units: kpc*km/s.
 
+    Return
+    ----------
+    arr_ : Instances of `ArrayAccessor`
+        Access to the attributes (defined with uttrs) of the provided instance,
+        and if they are of atropy.units.Quantity type it converts them into
+        numpy.ndarray.
     """
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
-    m: np.ndarray = uttr.ib(unit=u.Msun)
-    x: np.ndarray = uttr.ib(unit=u.kpc)
-    y: np.ndarray = uttr.ib(unit=u.kpc)
-    z: np.ndarray = uttr.ib(unit=u.kpc)
-    vx: np.ndarray = uttr.ib(unit=(u.km / u.s))
-    vy: np.ndarray = uttr.ib(unit=(u.km / u.s))
-    vz: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    m = uttr.ib(unit=u.Msun)
+    x = uttr.ib(unit=u.kpc)
+    y = uttr.ib(unit=u.kpc)
+    z = uttr.ib(unit=u.kpc)
+    vx = uttr.ib(unit=(u.km / u.s))
+    vy = uttr.ib(unit=(u.km / u.s))
+    vz = uttr.ib(unit=(u.km / u.s))
 
     potential: np.ndarray = uttr.ib(
         unit=(u.km / u.s) ** 2,
