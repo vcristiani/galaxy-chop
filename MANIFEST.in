@@ -10,6 +10,7 @@ recursive-exclude legacy *
 recursive-exclude legacy_test *
 recursive-exclude resource *
 recursive-exclude tests *
+recursive-exclude tools *
 
 exclude tox.ini
 exclude pyproject.toml

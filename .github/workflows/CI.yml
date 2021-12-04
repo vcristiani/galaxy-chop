@@ -25,6 +25,7 @@ jobs:
           - style
           - docstyle
           - check-manifest
+          - check-headers
           - coverage
           - make-docs
 
@@ -81,7 +82,7 @@ jobs:
          with:
            name: dist
            path: dist
-  
+
   # build many-linux wheel
   build-manylinux:
     needs: test
