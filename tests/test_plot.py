@@ -493,6 +493,7 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
     circ = utils.jcirc(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
+        & np.isfinite(circ.normalized_star_Jz)
         & np.isfinite(circ.eps)
         & np.isfinite(circ.eps_r)
     )
@@ -500,6 +501,7 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
     df = pd.DataFrame(
         {
             "normalized_star_energy": circ.normalized_star_energy[mask],
+            "normalized_star_Jz": circ.normalized_star_Jz[mask],
             "eps": circ.eps[mask],
             "eps_r": circ.eps_r[mask],
         }
