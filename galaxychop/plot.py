@@ -362,19 +362,14 @@ class GalaxyPlotter:
 
         # first we extract the circularity parameters from the galaxy
         # as a dictionary
-        circ = utils.jcirc(self._galaxy, *cbins)._asdict()
+        circ = utils.jcirc(self._galaxy, *cbins)
+        mask = circ.isfinite()
 
-        mask = (
-            np.isfinite(circ["normalized_star_energy"])
-            & np.isfinite(circ["eps"])
-            & np.isfinite(circ["eps_r"])
-        )
+        circ_dict = circ.as_dict()
 
         # determine the correct number of attributes
         attributes = (
-            [k for k in circ.keys() if k not in ("x", "y")]
-            if attributes is None
-            else attributes
+            list(circ_dict.keys()) if attributes is None else attributes
         )
         hue = None
 
@@ -387,7 +382,7 @@ class GalaxyPlotter:
 
         columns = OrderedDict()
         for aname in attributes:
-            columns[aname] = circ[aname][mask]
+            columns[aname] = circ_dict[aname][mask]
 
         df = pd.DataFrame(columns)  # here we create the dataframe
 

@@ -28,7 +28,7 @@ from ..utils import doc_inherit
 # CONSTANTS
 # =============================================================================
 
-_CIRCULARITY_ATTRIBUTES = ("normalized_star_energy", "eps", "eps_r")
+_CIRCULARITY_ATTRIBUTES = utils.JCirc.circularity_attributes()
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
@@ -298,7 +298,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = utils.jcirc(galaxy, *self.cbins)._asdict()
+        jcirc = utils.jcirc(galaxy, *self.cbins).as_dict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars
