@@ -56,7 +56,7 @@ class JCirc:
     eps_r: np.array
         Projected circularity parameter (eps_r: J_p/J_circ)
     x: np.array
-        Normalized specific energy for the particle with the 
+        Normalized specific energy for the particle with the
         maximum z-component of the normalized specific angular
         momentum per bin
     y: np.array
@@ -259,8 +259,8 @@ def jcirc(
     runtime_warnings : Any warning filter action (default "ignore")
         jcirc usually launches RuntimeWarning during the eps calculation
         because there may be particles with XXX (CONTROLAR).
-        By default the function decides to ignore these warnings. 
-        ``runtime_warnings``can be set to any valid "action" in the python
+        By default the function decides to ignore these warnings.
+        `runtime_warnings` can be set to any valid "action" in the python
         warnings module.
 
     Return
@@ -289,7 +289,8 @@ def jcirc(
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
     >>> E_star_norm, Jz_star_norm, eps, eps_r, x, y =
-    >>>         galaxy.jcir(bin0=0.05, bin1=0.005)
+    >>>        galaxy.jcir(bin0=0.05, bin1=0.005)
+
     """
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
