@@ -12,7 +12,7 @@
 
 from ._align import is_star_aligned, star_align
 from ._center import center, is_centered
-from ._circ import DEFAULT_CBIN, jcirc
+from ._circ import DEFAULT_CBIN, JCirc, jcirc
 from ._decorators import doc_inherit
 from ._potential import (
     DEFAULT_POTENTIAL_BACKEND,
@@ -30,6 +30,7 @@ __all__ = [
     "is_centered",
     "star_align",
     "is_star_aligned",
+    "JCirc",
     "jcirc",
     "DEFAULT_CBIN",
     "doc_inherit",

@@ -15,22 +15,85 @@
 # =============================================================================
 
 import warnings
-from collections import namedtuple
+
+import attr
 
 import numpy as np
+
+import uttr
 
 from ..data import ParticleSetType
 
 
 # =============================================================================
-# API
+# CONSTANTS
 # =============================================================================
 
-JCirc = namedtuple(
-    "JCirc", ["normalized_star_energy", "eps", "eps_r", "x", "y"]
-)
 
 DEFAULT_CBIN = (0.05, 0.005)
+"""Default bining of circularity.
+
+Please check the documentation of ``jcirc()``.
+
+"""
+
+
+# =============================================================================
+# API
+# =============================================================================
+@uttr.s(frozen=True, slots=True)
+class JCirc:
+    """Circularity information about the stars particles of a galaxy.
+
+    Parameters
+    ----------
+    normalized_star_energy: np.array
+    eps: np.array
+    eps_r: np.array
+    x: np.array
+    y: np.array
+
+    """
+
+    normalized_star_energy = uttr.ib()
+    eps = uttr.ib()
+    eps_r = uttr.ib()
+
+    x = uttr.ib(metadata={"asdict": False})
+    y = uttr.ib(metadata={"asdict": False})
+
+    @classmethod
+    def circularity_attributes(cls):
+        """Retrieve all the circularity attributes stored in the JCirc class.
+
+        This method returns a tuple of str ignoring those that are marked as
+        "asdict=False".
+
+        """
+        fields = [
+            f.name for f in attr.fields(cls) if f.metadata.get("asdict", True)
+        ]
+        fields.sort()
+        return tuple(fields)
+
+    def as_dict(self):
+        """Convert the instance to a dict.
+
+        Attributes are ignored if they are marked as "asdict=False".
+
+        """
+        return attr.asdict(
+            self, filter=lambda a, v: a.metadata.get("asdict", True)
+        )
+
+    def isfinite(self):
+        """Return a mask of which elements are finite in all attributes.
+
+        Attributes are ignored if they are marked as "asdict=False".
+
+        """
+        selfd = self.as_dict()
+        return np.all([np.isfinite(v) for v in selfd.values()], axis=0)
 
 
 def _jcirc(galaxy, bin0, bin1):
@@ -184,15 +247,8 @@ def jcirc(
 
     Return
     ------
-    tuple : `float`
-        (E_star_norm, eps, eps_r, x, y): Normalized specific energy of
-        the stars, circularity parameter (J_z/J_circ), projected
-        circularity parameter (J_p/J_circ), the normalized specific
-        energy for the particle with the maximum z-specific angular
-        momentum component per the bin (x), and the maximum of z-specific
-        angular momentum component (y).
-        See section Notes for more details.
-        Shape(n_s, 1). Unit: dimensionless
+    JCirc :
+        Circularity attributes of the star components of the galaxy
 
     Notes
     -----
