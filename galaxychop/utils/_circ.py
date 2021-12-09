@@ -48,6 +48,7 @@ class JCirc:
     Parameters
     ----------
     normalized_star_energy: np.array
+    normalized_star_Jz: np.array
     eps: np.array
     eps_r: np.array
     x: np.array
@@ -56,6 +57,7 @@ class JCirc:
     """
 
     normalized_star_energy = uttr.ib()
+    normalized_star_Jz = uttr.ib()
     eps = uttr.ib()
     eps_r = uttr.ib()
 
@@ -190,26 +192,31 @@ def _jcirc(galaxy, bin0, bin1):
     eps_r = Jr_star_norm / j_circ
 
     E_star_norm_ = np.full(len(Etot_s), np.nan)
+    Jz_star_norm_ = np.full(len(Jz_star_norm), np.nan)
     eps_ = np.full(len(Etot_s), np.nan)
     eps_r_ = np.full(len(Etot_s), np.nan)
 
     E_star_norm_[bound_star] = E_star_norm
+    Jz_star_norm_[bound_star] = Jz_star_norm
     eps_[bound_star] = eps
     eps_r_[bound_star] = eps_r
 
     # We remove particles that have circularity < -1 and circularity > 1.
     mask = np.where(eps_ > 1.0)[0]
     E_star_norm_[mask] = np.nan
+    Jz_star_norm_[mask] = np.nan
     eps_[mask] = np.nan
     eps_r_[mask] = np.nan
 
     mask = np.where(eps_ < -1.0)[0]
     E_star_norm_[mask] = np.nan
+    Jz_star_norm_[mask] = np.nan
     eps_[mask] = np.nan
     eps_r_[mask] = np.nan
 
     return JCirc(
         normalized_star_energy=E_star_norm_,
+        normalized_star_Jz=Jz_star_norm_,
         eps=eps_,
         eps_r=eps_r_,
         x=x,
@@ -227,6 +234,7 @@ def jcirc(
     Process energy and angular momentum.
 
     Calculation of Normalized specific energy of the stars,
+    z-component normalized specific angular momentum of the stars,
     circularity parameter calculation, projected circularity parameter,
     and the points to build the function of the circular angular momentum.
 
@@ -261,7 +269,8 @@ def jcirc(
     Examples
     --------
     This returns the normalized specific energy of stars (E_star_norm), the
-    circularity parameters (eps : J_z/J_circ and
+    z-component normalized specific angular momentum of the stars
+    (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
     eps_r: J_p/J_circ), and the normalized specific energy for the particle
     with the maximum z-component of the normalized specific angular
     momentum per bin (`x`) and the maximum value of the z-component of the
@@ -269,7 +278,8 @@ def jcirc(
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> E_star_norm, eps, eps_r, x, y = galaxy.jcir(bin0=0.05, bin1=0.005)
+    >>> E_star_norm, Jz_star_norm, eps, eps_r, x, y =
+    >>>         galaxy.jcir(bin0=0.05, bin1=0.005)
     """
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
