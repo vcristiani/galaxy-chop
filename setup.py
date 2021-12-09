@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+# This file is part of
+# the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
+# Copyright (c) 2021, Valeria Cristiani
+# License: MIT
+# Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
+
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # =============================================================================
@@ -11,8 +17,9 @@
 # IMPORTS
 # =============================================================================
 import os
+import setuptools  # noqa
 
-from numpy.distutils.core import Extension, setup
+from numpy.distutils.core import Extension, setup  # noqa
 
 # =============================================================================
 # PATH TO THIS MODULE

@@ -1,6 +1,6 @@
 # This file is part of
 # the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
-# Copyright (c) 2020, Valeria Cristiani
+# Copyright (c) 2021, Valeria Cristiani
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
@@ -64,36 +64,33 @@ class ParticleSet:
     Creates a set particles of a particular type (stars, dark matter or gas)
     using masses, positions, velocities and potential energy.
 
-    :param m: zaraza
-    :type m: Quantity
     Parameters
     ----------
     ptype : ParticleSetType
         Indicates if this set corresponds to stars, dark matter or gas.
-    m : `np.ndarray`
+    m : Quantity
         Particle masses. Shape: (n,1). Default unit: M_sun
-    x, y, z : `Quantity`
+    x, y, z : Quantity
         Positions. Shape: (n,1). Default unit: kpc.
-    vx, vy, vz : `Quantity`
+    vx, vy, vz : Quantity
         Velocities. Shape: (n,1). Default unit: km/s.
-    potential : `Quantity`, default value = 0
-        Specific potential energy of particles.
-        Shape: (n,1). Default unit: (km/s)**2.
-    softening : `Quantity`, default value = 0
+    potential : Quantity, default value = 0
+        Specific potential energy of particles. Shape: (n,1). Default unit:
+        (km/s)**2.
+    softening : Quantity, default value = 0
         Softening radius of particles. Shape: (1,). Default unit: kpc.
+    kinetic_energy : Quantity
+        Specific kinetic energy of particles. Shape: (n,1). Default unit:
+        (km/s)**2.
+    total_energy : Quantity
+        Specific total energy of particles. Shape: (n,1). Default unit:
+        (km/s)**2.
+    Jx_, Jy_, Jz_ : Quantity
+        Components of angular momentum of particles. Shape: (n,1). Default
+        units: kpc*km/s.
     has_potential_ : bool.
-        Indicates whether the potential is charged or not.
-    kinetic_energy : `Quantity`
-        Specific kinetic energy of particles.
-        Shape: (n,1). Default unit: (km/s)**2.
-    total_energy : `Quantity`
-        Specific total energy of particles.
-        Shape: (n,1). Default unit: (km/s)**2.
-    Jx_, Jy_, Jz_ : `Quantity`
-        Components of angular momentum of particles.
-        Shape: (n,1). Default units: kpc*km/s.
-
-    arr_ : Instances of `ArrayAccessor`
+        Indicates if the specific potential energy is computed.
+    arr_ : Instances of ``ArrayAccessor``
         Access to the attributes (defined with uttrs) of the provided instance,
         and if they are of atropy.units.Quantity type it converts them into
         numpy.ndarray.
@@ -171,9 +168,8 @@ class ParticleSet:
         """
         Particle sets length validator.
 
-        This method determines that the length of the different particle
-        attributes are the same families are the same.
-
+        This method determines that the lengths of the different attributes of
+        particles that are of the same family are the same.
         """
         # we create a dictionary where we are going to put the length as keys,
         # and the name of component with this length inside a set.
@@ -202,7 +198,7 @@ class ParticleSet:
 
     @property
     def angular_momentum_(self):
-        """Components of angular momentum in units of kpc*km/s."""
+        """Components of specific angular momentum in units of kpc*km/s."""
         arr = self.arr_
         return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
 
@@ -225,18 +221,20 @@ class ParticleSet:
         """
         Convert to pandas data frame.
 
-        This method builds a data frame of all parameters of ParticleSet class.
+        This method constructs a data frame with the particles and parameters
+        of ``ParticleSet`` class.
 
         Parameters
         ----------
         attributes: tuple, default value = None
-            Dictionary keys of all ParticleSet class parameters.
+            Dictionary keys of ParticleSet parameters used to create the data
+            frame. If it's None, the data frame is constructed from all the
+            parameters of the ``ParticleSet`` class.
 
         Return
         ------
         DataFrame : pandas data frame
-            Data frame of all ParticleSet class parameters
-            of the particles.
+            Data frame of the particles with the selected parameters.
 
         """
         arr = self.arr_
@@ -282,16 +280,16 @@ class Galaxy:
     """
     Galaxy class.
 
-    Builds a galaxy object from a ParticleSet for each type
+    Builds a galaxy object from a ``ParticleSet`` for each type
     of particle (stars, dark matter and gas).
 
     Parameters
     ----------
-    stars : `ParticleSet`
-        Instance of ParticleSet with stars particles.
-    dark_matter : `ParticleSet`
-        Instance of ParticleSet with dark matter particles.
-    gas : `ParticleSet`
+    stars : ``ParticleSet``
+        Instance of ``ParticleSet`` with stars particles.
+    dark_matter : ``ParticleSet``
+        Instance of ``ParticleSet`` with dark matter particles.
+    gas : ``ParticleSet``
         Instance of ParticleSet with gas particles.
 
     Attributes
@@ -353,21 +351,22 @@ class Galaxy:
         """
         Convert to pandas data frame.
 
-        This method builds a data frame from the particle components of the
-        galaxy.
+        This method builds a data frame from the particles of the Galaxy.
 
         Parameters
         ----------
         ptypes: tuple, default value = None
-            Strings indicating the ParticleSetType to include. If None,
+            Strings indicating the ParticleSetType to include. If it's None,
             all particle types are included.
         attributes: tuple, default value = None
-            Dictionary keys of ParticleSet parameters.
+            Dictionary keys of ParticleSet parameters used to create the data
+            frame. If it's None, the data frame is constructed from all the
+            parameters of the ``ParticleSet`` class.
 
         Return
         ------
         DataFrame : pandas data frame
-            Data frame of all Galaxy class parameters.
+            Data frame of Galaxy with selected particles and parameters.
 
         """
         psets = [self.stars, self.dark_matter, self.gas]
