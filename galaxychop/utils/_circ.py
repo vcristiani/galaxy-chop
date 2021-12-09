@@ -48,11 +48,20 @@ class JCirc:
     Parameters
     ----------
     normalized_star_energy: np.array
+        Normalized specific energy of stars
     normalized_star_Jz: np.array
+        z-component normalized specific angular momentum of the stars
     eps: np.array
+        Circularity parameter (eps : J_z/J_circ)
     eps_r: np.array
+        Projected circularity parameter (eps_r: J_p/J_circ)
     x: np.array
+        Normalized specific energy for the particle with the 
+        maximum z-component of the normalized specific angular
+        momentum per bin
     y: np.array
+        Maximum value of the z-component of the normalized specific
+        angular momentum per bin.
 
     """
 
@@ -248,10 +257,11 @@ def jcirc(
         Size of the specific energy bin of the outer part of the galaxy,
         in the range of (-0.1, 0) of the normalized energy.
     runtime_warnings : Any warning filter action (default "ignore")
-        jcirc suele lanzar RuntimeWarning durante el calculo de eps debido
-        a que pueden haber particulas XXX. Por esto por defecto la funcion
-        decide ignorar estas advertencias. ``runtime_warnings`` puede valer
-        cualquier "action" valida en el modulo warnings de python.
+        jcirc usually launches RuntimeWarning during the eps calculation
+        because there may be particles with XXX (CONTROLAR).
+        By default the function decides to ignore these warnings. 
+        ``runtime_warnings``can be set to any valid "action" in the python
+        warnings module.
 
     Return
     ------
