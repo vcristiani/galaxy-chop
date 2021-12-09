@@ -1,6 +1,6 @@
 # Welcome to **GalaxyChop**
 
-![logo](docs/source/_static/galaxychop_logo.png)
+![logo](docs/source/_static/galaxychop_logo_wb.png)
 
 <!-- BODY -->
 
