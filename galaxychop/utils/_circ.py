@@ -257,7 +257,7 @@ def jcirc(
         in the range of (-0.1, 0) of the normalized energy.
     runtime_warnings : Any warning filter action (default "ignore")
         jcirc usually launches RuntimeWarning during the eps calculation
-        because there may be particles with XXX (CONTROLAR).
+        because there may be some particle with jcirc=0.
         By default the function decides to ignore these warnings.
         `runtime_warnings` can be set to any valid "action" in the python
         warnings module.
