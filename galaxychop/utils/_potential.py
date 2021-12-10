@@ -51,16 +51,16 @@ def fortran_potential(x, y, z, m, softening):
 
     Parameters
     ----------
-    x, y, z : `np.ndarray`
-        Positions of particles. Shape(n,1)
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    softening : `float`, optional
-        Softening parameter. Shape(1,)
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
 
     Returns
     -------
-    np.ndarray : `float`
+    np.ndarray : float
         Specific potential energy of particles.
 
     """
@@ -75,16 +75,16 @@ def numpy_potential(x, y, z, m, softening):
 
     Parameters
     ----------
-    x, y, z : `np.ndarray`
-        Positions of particles. Shape(n,1)
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    softening : `float`, optional
-        Softening parameter. Shape(1,)
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape:(n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
 
     Returns
     -------
-    np.ndarray : `float`
+    np.ndarray : float
         Specific potential energy of particles.
 
     """
@@ -123,13 +123,13 @@ def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
+    galaxy : ``Galaxy class`` object
 
     Returns
     -------
-    galaxy: new object of Galaxy class.
-        A new galaxy object the specific potential energy
-        of particles calculated.
+    galaxy: new ``Galaxy class`` object
+        A new galaxy object with the specific potential energy of particles
+        calculated.
     """
     if galaxy.has_potential_:
         raise ValueError("galaxy are already calculated")

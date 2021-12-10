@@ -48,20 +48,19 @@ class JCirc:
     Parameters
     ----------
     normalized_star_energy: np.array
-        Normalized specific energy of stars
+        Normalized specific energy of stars.
     normalized_star_Jz: np.array
-        z-component normalized specific angular momentum of the stars
+        z-component normalized specific angular momentum of the stars.
     eps: np.array
-        Circularity parameter (eps : J_z/J_circ)
+        Circularity parameter (eps : J_z/J_circ).
     eps_r: np.array
-        Projected circularity parameter (eps_r: J_p/J_circ)
+        Projected circularity parameter (eps_r: J_p/J_circ).
     x: np.array
-        Normalized specific energy for the particle with the
-        maximum z-component of the normalized specific angular
-        momentum per bin
+        Normalized specific energy for the particle with the maximum
+        z-component of the normalized specific angular momentum per bin.
     y: np.array
-        Maximum value of the z-component of the normalized specific
-        angular momentum per bin.
+        Maximum value of the z-component of the normalized specific angular
+        momentum per bin.
 
     """
 
@@ -240,20 +239,20 @@ def jcirc(
     runtime_warnings="ignore",
 ):
     """
-    Process energy and angular momentum.
+    Calculate galaxy stars particles circularity information.
 
-    Calculation of Normalized specific energy of the stars,
-    z-component normalized specific angular momentum of the stars,
-    circularity parameter calculation, projected circularity parameter,
-    and the points to build the function of the circular angular momentum.
+    Calculation of Normalized specific energy of the stars, z-component
+    normalized specific angular momentum of the stars, circularity parameter,
+    projected circularity parameter, and the points to build the function of
+    the circular angular momentum.
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
-    bin0 : `float`. Default=0.05
+    galaxy : ``Galaxy class`` object
+    bin0 : float. Default=0.05
         Size of the specific energy bin of the inner part of the galaxy,
         in the range of (-1, -0.1) of the normalized energy.
-    bin1 : `float`. Default=0.005
+    bin1 : float. Default=0.005
         Size of the specific energy bin of the outer part of the galaxy,
         in the range of (-0.1, 0) of the normalized energy.
     runtime_warnings : Any warning filter action (default "ignore")
@@ -270,11 +269,11 @@ def jcirc(
 
     Notes
     -----
-    The `x` and `y` are calculated from the binning in the
-    normalized specific energy. In each bin, the particle with the
-    maximum value of z-component of standardized specific angular
-    momentum is selected. This value is assigned to the `y` parameter
-    and its corresponding normalized specific energy pair value to `x`.
+    The `x` and `y` are calculated from the binning in the normalized specific
+    energy. In each bin, the particle with the maximum value of z-component of
+    standardized specific angular momentum is selected. This value is assigned
+    to the `y` parameter and its corresponding normalized specific energy pair
+    value to `x`.
 
     Examples
     --------
@@ -282,9 +281,9 @@ def jcirc(
     z-component normalized specific angular momentum of the stars
     (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
     eps_r: J_p/J_circ), and the normalized specific energy for the particle
-    with the maximum z-component of the normalized specific angular
-    momentum per bin (`x`) and the maximum value of the z-component of the
-    normalized specific angular momentum per bin (`y`).
+    with the maximum z-component of the normalized specific angular momentum
+    per bin (`x`) and the maximum value of the z-component of the normalized
+    specific angular momentum per bin (`y`).
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)

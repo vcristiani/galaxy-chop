@@ -32,40 +32,40 @@ class DynamicStarsGaussianDecomposerABC(
     Parameters
     ----------
     covariance_type : {‘full’, ‘tied’, ‘diag’, ‘spherical’}, default="full"
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into `scikit-learn`
         library.
     tol : float, default=0.001
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     reg_covar : float, default=1e-06
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     max_iter : float, default=100
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     n_init : int, default=10
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     init_params : {‘kmeans’, ‘random’}, default="kmeans"
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     weights_init : array-like of shape (n_components, ),  default=None
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     means_init : array-like of shape (n_components, n_features), default=None
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     precisions_init : array-like, default=None
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     random_state : int, default=None
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     warm_start : bool, default=False
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     verbose : int, default=0
-        Parameter of :py:class:`GaussianMixture` class into `scikit-learn`
+        Parameter of :py:class:``GaussianMixture`` class into ``scikit-learn``
         library.
     verbose_interval : int, default=10
     """
@@ -103,21 +103,21 @@ class DynamicStarsGaussianDecomposerABC(
 class GaussianMixture(DynamicStarsGaussianDecomposerABC):
     """GaussianMixture class.
 
-    Implementation of the method for dynamically decomposing galaxies
-    described by Obreja et al.(2018) [7]_ .
+    Implementation of the method for dynamically decomposing galaxies described
+    by Obreja et al.(2018) [7]_ .
 
     Parameters
     ----------
     n_components: int, default=2
         The number of mixture components. Parameter of
-        :py:class:`GaussianMixture` class into `scikit-learn` library.
+        :py:class:``GaussianMixture`` class into ``scikit-learn`` library.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GaussianMixture` class into `scikit-learn` library.
+        :py:class:``GaussianMixture`` class into ``scikit-learn`` library.
 
     Notes
     -----
-    More information for `GaussianMixture` class:
+    More information for ``GaussianMixture`` class:
         https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
 
     Examples
@@ -137,7 +137,6 @@ class GaussianMixture(DynamicStarsGaussianDecomposerABC):
         Monthly Notices of the Royal Astronomical Society, vol. 477, no. 4,
         pp. 4915-4930, 2018. doi:10.1093/mnras/sty1022.
         `<https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract>`_
-        Obtain the columns of the quantities to be used.
     """
 
     n_components = hparam(default=2)
@@ -194,7 +193,7 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
     n_jobs : int, default=None
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
-        :py:class:`GaussianMixture` class into `scikit-learn` library.
+        :py:class:``GaussianMixture`` class into ``scikit-learn`` library.
 
     Notes
     -----

@@ -33,8 +33,8 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     ----------
     eps_cut : float, default=0.6
         Cut-off value in the circularity parameter. Stellar particles with
-        eps>eps_cut are assigned to the disk and stellar particles with
-        eps<=eps_cut to the spheroid.
+        eps > eps_cut are assigned to the disk and stellar particles with
+        eps <= eps_cut to the spheroid.
 
     Notes
     -----
@@ -99,7 +99,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         Notes
         -----
         In this model the parameter space is given by
-            eps: circularity parameter (J_z/J_circ)
+            eps: circularity parameter (J_z/J_circ).
         """
         return ["eps"]
 

@@ -214,9 +214,9 @@ class GalaxyPlotter:
     def scatter(self, x, y, ptypes=None, labels=None, lmap=None, **kwargs):
         """Draw a scatter plot of galaxy properties.
 
-        Shows the relationship between x and y.
-        This function groups the values of all galaxy particles according
-        to some ``ParticleSet class`` parameter.
+        Shows the relationship between x and y. This function groups the values
+        of all galaxy particles according to some ``ParticleSet class``
+        parameter.
 
         Parameters
         ----------
@@ -252,9 +252,9 @@ class GalaxyPlotter:
     def hist(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
         """Draw a histogram of galaxy properties.
 
-        Plot univariate or bivariate histograms to show distributions
-        of datasets. This function groups the values of all galaxy
-        particles according to some ``ParticleSet class`` parameter.
+        Plot univariate or bivariate histograms to show distributions of
+        datasets. This function groups the values of all galaxy particles
+        according to some ``ParticleSet class`` parameter.
 
         Parameters
         ----------
@@ -307,8 +307,7 @@ class GalaxyPlotter:
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.kdeplot``.
@@ -337,11 +336,12 @@ class GalaxyPlotter:
         ----------
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum. Shape: (2,).
+            Dafult value = (0.05, 0.005).
         attributes : keys of ``JCirc`` tuple.
             Keys of the normalized specific energy, the circularity parameter
             (J_z/J_circ) and/or the projected circularity parameter
-            (J_p/J_circ)  of the stellar particles.
+            (J_p/J_circ) of the stellar particles.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
         lmap :  dicts
@@ -429,15 +429,15 @@ class GalaxyPlotter:
         ----------
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum. Shape: (2,).
+            Dafult value = (0.05, 0.005).
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters. Default value = None
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs :
             Additional keyword arguments are passed and are documented in
             ``seaborn.pairplot``.
@@ -467,8 +467,8 @@ class GalaxyPlotter:
     ):
         """Draw a distribution plots onto a FacetGrid.
 
-        Plot univariate or bivariate distributions of datasets using
-        different approachs for visualizing the normalized specific energy, the
+        Plot univariate or bivariate distributions of datasets using different
+        approachs for visualizing the normalized specific energy, the
         circularity parameter (J_z/J_circ) and/or the projected circularity
         parameter (J_p/J_circ)  of the stellar particles.
         This function groups the values of stellar particles according to some
@@ -482,13 +482,13 @@ class GalaxyPlotter:
             Default value y = None.
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum. Shape: (2,).
+            Dafult value = (0.05, 0.005).
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented in
             ``seaborn.displot``.
@@ -518,9 +518,8 @@ class GalaxyPlotter:
     ):
         """Draw a scatter plot of circularity and normalized energy.
 
-        Shows the relationship between x and y.
-        This function groups the values of stellar particles according to some
-        keys of ``JCirc`` tuple.
+        Shows the relationship between x and y. This function groups the values
+        of stellar particles according to some keys of ``JCirc`` tuple.
 
         Parameters
         ----------
@@ -529,13 +528,13 @@ class GalaxyPlotter:
             Default value y = None.
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum. Shape: (2,).
+            Dafult value = (0.05, 0.005).
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.scatterplot``.
@@ -565,8 +564,8 @@ class GalaxyPlotter:
     ):
         """Draw a histogram of circularity and normalized energy.
 
-        Plot univariate or bivariate histograms to show distributions
-        of datasets. This function groups the values of stellar particles
+        Plot univariate or bivariate histograms to show distributions of
+        datasets. This function groups the values of stellar particles
         according to some keys of ``JCirc`` tuple.
 
         Parameters
@@ -576,13 +575,13 @@ class GalaxyPlotter:
             Default value y = None.
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum.  Shape: (2,).
+            Dafult value = (0.05, 0.005).
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.histplot``.
@@ -627,13 +626,13 @@ class GalaxyPlotter:
             Default value y = None.
         cbins : tuple
             It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.
+            the circular angular momentum. Shape: (2,).
+            Dafult value = (0.05, 0.005).
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
-            Name assignment to the label.
-            Default value = None
+            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.kdeplot``.

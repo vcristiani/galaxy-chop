@@ -125,7 +125,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         Notes
         -----
         In this model the parameter space is given by
-            eps: circularity parameter (J_z/J_circ)
+            eps: circularity parameter (J_z/J_circ).
         """
         return ["eps"]
 
@@ -196,8 +196,8 @@ class JEHistogram(JHistogram):
     Parameters
     ----------
     n_bin_E: int, default=20
-        Number of bins needed to build the normalised specific
-        energy histogram.
+        Number of bins needed to build the normalised specific energy
+        histogram.
     **kwargs: key, value mappings
         Other optional keyword arguments are passed through to
         :py:class:`JHistogram` classes.

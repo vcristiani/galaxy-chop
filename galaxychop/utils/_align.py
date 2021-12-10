@@ -36,28 +36,27 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     """
     Rotation matrix calculation.
 
-    Calculates the rotation matrix that aligns the TOTAL
-    angular momentum of the particles with the z-axis.
-    Optionally, only particles within a cutting radius `(r_cut)` can be used.
+    Calculates the rotation matrix that aligns the TOTAL angular momentum of
+    the particles with the z-axis. Optionally, only particles within a cutting
+    radius `(r_cut)` can be used.
 
     Parameters
     ----------
-    m : `np.ndarray`
-        Masses of particles. Shape(n,1)
-    x, y, z : `np.ndarray`
-        Positions x, y, z of particles. Shape(n,1)
-    Jx, Jy, Jz : `np.ndarray`
-        Components of angular momentum of particles. Shape(n,1)
-    r_cut : `float`, optional
-        The default is ``None``; if provided, it must be
-        positive and the rotation matrix `A` is calculated
-        from the particles with radii smaller than
-        r_cut.
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    x, y, z : np.ndarray
+        Positions x, y, z of particles. Shape: (n,1).
+    Jx, Jy, Jz : np.ndarray
+        Components of angular momentum of particles. Shape: (n,1).
+    r_cut : float, optional
+        Default value =  None. If it's provided, it must be positive and the
+        rotation matrix `A` is calculated from the particles with radii smaller
+        than r_cut.
 
     Returns
     -------
-    A : `np.ndarray`
-        Rotation matrix. Shape(3,3)
+    A : np.ndarray
+        Rotation matrix. Shape: (3,3).
     """
     mask = _make_mask(x, y, z, r_cut)
 
@@ -91,24 +90,23 @@ def star_align(galaxy, *, r_cut=None):
     """Align the galaxy.
 
     Rotates the positions, velocities and angular momentum of the
-    particles so that the total angular moment coincides with the z-axis.
-    Optionally, only particles within a cutting radius
+    particles so that the total angular moment of the stars particles coincides
+    with the z-axis. Optionally, only stars particles within a cutting radius
     `(r_cut)` can be used to calculate the rotation matrix.
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
-    r_cut : `float`, optional
-        The default is ``None``; if provided, it must be
-        positive and the rotation matrix `A` is calculated
-        from the particles with radii smaller than
-        r_cut.
+    galaxy : ``Galaxy class`` object
+    r_cut : float, optional
+        Default value =  None. If it's provided, it must be positive and the
+        rotation matrix `A` is calculated from the particles with radii smaller
+        than r_cut.
 
     Returns
     -------
-    galaxy: new object of Galaxy class.
-        A new galaxy object with their total angular momentum
-        aligned with the z-axis.
+    galaxy: new ``Galaxy class`` object
+        A new galaxy object with their total angular momentum aligned with the
+        z-axis.
     """
     if r_cut is not None and r_cut <= 0.0:
         raise ValueError("r_cut must not be lower than 0.")
@@ -180,22 +178,21 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
-    r_cut : `float`, optional
-        The default is ``None``; if provided, it must be
-        positive and the rotation matrix `A` is calculated
-        from the particles with radii smaller than
-        r_cut.
+    galaxy : ``Galaxy class`` object
+    r_cut : float, optional
+        Default value =  None. If it's provided, it must be positive and the
+        rotation matrix `A` is calculated from the particles with radii smaller
+        than r_cut.
     rtol : float
-        Relative tolerance.
+        Relative tolerance. Default value = 1e-05.
     atol : float
-        Absolute tolerance.
+        Absolute tolerance. Default value = 1e-08.
 
     Returns
     -------
     bool
-        True if the total angular momentum of the galaxy is aligned
-        with the z-axis, False otherwise.
+        True if the total angular momentum of the galaxy is aligned with the
+        z-axis, False otherwise.
     """
     # Now we extract only the needed column to rotate the galaxy
     df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])

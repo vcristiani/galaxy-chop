@@ -36,19 +36,19 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         generate.
     init : {‘k-means++’, ‘random’}, callable or array-like of shape
     (n_clusters, n_features), default="k-means++"
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     n_init : int, default=10
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     max_iter : int, default=300
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     tol : float, default=0.0001
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     verbose : int, default=0
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     random_state : int, default=None
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     algorithm : {“auto”, “full”, “elkan”}, default="auto"
-        Parameter of :py:class:`k-Means` class into `scikit-learn` library.
+        Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
 
     Notes
     -----

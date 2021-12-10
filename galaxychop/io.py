@@ -83,7 +83,7 @@ def read_hdf5(
 
     Parameters
     ----------
-    path_or_stream : str or file-like.
+    path_or_stream : str or file-like
         Path to the h5 file containing the properties of the galaxy particles.
     softening_s : float, default value = 0
         Softening radius of star particles.
@@ -94,7 +94,7 @@ def read_hdf5(
 
     Returns
     -------
-    galaxy : object of Galaxy class.
+    galaxy : ``Galaxy class`` object.
     """
     with h5py.File(path_or_stream, "r") as f:
         star_table = Table.read(f["stars"])
@@ -132,7 +132,7 @@ def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
 
     Parameters
     ----------
-    path_or_stream : str or file-like.
+    path_or_stream : str or file-like
         Path or file like objet to the h5 to store the galaxy.
     galaxy : galaxychop.data.Galaxy
         The galaxy to store.
@@ -202,21 +202,21 @@ def read_npy(
 
     Parameters
     ----------
-    path_or_stream_star : str or file like.
+    path_or_stream_star : str or file like
         Path to the npy file containing the properties of the star particles.
-    path_or_stream_dark : str or file like.
+    path_or_stream_dark : str or file like
         Path to the npy file containing the properties of the dark matter
         particles.
-    path_or_stream_gas : str or file like.
+    path_or_stream_gas : str or file like
         Path to the npy file containing the properties of the gas particles.
     columns: list
         Specify column names.
-    path_or_stream_pot_s : str or file like.
+    path_or_stream_pot_s : str or file like
         Path to the npy file containing the potentials of the star particles.
-    path_or_stream_pot_dm : str or file like.
+    path_or_stream_pot_dm : str or file like
         Path to the npy file containing the potentials of the dark matter
         particles.
-    path_or_stream_pot_g : str or file like.
+    path_or_stream_pot_g : str or file like
         Path to the npy file containing the potentials of the gas particles.
     softening_s : float, default value = 0
         Softening radius of star particles.
@@ -227,7 +227,7 @@ def read_npy(
 
     Returns
     -------
-    galaxy : object of Galaxy class.
+    galaxy : ``Galaxy class`` object.
     """
     particles_star = np.load(path_or_stream_star)
     particles_dark = np.load(path_or_stream_dark)

@@ -32,7 +32,7 @@ class ParticleSetType(enum.IntEnum):
     Name of the particle type.
 
     Name and number that are used to describe the particle
-    type in the ParticleSet class.
+    type in the ``ParticleSet class``.
     """
 
     STARS = 0
@@ -71,9 +71,9 @@ class ParticleSet:
     m : Quantity
         Particle masses. Shape: (n,1). Default unit: M_sun
     x, y, z : Quantity
-        Positions. Shape: (n,1). Default unit: kpc.
+        Positions. Shapes: (n,1). Default unit: kpc.
     vx, vy, vz : Quantity
-        Velocities. Shape: (n,1). Default unit: km/s.
+        Velocities. Shapes: (n,1). Default unit: km/s.
     potential : Quantity, default value = 0
         Specific potential energy of particles. Shape: (n,1). Default unit:
         (km/s)**2.
@@ -86,7 +86,7 @@ class ParticleSet:
         Specific total energy of particles. Shape: (n,1). Default unit:
         (km/s)**2.
     Jx_, Jy_, Jz_ : Quantity
-        Components of angular momentum of particles. Shape: (n,1). Default
+        Components of angular momentum of particles. Shapes: (n,1). Default
         units: kpc*km/s.
     has_potential_ : bool.
         Indicates if the specific potential energy is computed.
@@ -98,13 +98,13 @@ class ParticleSet:
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
-    m = uttr.ib(unit=u.Msun)
-    x = uttr.ib(unit=u.kpc)
-    y = uttr.ib(unit=u.kpc)
-    z = uttr.ib(unit=u.kpc)
-    vx = uttr.ib(unit=(u.km / u.s))
-    vy = uttr.ib(unit=(u.km / u.s))
-    vz = uttr.ib(unit=(u.km / u.s))
+    m: np.ndarray = uttr.ib(unit=u.Msun)
+    x: np.ndarray = uttr.ib(unit=u.kpc)
+    y: np.ndarray = uttr.ib(unit=u.kpc)
+    z: np.ndarray = uttr.ib(unit=u.kpc)
+    vx: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    vy: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    vz: np.ndarray = uttr.ib(unit=(u.km / u.s))
 
     potential: np.ndarray = uttr.ib(
         unit=(u.km / u.s) ** 2,
@@ -222,14 +222,14 @@ class ParticleSet:
         Convert to pandas data frame.
 
         This method constructs a data frame with the particles and parameters
-        of ``ParticleSet`` class.
+        of ``ParticleSet class``.
 
         Parameters
         ----------
         attributes: tuple, default value = None
             Dictionary keys of ParticleSet parameters used to create the data
             frame. If it's None, the data frame is constructed from all the
-            parameters of the ``ParticleSet`` class.
+            parameters of the ``ParticleSet class``.
 
         Return
         ------
@@ -361,7 +361,7 @@ class Galaxy:
         attributes: tuple, default value = None
             Dictionary keys of ParticleSet parameters used to create the data
             frame. If it's None, the data frame is constructed from all the
-            parameters of the ``ParticleSet`` class.
+            parameters of the ``ParticleSet class``.
 
         Return
         ------
@@ -423,7 +423,7 @@ class Galaxy:
 
         Returns
         -------
-        tuple : `Quantity`
+        tuple : Quantity
             (k_s, k_dm, k_g): Specific kinetic energy of stars, dark matter and
             gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
 
@@ -448,11 +448,11 @@ class Galaxy:
 
         This property doesn't compute the potential energy, only returns its
         value if it is already computed, i.e. ``has_potential_`` is True. To
-        compute the potential use the `galaxychop.potential` function.
+        compute the potential use the ``galaxychop.potential`` function.
 
         Returns
         -------
-        tuple : `Quantity`
+        tuple : Quantity
             (p_s, p_dm, p_g): Specific potential energy of stars, dark matter
             and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
 
@@ -476,16 +476,16 @@ class Galaxy:
     @property
     def total_energy_(self):
         """
-        Specific energy calculation.
+        Specific total energy calculation.
 
-        Calculates the specific energy of dark matter, star and gas particles.
+        Calculates the specific total energy of dark matter, star and gas
+        particles.
 
         Returns
         -------
-        tuple : `Quantity`
+        tuple : Quantity
             (Etot_s, Etot_dm, Etot_g): Specific total energy of stars, dark
-            matter and gas respectively.
-            Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+            matter and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
 
         Examples
         --------
@@ -506,21 +506,22 @@ class Galaxy:
     @property
     def angular_momentum_(self):
         """
-        Angular momentum calculation.
+        Specific angular momentum calculation.
 
-        Compute the angular momentum of stars, dark matter and gas particles.
+        Compute the specific angular momentum of stars, dark matter and gas
+        particles.
 
         Returns
         -------
         tuple : `Quantity`
-            (J_s, J_dm, J_g): Angular momentum of stars, dark
-            matter and gas respectively.
-            Shape(n_s, n_dm, n_g). Unit: (kpc * km / s)
+            (J_s, J_dm, J_g): Specific angular momentum of stars, dark
+            matter and gas respectively. Shape(n_s, n_dm, n_g).
+            Unit: (kpc * km / s)
 
         Examples
         --------
-        This returns the angular momentum of stars, dark matter and gas
-        particles respectively.
+        This returns the specific angular momentum of stars, dark matter and
+        gas particles respectively.
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
@@ -549,7 +550,7 @@ def galaxy_as_kwargs(galaxy):
     Returns
     -------
     kwargs: dict
-        Dictionary with `galaxy` attributes.
+        Dictionary with ``galaxy`` attributes.
     """
 
     def _filter_internals(attribute, value):
@@ -606,40 +607,40 @@ def mkgalaxy(
 
     Parameters
     ----------
-    m_s : float
-        Star masses
-    x_s, y_s, z_s : float
-        Star positions.
-    vx_s, vy_s, vz_s : float
-        Star velocities.
-    m_dm : float
-        Dark matter masses.
-    x_dm, y_dm, z_dm : float
-        Dark matter positions.
-    vx_dm, vy_dm, vz_dm : float
-        Dark matter velocities.
-    m_g : float
-        Gas masses.
-    x_g, y_g, z_g :  float
-        Gas positions.
-    vx_g, vy_g, vz_g : float
-        Gas velocities.
-    potential_s : float, default value = None
-        Specific potential energy of star particles.
-    potential_dm : float, default value = None
-        Specific potential energy of dark matter particles.
-    potential_g : float, default value = None
-        Specific potential energy of gas particles.
+    m_s : np.ndarray
+        Star masses. Shape: (n,1).
+    x_s, y_s, z_s : np.ndarray
+        Star positions. Shapes: (n,1).
+    vx_s, vy_s, vz_s : np.ndarray
+        Star velocities. Shape: (n,1).
+    m_dm : np.ndarray
+        Dark matter masses. Shape: (n,1).
+    x_dm, y_dm, z_dm : np.ndarray
+        Dark matter positions. Shapes: (n,1).
+    vx_dm, vy_dm, vz_dm : np.ndarray
+        Dark matter velocities. Shapes: (n,1).
+    m_g : np.ndarray
+        Gas masses. Shape: (n,1).
+    x_g, y_g, z_g :  np.ndarray
+        Gas positions. Shapes: (n,1).
+    vx_g, vy_g, vz_g : np.ndarray
+        Gas velocities. Shapes: (n,1).
+    potential_s : np.ndarray, default value = None
+        Specific potential energy of star particles. Shape: (n,1).
+    potential_dm : np.ndarray, default value = None
+        Specific potential energy of dark matter particles. Shape: (n,1).
+    potential_g : np.ndarray, default value = None
+        Specific potential energy of gas particles. Shape: (n,1).
     softening_s : float, default value = 0
-        Softening radius of stellar particles.
+        Softening radius of stellar particles. Shape: (1,).
     softening_dm : float, default value = 0
-        Softening radius of dark matter particles.
+        Softening radius of dark matter particles. Shape: (1,).
     softening_g : float, default value = 0
-        Softening radius of gas particles.
+        Softening radius of gas particles. Shape: (1,).
 
     Return
     ------
-    galaxy: object of Galaxy class.
+    galaxy: ``Galaxy class`` object.
     """
     stars = ParticleSet(
         ParticleSetType.STARS,

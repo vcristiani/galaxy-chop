@@ -27,18 +27,18 @@ def center(galaxy):
     """
     Particle centring.
 
-    Centers the position of all particle galaxies respect
-    to the position of the lowest potential particle.
+    Centers the position of all galaxy particles respect to the position of the
+    lowest potential particle.
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
+    galaxy : ``Galaxy class`` object
 
     Returns
     -------
-    galaxy: new object of Galaxy class.
-        A new galaxy object with centered positions respect
-        to the position of the lowest potential particle.
+    galaxy : new ``Galaxy class`` object
+        A new galaxy object with centered positions respect to the position of
+        the lowest potential particle.
     """
     if not galaxy.has_potential_:
         raise ValueError("galaxy must has the potential energy")
@@ -84,11 +84,11 @@ def is_centered(galaxy, rtol=1e-05, atol=1e-08):
 
     Parameters
     ----------
-    galaxy : object of Galaxy class.
+    galaxy : ``Galaxy class`` object
     rtol : float
-        Relative tolerance.
+        Relative tolerance. Default value = 1e-05.
     atol : float
-        Absolute tolerance.
+        Absolute tolerance. Default value = 1e-08.
 
     Returns
     -------

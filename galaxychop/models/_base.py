@@ -47,14 +47,16 @@ class Components:
 
     Parameters
     ----------
-    labels : `np.ndarray`
+    labels : np.ndarray
         1D array with the index of the component to which each particle
-        belongs.
-    ptypes : `np.ndarray`
+        belongs. Shape: (n,1).
+    ptypes : np.ndarray
         Indicates the type of particle: stars = 0, dark matter = 1, gas = 2.
-    probabilities : `np.ndarray`
+        Shape: (n,1).
+    probabilities : np.ndarray or None
        1D array with probabilities of the particles to belong to each
        component, in case the dynamic decomposition model includes them.
+       Shape: (n,1).
        Otherwise it adopts the value None.
     """
 
@@ -68,8 +70,8 @@ class Components:
         """Length validator.
 
         This method validates that the lengths of labels, ptypes are equal.
-        On the other hand, if probabilities is not None, its length must
-        be the same as ptypes and labels.
+        On the other hand, if probabilities is not None, its length must be the
+        same as ptypes and labels.
 
         """
         lens = {len(self.labels), len(self.ptypes)}
@@ -93,7 +95,7 @@ class Components:
         """
         Convert to pandas data frame.
 
-        This method builds a data frame of all parameters of Components..
+        This method builds a data frame of all parameters of Components.
 
         Return
         ------
@@ -176,7 +178,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     ----------
     cbins : tuple
         It contains the two widths of bins necessary for the calculation of the
-        circular angular momentum.
+        circular angular momentum.  Shape: (2,). Dafult value = (0.05, 0.005).
     """
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
@@ -234,20 +236,21 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        X : ``np.ndarray(n_particles, attributes)``
+        X : np.ndarray(n_particles, attributes)
             2D array where each file it is a diferent particle and each column
             is a attribute of the particles. n_particles is the total number of
             particles.
-        y : ``np.ndarray(n_particles)``
+        y : np.ndarray(n_particles,)
             1D array where is identified the nature of each particle:
             0 = stars, 1 = dark matter, 2 = gas. n_particles is the total
             number of particles.
-        attributes: tuple, dictionary keys of ``ParticleSet class`` parameters
-            Particle attributes used to operate the clustering.
+        attributes: tuple
+            Dictionary keys of ``ParticleSet class`` parameters with particle
+            attributes used to operate the clustering.
 
         Returns
         -------
-        mask : ``nd.array(m_particles)``
+        mask : nd.array(m_particles)
             Mask only with valid values to operate the clustering.
         """
         raise NotImplementedError()
@@ -265,12 +268,12 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        labels : ``np.ndarray(m_particles)``
+        labels : np.ndarray(m_particles)
             1D array with the index of the clusters to which each particle
             belongs. m_particles is the total number of particles with valid
             values to operate the clustering.
 
-        probs : ``np.ndarray(m_particles)``
+        probs : np.ndarray(m_particles) or None
             Probabilities of the particles to belong to each component, in case
             the dynamic decomposition model includes them. Otherwise it adopts
             the value None.
@@ -333,18 +336,18 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        galaxy : ``galaxy object``
+        galaxy : ``Galaxy class`` object
             Instance of Galaxy class.
         attributes : keys of ``ParticleSet class`` parameters
             Particle attributes used to operate the clustering.
 
         Returns
         -------
-        X : ``np.ndarray(n_particles, attributes)``
+        X : np.ndarray(n_particles, attributes)
             2D array where each file it is a diferent particle and each column
             is a attribute of the particles. n_particles is the total number of
             particles.
-        y : ``np.ndarray(n_particles)``
+        y : np.ndarray(n_particles)
             1D array where is identified the nature of each particle:
             0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
             particles.
@@ -407,22 +410,22 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        X : ``np.ndarray(n_particles, attributes)``
+        X : np.ndarray(n_particles, attributes)
             2D array where each file it is a diferent particle and each column
             is a parameter of the particles. n_particles is the total number of
             particles.
-        labels: ``np.ndarray(m_particles)``
+        labels: np.ndarray(m_particles)
             1D array with the index of the clusters to which each particle
             belongs. m_particles is the total number of particles with valid
             values to operate the clustering.
-        rows_mask : ``nd.array(m_particles)``
+        rows_mask : nd.array(m_particles)
             Mask only with valid values to operate the clustering. m_particles
             is the total number of particles with valid values to operate the
             clustering.
 
         Return
         ------
-        new_labels: ``np.ndarray(n_particles)``
+        new_labels: np.ndarray(n_particles)
             1D array with the index of the clusters to which each particle
             belongs. Particles that do not belong to any of them are assigned
             the label Nan. n_particles is the total number of particles.
@@ -441,23 +444,23 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        X : ``np.ndarray(n_particles, attributes)``
+        X : np.ndarray(n_particles, attributes)
             2D array where each file it is a diferent particle and each column
             is a parameter of the particles. n_particles is the total number of
             particles.
-        probs: ``np.ndarray(n_cluster, m_particles)``
+        probs: np.ndarray(n_cluster, m_particles)
             2D array with probabilities of belonging to each component.
             n_cluster is the number of components obtained. m_particles is the
             total number of particles with valid values to operate the
             clustering.
-        rows_mask : ``nd.array(m_particles)``
+        rows_mask : nd.array(m_particles)
             Mask only with valid values to operate the clustering. m_particles
             is the total number of particles with valid values to operate the
             clustering.
 
         Return
         ------
-        new_probs: ``np.ndarray(n_cluster, n_particles)``
+        new_probs: np.ndarray(n_cluster, n_particles)
             2D array with probabilities of belonging to each component.
             n_cluster is the number of components obtained. n_particles is the
             total number of particles. Particles that do not belong to any
@@ -489,13 +492,13 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        galaxy : ``galaxy object``
+        galaxy : ``Galaxy class`` object
             Instance of Galaxy class.
 
         Return
         ------
         Components :
-            Instance of the Component class, with the result of the dynamic
+            Instance of the ``Component class``, with the result of the dynamic
             decomposition.
         """
         attributes = self.get_attributes()
