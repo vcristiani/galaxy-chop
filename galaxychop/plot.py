@@ -172,45 +172,6 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
-    def dis(self, x, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
-        """Draw a distribution plots onto a FacetGrid.
-
-        Plot univariate or bivariate distributions of datasets using
-        different approachs for visualizing the galaxy parameters.
-        This function groups the values of all galaxy particles according
-        to some ``ParticleSet class`` parameter.
-
-        Parameters
-        ----------
-        x, y : keys of ``ParticleSet class`` parameters.
-            Variables that specify positions on the x and y axes.
-            Default value y = None.
-        ptypes : keys of ``ParticleSet class`` parameters.
-            Particle type. Default value = None
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dicts
-            Name assignment to the label.
-            Default value = None
-        **kwargs
-            Additional keyword arguments are passed and are documented in
-            ``seaborn.displot``.
-
-        Returns
-        -------
-        seaborn.axisgrid.PairGrid
-        """
-        attributes = [x] if y is None else [x, y]
-        df, hue = self.get_df_and_hue(
-            ptypes=ptypes,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
-        )
-        ax = sns.displot(x=x, y=y, data=df, hue=hue, **kwargs)
-        return ax
-
     def scatter(self, x, y, ptypes=None, labels=None, lmap=None, **kwargs):
         """Draw a scatter plot of galaxy properties.
 
@@ -454,57 +415,6 @@ class GalaxyPlotter:
         kwargs.setdefault("diag_kind", "kde")
 
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
-        return ax
-
-    def circ_dis(
-        self,
-        x,
-        y=None,
-        cbins=utils.DEFAULT_CBIN,
-        labels=None,
-        lmap=None,
-        **kwargs,
-    ):
-        """Draw a distribution plots onto a FacetGrid.
-
-        Plot univariate or bivariate distributions of datasets using different
-        approachs for visualizing the normalized specific energy, the
-        circularity parameter (J_z/J_circ) and/or the projected circularity
-        parameter (J_p/J_circ)  of the stellar particles.
-        This function groups the values of stellar particles according to some
-        keys of ``JCirc`` tuple.
-
-
-        Parameters
-        ----------
-        x, y : keys of ``JCirc`` tuple.
-            Variables that specify positions on the x and y axes.
-            Default value y = None.
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum. Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        labels : keys of ``JCirc`` tuple.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
-        **kwargs
-            Additional keyword arguments are passed and are documented in
-            ``seaborn.displot``.
-
-        Returns
-        -------
-        seaborn.axisgrid.PairGrid
-        """
-        attributes = [x] if y is None else [x, y]
-        df, hue = self.get_circ_df_and_hue(
-            cbins=cbins,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
-        )
-        ax = sns.displot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
     def circ_scatter(

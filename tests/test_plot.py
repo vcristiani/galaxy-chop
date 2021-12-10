@@ -238,23 +238,6 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
 @pytest.mark.slow
 @pytest.mark.plot
-@pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_dis(galaxy, format):
-
-    gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    test_grid = plotter.dis("x", "y", labels="ptype", ptypes=["gas"])
-
-    # EXPECTED
-    df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
-    expected_grid = sns.displot(x="x", y="y", data=df, hue="ptype")
-
-    assert_same_image(test_GalaxyPlotter_dis, format, test_grid, expected_grid)
-
-
-@pytest.mark.slow
-@pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 
@@ -513,32 +496,6 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
         format,
         test_grid,
         expected_grid,
-    )
-
-
-@pytest.mark.slow
-@pytest.mark.plot
-@pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_circ_dis(read_hdf5_galaxy, format):
-
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
-
-    test_grid = plotter.circ_dis("eps")
-
-    # expected
-    circ = utils.jcirc(gal)
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    df = pd.DataFrame({"eps": circ.eps[mask]})
-    expected_grid = sns.displot(x="eps", data=df)
-
-    assert_same_image(
-        test_GalaxyPlotter_circ_dis, format, test_grid, expected_grid
     )
 
 
