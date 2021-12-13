@@ -1,0 +1,57 @@
+# ==============================================================
+# CI with GitHub Actions
+# ==============================================================
+
+name: Testing
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    strategy:
+
+      # continues even if an environment fails
+      fail-fast: false
+
+      matrix:
+
+        # all the tox with the default python version
+        py_version: [3.9]
+        tox_env:
+          - style
+          - docstyle
+          - check-manifest
+          - check-headers
+          - coverage
+          - make-docs
+
+        # check version by version
+        include:
+          - py_version: 3.7
+            tox_env: py37
+          - py_version: 3.8
+            tox_env: py38
+          - py_version: 3.9
+            tox_env: py39
+
+    # the steps of the CI
+    steps:
+      - uses: actions/checkout@master
+
+      # optionals
+      - name: Install pandoc
+        if: ${{ matrix.tox_env == 'make-docs'}}
+        run: sudo apt-get install pandoc
+      # tox steps
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py_version }}
+      - name: Install tox
+        run: pip install tox
+      - name: tox -e ${{ matrix.tox_env }}
+        run: tox -re ${{ matrix.tox_env }}
+
