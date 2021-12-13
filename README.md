@@ -1,6 +1,7 @@
 # Welcome to **GalaxyChop**
 
-![logo](docs/source/_static/galaxychop_logo_wb.png)
+![logo](https://github.com/vcristiani/galaxy-chop/raw/master/docs/source/_static/galaxychop_logo_wb.png)
+
 
 <!-- BODY -->
 
@@ -12,7 +13,7 @@
 
 **GalaxyChop**  is a Python package that tackles the dynamical decomposition problem by using clustering techniques in phase space for stellar galactic components.
 
-It runs in numerical N-body simulations populated with semi-analytical models and full hydrodynamical simulations, such as [Illustris TNG](https://www.tng-project.org/).
+It runs in numerical N-body simulations populated with semi-analytical models and full hydrodynamical simulations, such as [Illustris TNG](https://www.tng-project.org/) and [EAGLE](http://icc.dur.ac.uk/Eagle/).
 
 ## Motivation
 
@@ -24,22 +25,22 @@ It runs in numerical N-body simulations populated with semi-analytical models an
 ## Dynamic decomposition models implemented
 - **JHistogram:** Implementation of the dynamic decomposition model of galaxies described by [Abadi et al.(2003)](https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21Aabstract).
 - **JThreshold:** Implementation of the dynamic decomposition model of galaxies used in [Tissera et al.(2012)](https://ui.adsabs.harvard.edu/abs/2012MNRAS.420..255T/abstract), [Vogelsberger et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.444.1518V/abstract), [Marinacci et al.(2014)](https://ui.adsabs.harvard.edu/abs/2014MNRAS.437.1750M/abstract), [Park et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract), etc.
-- **KMeans:** Implementation of [Skitlearn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a model for dynamical decomposing of galaxies.
-- **GCgmm:** Implementation of the dynamic decomposition model of galaxies described by [Obreja et al.(2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract).
+- **KMeans:** Implementation of [Scikit-Learn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a model for dynamical decomposing of galaxies.
+- **GaussianMixture:** Implementation of the dynamic decomposition model of galaxies described by [Obreja et al.(2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract).
 - **AutoGaussianMixture:** Implementation of the  dynamic decomposition model of galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
 
 **And many more**
 
 ## Requirements
 
-You need Python 3.7, 3.8, 3.9 to run GalaxyChop.
+You need Python `3.7`, `3.8`, `3.9` to run GalaxyChop.
 
 ### Standard Installation
 
 You could find **GalaxyChop** at PyPI. The standar instalation via pip:
 
 ```bash
-    $ pip install galaxychop
+$ pip install galaxychop
 ```
 
 ### Development Install
@@ -47,17 +48,29 @@ You could find **GalaxyChop** at PyPI. The standar instalation via pip:
 Clone this repo and then inside the local directory execute
 
 ```bash
-     $ git clone https://github.com/vcristiani/galaxy-chop.git
-     $ cd galaxy-chop
-     $ pip install -e .
+$ git clone https://github.com/vcristiani/galaxy-chop.git
+$ cd galaxy-chop
+$ pip install -e .
 ```
 
 ## Authors
-- Valeria Cristiani ([valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar)),
-- Antonela Taverna.
-- Juan Cabral.
-- Martin Chalela.
-- Bruno Sanchez.
-- Ornela Marioni.
-- Nelson Villagra.
-- Rafael Pignata.
+- Valeria Cristiani ([valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar)) ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
+- Antonela Taverna ([IATE-OAC-CONICET][]).
+- Juan Cabral ([IATE-OAC-CONICET][], [CONAE][]).
+- Rafael Pignata ([OAC-CONICET][], [FaMAF-UNC][]).
+- Bruno Sanchez ([Duke University][]).
+- Martin Chalela ([IATE-OAC-CONICET][]).
+- Federico Benelli ([IPQA-CONICET][], [FCEFyN][]).
+- Ornela Marioni ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
+- Nelson Villagra ([UNPSJB]).
+
+
+
+  [IATE-OAC-CONICET]: http://iate.oac.uncor.edu/
+  [OAC-CONICET]: https://oac.unc.edu.ar/
+  [FaMAF-UNC]: https://www.famaf.unc.edu.ar/
+  [CONAE]: https://www.argentina.gob.ar/ciencia/conae
+  [Duke University]: https://duke.edu/
+  [IPQA-CONICET]: https://ipqa.unc.edu.ar/en/
+  [FCEFyN]: https://fcefyn.unc.edu.ar/
+  [UNPSJB]: http://www.ing.unp.edu.ar/
