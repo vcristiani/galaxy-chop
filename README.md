@@ -60,7 +60,7 @@ $ pip install -e .
 - Rafael Pignata ([OAC-CONICET][], [FaMAF-UNC][]).
 - Bruno Sanchez ([Duke University][]).
 - Martin Chalela ([IATE-OAC-CONICET][]).
-- Federico Benelli ([IPQA-CONICET][], [FCEFyN][]).
+- Federico Benelli ([IPQA-CONICET][], [FCEFyN-UNC][]).
 - Ornela Marioni ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
 - Nelson Villagra ([UNPSJB]).
 
@@ -72,5 +72,5 @@ $ pip install -e .
   [CONAE]: https://www.argentina.gob.ar/ciencia/conae
   [Duke University]: https://duke.edu/
   [IPQA-CONICET]: https://ipqa.unc.edu.ar/en/
-  [FCEFyN]: https://fcefyn.unc.edu.ar/
+  [FCEFyN-UNC]: https://fcefyn.unc.edu.ar/
   [UNPSJB]: http://www.ing.unp.edu.ar/
