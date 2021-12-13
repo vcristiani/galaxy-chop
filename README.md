@@ -54,7 +54,7 @@ $ pip install -e .
 ```
 
 ## Authors
-- Valeria Cristiani ([valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar)) ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
+- Valeria Cristiani <[valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar)> ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
 - Antonela Taverna ([IATE-OAC-CONICET][]).
 - Juan Cabral ([IATE-OAC-CONICET][], [CONAE][]).
 - Rafael Pignata ([OAC-CONICET][], [FaMAF-UNC][]).
