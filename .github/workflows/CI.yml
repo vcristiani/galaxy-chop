@@ -10,5 +10,5 @@ on:
 
 jobs:
   testing:
-    uses: vcristiani/galaxy-chop/.github/workflows/tests.yml@HEAD
+    uses: vcristiani/galaxy-chop/.github/workflows/tests.yml@6755fca5b3b61910a085a25f94a33e2fb4c1fc3e
 
