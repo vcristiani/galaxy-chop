@@ -17,6 +17,7 @@
 # IMPORTS
 # =============================================================================
 import os
+import platform
 import setuptools  # noqa
 
 from numpy.distutils.core import Extension, setup  # noqa
@@ -69,13 +70,25 @@ with open("README.md") as fp:
 FORTRAN_DIR = os.path.join(PATH, "galaxychop", "utils", "fortran")
 
 ON_RTD = os.environ.get("READTHEDOCS") == "True"
+ON_WINDOWS = platform.system() == "Windows"
+
+if ON_WINDOWS:
+    extra_link_args = [
+        "-lgomp",
+        "-static",
+        "-static-libgfortran",
+        "-static-libgcc",
+    ]
+else:
+    extra_link_args = ["-lgomp"]
+
 
 EXTENSIONS = [
     Extension(
         name="galaxychop.utils.fortran.potential",
         sources=[os.path.join(FORTRAN_DIR, "potential.f95")],
         extra_f90_compile_args=["-fopenmp"],
-        extra_link_args=["-lgomp"],
+        extra_link_args=extra_link_args,
     )
 ]
 
