@@ -107,3 +107,17 @@ with open(README_RST_PATH, "w") as fp:
     fp.write(".. FILE AUTO GENERATED !! \n")
     fp.write(m2r.convert(readme_md))
     print(f"{README_RST_PATH} regenerated!")
+
+# =============================================================================
+# CSS AND JS
+# =============================================================================
+
+# =============================================================================
+# SETUP
+# =============================================================================
+
+
+def setup(app):
+    app.add_css_file("css/galaxychop.css")
+    app.add_js_file("js/galaxychop.js")
+

@@ -1,0 +1,72 @@
+@import url("theme.css");
+:root {
+    --primary: #c241ce;
+    /* Used for subtitles, captions and code */
+    --secondary: #6e5e70;
+    /* The top part of the left navbar */
+    --navbar-header-bg: #832d8e;
+    /* Links  */
+    --links: #c241ce;
+    /* Background color of jupyter input cell */
+    --jupyter-in-cell-bg: #ffd2fb8c;
+}
+
+
+/* GENERAL */
+
+h1,
+h2,
+h3,
+div.wy-grid-for-nav nav.wy-nav-side p.caption {
+    color: var(--primary);
+}
+
+p.caption[role='heading'] {
+    color: var(--secondary);
+}
+
+a,
+a:visited {
+    color: var(--links);
+}
+
+code {
+    color: var(--secondary) !important;
+    border: none !important;
+}
+
+a:hover,
+a:hover code {
+    color: var(--primary) !important;
+}
+
+
+/* NAVBAR */
+
+.wy-side-nav-search,
+.wy-nav-top {
+    background-color: var(--navbar-header-bg);
+}
+
+.wy-side-nav-search input[type=text] {
+    border-color: var(--secondary);
+}
+
+.wy-menu a,
+.wy-menu a code,
+.wy-side-nav-search a.icon,
+.wy-side-nav-search div.version {
+    color: white !important;
+}
+
+.wy-menu li.current a,
+.wy-menu li.current a code {
+    color: #222222 !important;
+}
+
+
+/* JUPYTER */
+
+div.input_area div.highlight {
+    background-color: var(--jupyter-in-cell-bg) !important;
+}
