@@ -14,6 +14,8 @@
 # IMPORTS
 # =============================================================================
 
+import gc
+
 import astropy.constants as c
 import astropy.units as u
 
@@ -35,7 +37,7 @@ DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
 # =============================================================================
 
 #: GalaxyChop Gravitational unit
-G_UNIT = (u.km ** 2 * u.kpc) / (u.s ** 2 * u.solMass)
+G_UNIT = (u.km**2 * u.kpc) / (u.s**2 * u.solMass)
 
 #: Gravitational constant as float in G_UNIT
 G = c.G.to(G_UNIT).to_value()
@@ -88,17 +90,28 @@ def numpy_potential(x, y, z, m, softening):
         Specific potential energy of particles.
 
     """
-    dist = np.sqrt(
-        np.square(x - x.reshape(-1, 1))
-        + np.square(y - y.reshape(-1, 1))
-        + np.square(z - z.reshape(-1, 1))
-        + np.square(softening)
-    )
+
+    def _square_substract(v):
+        return np.square(v - v.reshape(-1, 1))
+
+    dist_2 = np.square(softening)
+    for v in (x, y, z):
+        dist_2 += _square_substract(v)
+        del v
+        gc.collect()
+
+    dist = np.sqrt(dist_2)
+
+    del dist_2
+    gc.collect()
 
     np.fill_diagonal(dist, 0.0)
 
     flt = dist != 0
     mdist = np.divide(m, dist, where=flt)
+
+    del dist, flt
+    gc.collect()
 
     return mdist.sum(axis=1) * G, np.asarray
 

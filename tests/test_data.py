@@ -92,7 +92,7 @@ def test_ParticleSet_creation_with_potential(data_particleset):
     assert np.all(pset.arr_.vz == vz) and pset.vz.unit == (u.km / u.s)
     assert np.all(pset.softening == soft)
 
-    kinetic_energy = 0.5 * (vx ** 2 + vy ** 2 + vz ** 2)
+    kinetic_energy = 0.5 * (vx**2 + vy**2 + vz**2)
     assert (
         np.all(pset.arr_.kinetic_energy_ == kinetic_energy)
         and pset.kinetic_energy_.unit == (u.km / u.s) ** 2
@@ -130,7 +130,7 @@ def test_ParticleSet_creation_without_potential(data_particleset):
     assert np.all(pset.arr_.vz == vz) and pset.vz.unit == (u.km / u.s)
     assert np.all(pset.softening == soft)
 
-    kinetic_energy = 0.5 * (vx ** 2 + vy ** 2 + vz ** 2)
+    kinetic_energy = 0.5 * (vx**2 + vy**2 + vz**2)
     assert (
         np.all(pset.arr_.kinetic_energy_ == kinetic_energy)
         and pset.kinetic_energy_.unit == (u.km / u.s) ** 2
@@ -220,9 +220,9 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "vz": vz,
             "softening": soft,
             "potential": pot if has_potential else np.full(len(pset), np.nan),
-            "kinetic_energy": 0.5 * (vx ** 2 + vy ** 2 + vz ** 2),
+            "kinetic_energy": 0.5 * (vx**2 + vy**2 + vz**2),
             "total_energy": (
-                0.5 * (vx ** 2 + vy ** 2 + vz ** 2) + pot
+                0.5 * (vx**2 + vy**2 + vz**2) + pot
                 if has_potential
                 else np.full(len(pset), np.nan)
             ),

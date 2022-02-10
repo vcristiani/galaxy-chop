@@ -91,6 +91,29 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
     )
 
 
+@pytest.mark.xfail
+@pytest.mark.slow
+def test_potential_recover(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+
+    kwargs = {
+        k: v
+        for k, v in data.galaxy_as_kwargs(gal).items()
+        if "potential_" not in k
+    }
+    new = utils.potential(data.mkgalaxy(**kwargs), backend="fortran")
+
+    original_potential = (
+        gal.to_dataframe(attributes=["potential"]).to_numpy().flatten()
+    )
+
+    new_potential = (
+        new.to_dataframe(attributes=["potential"]).to_numpy().flatten()
+    )
+
+    np.testing.assert_allclose(original_potential, new_potential)
+
+
 # =============================================================================
 # CENTER
 # =============================================================================

@@ -23,10 +23,11 @@ import pandas as pd
 
 import uttr
 
-
 # =============================================================================
 # PARTICLE SET
 # =============================================================================
+
+
 class ParticleSetType(enum.IntEnum):
     """
     Name of the particle type.
@@ -134,7 +135,7 @@ class ParticleSet:
     @kinetic_energy_.default
     def _kinetic_energy__default(self):
         arr = self.arr_
-        ke = 0.5 * (arr.vx ** 2 + arr.vy ** 2 + arr.vz ** 2)
+        ke = 0.5 * (arr.vx**2 + arr.vy**2 + arr.vz**2)
         return ke
 
     @total_energy_.default

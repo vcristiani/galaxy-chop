@@ -5,3 +5,4 @@ sphinx-rtd-theme
 nbsphinx
 Cython >= 0.28.5
 m2r
+mistune==0.8.4

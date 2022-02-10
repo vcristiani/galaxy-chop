@@ -24,7 +24,7 @@ from .. import data
 
 
 def _make_mask(x, y, z, r_cut):
-    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+    r = np.sqrt(x**2 + y**2 + z**2)
 
     if r_cut is None:
         return np.repeat(True, len(r))
@@ -66,8 +66,8 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     rjy = np.sum(mjy[mask])
     rjz = np.sum(mjz[mask])
 
-    rjp = np.sqrt(rjx ** 2 + rjy ** 2)
-    rj = np.sqrt(rjx ** 2 + rjy ** 2 + rjz ** 2)
+    rjp = np.sqrt(rjx**2 + rjy**2)
+    rj = np.sqrt(rjx**2 + rjy**2 + rjz**2)
 
     e1x = rjy / rjp
     e1y = -rjx / rjp
@@ -202,6 +202,6 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     Jxtot = np.sum(df.Jx.values[mask] * df.m.values[mask])
     Jytot = np.sum(df.Jy.values[mask] * df.m.values[mask])
     Jztot = np.sum(df.Jz.values[mask] * df.m.values[mask])
-    Jtot = np.sqrt(Jxtot ** 2 + Jytot ** 2 + Jztot ** 2)
+    Jtot = np.sqrt(Jxtot**2 + Jytot**2 + Jztot**2)
 
     return np.allclose(Jztot, Jtot, rtol=rtol, atol=atol)

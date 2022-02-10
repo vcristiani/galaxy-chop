@@ -120,4 +120,3 @@ with open(README_RST_PATH, "w") as fp:
 def setup(app):
     app.add_css_file("css/galaxychop.css")
     app.add_js_file("js/galaxychop.js")
-
