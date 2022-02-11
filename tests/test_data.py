@@ -236,6 +236,27 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
     assert df.equals(expected)
 
 
+def test_ParticleSet_to_dataframe_no_potential(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=False
+    )
+
+    pset = data.ParticleSet(
+        data.ParticleSetType.STARS,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    import ipdb; ipdb.set_trace()
+
+
 @pytest.mark.parametrize("has_potential", [True, False])
 def test_ParticleSet_repr(data_particleset, has_potential):
     m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
