@@ -254,7 +254,16 @@ def test_ParticleSet_to_dataframe_no_potential(data_particleset):
         potential=pot,
     )
 
-    import ipdb; ipdb.set_trace()
+    expected = pd.DataFrame(
+        {
+            "potential": np.full(len(pset), np.nan),
+            "total_energy": np.full(len(pset), np.nan),
+        }
+    )
+
+    df = pset.to_dataframe(attributes=["potential", "total_energy"])
+
+    assert df.equals(expected)
 
 
 @pytest.mark.parametrize("has_potential", [True, False])

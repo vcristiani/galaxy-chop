@@ -251,11 +251,15 @@ class ParticleSet:
             "vz": lambda: arr.vz,
             "softening": lambda: self.softening,
             "potential": lambda: (
-                arr.potential if self.has_potential_ else np.nan
+                arr.potential
+                if self.has_potential_
+                else np.full(len(self), np.nan)
             ),
             "kinetic_energy": lambda: arr.kinetic_energy_,
             "total_energy": lambda: (
-                arr.total_energy_ if self.has_potential_ else np.nan
+                arr.total_energy_
+                if self.has_potential_
+                else np.full(len(self), np.nan)
             ),
             "Jx": lambda: arr.Jx_,
             "Jy": lambda: arr.Jy_,
