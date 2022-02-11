@@ -50,6 +50,10 @@ def test_Galaxy_potential_energy(galaxy):
     assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
 
 
+@pytest.mark.skipif(
+    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    reason="apparently the potential fortran extension are not compiled",
+)
 def test_Galaxy_potential_energy_fortran_backend(galaxy):
     gal = galaxy(
         seed=42,
@@ -66,6 +70,10 @@ def test_Galaxy_potential_energy_fortran_backend(galaxy):
     assert np.all(pgal_f.gas.potential == pgal_f.potential_energy_[2])
 
 
+@pytest.mark.skipif(
+    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    reason="apparently the potential fortran extension are not compiled",
+)
 def test_Galaxy_potential_energy_backend_consistency(galaxy):
     gal = galaxy(
         seed=42,
@@ -92,7 +100,10 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
 
 
 @pytest.mark.xfail
-@pytest.mark.slow
+@pytest.mark.skipif(
+    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    reason="apparently the potential fortran extension are not compiled",
+)
 def test_potential_recover(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
 
