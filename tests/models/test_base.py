@@ -4,7 +4,7 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-from unittest import result
+
 import galaxychop as gchop
 from galaxychop import models
 
@@ -39,10 +39,12 @@ def test_Components(probs):
     )
 
     assert len(components) == 100
-    assert (
-        repr(components)
-        == f"Components(100, labels=[0 1 2], probabilities={probs})"
+
+    expected_repr = (
+        "Components(100, labels={0, 1, 2}, "
+        f"probabilities={probs}, lmap=False)"
     )
+    assert repr(components) == expected_repr
 
 
 @pytest.mark.model

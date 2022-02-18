@@ -93,9 +93,15 @@ class Components:
     def __repr__(self):
         """x.__repr__() <==> repr(x)."""
         length = len(self)
-        labels = np.unique(self.labels)
+        labels = {
+            self.lmap.get(label, label) for label in np.unique(self.labels)
+        }
+        lmap = bool(self.lmap)
         probs = True if self.probabilities is not None else False
-        return f"Components({length}, labels={labels}, probabilities={probs})"
+        return (
+            f"Components({length}, labels={labels}, "
+            f"probabilities={probs}, lmap={lmap})"
+        )
 
     def to_dataframe(self, attributes=None):
         """
