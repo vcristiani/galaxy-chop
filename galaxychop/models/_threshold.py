@@ -121,3 +121,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         labels[disk_idx] = 1
 
         return labels, None
+
+    @doc_inherit(GalaxyDecomposerABC.get_lmap)
+    def get_lmap(self):
+        return {0: "Spheroid", 1: "Disk"}

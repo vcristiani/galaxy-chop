@@ -93,8 +93,10 @@ class GalaxyPlotter:
         hue : keys of ``ParticleSet class`` parameters.
             Labels of all galaxy particles.
         """
-        # if we use the components as laberls we need to extract the labels
+        # if we use the components as labels we need to extract the labels
+        # and the lmap if lmap is None
         if isinstance(labels, models.Components):
+            lmap = labels.lmap if lmap is None else lmap
             labels = labels.labels
 
         attributes = ["x", "y", "z"] if attributes is None else attributes
@@ -305,7 +307,7 @@ class GalaxyPlotter:
             (J_p/J_circ) of the stellar particles.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
-        lmap :  dicts
+        lmap :  dict
             Name assignment to the label.
 
         Returns
@@ -318,7 +320,9 @@ class GalaxyPlotter:
             Labels of stellar particles.
         """
         # if we use the components as laberls we need to extract the labels
+        # and the lmap if lmap is None
         if isinstance(labels, models.Components):
+            lmap = labels.lmap if lmap is None else lmap
             labels = labels.labels
 
         # first we extract the circularity parameters from the galaxy

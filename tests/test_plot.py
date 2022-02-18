@@ -122,7 +122,9 @@ def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
     components = models.Components(
         labels=np.full(len(gal), 100),
         ptypes=np.full(len(gal), "foo"),
+        m=np.random.random(size=len(gal)),
         probabilities=None,
+        lmap={},
     )
 
     df, hue = plotter.get_df_and_hue(
@@ -308,7 +310,9 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
     components = models.Components(
         labels=circ.eps,
         ptypes=np.full(len(circ.eps), "foo"),
+        m=np.random.random(size=len(circ.eps)),
         probabilities=None,
+        lmap={},
     )
 
     df, hue = plotter.get_circ_df_and_hue(

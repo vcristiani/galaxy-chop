@@ -317,3 +317,12 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
         labels = probability.argmax(axis=1)
 
         return labels, probability
+
+    @doc_inherit(GalaxyDecomposerABC.get_lmap)
+    def get_lmap(self):
+        return {
+            0: "Halo",
+            1: "Bulge",
+            2: "Cold disk",
+            3: "Warm disk",
+        }

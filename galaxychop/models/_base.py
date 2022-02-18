@@ -53,6 +53,10 @@ class Components:
     ptypes : np.ndarray
         Indicates the type of particle: stars = 0, dark matter = 1, gas = 2.
         Shape: (n,1).
+    m : np.ndarray
+        Particle masses.
+    lmap : dict
+        Meaning of the component numbers.
     probabilities : np.ndarray or None
        1D array with probabilities of the particles to belong to each
        component, in case the dynamic decomposition model includes them.
@@ -62,6 +66,8 @@ class Components:
 
     labels = attr.ib(validator=vldt.instance_of(np.ndarray))
     ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
+    m = attr.ib(validator=vldt.instance_of(np.ndarray))
+    lmap = attr.ib(validator=vldt.instance_of(dict))
     probabilities = attr.ib(
         validator=vldt.optional(vldt.instance_of(np.ndarray))
     )
@@ -74,7 +80,7 @@ class Components:
         same as ptypes and labels.
 
         """
-        lens = {len(self.labels), len(self.ptypes)}
+        lens = {len(self.labels), len(self.ptypes), len(self.m)}
         if self.probabilities is not None:
             lens.add(len(self.probabilities))
         if len(lens) > 1:
@@ -104,6 +110,7 @@ class Components:
 
         """
         columns_makers = {
+            "m": lambda: self.m,
             "labels": lambda: self.labels,
             "ptypes": lambda: self.ptypes,
         }
@@ -129,6 +136,66 @@ class Components:
         if probs_df is not None:
             df = pd.concat([df, probs_df], axis=1)
 
+        return df
+
+    def describe(self, lmap=None):
+        """Çreate a description of the sizes and masses of each component.
+
+        The method takes into account only stellar particles that could be
+        classified.
+
+        Parameters
+        ----------
+        lmap: dict or None, default None
+            Meaning of the component numbers.
+            Converts each component label to the mapped value. By
+            default uses the ones provided by the decomposer.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Information regarding component sizes and masses.
+
+        """
+        labeled_df = self.to_dataframe()
+        labeled_df = labeled_df[~pd.isna(labeled_df.labels)]
+        del labeled_df["ptypes"]
+
+        total_size, total_mass = len(labeled_df), labeled_df.m.sum()
+        has_probs = self.probabilities is not None
+
+        components, rows = list(labeled_df.labels.unique().astype(int)), []
+        components.sort()
+
+        for component_label in components:
+            component = labeled_df[labeled_df.labels == component_label]
+
+            row = OrderedDict()
+            row[("Particles", "Size")] = len(component)
+            row[("Particles", "Fraction")] = len(component) / total_size
+
+            component_mass = component.m.sum()
+            row[("Deterministic mass", "Size")] = component_mass
+            row[("Deterministic mass", "Fraction")] = (
+                component_mass / total_mass
+            )
+
+            if has_probs:
+                col_name = f"probs_{component_label}"
+                component_mass_fuss = (component.m * component[col_name]).sum()
+                row[("Probabilistic mass", "Size")] = component_mass_fuss
+                row[("Probabilistic mass", "Fraction")] = (
+                    component_mass_fuss / total_mass
+                )
+
+            rows.append(row)
+
+        lmap = self.lmap if lmap is None else lmap
+        components = [lmap.get(c, c) for c in components]
+
+        df = pd.DataFrame(rows, index=components, columns=row.keys())
+
+        # df.index.name = "Component"
         return df
 
 
@@ -484,6 +551,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return new_probs
 
+    def get_lmap(self):
+        """Map the numeric labels of the components into a human readable \
+        text."""
+        return {}
+
     def decompose(self, galaxy):
         """Decompose method.
 
@@ -524,10 +596,16 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         )
 
         # return the instance
+        mass = galaxy.to_dataframe(
+            ptypes=_PTYPES_ORDER, attributes=["m"]
+        ).m.to_numpy()
+
         return Components(
             labels=final_labels,
             ptypes=final_y,
             probabilities=final_probs,
+            m=mass,
+            lmap=self.get_lmap().copy(),
         )
 
 
