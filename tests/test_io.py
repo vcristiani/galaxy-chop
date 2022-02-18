@@ -112,18 +112,18 @@ def test_read_hdf5(data_path):
     assert isinstance(gala, data.Galaxy) is True
 
     assert (
-        len(gala.stars) == 32067
+        len(gala.stars) == 37393
         and gala.stars.softening == 0.0
         and gala.stars.has_potential_
     )
     assert (
-        len(gala.dark_matter) == 21156
+        len(gala.dark_matter) == 155101
         and gala.dark_matter.softening == 0.0
         and gala.dark_matter.has_potential_
     )
 
     assert (
-        len(gala.gas) == 4061
+        len(gala.gas) == 80153
         and gala.gas.softening == 0.0
         and gala.gas.has_potential_
     )
@@ -137,18 +137,18 @@ def test_read_hdf5_stream(data_path):
     assert isinstance(gala, data.Galaxy) is True
 
     assert (
-        len(gala.stars) == 32067
+        len(gala.stars) == 37393
         and gala.stars.softening == 0.0
         and gala.stars.has_potential_
     )
     assert (
-        len(gala.dark_matter) == 21156
+        len(gala.dark_matter) == 155101
         and gala.dark_matter.softening == 0.0
         and gala.dark_matter.has_potential_
     )
 
     assert (
-        len(gala.gas) == 4061
+        len(gala.gas) == 80153
         and gala.gas.softening == 0.0
         and gala.gas.has_potential_
     )
