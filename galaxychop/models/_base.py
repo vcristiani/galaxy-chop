@@ -165,10 +165,32 @@ class Components:
         """
         labeled_df = self.to_dataframe()
         labeled_df = labeled_df[~pd.isna(labeled_df.labels)]
+
         del labeled_df["ptypes"]
 
         total_size, total_mass = len(labeled_df), labeled_df.m.sum()
         has_probs = self.probabilities is not None
+
+        if has_probs:
+            # We create a dict that make the relation label -> prob_column
+            probs_column_map = {
+                int(label): f"probs_{int(label)}"
+                for label in labeled_df.labels.unique()
+            }
+
+            # multiply every probability by the mass
+            probs_columns = list(probs_column_map.values())
+            probs_m_particles = labeled_df[probs_columns].apply(
+                lambda col: (col * labeled_df["m"])
+            )
+
+            # add all the mass_prob and convert to a dict
+            # {"proba_0": X.xxx, "probs_1": Y.yyy}
+            # where X.xxx and Y.yyy are the mass probability
+            probs_m = probs_m_particles.sum().to_dict()
+
+            # cleanup
+            del probs_columns, probs_m_particles
 
         components, rows = list(labeled_df.labels.unique().astype(int)), []
         components.sort()
@@ -177,6 +199,7 @@ class Components:
             component = labeled_df[labeled_df.labels == component_label]
 
             row = OrderedDict()
+
             row[("Particles", "Size")] = len(component)
             row[("Particles", "Fraction")] = len(component) / total_size
 
@@ -187,8 +210,9 @@ class Components:
             )
 
             if has_probs:
-                col_name = f"probs_{component_label}"
-                component_mass_fuss = (component.m * component[col_name]).sum()
+                probs_m_column = probs_column_map[component_label]
+                component_mass_fuss = probs_m[probs_m_column]
+
                 row[("Probabilistic mass", "Size")] = component_mass_fuss
                 row[("Probabilistic mass", "Fraction")] = (
                     component_mass_fuss / total_mass
@@ -199,10 +223,9 @@ class Components:
         lmap = self.lmap if lmap is None else lmap
         components = [lmap.get(c, c) for c in components]
 
-        df = pd.DataFrame(rows, index=components, columns=row.keys())
+        describe_df = pd.DataFrame(rows, index=components, columns=row.keys())
 
-        # df.index.name = "Component"
-        return df
+        return describe_df
 
 
 # =============================================================================

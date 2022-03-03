@@ -101,8 +101,8 @@ def test_Components_describe(probs):
 
     labels = random.integers(0, 3, 100)
     ptypes = np.ones(100)
-    mass = random.normal(size=100)
-    probabilities = random.normal(size=(100, 3)) if probs else None
+    mass = random.normal(loc=1000933.2, scale=252304.96, size=100)
+    probabilities = random.uniform(size=(100, 3)) if probs else None
 
     components = models.Components(
         labels=labels,
@@ -116,14 +116,14 @@ def test_Components_describe(probs):
         ("Particles", "Size"): {0: 27, 1: 33, 2: 40},
         ("Particles", "Fraction"): {0: 0.27, 1: 0.33, 2: 0.4},
         ("Deterministic mass", "Size"): {
-            0: -3.717358382349127,
-            1: -1.0593396206599262,
-            2: -7.848799275989102,
+            0: 26087288.44203574,
+            1: 32763518.959382985,
+            2: 38057037.01262353,
         },
         ("Deterministic mass", "Fraction"): {
-            0: 0.29443263106418427,
-            1: 0.08390478388697459,
-            2: 0.621662585048841,
+            0: 0.26919687048838753,
+            1: 0.33808944113336864,
+            2: 0.39271368837824394,
         },
     }
 
@@ -131,14 +131,14 @@ def test_Components_describe(probs):
         expected_dict.update(
             {
                 ("Probabilistic mass", "Size"): {
-                    0: 4.066088644168818,
-                    1: -0.19930462240471225,
-                    2: 1.9065674194071063,
+                    0: 50689931.17716688,
+                    1: 46151058.83650705,
+                    2: 48717115.96184553,
                 },
                 ("Probabilistic mass", "Fraction"): {
-                    0: -0.3220537420678503,
-                    1: 0.015785882963694816,
-                    2: -0.15100929312135528,
+                    0: 0.523073560078298,
+                    1: 0.4762365638773781,
+                    2: 0.5027159179570635,
                 },
             }
         )
