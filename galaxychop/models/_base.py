@@ -145,7 +145,7 @@ class Components:
         return df
 
     def describe(self, lmap=None):
-        """Çreate a description of the sizes and masses of each component.
+        """Create a description of the sizes and masses of each component.
 
         The method takes into account only stellar particles that could be
         classified.
