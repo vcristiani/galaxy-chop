@@ -1,14 +1,14 @@
 @import url("theme.css");
 :root {
-    --primary: #c241ce;
+    --primary: #3bbdee;
     /* Used for subtitles, captions and code */
-    --secondary: #6e5e70;
+    --secondary: #f28e42;
     /* The top part of the left navbar */
-    --navbar-header-bg: #832d8e;
+    --navbar-header-bg: #306a99;
     /* Links  */
-    --links: #c241ce;
+    --links: #3bbdee;
     /* Background color of jupyter input cell */
-    --jupyter-in-cell-bg: #ffd2fb8c;
+    --jupyter-in-cell-bg: #ff9f3230;
 }
 
 
@@ -61,7 +61,7 @@ a:hover code {
 
 .wy-menu li.current a,
 .wy-menu li.current a code {
-    color: #222222 !important;
+    color: var(--navbar-header-bg) !important;
 }
 
 
