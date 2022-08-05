@@ -97,7 +97,7 @@ nbsphinx_prompt_width = "0pt"
 import m2r
 
 with open(CHOP_PATH / "README.md") as fp:
-    readme_md = fp.read().split("<!-- BODY -->")[-1]
+    readme_md = fp.read().split("<!-- BODY -->", 1)[1]
 
 
 README_RST_PATH = CURRENT_PATH / "_dynamic" / "README"
