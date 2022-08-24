@@ -1,0 +1,4 @@
+ipdb 
+tox 
+pytest 
+pytest-cov

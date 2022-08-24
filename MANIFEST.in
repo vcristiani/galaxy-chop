@@ -14,5 +14,6 @@ recursive-exclude tools *
 
 exclude tox.ini
 exclude pyproject.toml
+exclude requirements_dev.txt
 exclude .header-template
 exclude .readthedocs.yml

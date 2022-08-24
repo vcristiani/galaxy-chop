@@ -47,7 +47,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     random_state : int, default=None
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
-    algorithm : {“auto”, “full”, “elkan”}, default="auto"
+    algorithm : {“lloyd”, “elkan”}, default="auto"
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
 
     Notes
@@ -79,7 +79,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     tol = hparam(default=0.0001)
     verbose = hparam(default=0)
     random_state = hparam(default=None, converter=np.random.default_rng)
-    algorithm = hparam(default="auto")
+    algorithm = hparam(default="lloyd")
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
     def get_attributes(self):
