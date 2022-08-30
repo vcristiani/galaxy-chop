@@ -26,6 +26,6 @@ __version__ = "0.3.dev0"
 # =============================================================================
 
 from .data import *  # noqa
-from .io import *  # noqa
-from .utils import *  # noqa
+import io  # noqa
+import utils  # noqa
 from . import models  # noqa
