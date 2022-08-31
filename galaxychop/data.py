@@ -50,7 +50,7 @@ class ParticleSetType(enum.IntEnum):
         for p in ParticleSetType:
             if v in (p.name, p.value):
                 return p
-        raise ValueError(f"Can't coherce {v} into ParticleSetType ")
+        raise ValueError(f"Can't coerce {v} into ParticleSetType ")
 
     def humanize(self):
         """Particle type name in lower case."""
@@ -122,9 +122,9 @@ class ParticleSet:
     total_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
 
     # angular momentum
-    Jx_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
-    Jy_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
-    Jz_ = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+    Jx_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+    Jy_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
+    Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
     # UTTRS Orchestration =====================================================
 
@@ -500,6 +500,7 @@ class Galaxy:
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
         >>> E_s, E_dm, E_g = galaxy.total_energy_
+
         """
         if self.has_potential_:
             return (
@@ -531,6 +532,7 @@ class Galaxy:
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
         >>> J_s, J_dm, J_g = galaxy.angular_momentum_
+
         """
         return (
             self.stars.angular_momentum_,
