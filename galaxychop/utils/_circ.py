@@ -31,7 +31,7 @@ from ..data import ParticleSetType
 
 
 DEFAULT_CBIN = (0.05, 0.005)
-"""Default bining of circularity.
+"""Default binning of circularity.
 
 Please check the documentation of ``jcirc()``.
 
