@@ -48,7 +48,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
     >>> chopper = gchop.JThreshold()
     >>> chopper.decompose(galaxy)
 

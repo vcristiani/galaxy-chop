@@ -48,7 +48,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
     >>> chopper = gchop.JHistogram()
     >>> chopper.decompose(galaxy)
 
@@ -218,7 +218,7 @@ class JEHistogram(JHistogram):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.star_align(gchop.center(galaxy))
+    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
     >>> chopper = gchop.JEHistogram()
     >>> chopper.decompose(galaxy)
     """

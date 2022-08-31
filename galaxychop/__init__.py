@@ -26,6 +26,7 @@ __version__ = "0.3.dev0"
 # =============================================================================
 
 from .data import *  # noqa
-import io  # noqa
-import utils  # noqa
-from . import models  # noqa
+from . import io, models, utils  # noqa
+
+
+__all__ = ["io", "models", "utils"]

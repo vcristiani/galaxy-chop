@@ -22,7 +22,7 @@ import pytest
 @pytest.mark.model
 def test_JThreshold(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.star_align(gchop.center(gal))
+    gal = gchop.utils.star_align(gchop.utils.center(gal))
 
     decomposer = gchop.models.JThreshold()
 

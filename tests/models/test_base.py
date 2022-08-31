@@ -223,7 +223,7 @@ def test_GalaxyDecomposerABC_repr():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.star_align(gchop.center(gal))
+    gal = gchop.utils.star_align(gchop.utils.center(gal))
 
     class Decomposer(models.GalaxyDecomposerABC):
         def get_attributes(self):
@@ -256,7 +256,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     assert np.all(X[:, 0] == gal.to_dataframe(attributes=["x"])["x"])
 
     # check jcirc eps
-    jcirc = gchop.jcirc(gal)
+    jcirc = gchop.utils.jcirc(gal)
 
     X_stars = X[t == gchop.ParticleSetType.STARS.value]
     assert np.array_equal(X_stars[:, 1], jcirc.eps, equal_nan=True)
@@ -293,7 +293,7 @@ def test_GalaxyDecomposerABC_complete_labels():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.star_align(gchop.center(gal))
+    gal = gchop.utils.star_align(gchop.utils.center(gal))
 
     class Decomposer(models.GalaxyDecomposerABC):
         def get_attributes(self):

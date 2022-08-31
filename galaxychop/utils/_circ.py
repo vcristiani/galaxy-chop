@@ -287,8 +287,9 @@ def jcirc(
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> E_star_norm, Jz_star_norm, eps, eps_r, x, y =
-    >>>        galaxy.jcir(bin0=0.05, bin1=0.005)
+    >>> E_star_norm, Jz_star_norm, eps, eps_r, x, y = galaxy.jcir(
+    ...     bin0=0.05, bin1=0.005
+    ... )
 
     """
     with warnings.catch_warnings():
