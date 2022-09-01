@@ -67,7 +67,7 @@ with open("README.md") as fp:
 # FORTRAN EXTENSIONS
 # =============================================================================
 
-FORTRAN_DIR = os.path.join(PATH, "galaxychop", "utils", "fortran")
+FORTRAN_DIR = os.path.join(PATH, "galaxychop", "preproc", "fortran")
 
 ON_RTD = os.environ.get("READTHEDOCS") == "True"
 ON_WINDOWS = platform.system() == "Windows"
@@ -85,7 +85,7 @@ else:
 
 EXTENSIONS = [
     Extension(
-        name="galaxychop.utils.fortran.potential",
+        name="galaxychop.preproc.fortran.potential",
         sources=[os.path.join(FORTRAN_DIR, "potential.f95")],
         extra_f90_compile_args=["-fopenmp"],
         extra_link_args=extra_link_args,
@@ -109,8 +109,8 @@ setup(
     packages=[
         "galaxychop",
         "galaxychop.models",
-        "galaxychop.utils",
-        "galaxychop.utils.fortran",
+        "galaxychop.preproc",
+        "galaxychop.preproc.fortran",
     ],
     ext_modules=EXTENSIONS if not ON_RTD else [],
     license="MIT",

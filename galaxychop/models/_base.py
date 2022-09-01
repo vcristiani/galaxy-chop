@@ -21,14 +21,14 @@ import numpy as np
 
 import pandas as pd
 
-from .. import data, utils
-from ..utils import doc_inherit
+from .. import data, preproc
+from ..preproc import doc_inherit
 
 # =============================================================================
 # CONSTANTS
 # =============================================================================
 
-_CIRCULARITY_ATTRIBUTES = utils.JCirc.circularity_attributes()
+_CIRCULARITY_ATTRIBUTES = preproc.JCirc.circularity_attributes()
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
@@ -279,7 +279,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
 
-    cbins = hparam(default=utils.DEFAULT_CBIN)
+    cbins = hparam(default=preproc.DEFAULT_CBIN)
 
     @cbins.validator
     def _bins_validator(self, attribute, value):
@@ -397,7 +397,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = utils.jcirc(galaxy, *self.cbins).as_dict()
+        jcirc = preproc.jcirc(galaxy, *self.cbins).as_dict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars

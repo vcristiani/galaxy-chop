@@ -1,7 +1,7 @@
-``galaxychop.utils`` package
+``galaxychop.preproc`` package
 ==============================
 
-.. automodule:: galaxychop.utils
+.. automodule:: galaxychop.preproc
    :members:
    :show-inheritance:
    :member-order: bysource

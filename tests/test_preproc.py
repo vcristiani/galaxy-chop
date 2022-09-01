@@ -10,7 +10,7 @@
 # IMPORTS
 # =============================================================================
 
-from galaxychop import data, utils
+from galaxychop import data, preproc
 
 import numpy as np
 import numpy.testing as npt
@@ -31,7 +31,7 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
         gas_potential=True,
     )
     with pytest.raises(ValueError):
-        utils.potential(gal)
+        preproc.potential(gal)
 
 
 def test_Galaxy_potential_energy(galaxy):
@@ -42,7 +42,7 @@ def test_Galaxy_potential_energy(galaxy):
         gas_potential=False,
     )
 
-    pgal = utils.potential(gal)
+    pgal = preproc.potential(gal)
 
     assert isinstance(pgal, data.Galaxy)
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
@@ -51,7 +51,7 @@ def test_Galaxy_potential_energy(galaxy):
 
 
 @pytest.mark.skipif(
-    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    preproc.DEFAULT_POTENTIAL_BACKEND == "numpy",
     reason="apparently the potential fortran extension are not compiled",
 )
 def test_Galaxy_potential_energy_fortran_backend(galaxy):
@@ -62,7 +62,7 @@ def test_Galaxy_potential_energy_fortran_backend(galaxy):
         gas_potential=False,
     )
 
-    pgal_f = utils.potential(gal, backend="fortran")
+    pgal_f = preproc.potential(gal, backend="fortran")
 
     assert isinstance(pgal_f, data.Galaxy)
     assert np.all(pgal_f.stars.potential == pgal_f.potential_energy_[0])
@@ -71,7 +71,7 @@ def test_Galaxy_potential_energy_fortran_backend(galaxy):
 
 
 @pytest.mark.skipif(
-    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    preproc.DEFAULT_POTENTIAL_BACKEND == "numpy",
     reason="apparently the potential fortran extension are not compiled",
 )
 def test_Galaxy_potential_energy_backend_consistency(galaxy):
@@ -82,8 +82,8 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
         gas_potential=False,
     )
 
-    pgal_np = utils.potential(gal, backend="numpy")
-    pgal_f = utils.potential(gal, backend="fortran")
+    pgal_np = preproc.potential(gal, backend="numpy")
+    pgal_f = preproc.potential(gal, backend="fortran")
 
     decimal = 5
     npt.assert_almost_equal(
@@ -101,7 +101,7 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
 
 @pytest.mark.xfail
 @pytest.mark.skipif(
-    utils.DEFAULT_POTENTIAL_BACKEND == "numpy",
+    preproc.DEFAULT_POTENTIAL_BACKEND == "numpy",
     reason="apparently the potential fortran extension are not compiled",
 )
 def test_potential_recover(read_hdf5_galaxy):
@@ -112,7 +112,7 @@ def test_potential_recover(read_hdf5_galaxy):
         for k, v in data.galaxy_as_kwargs(gal).items()
         if "potential_" not in k
     }
-    new = utils.potential(data.mkgalaxy(**kwargs), backend="fortran")
+    new = preproc.potential(data.mkgalaxy(**kwargs), backend="fortran")
 
     original_potential = (
         gal.to_dataframe(attributes=["potential"]).to_numpy().flatten()
@@ -138,7 +138,7 @@ def test_center_without_potential_energy(galaxy):
         gas_potential=False,
     )
     with pytest.raises(ValueError):
-        utils.center(gal)
+        preproc.center(gal)
 
 
 def test_center(galaxy):
@@ -149,7 +149,7 @@ def test_center(galaxy):
         gas_potential=True,
     )
 
-    cgal = utils.center(gal)
+    cgal = preproc.center(gal)
 
     df = gal.to_dataframe()
     cdf = cgal.to_dataframe()
@@ -175,7 +175,7 @@ def test_is_centered_without_potential_energy(galaxy):
         gas_potential=False,
     )
     with pytest.raises(ValueError):
-        utils.is_centered(gal)
+        preproc.is_centered(gal)
 
 
 def test_is_centered(galaxy):
@@ -186,10 +186,10 @@ def test_is_centered(galaxy):
         gas_potential=True,
     )
 
-    cgal = utils.center(gal)
+    cgal = preproc.center(gal)
 
-    assert not utils.is_centered(gal)
-    assert utils.is_centered(cgal)
+    assert not preproc.is_centered(gal)
+    assert preproc.is_centered(cgal)
 
 
 # =============================================================================
@@ -200,7 +200,7 @@ def test_is_centered(galaxy):
 def test_star_align_rcur0dot9(galaxy):
     gal = galaxy(seed=42)
 
-    agal = utils.star_align(gal, r_cut=0.9)
+    agal = preproc.star_align(gal, r_cut=0.9)
 
     df = gal.to_dataframe()
     adf = agal.to_dataframe()
@@ -233,7 +233,7 @@ def test_star_align_rcur0dot9(galaxy):
 def test_star_align(galaxy):
     gal = galaxy(seed=42)
 
-    agal = utils.star_align(gal)
+    agal = preproc.star_align(gal)
 
     df = gal.to_dataframe()
     adf = agal.to_dataframe()
@@ -267,25 +267,25 @@ def test_star_align_invalid_rcut(galaxy):
     gal = galaxy(seed=42)
 
     with pytest.raises(ValueError):
-        utils.star_align(gal, r_cut=-1)
+        preproc.star_align(gal, r_cut=-1)
 
 
 def test_is_star_aligned_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
 
-    agal = utils.star_align(gal, r_cut=5)
+    agal = preproc.star_align(gal, r_cut=5)
 
-    assert not utils.is_star_aligned(gal, r_cut=5)
-    assert utils.is_star_aligned(agal, r_cut=5)
+    assert not preproc.is_star_aligned(gal, r_cut=5)
+    assert preproc.is_star_aligned(agal, r_cut=5)
 
 
 def test_is_star_aligned_fake_galaxy(galaxy):
     gal = galaxy(seed=42)
 
-    agal = utils.star_align(gal, r_cut=5)
+    agal = preproc.star_align(gal, r_cut=5)
 
-    assert not utils.is_star_aligned(gal, r_cut=5)
-    assert utils.is_star_aligned(agal, r_cut=5)
+    assert not preproc.is_star_aligned(gal, r_cut=5)
+    assert preproc.is_star_aligned(agal, r_cut=5)
 
 
 # =============================================================================
@@ -295,7 +295,7 @@ def test_is_star_aligned_fake_galaxy(galaxy):
 
 def test_jcirc_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = utils.jcirc(gal)
+    result = preproc.jcirc(gal)
 
     mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]
     mask_eps = np.where(~np.isnan(result.eps))[0]
@@ -310,13 +310,13 @@ def test_jcirc_fake_galaxy(galaxy):
     for seed in range(100):
         gal = galaxy(seed=seed)
         with pytest.raises(ValueError):
-            utils.jcirc(gal)
+            preproc.jcirc(gal)
 
 
 def test_x_y_len(read_hdf5_galaxy):
     """Check the x and y array len."""
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = utils.jcirc(gal)
+    result = preproc.jcirc(gal)
 
     x = result.x
     y = result.y
@@ -326,7 +326,7 @@ def test_x_y_len(read_hdf5_galaxy):
 
 def test_x_values(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = utils.jcirc(gal)
+    result = preproc.jcirc(gal)
 
     aux0 = np.zeros(len(result.x) + 1)
     aux1 = np.zeros(len(result.x) + 1)
@@ -341,7 +341,7 @@ def test_x_values(read_hdf5_galaxy):
 
 def test_y_values(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = utils.jcirc(gal)
+    result = preproc.jcirc(gal)
 
     df = gal.to_dataframe(attributes=["total_energy", "Jz"])
 

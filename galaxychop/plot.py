@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from . import models, utils
+from . import models, preproc
 
 # =============================================================================
 # ACCESSOR
@@ -327,7 +327,7 @@ class GalaxyPlotter:
 
         # first we extract the circularity parameters from the galaxy
         # as a dictionary
-        circ = utils.jcirc(self._galaxy, *cbins)
+        circ = preproc.jcirc(self._galaxy, *cbins)
         mask = circ.isfinite()
 
         circ_dict = circ.as_dict()
@@ -373,7 +373,7 @@ class GalaxyPlotter:
 
     def circ_pairplot(
         self,
-        cbins=utils.DEFAULT_CBIN,
+        cbins=preproc.DEFAULT_CBIN,
         attributes=None,
         labels=None,
         lmap=None,
@@ -425,7 +425,7 @@ class GalaxyPlotter:
         self,
         x,
         y,
-        cbins=utils.DEFAULT_CBIN,
+        cbins=preproc.DEFAULT_CBIN,
         labels=None,
         lmap=None,
         **kwargs,
@@ -471,7 +471,7 @@ class GalaxyPlotter:
         self,
         x,
         y=None,
-        cbins=utils.DEFAULT_CBIN,
+        cbins=preproc.DEFAULT_CBIN,
         labels=None,
         lmap=None,
         **kwargs,
@@ -518,7 +518,7 @@ class GalaxyPlotter:
         self,
         x,
         y=None,
-        cbins=utils.DEFAULT_CBIN,
+        cbins=preproc.DEFAULT_CBIN,
         labels=None,
         lmap=None,
         **kwargs,
