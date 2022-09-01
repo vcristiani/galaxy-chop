@@ -4,17 +4,16 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Utilities module."""
+"""preprocessing module."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
-from ._align import is_star_aligned, star_align
-from ._center import center, is_centered
-from ._circ import DEFAULT_CBIN, JCirc, jcirc
-from ._decorators import doc_inherit
-from ._potential import (
+from .salign import is_star_aligned, star_align
+from .center import center, is_centered
+from .circ import DEFAULT_CBIN, JCirc, jcirc
+from .potential import (
     DEFAULT_POTENTIAL_BACKEND,
     G,
     POTENTIAL_BACKENDS,
@@ -33,5 +32,4 @@ __all__ = [
     "JCirc",
     "jcirc",
     "DEFAULT_CBIN",
-    "doc_inherit",
 ]
