@@ -13,7 +13,7 @@
 import numpy as np
 
 from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
-from ..preproc import doc_inherit
+from ..utils import doc_inherit
 
 
 # =============================================================================

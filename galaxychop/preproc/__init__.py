@@ -11,9 +11,9 @@
 # =============================================================================
 
 from .salign import is_star_aligned, star_align
-from .center import center, is_centered
+from .pcenter import center, is_centered
 from .circ import DEFAULT_CBIN, JCirc, jcirc
-from .potential import (
+from .potential_energy import (
     DEFAULT_POTENTIAL_BACKEND,
     G,
     POTENTIAL_BACKENDS,
@@ -25,10 +25,13 @@ __all__ = [
     "POTENTIAL_BACKENDS",
     "DEFAULT_POTENTIAL_BACKEND",
     "G",
+
     "center",
     "is_centered",
+
     "star_align",
     "is_star_aligned",
+
     "JCirc",
     "jcirc",
     "DEFAULT_CBIN",

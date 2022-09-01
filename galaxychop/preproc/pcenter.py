@@ -24,8 +24,7 @@ from .. import data
 
 
 def center(galaxy):
-    """
-    Particle centring.
+    """Galaxy particle centering.
 
     Centers the position of all galaxy particles respect to the position of the
     lowest potential particle.
@@ -79,8 +78,7 @@ def center(galaxy):
 
 
 def is_centered(galaxy, rtol=1e-05, atol=1e-08):
-    """
-    Validate if the galaxy is centered.
+    """Validate if the galaxy is centered.
 
     Parameters
     ----------

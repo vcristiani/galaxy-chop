@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 
 from .. import data, preproc
-from ..preproc import doc_inherit
+from ..utils import doc_inherit
 
 # =============================================================================
 # CONSTANTS
