@@ -25,13 +25,10 @@ __all__ = [
     "POTENTIAL_BACKENDS",
     "DEFAULT_POTENTIAL_BACKEND",
     "G",
-
     "center",
     "is_centered",
-
     "star_align",
     "is_star_aligned",
-
     "JCirc",
     "jcirc",
     "DEFAULT_CBIN",

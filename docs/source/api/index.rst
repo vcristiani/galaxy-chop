@@ -13,6 +13,24 @@
    data.rst
    io.rst
    plot.rst
-   models.rst
-   utils.rst
+
+
+.. toctree::
+   :maxdepth: 2
+
+   madm/preproc
+
+
+.. toctree::
+   :maxdepth: 2
+
+   models/index
+
+
+.. toctree::
+   :maxdepth: 2
+
+   utils/index
+
+
 

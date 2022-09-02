@@ -4,7 +4,7 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Test utilities provided by galaxychop."""
+"""Test utilities  galaxychop.preproc.pcenter"""
 
 # =============================================================================
 # IMPORTS

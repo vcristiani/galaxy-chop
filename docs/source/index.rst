@@ -30,7 +30,7 @@ Contents
    :maxdepth: 3
    :caption: - Reference
 
-   api/galaxychop.rst
+   api/index.rst
 
 
 .. toctree::

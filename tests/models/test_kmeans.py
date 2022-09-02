@@ -23,7 +23,7 @@ import pytest
 @pytest.mark.model
 def test_KMeans(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
 
     decomposer = gchop.models.KMeans(random_state=42)
 
