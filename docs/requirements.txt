@@ -6,3 +6,4 @@ nbsphinx
 Cython >= 0.28.5
 m2r2
 mistune==0.8.4
+sphinx-fortran
