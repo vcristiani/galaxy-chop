@@ -32,7 +32,7 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
         gas_potential=True,
     )
     with pytest.raises(ValueError):
-        potential_energy.potential_energy(gal)
+        potential_energy.potential(gal)
 
 
 def test_Galaxy_potential_energy(galaxy):
@@ -43,7 +43,7 @@ def test_Galaxy_potential_energy(galaxy):
         gas_potential=False,
     )
 
-    pgal = potential_energy.potential_energy(gal)
+    pgal = potential_energy.potential(gal)
 
     assert isinstance(pgal, data.Galaxy)
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
@@ -63,7 +63,7 @@ def test_Galaxy_potential_energy_fortran_backend(galaxy):
         gas_potential=False,
     )
 
-    pgal_f = potential_energy.potential_energy(gal, backend="fortran")
+    pgal_f = potential_energy.potential(gal, backend="fortran")
 
     assert isinstance(pgal_f, data.Galaxy)
     assert np.all(pgal_f.stars.potential == pgal_f.potential_energy_[0])
@@ -84,8 +84,8 @@ def test_Galaxy_potential_energy_backend_consistency(galaxy):
         gas_potential=False,
     )
 
-    pgal_np = potential_energy.potential_energy(gal, backend="numpy")
-    pgal_f = potential_energy.potential_energy(gal, backend="fortran")
+    pgal_np = potential_energy.potential(gal, backend="numpy")
+    pgal_f = potential_energy.potential(gal, backend="fortran")
 
     decimal = 5
     npt.assert_almost_equal(
@@ -115,7 +115,7 @@ def test_potential_recover(read_hdf5_galaxy):
         for k, v in data.galaxy_as_kwargs(gal).items()
         if "potential_" not in k
     }
-    new = potential_energy.potential_energy(
+    new = potential_energy.potential(
         data.mkgalaxy(**kwargs), backend="fortran"
     )
 

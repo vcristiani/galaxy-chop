@@ -17,14 +17,14 @@ from ._base import (
     GalaxyDecomposerABC,
     hparam,
 )
-from ._gaussian_mixture import (
+from .gaussian_mixture import (
     AutoGaussianMixture,
     DynamicStarsGaussianDecomposerABC,
     GaussianMixture,
 )
-from ._histogram import JEHistogram, JHistogram
-from ._kmeans import KMeans
-from ._threshold import JThreshold
+from .histogram import JEHistogram, JHistogram
+from .kmeans import KMeans
+from .threshold import JThreshold
 
 
 # =============================================================================

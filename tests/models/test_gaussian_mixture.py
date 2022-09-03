@@ -23,7 +23,7 @@ import pytest
 @pytest.mark.model
 def test_GaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
     decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
 
@@ -73,7 +73,7 @@ def test_GaussianMixture(read_hdf5_galaxy):
 @pytest.mark.model
 def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
     decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
 

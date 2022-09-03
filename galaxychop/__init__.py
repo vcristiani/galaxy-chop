@@ -25,8 +25,24 @@ __version__ = "0.3.dev0"
 # IMPORTS
 # =============================================================================
 
-from .data import *  # noqa
 from . import io, models, preproc, utils
+from .data import (
+    Galaxy,
+    ParticleSet,
+    ParticleSetType,
+    galaxy_as_kwargs,
+    mkgalaxy,
+)
 
 
-__all__ = ["io", "models", "preproc", "utils"]
+__all__ = [
+    "Galaxy",
+    "ParticleSet",
+    "ParticleSetType",
+    "io",
+    "models",
+    "preproc",
+    "utils",
+    "galaxy_as_kwargs",
+    "mkgalaxy",
+]

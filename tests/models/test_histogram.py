@@ -23,7 +23,7 @@ import pytest
 @pytest.mark.model
 def test_JHistogram(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
     decomposer = gchop.models.JHistogram()
 
@@ -53,7 +53,7 @@ def test_JHistogram(read_hdf5_galaxy):
 @pytest.mark.model
 def test_JEHistogram(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
     decomposer = gchop.models.JEHistogram()
 

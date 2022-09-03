@@ -6,7 +6,6 @@
 
 
 import galaxychop as gchop
-from galaxychop import models
 
 import numpy as np
 
@@ -30,7 +29,7 @@ def test_Components(probs):
     probabilities = random.normal(size=100) if probs else None
     mass = random.normal(size=100)
 
-    components = models.Components(
+    components = gchop.models.Components(
         labels=labels,
         ptypes=ptypes,
         probabilities=probabilities,
@@ -58,7 +57,7 @@ def test_Components_bad_len(probs):
     probabilities = random.normal(size=98) if probs else None
 
     with pytest.raises(ValueError):
-        models.Components(
+        gchop.models.Components(
             labels=labels,
             ptypes=ptypes,
             probabilities=probabilities,
@@ -77,7 +76,7 @@ def test_Components_to_dataframe(probs):
     mass = random.normal(size=100)
     probabilities = random.normal(size=100) if probs else None
 
-    components = models.Components(
+    components = gchop.models.Components(
         labels=labels,
         ptypes=ptypes,
         probabilities=probabilities,
@@ -104,7 +103,7 @@ def test_Components_describe(probs):
     mass = random.normal(loc=1000933.2, scale=252304.96, size=100)
     probabilities = random.uniform(size=(100, 3)) if probs else None
 
-    components = models.Components(
+    components = gchop.models.Components(
         labels=labels,
         ptypes=ptypes,
         probabilities=probabilities,
@@ -157,7 +156,7 @@ def test_Components_describe(probs):
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemethed():
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             return super().get_attributes()
 
@@ -184,7 +183,7 @@ def test_GalaxyDecomposerABC_not_implemethed():
     "bins_value", [None, (1.0,), (1.0, 2.0, 3.0), (1.0, 2)]
 )
 def test_GalaxyDecomposerABC_invalid_bins(bins_value):
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
 
@@ -200,9 +199,9 @@ def test_GalaxyDecomposerABC_invalid_bins(bins_value):
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_repr():
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
 
-        other = models.hparam(default=1)
+        other = gchop.models.hparam(default=1)
 
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
@@ -223,9 +222,9 @@ def test_GalaxyDecomposerABC_repr():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
 
@@ -267,7 +266,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_complete_labels():
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
 
@@ -293,9 +292,9 @@ def test_GalaxyDecomposerABC_complete_labels():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.pcenter(gal))
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
 
-    class Decomposer(models.GalaxyDecomposerABC):
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             return ["x"]
 
@@ -325,8 +324,8 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 @pytest.mark.model
 def test_DynamicStarDecomposer_get_attributes():
     class Decomposer(
-        models.DynamicStarsDecomposerMixin,
-        models.GalaxyDecomposerABC,
+        gchop.models.DynamicStarsDecomposerMixin,
+        gchop.models.GalaxyDecomposerABC,
     ):
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
@@ -346,8 +345,8 @@ def test_DynamicStarDecomposer_get_attributes():
 @pytest.mark.model
 def test_DynamicStarDecomposer_get_rows_mask():
     class Decomposer(
-        models.DynamicStarsDecomposerMixin,
-        models.GalaxyDecomposerABC,
+        gchop.models.DynamicStarsDecomposerMixin,
+        gchop.models.GalaxyDecomposerABC,
     ):
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]

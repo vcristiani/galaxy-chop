@@ -32,6 +32,7 @@ def test_doc_inherit(galaxy):
             Something
 
         """
-    expected = 'something\n\nParameters\n----------\na: int\nSomething'
+
+    expected = "something\n\nParameters\n----------\na: int\nSomething"
 
     assert foo.__doc__ == expected
