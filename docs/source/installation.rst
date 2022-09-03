@@ -1,46 +1,53 @@
+==========================
 Installation
-============
+==========================
 
-You need Python 3.7, 3.8 or 3.9 to run `GalaxyChop`.
+You can also `install Galaxychop from PyPI`_ using pip:
 
-
-Installing  with pip
-^^^^^^^^^^^^^^^^^^^^
-
-Make sure that the Python interpreter can load `GalaxyChop` code.
-The most convenient way to do this is to use virtualenv, virtualenvwrapper, and pip.
-
-After setting up and activating the virtualenv, run the following command:
-
-.. code-block:: console
+.. code:: bash
 
    $ pip install galaxychop
 
-That should be it all.
+Finally, you can also install the latest development version of
+Galaxychop `directly from GitHub`_:
+
+.. code:: bash
+
+   $ pip install git+https://github.com/vcristiani/galaxy-chop.git
+
+This is useful if there is some feature that you want to try, but we did
+not release it yet as a stable version. Although you might find some
+unpolished details, these development installations should work without
+problems. If you find any, please open an issue in the `issue tracker`_.
+
+.. warning::
+
+   It is recommended that you
+   **never ever use sudo** with distutils, pip, setuptools and friends in Linux
+   because you might seriously break your system
+   [`1 <http://wiki.python.org/moin/CheeseShopTutorial#Distutils_Installation>`_]
+   [`2 <http://stackoverflow.com/questions/4314376/how-can-i-install-a-python-egg-file/4314446#comment4690673_4314446>`_]
+   [`3 <http://workaround.org/easy-install-debian>`_]
+   [`4 <http://matplotlib.1069221.n5.nabble.com/Why-is-pip-not-mentioned-in-the-Installation-Documentation-tp39779p39812.html)>`_].
+   Use `virtual environments <https://docs.python.org/3/library/venv.html>`_ instead.
+
+.. _conda: https://conda.io/docs/
+.. _mamba: https://mamba.readthedocs.io/
+.. _issue tracker: https://github.com/vcristiani/galaxy-chop/issues
+.. _install GalaxyChop from PyPI: https://pypi.python.org/pypi/galaxychop/
+.. _directly from GitHub: https://github.com/vcristiani/galaxy-chop
 
 
+If you don't have Python
+-------------------------
 
-Installing the development version
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you don't already have a python installation with numpy and scipy, we
+recommend to install either via your package manager or via a python bundle.
+These come with numpy, scipy, matplotlib and many other helpful
+scientific and data processing libraries.
 
-If you’d like to be able to update your `GalaxyChop` code occasionally with the
-latest improvements and bug fixes, follow these instructions:
-
-Make sure that you have Git installed and that you can run its commands from a shell.
-(Enter *git help* at a shell prompt to test this.)
-
-Check out `GalaxyChop` main development branch like so:
-
-.. code-block:: console
-
-   $ git clone https://github.com/vcristiani/galaxy-chop.git
-
-
-This will create a directory *galaxy-chop* in your current directory.
-
-Then you can proceed to install with the commands
-
-.. code-block:: console
-
-   $ cd galaxy-chop
-   $ pip install -e .
+`Canopy
+<https://www.enthought.com/products/canopy>`_ and `Anaconda
+<https://www.continuum.io/downloads>`_ both ship a recent
+version of Python, in addition to a large set of scientific python
+library for Windows, Mac OSX and Linux.

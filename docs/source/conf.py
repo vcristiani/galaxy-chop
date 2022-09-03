@@ -46,6 +46,8 @@ release = galaxychop.__version__
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinxfortran.fortran_domain",
+    "sphinxfortran.fortran_autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
@@ -94,23 +96,43 @@ nbsphinx_prompt_width = "0pt"
 # INJECT README INTO THE RESTRUCTURED TEXT index.rst
 # =============================================================================
 
-import m2r
+import m2r2
 
-with open(CHOP_PATH / "README.md") as fp:
-    readme_md = fp.read().split("<!-- BODY -->", 1)[1]
+DYNAMIC_RST = {
+    "README.md": "README.rst",
+    "CHANGELOG.md": "CHANGELOG.rst",
+}
 
+for md_name, rst_name in DYNAMIC_RST.items():
+    md_path = CHOP_PATH / md_name
+    with open(md_path) as fp:
+        readme_md = fp.read().split("<!-- BODY -->")[-1]
 
-README_RST_PATH = CURRENT_PATH / "_dynamic" / "README"
+    rst_path = CURRENT_PATH / "_dynamic" / rst_name
 
+    with open(rst_path, "w") as fp:
+        fp.write(".. FILE AUTO GENERATED !! \n")
+        fp.write(m2r2.convert(readme_md))
+        print(f"{md_path} -> {rst_path} regenerated!")
 
-with open(README_RST_PATH, "w") as fp:
-    fp.write(".. FILE AUTO GENERATED !! \n")
-    fp.write(m2r.convert(readme_md))
-    print(f"{README_RST_PATH} regenerated!")
 
 # =============================================================================
-# CSS AND JS
+# FORTRAN
 # =============================================================================
+
+## -- Options for Sphinx-Fortran ---------------------------------------------
+# List of possible extensions in the case of a directory listing
+fortran_ext = ['f90', 'F90', 'f95', 'F95']
+
+# This variable must be set with file pattern, like "*.f90", or a list of them.
+# It is also possible to specify a directory name; in this case, all files than
+# have an extension matching those define by the config variable `fortran_ext`
+# are used.
+fortran_src = [ str(CHOP_PATH / "galaxychop" / "preproc" / "fortran"),  ]
+
+# Indentation string or length (default 4). If it is an integer,
+# indicates the number of spaces.
+fortran_indent = 4
 
 # =============================================================================
 # SETUP

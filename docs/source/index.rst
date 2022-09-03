@@ -12,7 +12,7 @@ Welcome to GalaxyChop's documentation!
 |
 
 .. Here we render the README.md of the repository as a main page
-.. include:: _dynamic/README
+.. include:: _dynamic/README.rst
 
 
 Contents
@@ -38,6 +38,7 @@ Contents
    :caption: - Misc
 
    license.rst
+   changelog.rst
 
 Indices and tables
 ==================

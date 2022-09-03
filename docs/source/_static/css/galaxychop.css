@@ -21,6 +21,10 @@ div.wy-grid-for-nav nav.wy-nav-side p.caption {
     color: var(--primary);
 }
 
+div.wy-side-nav-search a.icon.icon-home {
+    text-transform: capitalize;
+}
+
 p.caption[role='heading'] {
     color: var(--secondary);
 }
@@ -31,7 +35,7 @@ a:visited {
 }
 
 code {
-    color: var(--secondary) !important;
+    color: #272547 !important;
     border: none !important;
 }
 

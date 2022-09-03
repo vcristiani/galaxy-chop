@@ -111,6 +111,7 @@ setup(
         "galaxychop.models",
         "galaxychop.preproc",
         "galaxychop.preproc.fortran",
+        "galaxychop.utils",
     ],
     ext_modules=EXTENSIONS if not ON_RTD else [],
     license="MIT",

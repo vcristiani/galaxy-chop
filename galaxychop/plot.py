@@ -33,7 +33,7 @@ from . import models, preproc
 
 @attr.s(frozen=True, order=False)
 class GalaxyPlotter:
-    """Make plots of DecisionMatrix."""
+    """Make plots of a Galaxy."""
 
     _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
 

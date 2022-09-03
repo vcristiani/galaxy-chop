@@ -648,6 +648,7 @@ class DynamicStarsDecomposerMixin:
 
     This class redefines the get_row_mask method so that dynamic decomposition
     is performed using only stellar particles.
+
     """
 
     @doc_inherit(GalaxyDecomposerABC.get_rows_mask)

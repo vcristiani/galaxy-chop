@@ -1,5 +1,6 @@
 include LICENSE.txt
 include README.md
+include CHANGELOG.md
 
 recursive-include galaxychop *.dat
 recursive-include galaxychop *.npy

@@ -18,7 +18,7 @@
 .. toctree::
    :maxdepth: 2
 
-   madm/preproc
+   preproc/index
 
 
 .. toctree::

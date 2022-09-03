@@ -33,7 +33,7 @@ It runs in numerical N-body simulations populated with semi-analytical models an
 
 ## Requirements
 
-You need Python `3.7`, `3.8`, `3.9` to run GalaxyChop.
+You need Python `>= 3.8`, to run GalaxyChop.
 
 ### Standard Installation
 
@@ -50,11 +50,11 @@ Clone this repo and then inside the local directory execute
 ```bash
 $ git clone https://github.com/vcristiani/galaxy-chop.git
 $ cd galaxy-chop
-$ pip install -e .
+$ pip -r requirements-dev
 ```
 
 ## Authors
-- Valeria Cristiani <[valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar)> ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
+- Valeria Cristiani [valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar) ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
 - Antonela Taverna ([IATE-OAC-CONICET][]).
 - Juan Cabral ([IATE-OAC-CONICET][], [CONAE][]).
 - Rafael Pignata ([OAC-CONICET][], [FaMAF-UNC][]).
