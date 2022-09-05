@@ -249,7 +249,7 @@ class ParticleSet:
             "vx": lambda: arr.vx,
             "vy": lambda: arr.vy,
             "vz": lambda: arr.vz,
-            "softening": lambda: self.softening,
+            "softening": lambda: np.full(len(self), self.softening),
             "potential": lambda: (
                 arr.potential
                 if self.has_potential_
