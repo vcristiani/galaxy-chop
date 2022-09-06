@@ -98,7 +98,7 @@ def numpy_potential(x, y, z, m, softening):
     np.fill_diagonal(dist, 0.0)
 
     flt = dist != 0
-    mdist = np.divide(m, dist, where=flt)
+    mdist = np.divide(m, dist, out=np.zeros_like(dist), where=flt)
 
     return mdist.sum(axis=1) * G, np.asarray
 
