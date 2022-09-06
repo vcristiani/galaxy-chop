@@ -138,22 +138,21 @@ def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
     backend_function = POTENTIAL_BACKENDS[backend]
 
     # convert the galaxy in multiple arrays
-    df = galaxy.to_dataframe()
-    x = df.x.to_numpy()
-    y = df.y.to_numpy()
-    z = df.z.to_numpy()
-    m = df.m.to_numpy()
-    softening = df.softening.max()
+    df = galaxy.to_dataframe(attributes=["x", "y", "z", "m", "softening"])
+    x = df.x.to_numpy(dtype=np.float32)
+    y = df.y.to_numpy(dtype=np.float32)
+    z = df.z.to_numpy(dtype=np.float32)
+    m = df.m.to_numpy(dtype=np.float32)
+    softening = np.asarray(df.softening.max(), dtype=np.float32)
 
-    # convert all the inputs to float32
-    x_f32 = np.asarray(x, dtype=np.float32)
-    y_f32 = np.asarray(y, dtype=np.float32)
-    z_f32 = np.asarray(z, dtype=np.float32)
-    m_f32 = np.asarray(m, dtype=np.float32)
-    softening_f32 = np.asarray(softening, dtype=np.float32)
+    # cleanup df
+    del df
 
     # execute the function and return
-    pot, postproc = backend_function(x_f32, y_f32, z_f32, m_f32, softening_f32)
+    pot, postproc = backend_function(x, y, z, m, softening)
+
+    # cleanup again
+    del x, y, z, m, softening
 
     # apply the post process to the final potential
     pot = postproc(pot)
