@@ -15,19 +15,14 @@ public fortran_potential
 contains
    subroutine fortran_potential(x, y, z, m, soft, pe, n)
         ! Compute the potential energy for each particle.
-        !
-        ! Parameters
-        ! ----------
-        ! x, y, z :     (array)    Positions of particles.
-        ! m :           (array)    Masses of particles.
-        ! softening :   (float)    Softening parameter.
-        !
-        ! Returns
-        ! -------
-        ! pe :          (float)    Specific potential energy of particles.
-        integer              :: n
-        real, intent(in)     :: x(n), y(n), z(n), m(n), soft
-        real, intent(out)    :: pe(n)
+        integer              :: n ! Number of particles
+        real, intent(in)     :: x(n) ! Position x of particles
+        real, intent(in)     :: y(n) ! Position y of particles
+        real, intent(in)     :: z(n) ! Position z of particles
+        real, intent(in)     :: m(n) ! Masses of particles
+        real, intent(in)     :: soft ! Softening parameter
+        real, intent(out)    :: pe(n) ! Specific potential energy of particles
+
         real                 :: dist, soft2
         integer              :: i, j
 
