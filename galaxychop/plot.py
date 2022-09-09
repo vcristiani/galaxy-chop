@@ -209,6 +209,7 @@ class GalaxyPlotter:
             labels=labels,
             lmap=lmap,
         )
+        kwargs.setdefault("marker", ".")
         ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
@@ -464,6 +465,7 @@ class GalaxyPlotter:
             labels=labels,
             lmap=lmap,
         )
+        kwargs.setdefault("marker", ".")
         ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 

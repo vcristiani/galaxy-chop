@@ -253,7 +253,7 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
-    sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
+    sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax, marker=".")
 
 
 @pytest.mark.slow
@@ -525,7 +525,7 @@ def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     )
 
     df = pd.DataFrame({"eps": circ.eps[mask], "eps_r": circ.eps_r[mask]})
-    sns.scatterplot(x="eps", y="eps_r", data=df, ax=exp_ax)
+    sns.scatterplot(x="eps", y="eps_r", data=df, ax=exp_ax, marker=".")
     exp_ax.set_xlabel("eps")
     exp_ax.set_ylabel("eps_r")
 
