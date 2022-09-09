@@ -77,7 +77,7 @@ def center(galaxy):
     return data.mkgalaxy(**new)
 
 
-def is_centered(galaxy, rtol=1e-05, atol=1e-08):
+def is_centered(galaxy, *, rtol=1e-05, atol=1e-08):
     """Validate if the galaxy is centered.
 
     Parameters

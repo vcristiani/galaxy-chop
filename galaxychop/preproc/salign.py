@@ -191,8 +191,9 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     Returns
     -------
     bool
-        True if the total angular momentum of the galaxy is aligned with the
-        z-axis, False otherwise.
+        True if galaxy is centered respect to the position of the lowest
+        potential particle, and if the total angular momentum of the galaxy
+        is aligned with the z-axis, False otherwise.
     """
     # Now we extract only the needed column to rotate the galaxy
     df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
