@@ -35,11 +35,11 @@ def test_KMeans(read_hdf5_galaxy):
     assert len(gal.gas) == np.sum(components.ptypes == "gas")
 
     # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels.astype(float)).sum()
+    total_labels_no_nans = np.isfinite(components.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
     # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels.astype(float)).sum()
+    total_labels_nans = np.isnan(components.labels).sum()
     assert total_labels_nans == (
         len(gal.stars)
         - total_labels_no_nans

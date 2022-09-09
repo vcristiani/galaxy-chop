@@ -284,7 +284,7 @@ def test_GalaxyDecomposerABC_complete_labels():
 
     result = decomposer.complete_labels(
         X=X, labels=labels, rows_mask=rows_mask
-    ).astype(float)
+    )
 
     assert np.array_equal(result, [1, np.nan, 1], equal_nan=True)
 
@@ -313,9 +313,7 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     assert (components.ptypes == "gas").sum() == len(gal.gas)
 
     assert np.all(components.labels[components.ptypes == "gas"] == 100)
-    assert np.all(
-        np.isnan(components.labels[components.ptypes != "gas"].astype(float))
-    )
+    assert np.all(np.isnan(components.labels[components.ptypes != "gas"]))
 
 
 # =============================================================================

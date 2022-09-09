@@ -526,7 +526,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             belongs. Particles that do not belong to any of them are assigned
             the label Nan. n_particles is the total number of particles.
         """
-        new_labels = np.full(len(X), np.nan, dtype=object)
+        new_labels = np.full(len(X), np.nan)
         new_labels[rows_mask] = labels
         return new_labels
 
