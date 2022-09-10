@@ -43,6 +43,7 @@ _DEFAULT_METADATA = {
     "platform": platform.platform(),
     "system_encoding": sys.getfilesystemencoding(),
     "Python": sys.version,
+    "format_version": 0.1,
 }
 
 
