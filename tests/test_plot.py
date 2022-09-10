@@ -328,7 +328,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == circ.eps[mask]).all()
+    assert (df[hue] == circ.eps[mask].astype(int)).all()
 
 
 @pytest.mark.plot

@@ -27,6 +27,21 @@ import seaborn as sns
 from . import models, preproc
 
 # =============================================================================
+# UTILITIES
+# =============================================================================
+
+
+class _FixComponentsDefaults(dict):
+    def get(self, key, default=None, /):
+        if np.isnan(default):
+            default = pd.NA
+        elif isinstance(default, (float, np.floating)):
+            default = int(default)
+
+        return super().get(key, default)
+
+
+# =============================================================================
 # ACCESSOR
 # =============================================================================
 
@@ -96,7 +111,9 @@ class GalaxyPlotter:
         # if we use the components as labels we need to extract the labels
         # and the lmap if lmap is None
         if isinstance(labels, models.Components):
-            lmap = labels.lmap if lmap is None else lmap
+            lmap = (
+                _FixComponentsDefaults(labels.lmap) if lmap is None else lmap
+            )
             labels = labels.labels
 
         attributes = ["x", "y", "z"] if attributes is None else attributes
@@ -323,7 +340,9 @@ class GalaxyPlotter:
         # if we use the components as laberls we need to extract the labels
         # and the lmap if lmap is None
         if isinstance(labels, models.Components):
-            lmap = labels.lmap if lmap is None else lmap
+            lmap = (
+                _FixComponentsDefaults(labels.lmap) if lmap is None else lmap
+            )
             labels = labels.labels
 
         # first we extract the circularity parameters from the galaxy
