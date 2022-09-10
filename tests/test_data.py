@@ -286,8 +286,8 @@ def test_ParticleSet_repr(data_particleset, has_potential):
     )
 
     expected = (
-        f"ParticleSet(STARS, size={len(m)}, "
-        f"softening={soft}, potentials={has_potential})"
+        f"<ParticleSet 'STARS', size={len(m)}, "
+        f"softening={soft}, potentials={has_potential}>"
     )
 
     assert repr(pset) == expected
@@ -658,7 +658,7 @@ def test_Galaxy_repr(galaxy):
         gas_max=100,
     )
 
-    expected = "Galaxy(stars=100, dark_matter=100, gas=100, potential=True)"
+    expected = "<Galaxy stars=100, dark_matter=100, gas=100, potential=True>"
     assert repr(gal) == expected
 
 

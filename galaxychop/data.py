@@ -208,8 +208,8 @@ class ParticleSet:
     def __repr__(self):
         """repr(x) <=> x.__repr__()."""
         return (
-            f"ParticleSet({self.ptype.name}, size={len(self)}, "
-            f"softening={self.softening}, potentials={self.has_potential_})"
+            f"<ParticleSet {self.ptype.name!r}, size={len(self)}, "
+            f"softening={self.softening}, potentials={self.has_potential_}>"
         )
 
     def __len__(self):
@@ -348,7 +348,7 @@ class Galaxy:
         dm_repr = f"dark_matter={len(self.dark_matter)}"
         gas_repr = f"gas={len(self.gas)}"
         has_pot = f"potential={self.has_potential_}"
-        return f"Galaxy({stars_repr}, {dm_repr}, {gas_repr}, {has_pot})"
+        return f"<Galaxy {stars_repr}, {dm_repr}, {gas_repr}, {has_pot}>"
 
     # UTILITIES ===============================================================
 
