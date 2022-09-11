@@ -1,10 +1,11 @@
 include LICENSE.txt
 include README.md
 include CHANGELOG.md
+include CMakeLists.txt
 
 recursive-include galaxychop *.dat
 recursive-include galaxychop *.npy
-recursive-include galaxychop *.f95
+recursive-include galaxychop *.f90
 
 recursive-exclude docs *
 recursive-exclude legacy *
