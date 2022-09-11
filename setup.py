@@ -20,7 +20,7 @@ import os
 import platform
 import setuptools  # noqa
 
-from numpy.distutils.core import Extension, setup  # noqa
+from skbuild import setup
 
 # =============================================================================
 # PATH TO THIS MODULE
@@ -64,36 +64,6 @@ with open("README.md") as fp:
     LONG_DESCRIPTION = fp.read()
 
 # =============================================================================
-# FORTRAN EXTENSIONS
-# =============================================================================
-
-FORTRAN_DIR = os.path.join(PATH, "galaxychop", "preproc", "fortran")
-
-ON_RTD = os.environ.get("READTHEDOCS") == "True"
-ON_WINDOWS = platform.system() == "Windows"
-
-if ON_WINDOWS:
-    extra_link_args = [
-        "-lgomp",
-        "-static",
-        "-static-libgfortran",
-        "-static-libgcc",
-    ]
-else:
-    extra_link_args = ["-lgomp"]
-
-
-EXTENSIONS = [
-    Extension(
-        name="galaxychop.preproc.fortran.potential",
-        sources=[os.path.join(FORTRAN_DIR, "potential.f95")],
-        extra_f90_compile_args=["-fopenmp"],
-        extra_link_args=extra_link_args,
-    )
-]
-
-
-# =============================================================================
 # FUNCTIONS
 # =============================================================================
 
@@ -113,7 +83,6 @@ setup(
         "galaxychop.preproc.fortran",
         "galaxychop.utils",
     ],
-    ext_modules=EXTENSIONS if not ON_RTD else [],
     license="MIT",
     keywords="galaxy, dynamics",
     classifiers=[

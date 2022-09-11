@@ -14,4 +14,11 @@ testpaths = [
 
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools", "numpy", "wheel"]
+requires = [
+    "setuptools>=42",
+    "scikit-build",
+    "cmake",
+    "ninja; platform_system!='Windows'",
+    "numpy",
+    "wheel"
+]
