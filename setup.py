@@ -17,7 +17,6 @@
 # IMPORTS
 # =============================================================================
 import os
-import platform
 import setuptools  # noqa
 
 from skbuild import setup
