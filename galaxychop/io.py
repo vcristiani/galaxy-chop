@@ -21,9 +21,7 @@ import sys
 from astropy.io.misc.hdf5 import write_table_hdf5
 from astropy.table import Table
 
-
 import h5py
-
 
 import numpy as np
 

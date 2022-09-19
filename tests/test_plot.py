@@ -144,7 +144,7 @@ def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
         ptypes=None, attributes=None, labels="x", lmap=None
     )
 
-    x = gal.to_dataframe(attributes=["x"]).x
+    x = gal.to_dataframe(attributes=["x"]).sort_values("x").x
 
     assert (df[hue] == x).all()
 
@@ -161,7 +161,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
         ptypes=None, attributes=None, labels="ptype", lmap=lmap
     )
 
-    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
+    ptype = gal.to_dataframe(attributes=["ptype"]).sort_values("ptype").ptype
     mapped = ptype.apply(lmap.get)
 
     assert (df[hue] == mapped).all()
@@ -182,7 +182,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
         ptypes=None, attributes=None, labels="ptype", lmap=lmap_func
     )
 
-    ptype = gal.to_dataframe(attributes=["ptype"]).ptype
+    ptype = gal.to_dataframe(attributes=["ptype"]).sort_values("ptype").ptype
     mapped = ptype.apply(lmap_func)
 
     assert (df[hue] == mapped).all()
@@ -200,7 +200,7 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
     test_grid = plotter.pairplot(attributes=["x", "y"])
 
     # EXPECTED
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"]).sort_values("ptype")
     expected_grid = sns.pairplot(
         data=df, hue="ptype", kind="hist", diag_kind="kde"
     )
@@ -224,7 +224,7 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
     )
 
     # EXPECTED
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"]).sort_values("ptype")
     df.columns = ["x", "y", "Labels"]
     expected_grid = sns.pairplot(
         data=df, hue="Labels", kind="hist", diag_kind="kde"
@@ -252,7 +252,9 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
+    df = gal.to_dataframe(
+        ptypes=["gas"], attributes=["x", "y", "ptype"]
+    ).sort_values("ptype")
     sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax, marker=".")
 
 
@@ -327,8 +329,8 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
         & np.isfinite(circ.eps)
         & np.isfinite(circ.eps_r)
     )
-
-    assert (df[hue] == circ.eps[mask].astype(int)).all()
+    expected = np.sort(circ.eps[mask].astype(int).astype(str))
+    assert (df[hue] == expected).all()
 
 
 @pytest.mark.plot
@@ -354,7 +356,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == circ.eps_r[mask]).all()
+    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -380,7 +382,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == circ.eps_r[mask]).all()
+    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -405,7 +407,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == circ.eps_r[mask]).all()
+    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -427,7 +429,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == circ.eps_r[mask]).all()
+    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot

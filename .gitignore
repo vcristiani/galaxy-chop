@@ -120,3 +120,4 @@ result_images/
 .mutmut-cache
 docs/source/_dynamic/*.rst
 docs/source/tutorials/gal394242.h5
+_skbuild/

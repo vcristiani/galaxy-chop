@@ -36,7 +36,7 @@ class _FixComponentsDefaults(dict):
         if np.isnan(default):
             default = pd.NA
         elif isinstance(default, (float, np.floating)):
-            default = int(default)
+            default = str(int(default))
 
         return super().get(key, default)
 
@@ -51,6 +51,7 @@ class GalaxyPlotter:
     """Make plots of a Galaxy."""
 
     _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
+    _DEFAULT_HUE_COLUMN = "Labels"
 
     _galaxy = attr.ib()
 
@@ -133,7 +134,9 @@ class GalaxyPlotter:
         # labels can be an np array and must be added as a column to the
         # dataframe and assign hue to the name of this new column.
         if hue is None and labels is not None:
-            hue = "Labels"  # Hue is not in ParticleSet, so it is useful
+            hue = (
+                self._DEFAULT_HUE_COLUMN
+            )  # Hue is not in ParticleSet, so it is useful
             df.insert(0, hue, labels)  # I place it as the first column
 
         if hue and lmap is not None:
@@ -141,6 +144,10 @@ class GalaxyPlotter:
                 (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
             )
             df[hue] = df[hue].apply(lmap_func)
+
+        # for consitency if we have a hue, we use the natural order
+        if hue is not None:
+            df = df.sort_values(hue)
 
         return df, hue
 
@@ -378,7 +385,7 @@ class GalaxyPlotter:
             # I only delete the nans and inf.
             labels = np.asarray(labels)
             labels = labels[np.isfinite(labels)]
-            hue = "Labels"
+            hue = self._DEFAULT_HUE_COLUMN
 
             # I place it as the first column
             df.insert(0, hue, labels)
@@ -388,6 +395,10 @@ class GalaxyPlotter:
                 (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
             )
             df[hue] = df[hue].apply(lmap_func)
+
+        # for consitency if we have a hue, we use the natural order
+        if hue is not None:
+            df = df.sort_values(hue)
 
         return df, hue
 
