@@ -99,8 +99,8 @@ class Components:
         lmap = bool(self.lmap)
         probs = True if self.probabilities is not None else False
         return (
-            f"Components({length}, labels={labels}, "
-            f"probabilities={probs}, lmap={lmap})"
+            f"<Components length={length}, labels={labels}, "
+            f"probabilities={probs}, lmap={lmap}>"
         )
 
     def to_dataframe(self, attributes=None):

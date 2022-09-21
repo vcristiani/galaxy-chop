@@ -40,8 +40,8 @@ def test_Components(probs):
     assert len(components) == 100
 
     expected_repr = (
-        "Components(100, labels={0, 1, 2}, "
-        f"probabilities={probs}, lmap=False)"
+        "<Components length=100, labels={0, 1, 2}, "
+        f"probabilities={probs}, lmap=False>"
     )
     assert repr(components) == expected_repr
 
