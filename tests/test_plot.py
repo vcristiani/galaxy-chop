@@ -329,7 +329,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
         & np.isfinite(circ.eps)
         & np.isfinite(circ.eps_r)
     )
-    expected = np.sort(circ.eps[mask].astype(int).astype(str))
+    expected = np.sort(circ.eps[mask])
     assert (df[hue] == expected).all()
 
 
