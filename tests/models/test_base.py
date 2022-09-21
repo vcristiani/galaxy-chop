@@ -84,7 +84,14 @@ def test_Components_to_dataframe(probs):
         lmap={},
     )
 
-    expected = pd.DataFrame({"m": mass, "labels": labels, "ptypes": ptypes})
+    expected = pd.DataFrame(
+        {
+            "m": mass,
+            "labels": labels,
+            "ptypes": ptypes,
+            "lmap": labels.astype(object),
+        }
+    )
 
     if probs:
         probs_df = pd.DataFrame({"probs_0": probabilities})

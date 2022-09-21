@@ -86,6 +86,22 @@ class Components:
         if len(lens) > 1:
             raise ValueError("All length must be the same")
 
+    def map_labels(self, lmap=None):
+        """Access all the labels mapped to the lmap dictionary.
+
+        If no lmap is provided, the function tries to use the internal
+        lmap dict. If the instance doesn't has an lmap dict this method
+        is equivalent to access the labels attribute, but returns a copy
+        with object as dtype.
+
+        """
+        lmap = self.lmap if lmap is None else lmap
+
+        def lmapper(k):
+            return lmap.get(k, k)
+
+        return np.fromiter(map(lmapper, self.labels), object)
+
     def __len__(self):
         """x.__len__() <==> len(x)."""
         return len(self.labels)
@@ -103,7 +119,7 @@ class Components:
             f"probabilities={probs}, lmap={lmap}>"
         )
 
-    def to_dataframe(self, attributes=None):
+    def to_dataframe(self, attributes=None, lmap=None):
         """
         Convert to pandas data frame.
 
@@ -119,13 +135,12 @@ class Components:
             "m": lambda: self.m,
             "labels": lambda: self.labels,
             "ptypes": lambda: self.ptypes,
+            "lmap": lambda: self.map_labels(lmap=lmap),
         }
 
-        attributes = (
-            list(columns_makers) + ["probabilities"]
-            if attributes is None
-            else attributes
-        )
+        default_attributes = list(columns_makers) + ["probabilities"]
+
+        attributes = default_attributes if attributes is None else attributes
 
         data = OrderedDict()
         probs_df = None
