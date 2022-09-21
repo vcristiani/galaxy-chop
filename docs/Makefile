@@ -13,7 +13,7 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 autobuild:
-	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" --watch ../galaxychop/ --ignore "**/_dynamic/*"
+	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" --watch ../galaxychop/ --ignore "**/_dynamic/*" --ignore "$(SOURCEDIR)_build/html/genindex.html"
 
 .PHONY: help Makefile
 
