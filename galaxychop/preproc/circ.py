@@ -200,7 +200,7 @@ def _jcirc(galaxy, bin0, bin1):
     eps_r = Jr_star_norm / j_circ
 
     E_star_norm_ = np.full(len(Etot_s), np.nan)
-    Jz_star_norm_ = np.full(len(Jz_star_norm), np.nan)
+    Jz_star_norm_ = np.full(len(Etot_s), np.nan)
     eps_ = np.full(len(Etot_s), np.nan)
     eps_r_ = np.full(len(Etot_s), np.nan)
 
