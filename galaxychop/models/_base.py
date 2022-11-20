@@ -62,6 +62,12 @@ class Components:
        component, in case the dynamic decomposition model includes them.
        Shape: (n,1).
        Otherwise it adopts the value None.
+    attributes: List[str]
+        The attributes that are relevant.
+    x_clean: Array(floats)
+        The valid values used to operate the clustering.
+    rows_mask: Array[bool]
+
     """
 
     labels = attr.ib(validator=vldt.instance_of(np.ndarray))
@@ -71,6 +77,9 @@ class Components:
     probabilities = attr.ib(
         validator=vldt.optional(vldt.instance_of(np.ndarray))
     )
+    attributes=attr.ib()
+    x_clean=attr.ib()
+    rows_mask=attr.ib()
 
     def __attrs_post_init__(self):
         """Length validator.
@@ -650,6 +659,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             probabilities=final_probs,
             m=mass,
             lmap=self.get_lmap().copy(),
+            attributes=attributes,
+            x_clean=X_clean,
+            rows_mask=rows_mask,
         )
 
 
