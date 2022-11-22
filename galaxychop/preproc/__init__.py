@@ -10,7 +10,7 @@
 # IMPORTS
 # =============================================================================
 
-from .circ import DEFAULT_CBIN, JCirc, jcirc
+from .circ import DEFAULT_CBIN, DEFAULT_REASSIGN, JCirc, jcirc
 from .pcenter import center, is_centered
 from .potential_energy import (
     DEFAULT_POTENTIAL_BACKEND,
@@ -26,6 +26,7 @@ __all__ = [
     "JCirc",
     "jcirc",
     "DEFAULT_CBIN",
+    "DEFAULT_REASSIGN",
     # pcenter
     "center",
     "is_centered",

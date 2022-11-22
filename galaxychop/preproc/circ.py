@@ -36,11 +36,17 @@ DEFAULT_CBIN = (0.05, 0.005)
 Please check the documentation of ``jcirc()``.
 
 """
+DEFAULT_REASSIGN = [False]
+"""Default value to reassign the values of the particle circularity parameter.
 
+Please check the documentation of ``jcirc()``.
 
+"""
 # =============================================================================
 # API
 # =============================================================================
+
+
 @uttr.s(frozen=True, slots=True)
 class JCirc:
     """Circularity information about the stars particles of a galaxy.
@@ -106,7 +112,7 @@ class JCirc:
         return np.all([np.isfinite(v) for v in selfd.values()], axis=0)
 
 
-def _jcirc(galaxy, bin0, bin1):
+def _jcirc(galaxy, bin0, bin1, reassign):
     # this function exists to silence the warnings in the public one
 
     # extract only the needed columns
@@ -209,18 +215,30 @@ def _jcirc(galaxy, bin0, bin1):
     eps_[bound_star] = eps
     eps_r_[bound_star] = eps_r
 
-    # We remove particles that have circularity < -1 and circularity > 1.
-    mask = np.where(eps_ > 1.0)[0]
-    E_star_norm_[mask] = np.nan
-    Jz_star_norm_[mask] = np.nan
-    eps_[mask] = np.nan
-    eps_r_[mask] = np.nan
+    # We decide what to do with particles with circularity parameter with
+    # values > 1 or <-1.
+    if reassign:
+        # We reassign particles that have circularity > 1 to circularity = 1.
+        mask = np.where(eps_ > 1.0)[0]
+        eps_[mask] = 1.0
 
-    mask = np.where(eps_ < -1.0)[0]
-    E_star_norm_[mask] = np.nan
-    Jz_star_norm_[mask] = np.nan
-    eps_[mask] = np.nan
-    eps_r_[mask] = np.nan
+        # We reassign particles that have circularity < -1 to circularity = -1.
+        mask = np.where(eps_ < -1.0)[0]
+        eps_[mask] = -1.0
+
+    else:
+        # We remove particles that have circularity < -1 and circularity > 1.
+        mask = np.where(eps_ > 1.0)[0]
+        E_star_norm_[mask] = np.nan
+        Jz_star_norm_[mask] = np.nan
+        eps_[mask] = np.nan
+        eps_r_[mask] = np.nan
+
+        mask = np.where(eps_ < -1.0)[0]
+        E_star_norm_[mask] = np.nan
+        Jz_star_norm_[mask] = np.nan
+        eps_[mask] = np.nan
+        eps_r_[mask] = np.nan
 
     return JCirc(
         normalized_star_energy=E_star_norm_,
@@ -236,6 +254,7 @@ def jcirc(
     galaxy,
     bin0=DEFAULT_CBIN[0],
     bin1=DEFAULT_CBIN[1],
+    reassign=DEFAULT_REASSIGN[0],
     runtime_warnings="ignore",
 ):
     """
@@ -255,6 +274,10 @@ def jcirc(
     bin1 : float. Default=0.005
         Size of the specific energy bin of the outer part of the galaxy,
         in the range of (-0.1, 0) of the normalized energy.
+    reassign : list. Default=[False]
+        It allows to define what to do with stellar particles with circularity
+        parameter values >1 or <-1. True reassigns the value to 1 or -1,
+        depending on the case. False discards these particles.
     runtime_warnings : Any warning filter action (default "ignore")
         jcirc usually launches RuntimeWarning during the eps calculation
         because there may be some particle with jcirc=0.
@@ -294,4 +317,4 @@ def jcirc(
     """
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
-        return _jcirc(galaxy, bin0, bin1)
+        return _jcirc(galaxy, bin0, bin1, reassign)
