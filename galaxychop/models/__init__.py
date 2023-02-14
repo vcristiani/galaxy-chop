@@ -25,6 +25,8 @@ from .gaussian_mixture import (
 from .histogram import JEHistogram, JHistogram
 from .kmeans import KMeans
 from .threshold import JThreshold
+from .internal_evaluation import Internal
+from .clustering_methods import HierarchicalClustering
 
 
 # =============================================================================
@@ -43,4 +45,6 @@ __all__ = [
     "GaussianMixture",
     "AutoGaussianMixture",
     "hparam",
+    "Internal",
+    "HierarchicalClustering",
 ]
