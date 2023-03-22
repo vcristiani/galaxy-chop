@@ -34,7 +34,7 @@ class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
     n_components : int, default=2
         The number of clusters to form as well as the number of centroids to
         generate.
-    init : {‘k-means++’, ‘random’}, callable or array-like of shape
+    init : {'k-means++', 'random'}, callable or array-like of shape
     (n_clusters, n_features), default="k-means++"
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     n_init : int, default=10
