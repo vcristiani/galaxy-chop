@@ -37,6 +37,7 @@ class GalaxyPlotter:
 
     _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
     _DEFAULT_HUE_COLUMN = "Labels"
+    _DEFAULT_HUE_COUNT_COLUMN = "LabelsCnt"
 
     _galaxy = attr.ib()
 
@@ -131,7 +132,15 @@ class GalaxyPlotter:
         # for consitency if we have a hue, we use the natural order
         if hue is not None:
             df[hue] = df[hue].astype("category")
-            df = df.sort_values(hue)
+
+            hue_count = df[hue].value_counts()
+            df[self._DEFAULT_HUE_COUNT_COLUMN] = df[hue].map(hue_count)
+
+            df = df.sort_values(
+                by=self._DEFAULT_HUE_COUNT_COLUMN, ascending=True
+            )
+
+            del df[self._DEFAULT_HUE_COUNT_COLUMN]
 
         return df, hue
 
@@ -199,7 +208,7 @@ class GalaxyPlotter:
         labels : keys of ``ParticleSet class`` parameters.
             Variable to map plot aspects to different colors.
             Default value = None
-        lmap :  dicts
+        lmap :  dict
             Name assignment to the label.
             Default value = None
         **kwargs
@@ -381,7 +390,13 @@ class GalaxyPlotter:
         # for consitency if we have a hue, we use the natural order
         if hue is not None:
             df[hue] = df[hue].astype("category")
-            df = df.sort_values(hue)
+
+            hue_count = df[hue].value_counts()
+            df[self._DEFAULT_HUE_COUNT_COLUMN] = df[hue].map(hue_count)
+
+            df = df.sort_values(
+                by=self._DEFAULT_HUE_COUNT_COLUMN, ascending=True
+            )
 
         return df, hue
 
