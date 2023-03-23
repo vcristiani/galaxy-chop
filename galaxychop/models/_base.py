@@ -290,6 +290,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     cbins : tuple
         It contains the two widths of bins necessary for the calculation of the
         circular angular momentum.  Shape: (2,). Dafult value = (0.05, 0.005).
+    reassign : list
+        It allows to define what to do with stellar particles with circularity
+        parameter values >1 or <-1. Default value = [False].
+
     """
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
@@ -305,6 +309,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             and isinstance(value[1], float)
         ):
             raise ValueError("cbins must be a tuple of two floats.")
+
+    reassign = hparam(default=preproc.DEFAULT_REASSIGN)
+
+    @reassign.validator
+    def _reassign_validator(self, attribute, value):
+        if not (
+            isinstance(value, list)
+            and len(value) == 1
+            and isinstance(value[0], bool)
+        ):
+            raise ValueError("reassign must be a list of one bool.")
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
@@ -412,7 +427,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = preproc.jcirc(galaxy, *self.cbins).as_dict()
+        jcirc = preproc.jcirc(galaxy, *self.cbins, *self.reassign).as_dict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars
