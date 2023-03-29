@@ -416,9 +416,10 @@ class Galaxy:
     @property
     def plot(self):
         """Plot accessor."""
-        from . import plot  # noqa
-
-        return plot.GalaxyPlotter(self)
+        if not hasattr(self, "_plot"):
+            from . import plot  # noqa
+            super().__setattr__("_plot", plot.GalaxyPlotter(self))
+        return self._plot
 
     # ENERGY ===============================================================
 
