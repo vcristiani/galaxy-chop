@@ -274,6 +274,21 @@ class ParticleSet:
             data[aname] = mkcolumn()
         return pd.DataFrame(data)
 
+    def copy(self):  
+        cls = type(self)
+        new = cls(
+            ptype=self.ptype, 
+            m=self.m.copy(),
+            x=self.x.copy(),
+            y=self.y.copy(),
+            z=self.z.copy(),
+            vx=self.vx.copy(),
+            vy=self.vy.copy(),
+            vz=self.vz.copy(),
+            potential=self.potential.copy(),
+            softening=self.softening)
+        return new
+
 
 # =============================================================================
 # GALAXY CLASS
@@ -420,6 +435,14 @@ class Galaxy:
             from . import plot  # noqa
             super().__setattr__("_plot", plot.GalaxyPlotter(self))
         return self._plot
+
+    def copy(self): 
+        cls = type(self)
+        new = cls(
+            stars=self.stars.copy(), 
+            dark_matter=self.dark_matter.copy(), 
+            gas=self.gas.copy())
+        return new
 
     # ENERGY ===============================================================
 
