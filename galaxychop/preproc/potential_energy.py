@@ -8,6 +8,8 @@
 # DOCS
 # =============================================================================
 
+#Bruno: Acá meto mano (importar GriSPy y def los potenciales nuevos)
+
 """Different potential implementations."""
 
 # =============================================================================
@@ -19,15 +21,34 @@ import astropy.units as u
 
 import numpy as np
 
+# New. Necesito GriSPy --
+import grispy as gsp
+# -----------------------
+
 from .. import data
+
+# New. ¿Debería importar las funciones básicas para
+# realizar el grid + cálculo o escribo todo acá?
+# Supongo opción 1, así que creo un .py con las ~3 func
+# fundamentales... ¿Tocar __init__.py? ---------------
+from gridsearch import make_grid, potential_grispy
+# ¿Así? ----------------------------------------------
 
 try:
     from .fortran import potential as potential_f
 except ImportError:
     potential_f = None
 
+# New. Sin existir, pero así debería ser (?): --
+try:
+    from .C import potencial as potential_c
+except ImportError:
+    potential_c = None
+#-----------------------------------------------  
+
 #: The default potential backend to use.
-DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
+DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None or \
+    potential_c is None else "fortran"
 
 
 # =============================================================================
@@ -103,6 +124,82 @@ def numpy_potential(x, y, z, m, softening):
     return mdist.sum(axis=1) * G, np.asarray
 
 
+def grispy_potential(galaxy,n_cells,bubble_size,shell_width):
+    """GriSPy implementation for the gravitational potential energy calculation
+    from the bubble and shell NNS methods of this library.
+
+    galaxy : ``Galaxy class`` object
+
+    Returns
+    -------
+    galaxy: new ``Galaxy class`` object
+        A new galaxy object with the specific potential energy of particles
+        calculated.
+
+    """
+    # convert the galaxy in multiple arrays
+    df = galaxy.to_dataframe(attributes=["x", "y", "z", "m"])
+
+    n_particles = len(df)
+
+    # Make the grid of the space and populate its cells
+    positions,particle_mass,L_box,grid = make_grid(df,n_cells)
+
+    # Initialize the NumPy array for the potential of every particle
+    epot = np.empty(n_particles)
+
+    # Calculate the potential through shell aproximation of every particle
+    for idx,part in enumerate(positions):
+        # The centre (particle) for this step
+        centre = np.array([part])
+        
+        # Compute the potential (in [(km/s)^2])
+        pot_shells = potential_grispy(
+            centre,positions,particle_mass,
+            bubble_size,shell_width,L_box,grid)
+        
+        # Assign it to the particle
+        epot[idx] = pot_shells
+        
+        # A % counter if necessary
+        #if idx % 100 == 0:
+        #    print(f'{100* idx/n_particles:.2f} %')
+
+    return epot, np.asarray
+
+
+def octree_potential(x, y, z, m, softening):
+    """Wrap the C implementation of the gravitational potential calculation
+    using an Octree algorithm.
+
+    Parameters
+    ----------
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
+
+    Returns
+    -------
+    np.ndarray : float
+        Specific potential energy of particles.
+
+    """
+
+    # Según lo que me pasó Luisito:
+    #calcula_potencial(Npoints,np.full(Npoints,1.4e+6,dtype=np.float32),
+    #                       np.float32(data[:,0]),np.float32(data[:,1]),np.float32(data[:,2]))
+    # Lo pongo a lo naïve y siguiendo los lineamientos de caja negra que es:
+    # (revisar el utils.py y el potencial.c de la carpeta creada "C").
+    epot = potential_c.calcula_potential(len(x),m,x, y, z) # Ya multiplicado por G y en
+                                                           # unidades [(km/s)^2]
+    #Ojo con esto último, porque en la función siguiente hace algo con las unidades...                                                     
+
+    return epot, np.asarray
+
+
 # =============================================================================
 # API
 # =============================================================================
@@ -110,6 +207,7 @@ def numpy_potential(x, y, z, m, softening):
 POTENTIAL_BACKENDS = {
     "fortran": fortran_potential,
     "numpy": numpy_potential,
+    "octree": octree_potential,
 }
 
 
@@ -167,6 +265,7 @@ def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
 
     new = data.galaxy_as_kwargs(galaxy)
 
+    # Esto. Ojo porque el Octree ya devuelve [(km/s)^2]
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,
         potential_dm=-pot_dm * (u.km / u.s) ** 2,
