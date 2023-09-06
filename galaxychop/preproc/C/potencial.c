@@ -105,11 +105,8 @@ static void force_setupnonrecursive(struct NODE *no, struct NODE **last)
 /****************************************/
 /* packs the particles of group 'gr' into into BH-trees */
 /****************************************/
-#ifdef PERIODIC
-static float force_treeevaluate_potential(const struct NODE *no, const float pos [], float *knlrad, float *knlpot, const float lbox)
-#else
+
 static float force_treeevaluate_potential(const struct NODE *no, const float pos [], float *knlrad, float *knlpot)
-#endif
 {
   float r2,dx,dy,dz,r,u,h,ff;
   float wp;
@@ -126,14 +123,7 @@ static float force_treeevaluate_potential(const struct NODE *no, const float pos
     dx = no->s[0] - pos[0];     
     dy = no->s[1] - pos[1];     
     dz = no->s[2] - pos[2];
-#ifdef PERIODIC
-    dx = dx >  0.5*lbox ? dx-lbox : dx;
-    dx = dx < -0.5*lbox ? dx+lbox : dx;
-    dy = dy >  0.5*lbox ? dy-lbox : dy;
-    dy = dy < -0.5*lbox ? dy+lbox : dy;
-    dz = dz >  0.5*lbox ? dz-lbox : dz;
-    dz = dz < -0.5*lbox ? dz+lbox : dz;
-#endif
+
     r2 = dx*dx + dy*dy + dz*dz;
 
     if(no->partind >= 0){   /* single particle */
@@ -178,11 +168,7 @@ static float force_treeevaluate_potential(const struct NODE *no, const float pos
 }
 
 /****************************************************************/
-#ifdef PERIODIC
-static int tree_potential(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep, const float lbox)
-#else
 static int tree_potential(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep)
-#endif
 {
   int    i, j, subp,subi,p,subnode,fak;
   float  icoord[3], imass;
@@ -228,9 +214,6 @@ static int tree_potential(const int npart, const float *mp, const float *x, cons
       length = xmax[j]-xmin[j];
   length *= 1.01;
   assert(length > 0);
-#ifdef PERIODIC  
-  assert(length < 0.5*lbox);
-#endif
 
   /* insert first particle in root node */
   for(j = 0 ; j < 3 ; j++)
@@ -385,10 +368,7 @@ static int tree_potential(const int npart, const float *mp, const float *x, cons
     for(j = 0 ; j < 3 ; j++)
     {
       nfree->s[j]  = (icoord[j] - nfree->center[j]);
-#ifdef PERIODIC
-      nfree->s[j]  = nfree->s[j] >  0.5*lbox ? nfree->s[j]-lbox : nfree->s[j];
-      nfree->s[j]  = nfree->s[j] < -0.5*lbox ? nfree->s[j]+lbox : nfree->s[j];
-#endif
+
       nfree->s[j] *= nfree->mass;
     }
     th->suns[subi] = nfree;
@@ -467,11 +447,8 @@ static int tree_potential(const int npart, const float *mp, const float *x, cons
     pcoord[1] = y[i];
     pcoord[2] = z[i];
 
-#ifdef PERIODIC
-    Ep[i]  = force_treeevaluate_potential(nodes, pcoord, knlrad, knlpot, lbox);
-#else
     Ep[i]  = force_treeevaluate_potential(nodes, pcoord, knlrad, knlpot);
-#endif
+
     Ep[i] *= GCONS*Msol/Kpc;
 
     assert(Ep[i]<0.0);
@@ -484,11 +461,7 @@ static int tree_potential(const int npart, const float *mp, const float *x, cons
   return 1;
 }
 
-#ifdef PERIODIC
-static void force_brute(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep, const float lbox)
-#else
 static void force_brute(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep)
-#endif
 {
   int  i, j;
   float pos[3], dx[3], dis;
@@ -498,15 +471,10 @@ static void force_brute(const int npart, const float *mp, const float *x, const 
   for(i = 0; i < npart; i++)
     Ep[i] = 0.0;
 
-#ifdef PERIODIC
-  #pragma omp parallel for schedule(dynamic) num_threads(NTHREADS) \
-  default(none) private(i,j,pos,dx,dis) \
-  shared(npart,x,y,z,mp,Ep,lbox)
-#else
   #pragma omp parallel for schedule(dynamic) num_threads(NTHREADS) \
   default(none) private(i,j,pos,dx,dis) \
   shared(npart,x,y,z,mp,Ep)
-#endif
+
   for(i = 0; i < npart; i++)
   {
     pos[0] = x[i];
@@ -523,15 +491,6 @@ static void force_brute(const int npart, const float *mp, const float *x, const 
       dx[1] = (pos[1] - y[j]);
       dx[2] = (pos[2] - z[j]);
 
-#ifdef PERIODIC
-      dx[0]  = dx[0] >  0.5*lbox ? dx[0]-lbox : dx[0];
-      dx[0]  = dx[0] < -0.5*lbox ? dx[0]+lbox : dx[0];
-      dx[1]  = dx[1] >  0.5*lbox ? dx[1]-lbox : dx[1];
-      dx[1]  = dx[1] < -0.5*lbox ? dx[1]+lbox : dx[1];
-      dx[2]  = dx[2] >  0.5*lbox ? dx[2]-lbox : dx[2];
-      dx[2]  = dx[2] < -0.5*lbox ? dx[2]+lbox : dx[2];
-#endif
-
       dis  = dx[0]*dx[0];
       dis += dx[1]*dx[1];
       dis += dx[2]*dx[2];
@@ -547,11 +506,7 @@ static void force_brute(const int npart, const float *mp, const float *x, const 
   return;
 }
 
-#ifdef PERIODIC  
-extern void calculate_potential(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep, const float lbox)
-#else
 extern void calculate_potential(const int npart, const float *mp, const float *x, const float *y, const float *z, float *Ep)
-#endif
 {
   /* Si el halo tiene menos de 1000 particulas calcula la energia
   de forma directa (N^2). Si tiene mas de 1000 particulas usa 
@@ -559,28 +514,15 @@ extern void calculate_potential(const int npart, const float *mp, const float *x
   if(npart > 1000)
   {
   
-#ifdef PERIODIC  
-    if(!tree_potential(npart, mp, x, y, z, Ep, lbox))
-#else
     if(!tree_potential(npart, mp, x, y, z, Ep))
-#endif   
     {
       fprintf(stderr,"Try Force Brute %d\n", npart);
-#ifdef PERIODIC  
-      force_brute(npart, mp, x, y, z, Ep, lbox);
-#else
       force_brute(npart, mp, x, y, z, Ep);
-#endif   
     }
   
   }else{
 
-#ifdef PERIODIC  
-    force_brute(npart, mp, x, y, z, Ep, lbox);
-#else                      
     force_brute(npart, mp, x, y, z, Ep);
-#endif   
-
   }
 
   return;
