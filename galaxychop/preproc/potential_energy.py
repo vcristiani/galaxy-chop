@@ -123,8 +123,9 @@ def numpy_potential(x, y, z, m, softening):
 
     return mdist.sum(axis=1) * G, np.asarray
 
-
-def grispy_potential(galaxy,n_cells,bubble_size,shell_width):
+# ex argumentos -> (galaxy,n_cells,bubble_size,shell_width)
+# Pero sólo pueden ser los mimos que las otras funcs...
+def grispy_potential(x, y, z, m, softening):
     """GriSPy implementation for the gravitational potential energy calculation
     from the bubble and shell NNS methods of this library.
 
@@ -137,26 +138,25 @@ def grispy_potential(galaxy,n_cells,bubble_size,shell_width):
         calculated.
 
     """
-    # convert the galaxy in multiple arrays
-    df = galaxy.to_dataframe(attributes=["x", "y", "z", "m"])
-
-    n_particles = len(df)
+    # Amount of particles given
+    n_particles = len(x)
 
     # Make the grid of the space and populate its cells
-    positions,particle_mass,L_box,grid = make_grid(df,n_cells)
+    L_box,grid = make_grid(x, y, z, m, n_cells=2**5)
 
     # Initialize the NumPy array for the potential of every particle
     epot = np.empty(n_particles)
 
     # Calculate the potential through shell aproximation of every particle
-    for idx,part in enumerate(positions):
+    for idx,part in enumerate(m):
         # The centre (particle) for this step
-        centre = np.array([part])
+        centre = np.array([x[idx],y[idx],z[idx]])
         
         # Compute the potential (in [(km/s)^2])
         pot_shells = potential_grispy(
-            centre,positions,particle_mass,
-            bubble_size,shell_width,L_box,grid)
+            centre, x, y, z, m, L_box, grid,
+            bubble_size=softening,
+            shell_width=L_box*0.2)
         
         # Assign it to the particle
         epot[idx] = pot_shells
@@ -208,6 +208,7 @@ POTENTIAL_BACKENDS = {
     "fortran": fortran_potential,
     "numpy": numpy_potential,
     "octree": octree_potential,
+    "grispy": grispy_potential
 }
 
 
@@ -265,7 +266,7 @@ def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
 
     new = data.galaxy_as_kwargs(galaxy)
 
-    # Esto. Ojo porque el Octree ya devuelve [(km/s)^2]
+    # Esto. Ojo porque el Octree y GriSPy ya devuelven [(km/s)^2]
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,
         potential_dm=-pot_dm * (u.km / u.s) ** 2,

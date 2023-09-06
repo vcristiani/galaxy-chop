@@ -25,7 +25,7 @@ from .. import data
 # =============================================================================
 
 
-def make_grid(df,n_cells):
+def make_grid(x, y, z, m, n_cells):
     """Space grid making (?).
 
     Make a grid of the volume and index galaxy's particles to each cell.
@@ -45,10 +45,6 @@ def make_grid(df,n_cells):
     #if not galaxy.has_potential_:
     #    raise ValueError("galaxy must has the potential energy")
 
-    # Le debería pasar directamente lo que quiero usar, no la glx entera...
-    # We extract only the needed column to make the grid
-    #df = galaxy.to_dataframe(attributes=["x", "y", "z","m"])
-
     #Lo dejo para guiarme --
     # minimum potential index of all particles and we extract data frame row
     #minpot_idx = df.potential.argmin()
@@ -57,20 +53,16 @@ def make_grid(df,n_cells):
 
     #Como lo tengo escrito yo:
     # Size of the box that contains all particles
-    L_box = max(np.abs([max(df['x'])-min(df['x']),
-                       max(df['y'])-min(df['y']),
-                       max(df['z'])-min(df['z'])]))
-
-    positions = np.array([df['x'],df['y'],df['z']])
-    particle_mass = np.array(df['m'])
-    positions = np.transpose(positions) # Para que le guste a GriSPy
+    L_box = max(np.abs([max(x)-min(x),
+                       max(y)-min(y),
+                       max(z)-min(z)]))
 
     # Make the grid (n_cells ~ 2**5 works well for 1e+4 ~ 1e+5 particles)
-    grid = gsp.GriSPy(positions, n_cells)
+    grid = gsp.GriSPy(x, y, z, n_cells)
 
-    return positions,particle_mass,L_box,grid
+    return L_box,grid
 
-def potential_grispy(centre, positions, particle_mass, 
+def potential_grispy(centre, x, y, z, m, 
                      bubble_size, shell_width, L_box, grid):
     """Compute the potential of a particle given the grid and the system.
 
@@ -113,7 +105,6 @@ def potential_grispy(centre, positions, particle_mass,
     #    raise ValueError("galaxy must has the potential energy")
 
     #Como lo tengo escrito yo:
-    
     # Use the bubble method to find the closest particles
     bubble_dist, bubble_ind = grid.bubble_neighbors(
         centre, distance_upper_bound=bubble_size
@@ -124,7 +115,7 @@ def potential_grispy(centre, positions, particle_mass,
     pot_shells = 0. # The potential variable.
     for idx,distance in enumerate(bubble_dist[0]):
         if distance > 0.:
-            pot_shells -= G * particle_mass[bubble_ind[0][idx]]/distance
+            pot_shells -= G * m[bubble_ind[0][idx]]/distance
         else:
             continue
             
@@ -140,7 +131,7 @@ def potential_grispy(centre, positions, particle_mass,
         # Compute the monopole potential contribution of this shell
         for idx,distance in enumerate(shell_dist[0]):
             # Due to non-periodicity, distance > 0 always
-            pot_shells -= G * particle_mass[shell_ind[0][idx]]/distance
+            pot_shells -= G * m[shell_ind[0][idx]]/distance
 
         d_min_shell += shell_width # Repeat for next shell (further)
         
