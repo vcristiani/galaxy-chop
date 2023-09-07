@@ -63,6 +63,7 @@ $ pip -r requirements-dev
 - Federico Benelli ([IPQA-CONICET][], [FCEFyN-UNC][]).
 - Ornela Marioni ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
 - Nelson Villagra ([UNPSJB]).
+- Bruno Celiz ([FaMAF-UNC][]).
 
 
 
