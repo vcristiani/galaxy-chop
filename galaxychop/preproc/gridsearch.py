@@ -14,9 +14,9 @@
 # IMPORTS
 # =============================================================================
 
-import numpy as np
-
 import grispy as gsp
+
+import numpy as np
 
 from .. import data
 
@@ -25,44 +25,41 @@ from .. import data
 # =============================================================================
 
 
-def make_grid(x, y, z, m, n_cells):
-    """Space grid making (?).
+def make_grid(x, y, z, m, n_cells=2**4):
+    """Grid making.
 
     Make a grid of the volume and index galaxy's particles to each cell.
 
     Parameters
-    ---------- *Cambiar
-    df : ``Galaxy class`` object as dataframe (!)
+    ----------
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
 
     Returns
     ------- *Cambiar
-    galaxy : new ``Galaxy class`` object
-        A new galaxy object with centered positions respect to the position of
-        the lowest potential particle.
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
     """
-    #En este caso no hace falta el potencial ¿Pero qué otra cosa si?
-    # ¿La glx en sí?
-    #if not galaxy.has_potential_:
-    #    raise ValueError("galaxy must has the potential energy")
-
-    #Lo dejo para guiarme --
-    # minimum potential index of all particles and we extract data frame row
-    #minpot_idx = df.potential.argmin()
-    #min_values = df.iloc[minpot_idx]
-    #-----------------------
-
-    #Como lo tengo escrito yo:
+    # ~Como lo tenía escrito yo
     # Size of the box that contains all particles
     L_box = max(np.abs([max(x)-min(x),
                        max(y)-min(y),
                        max(z)-min(z)]))
 
-    # Make the grid (n_cells ~ 2**5 works well for 1e+4 ~ 1e+5 particles)
+    # Make the grid (n_cells ~ 2**4 works well for 1e+4 ~ 1e+5 particles)
     grid = gsp.GriSPy(x, y, z, n_cells)
 
     return L_box,grid
 
-def potential_grispy(centre, x, y, z, m, 
+def potential_grispy(centre, x, y, z, m, softening,
                      bubble_size, shell_width, L_box, grid):
     """Compute the potential of a particle given the grid and the system.
 
@@ -73,7 +70,7 @@ def potential_grispy(centre, x, y, z, m,
     con mi implementación naïve.
 
     Parameters
-    ----------
+    ---------- *Revisar
     centre : np.array
         3D spatial position of the particle to compute its potential.
     positions : np.array
@@ -99,12 +96,12 @@ def potential_grispy(centre, x, y, z, m,
     pot_shells : float
         Potential of the given particle through the shells' monopole aproximation.
     """
-    #En este caso no hace falta el potencial ¿Pero qué otra cosa si?
-    # ¿La glx en sí?
-    #if not galaxy.has_potential_:
-    #    raise ValueError("galaxy must has the potential energy")
+    # En este caso no hace falta el potencial ¿O sí?
+    # Lo cambié para que, si ya tiene potencial, largue error
+    #if galaxy.has_potential_:
+    #    raise ValueError("galaxy already has the potential energy")
 
-    #Como lo tengo escrito yo:
+    # Como lo tengo escrito yo:
     # Use the bubble method to find the closest particles
     bubble_dist, bubble_ind = grid.bubble_neighbors(
         centre, distance_upper_bound=bubble_size
@@ -118,6 +115,10 @@ def potential_grispy(centre, x, y, z, m,
             pot_shells -= G * m[bubble_ind[0][idx]]/distance
         else:
             continue
+
+        # Otra versión de esto (mucho más lenta, pero creo que correcta)
+        #d_and_soft = np.sqrt(np.square(distance) + np.square(softening))
+        #pot_shells -= G * m[bubble_ind[0][idx]]/d_and_soft
             
     d_min_shell = bubble_size # Shell's lower limit to initialize the loop
     while d_min_shell < L_box:
@@ -133,6 +134,10 @@ def potential_grispy(centre, x, y, z, m,
             # Due to non-periodicity, distance > 0 always
             pot_shells -= G * m[shell_ind[0][idx]]/distance
 
-        d_min_shell += shell_width # Repeat for next shell (further)
+            # Otra versión de esto (mucho más lenta, pero creo que correcta)
+            #d_and_soft = np.sqrt(np.square(distance) + np.square(softening))
+            #pot_shells -= G * m[shell_ind[0][idx]]/d_and_soft
+
+        d_min_shell += shell_width # Repeat for next shell (further away)
         
     return pot_shells

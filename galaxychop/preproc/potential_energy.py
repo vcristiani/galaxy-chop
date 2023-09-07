@@ -19,20 +19,15 @@
 import astropy.constants as c
 import astropy.units as u
 
-import numpy as np
-
-# New. Necesito GriSPy --
 import grispy as gsp
-# -----------------------
+
+import numpy as np
 
 from .. import data
 
-# New. ¿Debería importar las funciones básicas para
-# realizar el grid + cálculo o escribo todo acá?
-# Supongo opción 1, así que creo un .py con las ~3 func
-# fundamentales... ¿Tocar __init__.py? ---------------
+# Creo un .py con las ~3 func
+# fundamentales... ¿Tocar __init__.py?
 from gridsearch import make_grid, potential_grispy
-# ¿Así? ----------------------------------------------
 
 try:
     from .fortran import potential as potential_f
@@ -41,14 +36,13 @@ except ImportError:
 
 # New. Sin existir, pero así debería ser (?): --
 try:
-    from .C import potencial as potential_c
+    from .c import potencial as potential_c
 except ImportError:
     potential_c = None
 #-----------------------------------------------  
 
 #: The default potential backend to use.
-DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None or \
-    potential_c is None else "fortran"
+DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
 
 
 # =============================================================================
@@ -123,8 +117,19 @@ def numpy_potential(x, y, z, m, softening):
 
     return mdist.sum(axis=1) * G, np.asarray
 
+# ¿Debería agregar que sólo calcule el potencial de las ptype == stars?
+# Porque ahora lo que hace el calcular para todas las partículas que contribuyan
+# al potencial de c/u
+
+# Ojo: Test de direct-sum + shell-monopole de glxs de ~500k de partículas (TNG50)
+# devuelve un error de ~300 km^2/s^2 (~1% de error relativo al cómputo vía fortran).
+# Entonces, a menos que se gane muchísimo tiempo (en el approach naïve tarda ~1/3 de
+# tiempo/partícula vs un direct-sum en Python), me parece que este método no otorgaría
+# ventajas, a menos que se optimice muy bien (o se emplee el método de fortran dentro
+# de la bubble...)
+
 # ex argumentos -> (galaxy,n_cells,bubble_size,shell_width)
-# Pero sólo pueden ser los mimos que las otras funcs...
+# Reemplazados por los mimos que las otras funcs (x,y,z,m,soft)...
 def grispy_potential(x, y, z, m, softening):
     """GriSPy implementation for the gravitational potential energy calculation
     from the bubble and shell NNS methods of this library.
@@ -142,7 +147,7 @@ def grispy_potential(x, y, z, m, softening):
     n_particles = len(x)
 
     # Make the grid of the space and populate its cells
-    L_box,grid = make_grid(x, y, z, m, n_cells=2**5)
+    L_box,grid = make_grid(x, y, z, m, n_cells=2**4)
 
     # Initialize the NumPy array for the potential of every particle
     epot = np.empty(n_particles)
@@ -154,8 +159,10 @@ def grispy_potential(x, y, z, m, softening):
         
         # Compute the potential (in [(km/s)^2])
         pot_shells = potential_grispy(
-            centre, x, y, z, m, L_box, grid,
-            bubble_size=softening,
+            centre,
+            x, y, z, m, softening,
+            L_box, grid,
+            bubble_size=softening*2,
             shell_width=L_box*0.2)
         
         # Assign it to the particle
@@ -191,8 +198,8 @@ def octree_potential(x, y, z, m, softening):
     # Según lo que me pasó Luisito:
     #calcula_potencial(Npoints,np.full(Npoints,1.4e+6,dtype=np.float32),
     #                       np.float32(data[:,0]),np.float32(data[:,1]),np.float32(data[:,2]))
-    # Lo pongo a lo naïve y siguiendo los lineamientos de caja negra que es:
-    # (revisar el utils.py y el potencial.c de la carpeta creada "C").
+    # Lo pongo a lo naïve:
+    # (revisar el utils.py y el potencial.c de la carpeta creada "c").
     epot = potential_c.calcula_potential(len(x),m,x, y, z) # Ya multiplicado por G y en
                                                            # unidades [(km/s)^2]
     #Ojo con esto último, porque en la función siguiente hace algo con las unidades...                                                     
@@ -266,7 +273,7 @@ def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
 
     new = data.galaxy_as_kwargs(galaxy)
 
-    # Esto. Ojo porque el Octree y GriSPy ya devuelven [(km/s)^2]
+    # A esto me refería. Ojo porque el Octree y GriSPy ya devuelven [(km/s)^2]
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,
         potential_dm=-pot_dm * (u.km / u.s) ** 2,
