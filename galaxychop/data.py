@@ -418,6 +418,7 @@ class Galaxy:
         """Plot accessor."""
         if not hasattr(self, "_plot"):
             from . import plot  # noqa
+
             super().__setattr__("_plot", plot.GalaxyPlotter(self))
         return self._plot
 

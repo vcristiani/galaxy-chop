@@ -155,7 +155,6 @@ def test_read_hdf5_stream(data_path):
 
 
 def test_to_hdf5(galaxy):
-
     gal = galaxy(seed=42)
 
     buff = BytesIO()

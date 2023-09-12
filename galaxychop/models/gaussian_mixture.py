@@ -253,7 +253,6 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
 
     @doc_inherit(GalaxyDecomposerABC.split)
     def split(self, X, y, attributes):
-
         # for simplicity we conver the default_rng to a scikit-learn
         # compatible RandomState
         random_state = np.random.RandomState(self.random_state.bit_generator)

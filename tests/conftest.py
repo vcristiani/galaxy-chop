@@ -98,7 +98,6 @@ def data_galaxy(data_particleset):
         gas_softening_max=1.0,
         gas_potential=True,
     ):
-
         # start the random generator
         random = np.random.default_rng(seed=seed)
 
@@ -139,7 +138,6 @@ def data_galaxy(data_particleset):
 
 @pytest.fixture(scope="session")
 def galaxy(data_galaxy):
-
     # @functools.wraps(data_galaxy)
     def make(**kwargs):
         (

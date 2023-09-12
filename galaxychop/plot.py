@@ -125,7 +125,9 @@ class GalaxyPlotter:
 
         if hue and lmap is not None:
             lmap_func = (
-                (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
+                (lambda label: lmap.get(label, label))
+                if isinstance(lmap, dict)
+                else lmap
             )
             df[hue] = df[hue].apply(lmap_func)
 
@@ -383,7 +385,9 @@ class GalaxyPlotter:
 
         if hue and lmap is not None:
             lmap_func = (
-                (lambda l: lmap.get(l, l)) if isinstance(lmap, dict) else lmap
+                (lambda label: lmap.get(label, label))
+                if isinstance(lmap, dict)
+                else lmap
             )
             df[hue] = df[hue].apply(lmap_func)
 

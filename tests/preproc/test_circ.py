@@ -10,11 +10,11 @@
 # IMPORTS
 # =============================================================================
 
+import astropy.units as u
+
 from galaxychop.preproc import circ
 
 import numpy as np
-
-import astropy.units as u
 
 import pytest
 
@@ -39,9 +39,9 @@ def test_jcirc_real_galaxy(read_hdf5_galaxy):
 
 def test_jcirc_real_galaxy_with_infinite_energy_test(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal.stars.total_energy_[0] = -np.inf * u.km**2/u.s**2
-    gal.dark_matter.total_energy_[0] = -np.inf * u.km**2/u.s**2
-    gal.gas.total_energy_[0] = -np.inf * u.km**2/u.s**2
+    gal.stars.total_energy_[0] = -np.inf * u.km**2 / u.s**2
+    gal.dark_matter.total_energy_[0] = -np.inf * u.km**2 / u.s**2
+    gal.gas.total_energy_[0] = -np.inf * u.km**2 / u.s**2
     result = circ.jcirc(gal)
 
     mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]

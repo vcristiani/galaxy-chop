@@ -327,7 +327,6 @@ def test_ParticleSet_angular_momentum(data_particleset):
 
 
 def test_Galaxy_invalid_ParticleSetType(data_particleset):
-
     bad_types = {
         "stars": data.ParticleSetType.DARK_MATTER,  # WRONG
         "dark_matter": data.ParticleSetType.GAS,
@@ -360,7 +359,6 @@ def test_Galaxy_invalid_ParticleSetType(data_particleset):
 # =============================================================================
 @pytest.mark.parametrize("has_potential", [True, False])
 def test_mkgakaxy(data_galaxy, has_potential):
-
     (
         m_s,
         x_s,
@@ -479,7 +477,6 @@ def test_mkgakaxy(data_galaxy, has_potential):
     "remove_potential", ["potential_s", "potential_g", "potential_dm"]
 )
 def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
-
     (
         m_s,
         x_s,

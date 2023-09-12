@@ -68,7 +68,6 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 @pytest.mark.plot
 @pytest.mark.parametrize("pkind", plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS)
 def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -78,7 +77,6 @@ def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -94,7 +92,6 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
 @pytest.mark.plot
 @pytest.mark.parametrize("plot_kind", ["pairplot"])
 def test_GalaxyPlotter_call(galaxy, plot_kind):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -115,7 +112,6 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -136,7 +132,6 @@ def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -151,7 +146,6 @@ def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -169,7 +163,6 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -193,7 +186,6 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot(galaxy, format):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -214,7 +206,6 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -242,7 +233,6 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -262,7 +252,6 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -280,7 +269,6 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
-
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -298,12 +286,12 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 # CIRCULARITY PLOTS
 # =============================================================================
 
+
 # get_circ_df_and_hue =========================================================
 @pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
     read_hdf5_galaxy,
 ):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -337,7 +325,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
     read_hdf5_galaxy,
 ):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -363,7 +350,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
     read_hdf5_galaxy,
 ):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -389,7 +375,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
     read_hdf5_galaxy,
 ):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -414,7 +399,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
 def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
     read_hdf5_galaxy,
 ):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -434,7 +418,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -451,7 +434,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
 
 @pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -472,7 +454,6 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
 @pytest.mark.plot
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -509,7 +490,6 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -536,7 +516,6 @@ def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
@@ -562,7 +541,6 @@ def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
-
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 

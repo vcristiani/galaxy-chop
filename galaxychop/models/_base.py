@@ -423,7 +423,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     # API =====================================================================
 
     def _get_jcirc_df(self, galaxy, attributes):
-
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
@@ -497,7 +496,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         #     now we take out all the attributes of "to_dataframe" and save
         #     them in a list where all the resulting dataframes will be stored
         if df_attrs:
-
             # we need this to create the array of classes
             if "ptypev" not in df_attrs:
                 df_attrs.append("ptypev")

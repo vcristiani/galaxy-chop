@@ -136,13 +136,15 @@ for md_name, rst_name in DYNAMIC_RST.items():
 
 ## -- Options for Sphinx-Fortran ---------------------------------------------
 # List of possible extensions in the case of a directory listing
-fortran_ext = ['f90', 'F90', 'f95', 'F95']
+fortran_ext = ["f90", "F90", "f95", "F95"]
 
 # This variable must be set with file pattern, like "*.f90", or a list of them.
 # It is also possible to specify a directory name; in this case, all files than
 # have an extension matching those define by the config variable `fortran_ext`
 # are used.
-fortran_src = [ str(CHOP_PATH / "galaxychop" / "preproc" / "fortran"),  ]
+fortran_src = [
+    str(CHOP_PATH / "galaxychop" / "preproc" / "fortran"),
+]
 
 # Indentation string or length (default 4). If it is an integer,
 # indicates the number of spaces.

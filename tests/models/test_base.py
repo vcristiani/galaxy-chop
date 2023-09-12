@@ -207,7 +207,6 @@ def test_GalaxyDecomposerABC_invalid_bins(bins_value):
 @pytest.mark.model
 def test_GalaxyDecomposerABC_repr():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-
         other = gchop.models.hparam(default=1)
 
         def get_attributes(self):
