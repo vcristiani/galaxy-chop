@@ -310,16 +310,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         ):
             raise ValueError("cbins must be a tuple of two floats.")
 
-    reassign = hparam(default=preproc.DEFAULT_REASSIGN)
-
-    @reassign.validator
-    def _reassign_validator(self, attribute, value):
-        if not (
-            isinstance(value, list)
-            and len(value) == 1
-            and isinstance(value[0], bool)
-        ):
-            raise ValueError("reassign must be a list of one bool.")
+    reassign = hparam(
+        default=preproc.DEFAULT_REASSIGN,
+        validator=attr.validators.instance_of(bool),
+    )
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
@@ -426,7 +420,12 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = preproc.jcirc(galaxy, *self.cbins, *self.reassign).as_dict()
+        jcirc = preproc.jcirc(
+            galaxy,
+            bin0=self.cbins[0],
+            bin1=self.cbins[1],
+            reassign=self.reassign,
+        ).as_dict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars

@@ -118,10 +118,12 @@ def star_align(galaxy, *, r_cut=None):
     # Now we extract only the needed column to rotate the galaxy
     # Note: for stars we need more columns to calculate the rotation matrix
     stars_df = galaxy.stars.to_dataframe(
-        ["m", "Jx", "Jy", "Jz"] + pos_columns + vel_columns
+        attributes=["m", "Jx", "Jy", "Jz"] + pos_columns + vel_columns
     )
-    dm_df = galaxy.dark_matter.to_dataframe(pos_columns + vel_columns)
-    gas_df = galaxy.gas.to_dataframe(pos_columns + vel_columns)
+    dm_df = galaxy.dark_matter.to_dataframe(
+        attributes=pos_columns + vel_columns
+    )
+    gas_df = galaxy.gas.to_dataframe(attributes=pos_columns + vel_columns)
 
     # now we can calculate the rotation matrix
     A = _get_rot_matrix(
@@ -196,7 +198,9 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
         is aligned with the z-axis, False otherwise.
     """
     # Now we extract only the needed column to rotate the galaxy
-    df = galaxy.stars.to_dataframe(["m", "x", "y", "z", "Jx", "Jy", "Jz"])
+    df = galaxy.stars.to_dataframe(
+        attributes=["m", "x", "y", "z", "Jx", "Jy", "Jz"]
+    )
 
     mask = _make_mask(df.x.values, df.y.values, df.z.values, r_cut)
 

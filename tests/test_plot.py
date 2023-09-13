@@ -256,7 +256,7 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.hist("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.hist("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
     # expected
     exp_ax = fig_ref.subplots()
@@ -273,7 +273,7 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.kde("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.kde("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
     # expected
     exp_ax = fig_ref.subplots()
@@ -307,6 +307,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
         attributes=None,
         labels=components,
         lmap=None,
@@ -332,6 +333,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
         attributes=None,
         labels=list(circ.eps_r),
         lmap=None,
@@ -357,6 +359,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
         attributes=None,
         labels=circ.eps_r,
         lmap=None,
@@ -380,6 +383,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
         attributes=["normalized_star_energy", "eps"],
         labels="eps_r",
         lmap=None,
@@ -403,7 +407,11 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=None
+        cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
+        attributes=None,
+        labels="eps_r",
+        lmap=None,
     )
 
     circ = preproc.jcirc(gal)
@@ -426,7 +434,11 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
     lmap = dict.fromkeys(circ.eps_r, 1)
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
+        cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
+        attributes=None,
+        labels="eps_r",
+        lmap=lmap,
     )
 
     assert (df[hue] == 1).all()
@@ -441,7 +453,11 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
         return 1
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN, attributes=None, labels="eps_r", lmap=lmap
+        cbins=preproc.DEFAULT_CBIN,
+        reassign=preproc.DEFAULT_REASSIGN,
+        attributes=None,
+        labels="eps_r",
+        lmap=lmap,
     )
 
     assert (df[hue] == 1).all()

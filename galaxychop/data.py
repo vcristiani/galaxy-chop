@@ -218,7 +218,7 @@ class ParticleSet:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self, attributes=None):
+    def to_dataframe(self, *, attributes=None):
         """
         Convert to pandas data frame.
 
@@ -384,7 +384,7 @@ class Galaxy:
 
         return pd.concat(parts, ignore_index=True)
 
-    def to_hdf5(self, path_or_stream, metadata=None, **kwargs):
+    def to_hdf5(self, path_or_stream, *, metadata=None, **kwargs):
         """Shortcut to ``galaxychop.io.to_hdf5()``.
 
         It is responsible for storing a galaxy in HDF5 format. The procedure
@@ -601,6 +601,7 @@ def mkgalaxy(
     vx_g: np.ndarray,
     vy_g: np.ndarray,
     vz_g: np.ndarray,
+    *,
     softening_s: float = 0.0,
     softening_dm: float = 0.0,
     softening_g: float = 0.0,

@@ -114,7 +114,7 @@ POTENTIAL_BACKENDS = {
 
 
 #: The default potential backend to use.
-def potential(galaxy, backend=DEFAULT_POTENTIAL_BACKEND):
+def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     """
     Potential energy calculation.
 

@@ -218,9 +218,9 @@ def test_GalaxyDecomposerABC_repr():
         def get_rows_mask(self, X, y, attributes):
             ...
 
-    decomposer = Decomposer(cbins=(0.3, 0.2), other="zaraza")
+    decomposer = Decomposer(cbins=(0.3, 0.2), reassign=True, other="zaraza")
     result = repr(decomposer)
-    expected = "Decomposer(cbins=(0.3, 0.2), other='zaraza')"
+    expected = "Decomposer(cbins=(0.3, 0.2), reassign=True, other='zaraza')"
 
     assert result == expected
 

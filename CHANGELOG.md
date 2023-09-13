@@ -7,7 +7,9 @@
 
 - Now the decomposition models are stateless and return a `Component`
   object that can be used as a hue in all plots, and can calculate mass
-  fractions for each component
+  fractions for each component.
+- All parameters with defaults, now are keyword only.
+- New `reassign` parameter in *jcirc* (and all code thar use *jcirc*)
 - Components and plots now support a `lmap` parameter (label-map)
   which allows to arbitrarily change component names.
   In addition, the models that "know" which component is which automatically

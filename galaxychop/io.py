@@ -69,6 +69,7 @@ def _df_to_table(df, ptype):
 
 def read_hdf5(
     path_or_stream,
+    *,
     softening_s: float = 0.0,
     softening_dm: float = 0.0,
     softening_g: float = 0.0,
@@ -120,7 +121,7 @@ def read_hdf5(
     return galaxy
 
 
-def to_hdf5(path_or_stream, galaxy, metadata=None, **kwargs):
+def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
     """HDF5 file writer.
 
     It is responsible for storing a galaxy in HDF5 format. The procedure only

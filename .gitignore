@@ -108,12 +108,7 @@ venv.bak/
 # galaxychop
 .vscode/
 dask-worker-space/
-.idea/.gitignore
-.idea/misc.xml
-.idea/modules.xml
-.idea/src.iml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
+
 
 
 result_images/

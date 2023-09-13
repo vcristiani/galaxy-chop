@@ -36,7 +36,7 @@ DEFAULT_CBIN = (0.05, 0.005)
 Please check the documentation of ``jcirc()``.
 
 """
-DEFAULT_REASSIGN = [False]
+DEFAULT_REASSIGN = False
 """Default value to reassign the values of the particle circularity parameter.
 
 Please check the documentation of ``jcirc()``.
@@ -252,9 +252,10 @@ def _jcirc(galaxy, bin0, bin1, reassign):
 
 def jcirc(
     galaxy,
+    *,
     bin0=DEFAULT_CBIN[0],
     bin1=DEFAULT_CBIN[1],
-    reassign=DEFAULT_REASSIGN[0],
+    reassign=DEFAULT_REASSIGN,
     runtime_warnings="ignore",
 ):
     """
@@ -274,7 +275,7 @@ def jcirc(
     bin1 : float. Default=0.005
         Size of the specific energy bin of the outer part of the galaxy,
         in the range of (-0.1, 0) of the normalized energy.
-    reassign : list. Default=[False]
+    reassign : list. Default=False
         It allows to define what to do with stellar particles with circularity
         parameter values >1 or <-1. True reassigns the value to 1 or -1,
         depending on the case. False discards these particles.
