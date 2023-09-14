@@ -94,14 +94,15 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         for count_bin in range(lim_aux, bin0):
             corot_bin = 2 * bin0 - 1 - count_bin
 
-            if len(bin_to_particle[count_bin]) >= len(
-                bin_to_particle[corot_bin]
-            ):
+            len_count_bin = len(bin_to_particle[count_bin])
+            len_corot_bin = len(bin_to_particle[corot_bin])
+
+            if len_count_bin >= len_corot_bin:
                 sph[corot_bin] = bin_to_particle[corot_bin]
             else:
                 sph[corot_bin] = self.random_state.choice(
                     bin_to_particle[corot_bin],
-                    len(bin_to_particle[count_bin]),
+                    len_count_bin,
                     replace=False,
                 )
         return sph

@@ -139,9 +139,10 @@ def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
         ptypes=None, attributes=None, labels="x", lmap=None
     )
 
-    x = gal.to_dataframe(attributes=["x"]).sort_values("x").x
+    expected = np.sort(gal.to_dataframe(attributes=["x"]).x)
+    result = np.sort(df[hue])
 
-    assert (df[hue] == x).all()
+    assert (result == expected).all()
 
 
 @pytest.mark.plot
@@ -319,7 +320,8 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
         & np.isfinite(circ.eps_r)
     )
     expected = np.sort(circ.eps[mask])
-    assert (df[hue] == expected).all()
+    result = np.sort(df[hue])
+    assert (result == expected).all()
 
 
 @pytest.mark.plot
@@ -345,7 +347,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
+    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -371,7 +373,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
+    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -396,7 +398,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
+    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot
@@ -421,7 +423,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
         & np.isfinite(circ.eps_r)
     )
 
-    assert (df[hue] == np.sort(circ.eps_r[mask])).all()
+    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
 
 
 @pytest.mark.plot

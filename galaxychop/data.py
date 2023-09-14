@@ -548,7 +548,7 @@ class Galaxy:
 # =============================================================================
 
 
-def galaxy_as_kwargs(galaxy):
+def galaxy_as_kwargs(galaxy: Galaxy):
     """Galaxy init attributes as dictionary.
 
     Parameters
