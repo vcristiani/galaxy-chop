@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from galaxychop import models, plot, preproc
+from galaxychop import models, preproc
 
 from matplotlib.testing.decorators import (
     _image_directories,
@@ -27,6 +27,8 @@ import pandas as pd
 import pytest
 
 import seaborn as sns
+
+from galaxychop.core import plot
 
 # =============================================================================
 # UTILITIES
@@ -95,7 +97,7 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
     gal = galaxy(seed=42)
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    method_name = f"galaxychop.plot.GalaxyPlotter.{plot_kind}"
+    method_name = f"galaxychop.core.plot.GalaxyPlotter.{plot_kind}"
 
     with mock.patch(method_name) as plot_method:
         plotter(plot_kind=plot_kind)
@@ -296,7 +298,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
 
     components = models.Components(
         labels=circ.eps,
@@ -331,7 +333,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
@@ -357,7 +359,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
 
     df, hue = plotter.get_circ_df_and_hue(
         cbins=preproc.DEFAULT_CBIN,
@@ -391,7 +393,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
         lmap=None,
     )
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -416,7 +418,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
         lmap=None,
     )
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -431,7 +433,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
 
     lmap = dict.fromkeys(circ.eps_r, 1)
 
@@ -478,7 +480,7 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
     test_grid = plotter.circ_pairplot()
 
     # expected
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.normalized_star_Jz)
@@ -517,7 +519,7 @@ def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -543,7 +545,7 @@ def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -568,7 +570,7 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.jcirc(gal)
+    circ = preproc.stellar_dynamics(gal)
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)

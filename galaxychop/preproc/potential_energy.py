@@ -19,7 +19,7 @@ import astropy.units as u
 
 import numpy as np
 
-from .. import data
+from ..core import data
 
 try:
     from .fortran import potential as potential_f

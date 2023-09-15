@@ -404,7 +404,7 @@ class Galaxy:
             ``astropy.io.misc.hdf5.write_table_hdf5()``
 
         """
-        from . import io
+        from .. import io
 
         return io.to_hdf5(
             path_or_stream=path_or_stream,
@@ -413,13 +413,20 @@ class Galaxy:
             **kwargs,
         )
 
+    def jcirc(self):
+        from ..preproc import circ
+
+        return circ.stellar_dynamics(self)
+
+    # ACCESSORS ===============================================================
+
     @property
     def plot(self):
         """Plot accessor."""
         if not hasattr(self, "_plot"):
             from . import plot  # noqa
-
-            super().__setattr__("_plot", plot.GalaxyPlotter(self))
+            plotter = plot.GalaxyPlotter(self)
+            super().__setattr__("_plot", plotter)
         return self._plot
 
     # ENERGY ===============================================================

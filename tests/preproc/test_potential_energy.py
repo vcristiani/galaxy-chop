@@ -10,7 +10,7 @@
 # IMPORTS
 # =============================================================================
 
-from galaxychop import data
+from galaxychop.core import data
 from galaxychop.preproc import potential_energy
 
 import numpy as np

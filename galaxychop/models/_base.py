@@ -21,14 +21,18 @@ import numpy as np
 
 import pandas as pd
 
-from .. import data, preproc
+from ..core import data
+
+from .. import preproc
 from ..utils import doc_inherit
 
 # =============================================================================
 # CONSTANTS
 # =============================================================================
 
-_CIRCULARITY_ATTRIBUTES = preproc.JCirc.circularity_attributes()
+_CIRCULARITY_ATTRIBUTES = (
+    preproc.GalaxyStellarDynamics.circularity_attributes()
+)
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
 
@@ -420,7 +424,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = preproc.jcirc(
+        jcirc = preproc.stellar_dynamics(
             galaxy,
             bin0=self.cbins[0],
             bin1=self.cbins[1],

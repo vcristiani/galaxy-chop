@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from . import models, preproc
+from .. import models, preproc
 
 # =============================================================================
 # ACCESSOR
@@ -359,7 +359,7 @@ class GalaxyPlotter:
 
         # first we extract the circularity parameters from the galaxy
         # as a dictionary
-        circ = preproc.jcirc(
+        circ = preproc.stellar_dynamics(
             self._galaxy, bin0=cbins[0], bin1=cbins[1], reassign=reassign
         )
         mask = circ.isfinite()

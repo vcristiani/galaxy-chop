@@ -10,7 +10,12 @@
 # IMPORTS
 # =============================================================================
 
-from .circ import DEFAULT_CBIN, DEFAULT_REASSIGN, JCirc, jcirc
+from .circ import (
+    DEFAULT_CBIN,
+    DEFAULT_REASSIGN,
+    GalaxyStellarDynamics,
+    stellar_dynamics,
+)
 from .pcenter import center, is_centered
 from .potential_energy import (
     DEFAULT_POTENTIAL_BACKEND,
@@ -23,8 +28,8 @@ from .salign import is_star_aligned, star_align
 
 __all__ = [
     # circ
-    "JCirc",
-    "jcirc",
+    "GalaxyStellarDynamics",
+    "stellar_dynamics",
     "DEFAULT_CBIN",
     "DEFAULT_REASSIGN",
     # pcenter

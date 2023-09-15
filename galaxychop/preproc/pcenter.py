@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from .. import data
+from ..core import data
 
 # =============================================================================
 # BACKENDS

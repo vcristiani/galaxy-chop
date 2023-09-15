@@ -14,13 +14,15 @@ from io import BytesIO
 
 import astropy.units as u
 
-from galaxychop import data, io, plot
+from galaxychop import io
 
 import numpy as np
 
 import pandas as pd
 
 import pytest
+
+from galaxychop.core import data, plot
 
 # =============================================================================
 # PARTICLESET TYPE TESTS

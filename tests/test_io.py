@@ -12,7 +12,7 @@
 
 from io import BytesIO
 
-from galaxychop import data
+from galaxychop.core import data
 from galaxychop import io
 
 import pandas as pd

@@ -13,11 +13,13 @@
 import os
 from pathlib import Path
 
-from galaxychop import data, io
+from galaxychop import io
 
 import numpy as np
 
 import pytest
+
+from galaxychop.core import data
 
 # =============================================================================
 # PATHS

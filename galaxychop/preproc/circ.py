@@ -22,7 +22,7 @@ import numpy as np
 
 import uttr
 
-from ..data import ParticleSetType
+from ..core.data import ParticleSetType
 
 
 # =============================================================================
@@ -48,7 +48,7 @@ Please check the documentation of ``jcirc()``.
 
 
 @uttr.s(frozen=True, slots=True)
-class JCirc:
+class GalaxyStellarDynamics:
     """Circularity information about the stars particles of a galaxy.
 
     Parameters
@@ -112,7 +112,7 @@ class JCirc:
         return np.all([np.isfinite(v) for v in selfd.values()], axis=0)
 
 
-def _jcirc(galaxy, bin0, bin1, reassign):
+def _stellar_dynamics(galaxy, bin0, bin1, reassign):
     # this function exists to silence the warnings in the public one
 
     # extract only the needed columns
@@ -240,7 +240,7 @@ def _jcirc(galaxy, bin0, bin1, reassign):
         eps_[mask] = np.nan
         eps_r_[mask] = np.nan
 
-    return JCirc(
+    return GalaxyStellarDynamics(
         normalized_star_energy=E_star_norm_,
         normalized_star_Jz=Jz_star_norm_,
         eps=eps_,
@@ -250,7 +250,7 @@ def _jcirc(galaxy, bin0, bin1, reassign):
     )
 
 
-def jcirc(
+def stellar_dynamics(
     galaxy,
     *,
     bin0=DEFAULT_CBIN[0],
@@ -268,7 +268,8 @@ def jcirc(
 
     Parameters
     ----------
-    galaxy : ``Galaxy class`` object
+    galaxy : ``Galaxy``
+        The galaxy to extract the stellar dynamics components.
     bin0 : float. Default=0.05
         Size of the specific energy bin of the inner part of the galaxy,
         in the range of (-1, -0.1) of the normalized energy.
@@ -280,15 +281,15 @@ def jcirc(
         parameter values >1 or <-1. True reassigns the value to 1 or -1,
         depending on the case. False discards these particles.
     runtime_warnings : Any warning filter action (default "ignore")
-        jcirc usually launches RuntimeWarning during the eps calculation
-        because there may be some particle with jcirc=0.
+        stellar_synamics usually launches RuntimeWarning during the eps
+        calculation because there may be some particle with jcirc=0.
         By default the function decides to ignore these warnings.
         `runtime_warnings` can be set to any valid "action" in the python
         warnings module.
 
     Return
     ------
-    JCirc :
+    GalaxyStellarDynamics :
         Circularity attributes of the star components of the galaxy
 
     Notes
@@ -318,4 +319,4 @@ def jcirc(
     """
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
-        return _jcirc(galaxy, bin0, bin1, reassign)
+        return _stellar_dynamics(galaxy, bin0, bin1, reassign)

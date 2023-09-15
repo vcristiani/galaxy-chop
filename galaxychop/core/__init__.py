@@ -4,29 +4,13 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-# =============================================================================
-# DOCS
-# =============================================================================
-
-"""
-GalaxyChop.
-
-Implementation of a few galaxy dynamic decomposition methods.
-"""
-
-# =============================================================================
-# META
-# =============================================================================
-
-__version__ = "0.3.dev0"
-
+"""Base objects and functions og galaxychop."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
-from . import io, models, preproc, utils
-from .core import (
+from .data import (
     Galaxy,
     ParticleSet,
     ParticleSetType,
@@ -42,5 +26,6 @@ __all__ = [
     "models",
     "preproc",
     "utils",
+    "galaxy_as_kwargs",
     "mkgalaxy",
 ]
