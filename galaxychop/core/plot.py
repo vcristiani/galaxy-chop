@@ -319,7 +319,7 @@ class GalaxyPlotter:
 
     # CICULARITY ==============================================================
 
-    def get_circ_df_and_hue(self, sdyn_kws, attributes, labels, lmap):
+    def get_sdyn_df_and_hue(self, sdyn_kws, attributes, labels, lmap):
         """
         Dataframe and Hue constructor for plot implementations.
 
@@ -411,7 +411,7 @@ class GalaxyPlotter:
 
         return df, hue
 
-    def circ_pairplot(
+    def sdyn_pairplot(
         self,
         *,
         attributes=None,
@@ -421,7 +421,7 @@ class GalaxyPlotter:
         **kwargs,
     ):
         """
-        Draw a pairplot of circularity and normalized energy.
+        Draw a pairplot of stellar dynamics.
 
         By default, this function will create a grid of Axes such that each
         numeric variable in data will by shared across the y-axes across a
@@ -433,8 +433,9 @@ class GalaxyPlotter:
 
         Parameters
         ----------
-        attributes : keys of ``ParticleSet class`` parameters.
-            Names of ``ParticleSet class`` parameters. Default value = None
+        attributes : keys of ``GalaxyStarsDynamics class`` parameters.
+            Names of ``GalaxyStarsDynamics class`` parameters.
+            Default value = None
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
@@ -450,7 +451,7 @@ class GalaxyPlotter:
         -------
         seaborn.axisgrid.PairGrid
         """
-        df, hue = self.get_circ_df_and_hue(
+        df, hue = self.get_sdyn_df_and_hue(
             attributes=attributes,
             labels=labels,
             sdyn_kws=sdyn_kws,
@@ -463,7 +464,7 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
-    def circ_scatter(
+    def sdyn_scatter(
         self,
         x,
         y,
@@ -473,7 +474,7 @@ class GalaxyPlotter:
         sdyn_kws=None,
         **kwargs,
     ):
-        """Draw a scatter plot of circularity and normalized energy.
+        """Draw a scatter plot of stellar dynamics.
 
         Shows the relationship between x and y. This function groups the values
         of stellar particles according to some keys of ``JCirc`` tuple.
@@ -483,14 +484,6 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum. Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value
-            to 1 or -1, depending on the case. False discards these particles.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
@@ -507,7 +500,7 @@ class GalaxyPlotter:
         matplotlib.axes.Axes
         """
         attributes = [x, y]
-        df, hue = self.get_circ_df_and_hue(
+        df, hue = self.get_sdyn_df_and_hue(
             sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
@@ -517,7 +510,7 @@ class GalaxyPlotter:
         ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
-    def circ_hist(
+    def sdyn_hist(
         self,
         x,
         *,
@@ -527,7 +520,7 @@ class GalaxyPlotter:
         sdyn_kws=None,
         **kwargs,
     ):
-        """Draw a histogram of circularity and normalized energy.
+        """Draw a histogram of stellar dynamics.
 
         Plot univariate or bivariate histograms to show distributions of
         datasets. This function groups the values of stellar particles
@@ -554,7 +547,7 @@ class GalaxyPlotter:
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_circ_df_and_hue(
+        df, hue = self.get_sdyn_df_and_hue(
             sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
@@ -563,17 +556,17 @@ class GalaxyPlotter:
         ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
         return ax
 
-    def circ_kde(
+    def sdyn_kde(
         self,
         x,
-        y=None,
         *,
+        y=None,
         labels=None,
         lmap=None,
         sdyn_kws=None,
         **kwargs,
     ):
-        """Draw a Kernel Density plot of circularity and normalized energy.
+        """Draw a Kernel Density plot of stellar dynamics.
 
         Plot univariate or bivariate distributions using kernel density
         estimation (KDE). This plot represents normalized specific energy, the
@@ -604,7 +597,7 @@ class GalaxyPlotter:
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_circ_df_and_hue(
+        df, hue = self.get_sdyn_df_and_hue(
             sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
