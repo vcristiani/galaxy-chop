@@ -108,9 +108,6 @@ venv.bak/
 # galaxychop
 .vscode/
 dask-worker-space/
-
-
-
 result_images/
 .mutmut-cache
 docs/source/_dynamic/*.rst

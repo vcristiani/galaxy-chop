@@ -22,8 +22,8 @@ import numpy as np
 
 import uttr
 
-from .. import constants as const
 from .data import ParticleSetType
+from .. import constants as const
 
 
 # =============================================================================

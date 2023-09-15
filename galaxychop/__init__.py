@@ -32,7 +32,7 @@ from .core import (
     ParticleSetType,
     mkgalaxy,
 )
-from .io import read_hdf5, to_hdf5, read_npy
+from .io import read_hdf5, to_hdf5
 
 
 __all__ = [
@@ -46,6 +46,5 @@ __all__ = [
     "mkgalaxy",
     "read_hdf5",
     "to_hdf5",
-    "read_npy",
     "constants",
 ]

@@ -18,7 +18,10 @@ import astropy.units as u
 
 import numpy as np
 
-from .. import core, constants as const
+from .. import (
+    constants as const,
+    core,
+)
 
 try:
     from .fortran import potential as potential_f

@@ -10,13 +10,8 @@
 # IMPORTS
 # =============================================================================
 
-from .data import (
-    Galaxy,
-    ParticleSet,
-    ParticleSetType,
-    mkgalaxy,
-)
 from . import plot, sdynamics
+from .data import Galaxy, ParticleSet, ParticleSetType, mkgalaxy
 
 
 __all__ = [

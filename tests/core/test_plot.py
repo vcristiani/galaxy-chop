@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from galaxychop import core, models, preproc
+from galaxychop import core, models
 
 from matplotlib.testing.decorators import (
     _image_directories,

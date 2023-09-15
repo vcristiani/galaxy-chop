@@ -21,9 +21,13 @@ import numpy as np
 
 import pandas as pd
 
-from .. import core, constants as consts
+from .. import (
+    constants as consts,
+    core,
+)
 from ..core import sdynamics as sdyn
 from ..utils import doc_inherit
+
 
 # =============================================================================
 # CONSTANTS
