@@ -12,7 +12,7 @@
 
 import astropy.units as u
 
-from galaxychop.preproc import circ
+from galaxychop.core import sdynamics
 
 import numpy as np
 
@@ -26,7 +26,7 @@ import pytest
 
 def test_jcirc_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = circ.stellar_dynamics(gal)
+    result = sdynamics.stellar_dynamics(gal)
 
     mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]
     mask_eps = np.where(~np.isnan(result.eps))[0]
@@ -42,7 +42,7 @@ def test_jcirc_real_galaxy_with_infinite_energy_test(read_hdf5_galaxy):
     gal.stars.total_energy_[0] = -np.inf * u.km**2 / u.s**2
     gal.dark_matter.total_energy_[0] = -np.inf * u.km**2 / u.s**2
     gal.gas.total_energy_[0] = -np.inf * u.km**2 / u.s**2
-    result = circ.stellar_dynamics(gal)
+    result = sdynamics.stellar_dynamics(gal)
 
     mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]
     mask_eps = np.where(~np.isnan(result.eps))[0]
@@ -57,13 +57,13 @@ def test_jcirc_fake_galaxy(galaxy):
     for seed in range(100):
         gal = galaxy(seed=seed)
         with pytest.raises(ValueError):
-            circ.stellar_dynamics(gal)
+            sdynamics.stellar_dynamics(gal)
 
 
 def test_x_y_len(read_hdf5_galaxy):
     """Check the x and y array len."""
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = circ.stellar_dynamics(gal)
+    result = sdynamics.stellar_dynamics(gal)
 
     x = result.x
     y = result.y
@@ -73,7 +73,7 @@ def test_x_y_len(read_hdf5_galaxy):
 
 def test_x_values(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = circ.stellar_dynamics(gal)
+    result = sdynamics.stellar_dynamics(gal)
 
     aux0 = np.zeros(len(result.x) + 1)
     aux1 = np.zeros(len(result.x) + 1)
@@ -88,7 +88,7 @@ def test_x_values(read_hdf5_galaxy):
 
 def test_y_values(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    result = circ.stellar_dynamics(gal)
+    result = sdynamics.stellar_dynamics(gal)
 
     df = gal.to_dataframe(attributes=["total_energy", "Jz"])
 

@@ -16,16 +16,14 @@ from .data import (
     ParticleSetType,
     mkgalaxy,
 )
+from . import plot, sdynamics
 
 
 __all__ = [
     "Galaxy",
     "ParticleSet",
     "ParticleSetType",
-    "io",
-    "models",
-    "preproc",
-    "utils",
-    "galaxy_as_kwargs",
     "mkgalaxy",
+    "plot",
+    "sdynamics",
 ]

@@ -25,13 +25,14 @@ __version__ = "0.3.dev0"
 # IMPORTS
 # =============================================================================
 
-from . import io, models, preproc, utils
+from . import constants, models, preproc, utils
 from .core import (
     Galaxy,
     ParticleSet,
     ParticleSetType,
     mkgalaxy,
 )
+from .io import read_hdf5, to_hdf5, read_npy
 
 
 __all__ = [
@@ -43,4 +44,8 @@ __all__ = [
     "preproc",
     "utils",
     "mkgalaxy",
+    "read_hdf5",
+    "to_hdf5",
+    "read_npy",
+    "constants",
 ]

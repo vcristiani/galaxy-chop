@@ -24,7 +24,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from .. import models, preproc
+from .. import constants as const, models, preproc
 
 # =============================================================================
 # ACCESSOR
@@ -319,25 +319,19 @@ class GalaxyPlotter:
 
     # CICULARITY ==============================================================
 
-    def get_circ_df_and_hue(self, cbins, reassign, attributes, labels, lmap):
+    def get_circ_df_and_hue(self, sdyn_kws, attributes, labels, lmap):
         """
         Dataframe and Hue constructor for plot implementations.
 
         Parameters
         ----------
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum. Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        attributes : keys of ``JCirc`` tuple.
+        sdyn_kws: dict or None
+            Extra parameters for galaxy.stellar_dynamics() method.
+        attributes : keys of ``GalaxyStellarDynamics`` dataframe.
             Keys of the normalized specific energy, the circularity parameter
             (J_z/J_circ) and/or the projected circularity parameter
             (J_p/J_circ) of the stellar particles.
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value to
-            1 or -1, depending on the case. False discards these particles.
-        labels : keys of ``JCirc`` tuple.
+        labels : keys of ``GalaxyStellarDynamics`` dataframe.
             Variable to map plot aspects to different colors.
         lmap :  dict
             Name assignment to the label.
@@ -348,7 +342,7 @@ class GalaxyPlotter:
             DataFrame of the normalized specific energy, the circularity
             parameter (J_z/J_circ) and/or the projected circularity parameter
             (J_p/J_circ) of the stellar particles with labels added.
-        hue : keys of ``JCirc`` tuple.
+        hue : keys of ``GalaxyStellarDynamics`` dataframe.
             Labels of stellar particles.
         """
         # if we use the components as laberls we need to extract the labels
@@ -359,16 +353,15 @@ class GalaxyPlotter:
 
         # first we extract the circularity parameters from the galaxy
         # as a dictionary
-        circ = preproc.stellar_dynamics(
-            self._galaxy, bin0=cbins[0], bin1=cbins[1], reassign=reassign
-        )
-        mask = circ.isfinite()
+        sdyn_kws = {} if sdyn_kws is None else sdyn_kws
+        sdyn = self._galaxy.stellar_dynamics(**sdyn_kws)
+        mask = sdyn.isfinite()
 
-        circ_dict = circ.as_dict()
+        sdyn_dict = sdyn.as_dict()
 
         # determine the correct number of attributes
         attributes = (
-            list(circ_dict.keys()) if attributes is None else attributes
+            list(sdyn_dict.keys()) if attributes is None else attributes
         )
         hue = None
 
@@ -381,7 +374,7 @@ class GalaxyPlotter:
 
         columns = OrderedDict()
         for aname in attributes:
-            columns[aname] = circ_dict[aname][mask]
+            columns[aname] = sdyn_dict[aname][mask]
 
         df = pd.DataFrame(columns)  # here we create the dataframe
 
@@ -421,11 +414,10 @@ class GalaxyPlotter:
     def circ_pairplot(
         self,
         *,
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
         attributes=None,
         labels=None,
         lmap=None,
+        sdyn_kws=None,
         **kwargs,
     ):
         """
@@ -441,14 +433,6 @@ class GalaxyPlotter:
 
         Parameters
         ----------
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum. Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value
-            to 1 or -1, depending on the case. False discards these particles.
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters. Default value = None
         labels : keys of ``JCirc`` tuple.
@@ -456,6 +440,8 @@ class GalaxyPlotter:
             Default value = None
         lmap :  dicts
             Name assignment to the label. Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs :
             Additional keyword arguments are passed and are documented in
             ``seaborn.pairplot``.
@@ -465,10 +451,9 @@ class GalaxyPlotter:
         seaborn.axisgrid.PairGrid
         """
         df, hue = self.get_circ_df_and_hue(
-            cbins=cbins,
-            reassign=reassign,
             attributes=attributes,
             labels=labels,
+            sdyn_kws=sdyn_kws,
             lmap=lmap,
         )
 
@@ -483,10 +468,9 @@ class GalaxyPlotter:
         x,
         y,
         *,
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
         labels=None,
         lmap=None,
+        sdyn_kws=None,
         **kwargs,
     ):
         """Draw a scatter plot of circularity and normalized energy.
@@ -512,6 +496,8 @@ class GalaxyPlotter:
             Default value = None
         lmap :  dicts
             Name assignment to the label. Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.scatterplot``.
@@ -522,8 +508,7 @@ class GalaxyPlotter:
         """
         attributes = [x, y]
         df, hue = self.get_circ_df_and_hue(
-            cbins=cbins,
-            reassign=reassign,
+            sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
             lmap=lmap,
@@ -537,10 +522,9 @@ class GalaxyPlotter:
         x,
         *,
         y=None,
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
         labels=None,
         lmap=None,
+        sdyn_kws=None,
         **kwargs,
     ):
         """Draw a histogram of circularity and normalized energy.
@@ -554,19 +538,13 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum.  Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value
-            to 1 or -1, depending on the case. False discards these particles.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
             Name assignment to the label. Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.histplot``.
@@ -577,8 +555,7 @@ class GalaxyPlotter:
         """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_circ_df_and_hue(
-            cbins=cbins,
-            reassign=reassign,
+            sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
             lmap=lmap,
@@ -591,10 +568,9 @@ class GalaxyPlotter:
         x,
         y=None,
         *,
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
         labels=None,
         lmap=None,
+        sdyn_kws=None,
         **kwargs,
     ):
         """Draw a Kernel Density plot of circularity and normalized energy.
@@ -612,19 +588,13 @@ class GalaxyPlotter:
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
             Default value y = None.
-        cbins : tuple
-            It contains the two widths of bins necessary for the calculation of
-            the circular angular momentum. Shape: (2,).
-            Dafult value = (0.05, 0.005).
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value
-            to 1 or -1, depending on the case. False discards these particles.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None
         lmap :  dicts
             Name assignment to the label. Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs
             Additional keyword arguments are passed and are documented
             in ``seaborn.kdeplot``.
@@ -635,8 +605,7 @@ class GalaxyPlotter:
         """
         attributes = [x] if y is None else [x, y]
         df, hue = self.get_circ_df_and_hue(
-            cbins=cbins,
-            reassign=reassign,
+            sdyn_kws=sdyn_kws,
             attributes=attributes,
             labels=labels,
             lmap=lmap,

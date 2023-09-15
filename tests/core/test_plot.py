@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from galaxychop import models, preproc
+from galaxychop import core, models, preproc
 
 from matplotlib.testing.decorators import (
     _image_directories,
@@ -28,7 +28,6 @@ import pytest
 
 import seaborn as sns
 
-from galaxychop.core import plot
 
 # =============================================================================
 # UTILITIES
@@ -68,10 +67,12 @@ def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
 
 
 @pytest.mark.plot
-@pytest.mark.parametrize("pkind", plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS)
+@pytest.mark.parametrize(
+    "pkind", core.plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS
+)
 def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     with pytest.raises(ValueError):
         plotter(pkind)
@@ -80,13 +81,13 @@ def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
 @pytest.mark.plot
 def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     with pytest.raises(ValueError):
         plotter("__call__")
 
     # not callable
-    super(plot.GalaxyPlotter, plotter).__setattr__("zaraza", None)
+    super(core.plot.GalaxyPlotter, plotter).__setattr__("zaraza", None)
     with pytest.raises(ValueError):
         plotter("zaraza")
 
@@ -95,7 +96,7 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
 @pytest.mark.parametrize("plot_kind", ["pairplot"])
 def test_GalaxyPlotter_call(galaxy, plot_kind):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     method_name = f"galaxychop.core.plot.GalaxyPlotter.{plot_kind}"
 
@@ -115,7 +116,7 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     components = models.Components(
         labels=np.full(len(gal), 100),
@@ -135,7 +136,7 @@ def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     df, hue = plotter.get_df_and_hue(
         ptypes=None, attributes=None, labels="x", lmap=None
@@ -150,7 +151,7 @@ def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
 
@@ -167,7 +168,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
 @pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
 
@@ -190,7 +191,7 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot(galaxy, format):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_grid = plotter.pairplot(attributes=["x", "y"])
 
@@ -210,7 +211,7 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     df = gal.to_dataframe(attributes=["x", "y", "ptype"])
     test_grid = plotter.pairplot(
@@ -237,7 +238,7 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
@@ -256,7 +257,7 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.hist("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
@@ -273,7 +274,7 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.kde("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
@@ -296,9 +297,9 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
 
     components = models.Components(
         labels=circ.eps,
@@ -309,8 +310,7 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_Component(
     )
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels=components,
         lmap=None,
@@ -331,13 +331,12 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels_list(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels=list(circ.eps_r),
         lmap=None,
@@ -357,13 +356,12 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_external_labels(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels=circ.eps_r,
         lmap=None,
@@ -383,17 +381,16 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_not_in_attributes(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=["normalized_star_energy", "eps"],
         labels="eps_r",
         lmap=None,
     )
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -408,17 +405,16 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels="eps_r",
         lmap=None,
     )
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -431,15 +427,14 @@ def test_GalaxyPlotter_get_circ_df_and_hue_labels_in_attributes(
 @pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
 
     lmap = dict.fromkeys(circ.eps_r, 1)
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels="eps_r",
         lmap=lmap,
@@ -451,14 +446,13 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_map(read_hdf5_galaxy):
 @pytest.mark.plot
 def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     def lmap(label):
         return 1
 
     df, hue = plotter.get_circ_df_and_hue(
-        cbins=preproc.DEFAULT_CBIN,
-        reassign=preproc.DEFAULT_REASSIGN,
+        sdyn_kws=None,
         attributes=None,
         labels="eps_r",
         lmap=lmap,
@@ -475,12 +469,12 @@ def test_GalaxyPlotter_get_circ_df_and_hue_lmap_callable(read_hdf5_galaxy):
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_grid = plotter.circ_pairplot()
 
     # expected
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.normalized_star_Jz)
@@ -511,7 +505,7 @@ def test_GalaxyPlotter_circ_pairplot(read_hdf5_galaxy, format):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.circ_scatter("eps", "eps_r", ax=test_ax)
@@ -519,7 +513,7 @@ def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -537,7 +531,7 @@ def test_GalaxyPlotter_circ_scatter(read_hdf5_galaxy, fig_test, fig_ref):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.circ_hist("eps", ax=test_ax)
@@ -545,7 +539,7 @@ def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)
@@ -562,7 +556,7 @@ def test_GalaxyPlotter_circ_hist(read_hdf5_galaxy, fig_test, fig_ref):
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = plot.GalaxyPlotter(galaxy=gal)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
     plotter.circ_kde("eps", ax=test_ax)
@@ -570,7 +564,7 @@ def test_GalaxyPlotter_circ_kde(read_hdf5_galaxy, fig_test, fig_ref):
     # expected
     exp_ax = fig_ref.subplots()
 
-    circ = preproc.stellar_dynamics(gal)
+    circ = gal.stellar_dynamics()
     mask = (
         np.isfinite(circ.normalized_star_energy)
         & np.isfinite(circ.eps)

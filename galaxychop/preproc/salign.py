@@ -148,7 +148,7 @@ def star_align(galaxy, *, r_cut=None):
     vel_rot_g = np.dot(A, gas_df[vel_columns].T.values)
 
     # recreate the valaxy
-    new = data.galaxy_as_kwargs(galaxy)
+    new = galaxy.to_dict()
 
     new.update(
         x_s=pos_rot_s.T[:, 0],

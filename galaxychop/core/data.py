@@ -23,6 +23,8 @@ import pandas as pd
 
 import uttr
 
+from .. import constants as const
+
 # =============================================================================
 # PARTICLE SET
 # =============================================================================
@@ -413,10 +415,58 @@ class Galaxy:
             **kwargs,
         )
 
-    def jcirc(self):
-        from ..preproc import circ
+    def stellar_dynamics(
+        self,
+        *,
+        bin0=const.SD_DEFAULT_CBIN[0],
+        bin1=const.SD_DEFAULT_CBIN[1],
+        reassign=const.SD_DEFAULT_REASSIGN,
+        runtime_warnings=const.SD_RUNTIME_WARNING_ACTION,
+    ):
+        from . import sdynamics
 
-        return circ.stellar_dynamics(self)
+        return sdynamics.stellar_dynamics(
+            self,
+            bin0=bin0,
+            bin1=bin1,
+            reassign=reassign,
+            runtime_warnings=runtime_warnings,
+        )
+
+    def to_dict(self):
+        """Convert all the attributes of the galaxy into a dictionary.
+
+        The resulting dict can be used to build a new galaxy with
+        ``galaxychop.mkgalaxy``.
+
+        Parameters
+        ----------
+        galaxy: Galaxy
+            Instance of Galaxy.
+
+        Returns
+        -------
+        dict
+            Dictionary with ``galaxy`` attributes.
+        """
+
+        def _filter_internals(attribute, value):
+            return attribute.init
+
+        def _pset_as_kwargs(pset, suffix):
+            return {
+                f"{k}_{suffix}": v for k, v in pset.items() if k != "ptype"
+            }
+
+        the_dict = attr.asdict(self, recurse=True, filter=_filter_internals)
+
+        stars_kws = _pset_as_kwargs(the_dict.pop("stars"), "s")
+        dark_matter_kws = _pset_as_kwargs(the_dict.pop("dark_matter"), "dm")
+        gas_kws = _pset_as_kwargs(the_dict.pop("gas"), "g")
+
+        the_dict.update(**stars_kws, **dark_matter_kws, **gas_kws)
+
+        return the_dict
 
     # ACCESSORS ===============================================================
 
@@ -425,6 +475,7 @@ class Galaxy:
         """Plot accessor."""
         if not hasattr(self, "_plot"):
             from . import plot  # noqa
+
             plotter = plot.GalaxyPlotter(self)
             super().__setattr__("_plot", plotter)
         return self._plot
@@ -553,37 +604,6 @@ class Galaxy:
 # =============================================================================
 # API FUNCTIONS
 # =============================================================================
-
-
-def galaxy_as_kwargs(galaxy: Galaxy):
-    """Galaxy init attributes as dictionary.
-
-    Parameters
-    ----------
-    galaxy: Galaxy
-        Instance of Galaxy.
-
-    Returns
-    -------
-    kwargs: dict
-        Dictionary with ``galaxy`` attributes.
-    """
-
-    def _filter_internals(attribute, value):
-        return attribute.init
-
-    def _pset_as_kwargs(pset, suffix):
-        return {f"{k}_{suffix}": v for k, v in pset.items() if k != "ptype"}
-
-    gkwargs = attr.asdict(galaxy, recurse=True, filter=_filter_internals)
-
-    stars_kws = _pset_as_kwargs(gkwargs.pop("stars"), "s")
-    dark_matter_kws = _pset_as_kwargs(gkwargs.pop("dark_matter"), "dm")
-    gas_kws = _pset_as_kwargs(gkwargs.pop("gas"), "g")
-
-    gkwargs.update(**stars_kws, **dark_matter_kws, **gas_kws)
-
-    return gkwargs
 
 
 def mkgalaxy(

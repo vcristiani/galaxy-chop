@@ -21,9 +21,8 @@ import numpy as np
 
 import pandas as pd
 
-from ..core import data
-
-from .. import preproc
+from .. import core, constants as consts
+from ..core import sdynamics as sdyn
 from ..utils import doc_inherit
 
 # =============================================================================
@@ -31,10 +30,10 @@ from ..utils import doc_inherit
 # =============================================================================
 
 _CIRCULARITY_ATTRIBUTES = (
-    preproc.GalaxyStellarDynamics.circularity_attributes()
+    sdyn.GalaxyStellarDynamics.circularity_attributes()
 )
 
-_PTYPES_ORDER = tuple(p.name.lower() for p in data.ParticleSetType)
+_PTYPES_ORDER = tuple(p.name.lower() for p in core.ParticleSetType)
 
 
 # =============================================================================
@@ -302,7 +301,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     __gchop_model_cls_config__ = {"repr": False, "frozen": True}
 
-    cbins = hparam(default=preproc.DEFAULT_CBIN)
+    cbins = hparam(default=consts.SD_DEFAULT_CBIN)
 
     @cbins.validator
     def _bins_validator(self, attribute, value):
@@ -315,7 +314,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             raise ValueError("cbins must be a tuple of two floats.")
 
     reassign = hparam(
-        default=preproc.DEFAULT_REASSIGN,
+        default=consts.SD_DEFAULT_REASSIGN,
         validator=attr.validators.instance_of(bool),
     )
 
@@ -424,8 +423,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
-        jcirc = preproc.stellar_dynamics(
-            galaxy,
+        jcirc = galaxy.stellar_dynamics(
             bin0=self.cbins[0],
             bin1=self.cbins[1],
             reassign=self.reassign,
@@ -433,7 +431,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         # we add the colum with the types, all the values from jcirc
         # are stars
-        jcirc["ptypev"] = data.ParticleSetType.STARS.value
+        jcirc["ptypev"] = core.ParticleSetType.STARS.value
         stars_df = pd.DataFrame({attr: jcirc[attr] for attr in attributes})
 
         # DARK_MATTER
@@ -441,7 +439,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         dm_nans = np.full(dm_rows, np.nan)
 
         dm_columns = {attr: dm_nans for attr in attributes}
-        dm_columns["ptypev"] = data.ParticleSetType.DARK_MATTER.value
+        dm_columns["ptypev"] = core.ParticleSetType.DARK_MATTER.value
 
         dm_df = pd.DataFrame(dm_columns)
 
@@ -450,7 +448,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         gas_nans = np.full(gas_rows, np.nan)
 
         gas_columns = {attr: gas_nans for attr in attributes}
-        gas_columns["ptypev"] = data.ParticleSetType.GAS.value
+        gas_columns["ptypev"] = core.ParticleSetType.GAS.value
 
         gas_df = pd.DataFrame(gas_columns)
 
@@ -652,7 +650,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             X=X, probs=probs, rows_mask=rows_mask
         )
         final_y = np.array(
-            [data.ParticleSetType.mktype(yi).humanize() for yi in y]
+            [core.ParticleSetType.mktype(yi).humanize() for yi in y]
         )
 
         # return the instance
@@ -692,6 +690,6 @@ class DynamicStarsDecomposerMixin:
         decomposition is carried out, must have finite values.
         """
         # all the rows where every value is finite
-        only_stars = np.equal(y, data.ParticleSetType.STARS.value)
+        only_stars = np.equal(y, core.ParticleSetType.STARS.value)
         finite_values = np.isfinite(X).all(axis=1)
         return only_stars & finite_values

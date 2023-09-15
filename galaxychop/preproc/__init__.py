@@ -10,40 +10,18 @@
 # IMPORTS
 # =============================================================================
 
-from .circ import (
-    DEFAULT_CBIN,
-    DEFAULT_REASSIGN,
-    GalaxyStellarDynamics,
-    stellar_dynamics,
-)
 from .pcenter import center, is_centered
-from .potential_energy import (
-    DEFAULT_POTENTIAL_BACKEND,
-    G,
-    POTENTIAL_BACKENDS,
-    potential,
-)
+from .potential_energy import potential
 from .salign import is_star_aligned, star_align
 
 
 __all__ = [
-    # circ
-    "GalaxyStellarDynamics",
-    "stellar_dynamics",
-    "DEFAULT_CBIN",
-    "DEFAULT_REASSIGN",
     # pcenter
     "center",
     "is_centered",
-    # potential
     "potential",
-    "POTENTIAL_BACKENDS",
-    "DEFAULT_POTENTIAL_BACKEND",
-    "G",
-    # salign
     "star_align",
     "is_star_aligned",
-    # composition
     "center_and_align",
 ]
 

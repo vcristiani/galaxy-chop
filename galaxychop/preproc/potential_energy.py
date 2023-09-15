@@ -14,12 +14,11 @@
 # IMPORTS
 # =============================================================================
 
-import astropy.constants as c
 import astropy.units as u
 
 import numpy as np
 
-from ..core import data
+from .. import core, constants as const
 
 try:
     from .fortran import potential as potential_f
@@ -28,17 +27,6 @@ except ImportError:
 
 #: The default potential backend to use.
 DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
-
-
-# =============================================================================
-# CONSTANTS
-# =============================================================================
-
-#: GalaxyChop Gravitational unit
-G_UNIT = (u.km**2 * u.kpc) / (u.s**2 * u.solMass)
-
-#: Gravitational constant as float in G_UNIT
-G = c.G.to(G_UNIT).to_value()
 
 
 # =============================================================================
@@ -67,7 +55,7 @@ def fortran_potential(x, y, z, m, softening):
     soft = np.asarray(softening)
     epot = potential_f.fortran_potential(x, y, z, m, soft)
 
-    return epot * G, np.asarray
+    return epot * const.G, np.asarray
 
 
 def numpy_potential(x, y, z, m, softening):
@@ -100,7 +88,7 @@ def numpy_potential(x, y, z, m, softening):
     flt = dist != 0
     mdist = np.divide(m, dist, out=np.zeros_like(dist), where=flt)
 
-    return mdist.sum(axis=1) * G, np.asarray
+    return mdist.sum(axis=1) * const.G, np.asarray
 
 
 # =============================================================================
@@ -165,7 +153,7 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     pot_dm = pot[num_s:num]
     pot_g = pot[num:]
 
-    new = data.galaxy_as_kwargs(galaxy)
+    new = galaxy.to_dict()
 
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,
@@ -173,4 +161,4 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
         potential_g=-pot_g * (u.km / u.s) ** 2,
     )
 
-    return data.mkgalaxy(**new)
+    return core.mkgalaxy(**new)

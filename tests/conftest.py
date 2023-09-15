@@ -13,13 +13,12 @@
 import os
 from pathlib import Path
 
-from galaxychop import io
+import galaxychop as gchop
 
 import numpy as np
 
 import pytest
 
-from galaxychop.core import data
 
 # =============================================================================
 # PATHS
@@ -44,7 +43,7 @@ def data_path():
 def read_hdf5_galaxy(data_path):
     def read(filename):
         path = data_path(filename)
-        return io.read_hdf5(path)
+        return gchop.read_hdf5(path)
 
     return read
 
@@ -172,7 +171,7 @@ def galaxy(data_galaxy):
             potential_g,
         ) = data_galaxy(**kwargs)
 
-        gal = data.mkgalaxy(
+        gal = gchop.mkgalaxy(
             # stars
             m_s=m_s,
             x_s=x_s,
