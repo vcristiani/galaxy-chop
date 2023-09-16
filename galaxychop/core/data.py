@@ -390,8 +390,7 @@ class Galaxy:
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
-        """
-        Convert to pandas data frame.
+        """Convert the galaxy to pandas DataFrame.
 
         This method builds a data frame from the particles of the Galaxy.
 
@@ -450,88 +449,37 @@ class Galaxy:
             **kwargs,
         )
 
-    def stellar_dynamics(
-        self,
-        *,
-        bin0=const.SD_DEFAULT_CBIN[0],
-        bin1=const.SD_DEFAULT_CBIN[1],
-        reassign=const.SD_DEFAULT_REASSIGN,
-        runtime_warnings=const.SD_RUNTIME_WARNING_ACTION,
-    ):
-        """Calculate galaxy stars particles circularity information.
-
-        Shortcut to ``galaxychop.core.sdynamics.stellar_dynamics()``.
-
-        Calculation of Normalized specific energy of the stars, z-component
-        normalized specific angular momentum of the stars, circularity
-        parameter, projected circularity parameter, and the points to build the
-        function of the circular angular momentum.
+    def to_dict(self, *, ptypes=None, attributes=None):
+        """Convert the galaxy to dict with information as a numpy array with \
+        coerced units.
 
         Parameters
         ----------
-        bin0 : float. Default=0.05
-            Size of the specific energy bin of the inner part of the galaxy,
-            in the range of (-1, -0.1) of the normalized energy.
-        bin1 : float. Default=0.005
-            Size of the specific energy bin of the outer part of the galaxy,
-            in the range of (-0.1, 0) of the normalized energy.
-        reassign : list. Default=False
-            It allows to define what to do with stellar particles with
-            circularity parameter values >1 or <-1. True reassigns the value
-            to 1 or -1, depending on the case. False discards these particles.
-        runtime_warnings : Any warning filter action (default "ignore")
-            stellar_synamics usually launches RuntimeWarning during the eps
-            calculation because there may be some particle with jcirc=0.
-            By default the function decides to ignore these warnings.
-            `runtime_warnings` can be set to any valid "action" in the python
-            warnings module.
+        ptypes: tuple, default value = None
+            Strings indicating the ParticleSetType to include. If it's None,
+            all particle types are included.
+        attributes: tuple, default value = None
+            Dictionary keys of ParticleSet parameters used to create the dict.
+            If it's None, the data frame is constructed from all the
+            parameters of the ``ParticleSet class``.
 
         Return
         ------
-        GalaxyStellarDynamics :
-            Circularity attributes of the star components of the galaxy
-
-        Notes
-        -----
-        The `x` and `y` are calculated from the binning in the normalized specific
-        energy. In each bin, the particle with the maximum value of z-component of
-        standardized specific angular momentum is selected. This value is assigned
-        to the `y` parameter and its corresponding normalized specific energy pair
-        value to `x`.
-
-        Examples
-        --------
-        This returns the normalized specific energy of stars (E_star_norm), the
-        z-component normalized specific angular momentum of the stars
-        (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
-        eps_r: J_p/J_circ), and the normalized specific energy for the particle
-        with the maximum z-component of the normalized specific angular momentum
-        per bin (`x`) and the maximum value of the z-component of the normalized
-        specific angular momentum per bin (`y`).
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> gsd = galaxy.stellar_dynamics(
-        ...     bin0=0.05, bin1=0.005, reassign=[False]
-        ... )
-        >>> gsd
-        GalaxyStellarDynamics(
-            normalized_star_energy=[...],
-            normalized_star_Jz=[...],
-            eps=[...],
-            eps_r=[...]
-        )
+        dict : pandas data frame
+            dictionary with all data of stars, dark_matter and gas as numpy
+            array with coerced units
 
         """
-        from . import sdynamics
+        psets = [self.stars, self.dark_matter, self.gas]
 
-        return sdynamics.stellar_dynamics(
-            self,
-            bin0=bin0,
-            bin1=bin1,
-            reassign=reassign,
-            runtime_warnings=runtime_warnings,
-        )
+        the_dict = {}
+        for pset in psets:
+            ptype = pset.ptype.humanize()
+            if ptypes is None or ptype in ptypes:
+                p_dict = pset.to_dict(attributes=attributes)
+                the_dict[ptype] = p_dict
+
+        return the_dict
 
     def disassemble(self):
         """Convert all the attributes of the galaxy into a dictionary.
@@ -576,6 +524,8 @@ class Galaxy:
             dark_matter=self.dark_matter.copy(),
             gas=self.gas.copy())
         return new
+
+
 
     # ACCESSORS ===============================================================
 
@@ -707,6 +657,91 @@ class Galaxy:
             self.stars.angular_momentum_,
             self.dark_matter.angular_momentum_,
             self.gas.angular_momentum_,
+        )
+
+    # METHODS =================================================================
+
+    def stellar_dynamics(
+        self,
+        *,
+        bin0=const.SD_DEFAULT_CBIN[0],
+        bin1=const.SD_DEFAULT_CBIN[1],
+        reassign=const.SD_DEFAULT_REASSIGN,
+        runtime_warnings=const.SD_RUNTIME_WARNING_ACTION,
+    ):
+        """Calculate galaxy stars particles circularity information.
+
+        Shortcut to ``galaxychop.core.sdynamics.stellar_dynamics()``.
+
+        Calculation of Normalized specific energy of the stars, z-component
+        normalized specific angular momentum of the stars, circularity
+        parameter, projected circularity parameter, and the points to build the
+        function of the circular angular momentum.
+
+        Parameters
+        ----------
+        bin0 : float. Default=0.05
+            Size of the specific energy bin of the inner part of the galaxy,
+            in the range of (-1, -0.1) of the normalized energy.
+        bin1 : float. Default=0.005
+            Size of the specific energy bin of the outer part of the galaxy,
+            in the range of (-0.1, 0) of the normalized energy.
+        reassign : list. Default=False
+            It allows to define what to do with stellar particles with
+            circularity parameter values >1 or <-1. True reassigns the value
+            to 1 or -1, depending on the case. False discards these particles.
+        runtime_warnings : Any warning filter action (default "ignore")
+            stellar_synamics usually launches RuntimeWarning during the eps
+            calculation because there may be some particle with jcirc=0.
+            By default the function decides to ignore these warnings.
+            `runtime_warnings` can be set to any valid "action" in the python
+            warnings module.
+
+        Return
+        ------
+        GalaxyStellarDynamics :
+            Circularity attributes of the star components of the galaxy
+
+        Notes
+        -----
+        The `x` and `y` are calculated from the binning in the normalized specific
+        energy. In each bin, the particle with the maximum value of z-component of
+        standardized specific angular momentum is selected. This value is assigned
+        to the `y` parameter and its corresponding normalized specific energy pair
+        value to `x`.
+
+        Examples
+        --------
+        This returns the normalized specific energy of stars (E_star_norm), the
+        z-component normalized specific angular momentum of the stars
+        (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
+        eps_r: J_p/J_circ), and the normalized specific energy for the particle
+        with the maximum z-component of the normalized specific angular momentum
+        per bin (`x`) and the maximum value of the z-component of the normalized
+        specific angular momentum per bin (`y`).
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> gsd = galaxy.stellar_dynamics(
+        ...     bin0=0.05, bin1=0.005, reassign=[False]
+        ... )
+        >>> gsd
+        GalaxyStellarDynamics(
+            normalized_star_energy=[...],
+            normalized_star_Jz=[...],
+            eps=[...],
+            eps_r=[...]
+        )
+
+        """
+        from . import sdynamics
+
+        return sdynamics.stellar_dynamics(
+            self,
+            bin0=bin0,
+            bin1=bin1,
+            reassign=reassign,
+            runtime_warnings=runtime_warnings,
         )
 
 
