@@ -296,7 +296,7 @@ class ParticleSet:
         return pd.DataFrame(the_dict)
 
     def copy(self):
-        """Creates a copy of the ParticleSet."""
+        """Make a copy of the ParticleSet."""
         cls = type(self)
         new = cls(
             ptype=self.ptype,
@@ -308,7 +308,8 @@ class ParticleSet:
             vy=self.vy.copy(),
             vz=self.vz.copy(),
             potential=self.potential.copy(),
-            softening=float(self.softening))
+            softening=float(self.softening),
+        )
         return new
 
 
@@ -482,7 +483,7 @@ class Galaxy:
         return the_dict
 
     def disassemble(self):
-        """Convert all the attributes of the galaxy into a dictionary.
+        """Convert all the attributes of the galaxy into a play dict.
 
         The resulting dict can be used to build a new galaxy with
         ``galaxychop.mkgalaxy``.
@@ -496,36 +497,39 @@ class Galaxy:
         -------
         dict
             Dictionary with ``galaxy`` attributes.
+
         """
+        attributes = {
+            fname: fvalue
+            for fname, fvalue in attr.fields_dict(ParticleSet).items()
+            if fvalue.init and fname != "ptype"
+        }
 
-        def _filter_internals(attribute, value):
-            return attribute.init
+        def _flat(pset_dict, suffix):
+            the_flatten_dict = {}
+            for k, v in pset_dict.items():
+                flat_k = f"{k}_{suffix}"
+                flat_v = v[0] if np.issctype(attributes[k].converter) else v
+                the_flatten_dict[flat_k] = flat_v
+            return the_flatten_dict
 
-        def _pset_as_kwargs(pset, suffix):
-            return {
-                f"{k}_{suffix}": v for k, v in pset.items() if k != "ptype"
-            }
+        the_dict = self.to_dict(attributes=attributes.keys())
+        stars_kws = _flat(the_dict["stars"], "s")
+        dark_matter_kws = _flat(the_dict["dark_matter"], "dm")
+        gas_kws = _flat(the_dict["gas"], "g")
 
-        the_dict = attr.asdict(self, recurse=True, filter=_filter_internals)
-
-        stars_kws = _pset_as_kwargs(the_dict.pop("stars"), "s")
-        dark_matter_kws = _pset_as_kwargs(the_dict.pop("dark_matter"), "dm")
-        gas_kws = _pset_as_kwargs(the_dict.pop("gas"), "g")
-
-        the_dict.update(**stars_kws, **dark_matter_kws, **gas_kws)
-
-        return the_dict
+        disassembled = dict(**stars_kws, **dark_matter_kws, **gas_kws)
+        return disassembled
 
     def copy(self):
-        """Creates a copy of the Galaxy"""
+        """Make a copy of the Galaxy."""
         cls = type(self)
         new = cls(
             stars=self.stars.copy(),
             dark_matter=self.dark_matter.copy(),
-            gas=self.gas.copy())
+            gas=self.gas.copy(),
+        )
         return new
-
-
 
     # ACCESSORS ===============================================================
 
@@ -704,11 +708,11 @@ class Galaxy:
 
         Notes
         -----
-        The `x` and `y` are calculated from the binning in the normalized specific
-        energy. In each bin, the particle with the maximum value of z-component of
-        standardized specific angular momentum is selected. This value is assigned
-        to the `y` parameter and its corresponding normalized specific energy pair
-        value to `x`.
+        The `x` and `y` are calculated from the binning in the normalized
+        specific energy. In each bin, the particle with the maximum value of
+        z-component of standardized specific angular momentum is selected.
+        This value is assigned to the `y` parameter and its corresponding
+        normalized specific energy pair value to `x`.
 
         Examples
         --------
@@ -716,9 +720,9 @@ class Galaxy:
         z-component normalized specific angular momentum of the stars
         (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
         eps_r: J_p/J_circ), and the normalized specific energy for the particle
-        with the maximum z-component of the normalized specific angular momentum
-        per bin (`x`) and the maximum value of the z-component of the normalized
-        specific angular momentum per bin (`y`).
+        with the maximum z-component of the normalized specific angular
+        momentum per bin (`x`) and the maximum value of the z-component of the
+        normalized specific angular momentum per bin (`y`).
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
