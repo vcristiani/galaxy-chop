@@ -219,25 +219,21 @@ class ParticleSet:
         return len(self.m)
 
     # UTILITIES ===============================================================
-
-    def to_dataframe(self, *, attributes=None):
+    def to_dict(self, *, attributes=None):
         """
-        Convert to pandas data frame.
-
-        This method constructs a data frame with the particles and parameters
-        of ``ParticleSet class``.
+        Convert the galaxy into a dict of array with coerced units.
 
         Parameters
         ----------
         attributes: tuple, default value = None
-            Dictionary keys of ParticleSet parameters used to create the data
-            frame. If it's None, the data frame is constructed from all the
+            Dictionary keys of ParticleSet parameters used to create the dict
+            If it's None, the data frame is constructed from all the
             parameters of the ``ParticleSet class``.
 
         Return
         ------
-        DataFrame : pandas data frame
-            Data frame of the particles with the selected parameters.
+        dict :
+            dictionary with coerced units.
 
         """
         arr = self.arr_
@@ -270,11 +266,50 @@ class ParticleSet:
         attributes = (
             columns_makers.keys() if attributes is None else attributes
         )
-        data = OrderedDict()
+        the_dict = OrderedDict()
         for aname in attributes:
             mkcolumn = columns_makers[aname]
-            data[aname] = mkcolumn()
-        return pd.DataFrame(data)
+            the_dict[aname] = mkcolumn()
+        return the_dict
+
+    def to_dataframe(self, *, attributes=None):
+        """
+        Convert to pandas data frame.
+
+        This method constructs a data frame with the particles and parameters
+        of ``ParticleSet class``.
+
+        Parameters
+        ----------
+        attributes: tuple, default value = None
+            Dictionary keys of ParticleSet parameters used to create the data
+            frame. If it's None, the data frame is constructed from all the
+            parameters of the ``ParticleSet class``.
+
+        Return
+        ------
+        DataFrame : pandas data frame
+            Data frame of the particles with the selected parameters.
+
+        """
+        the_dict = self.to_dict(attributes=attributes)
+        return pd.DataFrame(the_dict)
+
+    def copy(self):
+        """Creates a copy of the ParticleSet."""
+        cls = type(self)
+        new = cls(
+            ptype=self.ptype,
+            m=self.m.copy(),
+            x=self.x.copy(),
+            y=self.y.copy(),
+            z=self.z.copy(),
+            vx=self.vx.copy(),
+            vy=self.vy.copy(),
+            vz=self.vz.copy(),
+            potential=self.potential.copy(),
+            softening=float(self.softening))
+        return new
 
 
 # =============================================================================
@@ -423,6 +458,71 @@ class Galaxy:
         reassign=const.SD_DEFAULT_REASSIGN,
         runtime_warnings=const.SD_RUNTIME_WARNING_ACTION,
     ):
+        """Calculate galaxy stars particles circularity information.
+
+        Shortcut to ``galaxychop.core.sdynamics.stellar_dynamics()``.
+
+        Calculation of Normalized specific energy of the stars, z-component
+        normalized specific angular momentum of the stars, circularity
+        parameter, projected circularity parameter, and the points to build the
+        function of the circular angular momentum.
+
+        Parameters
+        ----------
+        bin0 : float. Default=0.05
+            Size of the specific energy bin of the inner part of the galaxy,
+            in the range of (-1, -0.1) of the normalized energy.
+        bin1 : float. Default=0.005
+            Size of the specific energy bin of the outer part of the galaxy,
+            in the range of (-0.1, 0) of the normalized energy.
+        reassign : list. Default=False
+            It allows to define what to do with stellar particles with
+            circularity parameter values >1 or <-1. True reassigns the value
+            to 1 or -1, depending on the case. False discards these particles.
+        runtime_warnings : Any warning filter action (default "ignore")
+            stellar_synamics usually launches RuntimeWarning during the eps
+            calculation because there may be some particle with jcirc=0.
+            By default the function decides to ignore these warnings.
+            `runtime_warnings` can be set to any valid "action" in the python
+            warnings module.
+
+        Return
+        ------
+        GalaxyStellarDynamics :
+            Circularity attributes of the star components of the galaxy
+
+        Notes
+        -----
+        The `x` and `y` are calculated from the binning in the normalized specific
+        energy. In each bin, the particle with the maximum value of z-component of
+        standardized specific angular momentum is selected. This value is assigned
+        to the `y` parameter and its corresponding normalized specific energy pair
+        value to `x`.
+
+        Examples
+        --------
+        This returns the normalized specific energy of stars (E_star_norm), the
+        z-component normalized specific angular momentum of the stars
+        (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
+        eps_r: J_p/J_circ), and the normalized specific energy for the particle
+        with the maximum z-component of the normalized specific angular momentum
+        per bin (`x`) and the maximum value of the z-component of the normalized
+        specific angular momentum per bin (`y`).
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> gsd = galaxy.stellar_dynamics(
+        ...     bin0=0.05, bin1=0.005, reassign=[False]
+        ... )
+        >>> gsd
+        GalaxyStellarDynamics(
+            normalized_star_energy=[...],
+            normalized_star_Jz=[...],
+            eps=[...],
+            eps_r=[...]
+        )
+
+        """
         from . import sdynamics
 
         return sdynamics.stellar_dynamics(
@@ -433,7 +533,7 @@ class Galaxy:
             runtime_warnings=runtime_warnings,
         )
 
-    def to_dict(self):
+    def disassemble(self):
         """Convert all the attributes of the galaxy into a dictionary.
 
         The resulting dict can be used to build a new galaxy with
@@ -467,6 +567,15 @@ class Galaxy:
         the_dict.update(**stars_kws, **dark_matter_kws, **gas_kws)
 
         return the_dict
+
+    def copy(self):
+        """Creates a copy of the Galaxy"""
+        cls = type(self)
+        new = cls(
+            stars=self.stars.copy(),
+            dark_matter=self.dark_matter.copy(),
+            gas=self.gas.copy())
+        return new
 
     # ACCESSORS ===============================================================
 

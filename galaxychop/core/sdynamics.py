@@ -76,7 +76,7 @@ class GalaxyStellarDynamics:
         fields.sort()
         return tuple(fields)
 
-    def as_dict(self):
+    def to_dict(self):
         """Convert the instance to a dict.
 
         Attributes are ignored if they are marked as "asdict=False".
@@ -92,7 +92,7 @@ class GalaxyStellarDynamics:
         Attributes are ignored if they are marked as "asdict=False".
 
         """
-        selfd = self.as_dict()
+        selfd = self.to_dict()
         return np.all([np.isfinite(v) for v in selfd.values()], axis=0)
 
 
@@ -296,9 +296,16 @@ def stellar_dynamics(
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
-    >>> E_star_norm, Jz_star_norm, eps, eps_r, x, y = galaxy.jcir(
-    ...     bin0=0.05, bin1=0.005, reassign=[False]
+    >>> gsd = stellar_dynamics(
+    ...     galaxy, bin0=0.05, bin1=0.005, reassign=[False]
     ... )
+    >>> gsd
+    GalaxyStellarDynamics(
+        normalized_star_energy=[...],
+        normalized_star_Jz=[...],
+        eps=[...],
+        eps_r=[...]
+    )
 
     """
     with warnings.catch_warnings():

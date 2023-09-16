@@ -60,7 +60,7 @@ def center(galaxy):
     gas = df[df.ptypev == data.ParticleSetType.GAS.value]
 
     # patch
-    new = galaxy.to_dict()
+    new = galaxy.disassemble()
 
     new.update(
         x_s=stars.x.to_numpy(),

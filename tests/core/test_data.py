@@ -549,7 +549,7 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
 # =============================================================================
 
 
-def test_galaxy_to_dict(data_galaxy):
+def test_galaxy_disassemble(data_galaxy):
     (
         m_s,
         x_s,
@@ -610,7 +610,7 @@ def test_galaxy_to_dict(data_galaxy):
         potential_dm=potential_dm,
     )
 
-    gkwargs = gal.to_dict()
+    gkwargs = gal.disassemble()
 
     assert np.all(gkwargs["m_s"].to_value() == m_s)
     assert np.all(gkwargs["x_s"].to_value() == x_s)

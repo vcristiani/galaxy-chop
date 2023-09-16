@@ -357,7 +357,7 @@ class GalaxyPlotter:
         sdyn = self._galaxy.stellar_dynamics(**sdyn_kws)
         mask = sdyn.isfinite()
 
-        sdyn_dict = sdyn.as_dict()
+        sdyn_dict = sdyn.to_dict()
 
         # determine the correct number of attributes
         attributes = (

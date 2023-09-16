@@ -156,7 +156,7 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     pot_dm = pot[num_s:num]
     pot_g = pot[num:]
 
-    new = galaxy.to_dict()
+    new = galaxy.disassemble()
 
     new.update(
         potential_s=-pot_s * (u.km / u.s) ** 2,

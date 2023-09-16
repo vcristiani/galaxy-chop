@@ -429,7 +429,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             bin0=self.cbins[0],
             bin1=self.cbins[1],
             reassign=self.reassign,
-        ).as_dict()
+        ).to_dict()
 
         # we add the colum with the types, all the values from jcirc
         # are stars
