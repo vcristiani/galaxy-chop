@@ -114,7 +114,7 @@ class ParticleSet:
         validator=attr.validators.optional(
             attr.validators.instance_of(np.ndarray)
         ),
-        converter=np.copy,
+        converter=(lambda v: np.copy(v) if v is not None else v),
         repr=False,
     )
 
@@ -130,6 +130,8 @@ class ParticleSet:
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
     # UTTRS Orchestration =====================================================
+
+
 
     @has_potential_.default
     def _has_potential__default(self):
