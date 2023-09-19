@@ -62,6 +62,12 @@ class GalaxyStellarDynamics:
     x = uttr.ib(metadata={"asdict": False})
     y = uttr.ib(metadata={"asdict": False})
 
+    def __attrs_post_init__(self):
+        """Turn all fields into Read-only."""
+        for field in attr.astuple(self):
+            if isinstance(field, np.ndarray):
+                field.setflags(write=False)
+
     @classmethod
     def circularity_attributes(cls):
         """Retrieve all the circularity attributes stored in the JCirc class.

@@ -10,6 +10,7 @@
 # IMPORTS
 # =============================================================================
 
+import functools
 import os
 from pathlib import Path
 
@@ -139,7 +140,7 @@ def data_galaxy(data_particleset):
 
 @pytest.fixture(scope="session")
 def galaxy(data_galaxy):
-    # @functools.wraps(data_galaxy)
+    @functools.wraps(data_galaxy)
     def make(**kwargs):
         (
             m_s,

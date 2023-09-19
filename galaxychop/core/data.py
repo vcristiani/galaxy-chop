@@ -101,19 +101,20 @@ class ParticleSet:
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
-    m: np.ndarray = uttr.ib(unit=u.Msun)
-    x: np.ndarray = uttr.ib(unit=u.kpc)
-    y: np.ndarray = uttr.ib(unit=u.kpc)
-    z: np.ndarray = uttr.ib(unit=u.kpc)
-    vx: np.ndarray = uttr.ib(unit=(u.km / u.s))
-    vy: np.ndarray = uttr.ib(unit=(u.km / u.s))
-    vz: np.ndarray = uttr.ib(unit=(u.km / u.s))
+    m: np.ndarray = uttr.ib(unit=u.Msun, converter=np.copy)
+    x: np.ndarray = uttr.ib(unit=u.kpc, converter=np.copy)
+    y: np.ndarray = uttr.ib(unit=u.kpc, converter=np.copy)
+    z: np.ndarray = uttr.ib(unit=u.kpc, converter=np.copy)
+    vx: np.ndarray = uttr.ib(unit=(u.km / u.s), converter=np.copy)
+    vy: np.ndarray = uttr.ib(unit=(u.km / u.s), converter=np.copy)
+    vz: np.ndarray = uttr.ib(unit=(u.km / u.s), converter=np.copy)
 
     potential: np.ndarray = uttr.ib(
         unit=(u.km / u.s) ** 2,
         validator=attr.validators.optional(
             attr.validators.instance_of(np.ndarray)
         ),
+        converter=np.copy,
         repr=False,
     )
 
@@ -197,6 +198,10 @@ class ParticleSet:
                 f"Lengths: {lengths}"
             )
 
+        for field in attr.astuple(self):
+            if isinstance(field, np.ndarray):
+                field.setflags(write=False)
+
     # PROPERTIES ==============================================================
 
     @property
@@ -237,7 +242,7 @@ class ParticleSet:
 
         """
         arr = self.arr_
-        columns_makers = {
+        value_makers = {
             "ptype": lambda: np.full(len(self), self.ptype.humanize()),
             "ptypev": lambda: np.full(len(self), self.ptype.value),
             "m": lambda: arr.m,
@@ -263,13 +268,13 @@ class ParticleSet:
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
         }
-        attributes = (
-            columns_makers.keys() if attributes is None else attributes
-        )
+        attributes = value_makers.keys() if attributes is None else attributes
         the_dict = OrderedDict()
         for aname in attributes:
-            mkcolumn = columns_makers[aname]
-            the_dict[aname] = mkcolumn()
+            mkvalue = value_makers[aname]
+            avalue = mkvalue()
+            avalue.setflags(write=True)
+            the_dict[aname] = avalue
         return the_dict
 
     def to_dataframe(self, *, attributes=None):

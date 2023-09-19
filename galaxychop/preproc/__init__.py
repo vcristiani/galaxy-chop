@@ -13,7 +13,7 @@
 from .pcenter import center, is_centered
 from .potential_energy import potential
 from .salign import is_star_aligned, star_align
-from .smr_crop import star_mass_radius_crop
+from .smr_crop import half_star_mass_radius_crop
 
 
 __all__ = [
@@ -24,7 +24,7 @@ __all__ = [
     "star_align",
     "is_star_aligned",
     "center_and_align",
-    "star_mass_radius_crop",
+    "half_star_mass_radius_crop",
 ]
 
 # =============================================================================

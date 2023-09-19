@@ -25,7 +25,7 @@ from .. import (
 
 try:
     from .fortran import potential as potential_f
-except ImportError:
+except ImportError:  # pragma: no cover
     potential_f = None
 
 #: The default potential backend to use.

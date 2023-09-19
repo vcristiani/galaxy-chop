@@ -41,13 +41,36 @@ def test_stellar_dynamics_real_galaxy(read_hdf5_galaxy):
     assert np.all(result.eps[mask_eps] >= -1)
 
 
-def test_stellar_dynamics_real_galaxy_with_infinite_energy_test(
+def test_stellar_dynamics_real_galaxy_reasign(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    result = sdynamics.stellar_dynamics(gal, reassign=True)
+
+    mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]
+    mask_eps = np.where(~np.isnan(result.eps))[0]
+
+    assert np.all(result.normalized_star_energy[mask_energy] <= 0)
+    assert np.all(result.eps[mask_eps] != np.nan)
+    assert np.all(result.eps[mask_eps] <= 1)
+    assert np.all(result.eps[mask_eps] >= -1)
+
+
+def test_stellar_dynamics_real_galaxy_with_infinite_energy(
     read_hdf5_galaxy,
 ):
     gal = read_hdf5_galaxy("gal394242.h5")
+
+    gal.stars.total_energy_.setflags(write=True)
+    gal.dark_matter.total_energy_.setflags(write=True)
+    gal.gas.total_energy_.setflags(write=True)
+
     gal.stars.total_energy_[0] = -np.inf * u.km**2 / u.s**2
     gal.dark_matter.total_energy_[0] = -np.inf * u.km**2 / u.s**2
     gal.gas.total_energy_[0] = -np.inf * u.km**2 / u.s**2
+
+    gal.stars.total_energy_.setflags(write=False)
+    gal.dark_matter.total_energy_.setflags(write=False)
+    gal.gas.total_energy_.setflags(write=False)
+
     result = sdynamics.stellar_dynamics(gal)
 
     mask_energy = np.where(~np.isnan(result.normalized_star_energy))[0]
@@ -66,7 +89,7 @@ def test_stellar_dynamics_fake_galaxy(galaxy):
             sdynamics.stellar_dynamics(gal)
 
 
-def test_x_y_len(read_hdf5_galaxy):
+def test_GalaxyStellarDynamics_x_y_len(read_hdf5_galaxy):
     """Check the x and y array len."""
     gal = read_hdf5_galaxy("gal394242.h5")
     result = sdynamics.stellar_dynamics(gal)
@@ -77,7 +100,7 @@ def test_x_y_len(read_hdf5_galaxy):
     assert len(x) == len(y)
 
 
-def test_x_values(read_hdf5_galaxy):
+def test_GalaxyStellarDynamics_x(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     result = sdynamics.stellar_dynamics(gal)
 
@@ -92,7 +115,7 @@ def test_x_values(read_hdf5_galaxy):
     assert (diff > 0).all()
 
 
-def test_y_values(read_hdf5_galaxy):
+def test_GalaxyStellarDynamics_y(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     result = sdynamics.stellar_dynamics(gal)
 

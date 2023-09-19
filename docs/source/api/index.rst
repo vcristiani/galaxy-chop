@@ -10,10 +10,13 @@
 .. toctree::
    :maxdepth: 2
 
-   data.rst
+   constants.rst
    io.rst
-   plot.rst
 
+.. toctree::
+   :maxdepth: 2
+
+   core/index
 
 .. toctree::
    :maxdepth: 2

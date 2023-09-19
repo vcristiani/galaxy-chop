@@ -322,6 +322,117 @@ def test_ParticleSet_angular_momentum(data_particleset):
     )
 
 
+def test_ParticleSet_to_dict(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(seed=42)
+
+    pset = core.ParticleSet(
+        core.ParticleSetType.STARS,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    pset_dict = pset.to_dict()
+
+    np.testing.assert_equal(
+        pset_dict["ptype"],
+        [core.ParticleSetType.STARS.humanize()] * len(pset),
+    )
+    np.testing.assert_equal(
+        pset_dict["ptypev"],
+        [core.ParticleSetType.STARS.value] * len(pset),
+    )
+
+    np.testing.assert_allclose(pset_dict["m"], m)
+    np.testing.assert_allclose(pset_dict["m"], pset.m.to_value())
+    np.testing.assert_allclose(pset_dict["x"], x)
+    np.testing.assert_allclose(pset_dict["x"], pset.x.to_value())
+    np.testing.assert_allclose(pset_dict["y"], y)
+    np.testing.assert_allclose(pset_dict["y"], pset.y.to_value())
+    np.testing.assert_allclose(pset_dict["z"], z)
+    np.testing.assert_allclose(pset_dict["z"], pset.z.to_value())
+    np.testing.assert_allclose(pset_dict["vx"], vx)
+    np.testing.assert_allclose(pset_dict["vx"], pset.vx.to_value())
+    np.testing.assert_allclose(pset_dict["vy"], vy)
+    np.testing.assert_allclose(pset_dict["vy"], pset.vy.to_value())
+    np.testing.assert_allclose(pset_dict["vz"], vz)
+    np.testing.assert_allclose(pset_dict["vz"], pset.vz.to_value())
+    np.testing.assert_allclose(pset_dict["softening"], soft)
+    np.testing.assert_allclose(pset_dict["softening"], pset.softening)
+    np.testing.assert_allclose(pset_dict["potential"], pot)
+    np.testing.assert_allclose(
+        pset_dict["potential"], pset.potential.to_value()
+    )
+
+    np.testing.assert_allclose(
+        pset_dict["kinetic_energy"], pset.kinetic_energy_.to_value()
+    )
+    np.testing.assert_allclose(
+        pset_dict["total_energy"], pset.total_energy_.to_value()
+    )
+    np.testing.assert_allclose(pset_dict["Jx"], pset.Jx_.to_value())
+    np.testing.assert_allclose(pset_dict["Jy"], pset.Jy_.to_value())
+    np.testing.assert_allclose(pset_dict["Jz"], pset.Jz_.to_value())
+
+
+def test_ParticleSet_copy(data_particleset):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(seed=42)
+
+    pset = core.ParticleSet(
+        core.ParticleSetType.STARS,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    pset_copy = pset.copy()
+
+    assert pset_copy is not pset
+
+    assert pset_copy.ptype is pset_copy.ptype
+
+    np.testing.assert_equal(pset_copy.m, pset.m)
+    assert pset_copy.m is not pset.m
+    np.testing.assert_equal(pset_copy.x, pset.x)
+    assert pset_copy.x is not pset.x
+    np.testing.assert_equal(pset_copy.y, pset.y)
+    assert pset_copy.y is not pset.y
+    np.testing.assert_equal(pset_copy.z, pset.z)
+    assert pset_copy.z is not pset.z
+    np.testing.assert_equal(pset_copy.vx, pset.vx)
+    assert pset_copy.vx is not pset.vx
+    np.testing.assert_equal(pset_copy.vy, pset.vy)
+    assert pset_copy.vy is not pset.vy
+    np.testing.assert_equal(pset_copy.vz, pset.vz)
+    assert pset_copy.vz is not pset.vz
+    np.testing.assert_equal(pset_copy.potential, pset.potential)
+    assert pset_copy.potential is not pset.potential
+    np.testing.assert_equal(pset_copy.softening, pset.softening)
+
+    np.testing.assert_equal(pset_copy.kinetic_energy_, pset.kinetic_energy_)
+    assert pset_copy.kinetic_energy_ is not pset.kinetic_energy_
+    np.testing.assert_equal(pset_copy.total_energy_, pset.total_energy_)
+    assert pset_copy.total_energy_ is not pset.total_energy_
+    np.testing.assert_equal(pset_copy.Jx_, pset.Jx_)
+    assert pset_copy.Jx_ is not pset.Jx_
+    np.testing.assert_equal(pset_copy.Jy_, pset.Jy_)
+    assert pset_copy.Jy_ is not pset.Jy_
+    np.testing.assert_equal(pset_copy.Jz_, pset.Jz_)
+    assert pset_copy.Jz_ is not pset.Jz_
+
+
 # =============================================================================
 # TEST GALAXY MANUAL
 # =============================================================================
@@ -545,7 +656,37 @@ def test_mkgakaxy_missing_potential(data_galaxy, remove_potential):
 
 
 # =============================================================================
-# AS KWARGS
+# PLOTTER
+# =============================================================================
+
+
+def test_Galaxy_repr(galaxy):
+    gal = galaxy(
+        stars_min=100,
+        stars_max=100,
+        dm_min=100,
+        dm_max=100,
+        gas_min=100,
+        gas_max=100,
+    )
+
+    expected = "<Galaxy stars=100, dark_matter=100, gas=100, potential=True>"
+    assert repr(gal) == expected
+
+
+# =============================================================================
+# PLOTTER
+# =============================================================================
+
+
+def test_Galaxy_plot(galaxy):
+    gal = galaxy()
+    assert isinstance(gal.plot, core.plot.GalaxyPlotter)
+    assert gal.plot._galaxy is gal
+
+
+# =============================================================================
+# AS DISASSEMBLE
 # =============================================================================
 
 
@@ -642,36 +783,6 @@ def test_galaxy_disassemble(data_galaxy):
 
 
 # =============================================================================
-# PLOTTER
-# =============================================================================
-
-
-def test_Galaxy_repr(galaxy):
-    gal = galaxy(
-        stars_min=100,
-        stars_max=100,
-        dm_min=100,
-        dm_max=100,
-        gas_min=100,
-        gas_max=100,
-    )
-
-    expected = "<Galaxy stars=100, dark_matter=100, gas=100, potential=True>"
-    assert repr(gal) == expected
-
-
-# =============================================================================
-# PLOTTER
-# =============================================================================
-
-
-def test_Galaxy_plot(galaxy):
-    gal = galaxy()
-    assert isinstance(gal.plot, core.plot.GalaxyPlotter)
-    assert gal.plot._galaxy is gal
-
-
-# =============================================================================
 # TO HDF5
 # =============================================================================
 
@@ -690,6 +801,54 @@ def test_Galaxy_to_hdf5(galaxy):
     expected_df = gal.to_dataframe(attributes=stored_attributes)
 
     pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+# =============================================================================
+# TO DICT
+# =============================================================================
+def assert_pset_dict_equals(result, expected):
+    assert result.keys() == expected.keys()
+    for key in result:
+        assert np.array_equal(result[key], expected[key])
+
+
+def test_Galaxy_to_dict(galaxy):
+    gal = galaxy()
+    gal_dict = gal.to_dict()
+
+    assert_pset_dict_equals(gal_dict["stars"], gal.stars.to_dict())
+    assert_pset_dict_equals(gal_dict["dark_matter"], gal.dark_matter.to_dict())
+    assert_pset_dict_equals(gal_dict["gas"], gal.gas.to_dict())
+
+
+# =============================================================================
+# TO copy
+# =============================================================================
+
+
+def assert_pset_equals(result, expected):
+    assert isinstance(result, core.ParticleSet)
+
+    result_dict = result.to_dict()
+    expected_dict = expected.to_dict()
+
+    assert_pset_dict_equals(result_dict, expected_dict)
+
+
+def test_Galaxy_to_copy(galaxy):
+    gal = galaxy()
+    gal_copy = gal.copy()
+
+    assert gal_copy is not gal
+
+    assert gal_copy.stars is not gal.stars
+    assert_pset_equals(gal_copy.stars, gal.stars)
+
+    assert gal_copy.dark_matter is not gal.dark_matter
+    assert_pset_equals(gal_copy.dark_matter, gal.dark_matter)
+
+    assert gal_copy.gas is not gal.gas
+    assert_pset_equals(gal_copy.gas, gal.gas)
 
 
 # =============================================================================
