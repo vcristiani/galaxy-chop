@@ -74,3 +74,10 @@ a:hover code {
 div.input_area div.highlight {
     background-color: var(--jupyter-in-cell-bg) !important;
 }
+
+.version {
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+    color: var(--navbar-header-bg);
+}

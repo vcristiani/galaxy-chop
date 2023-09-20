@@ -57,13 +57,8 @@ $ pip -r requirements-dev
 - Valeria Cristiani [valeria.cristiani@unc.edu.ar](valeria.cristiani@unc.edu.ar) ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
 - Antonela Taverna ([IATE-OAC-CONICET][]).
 - Juan Cabral ([IATE-OAC-CONICET][], [CONAE][]).
-- Rafael Pignata ([OAC-CONICET][], [FaMAF-UNC][]).
-- Bruno Sanchez ([Duke University][]).
-- Martin Chalela ([IATE-OAC-CONICET][]).
 - Federico Benelli ([IPQA-CONICET][], [FCEFyN-UNC][]).
-- Ornela Marioni ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
-- Nelson Villagra ([UNPSJB]).
-
+- - Bruno Sanchez ([Duke University][]).
 
 
   [IATE-OAC-CONICET]: http://iate.oac.uncor.edu/
@@ -73,4 +68,3 @@ $ pip -r requirements-dev
   [Duke University]: https://duke.edu/
   [IPQA-CONICET]: https://ipqa.unc.edu.ar/en/
   [FCEFyN-UNC]: https://fcefyn.unc.edu.ar/
-  [UNPSJB]: http://www.ing.unp.edu.ar/

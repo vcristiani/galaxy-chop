@@ -3,13 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to GalaxyChop's documentation!
-=======================================
+.. title:: GalaxyChop Documentation
 
 .. image:: _static/galaxychop_logo.png
    :scale: 35
 
 |
+
+.. rst-class:: version
+
+Ver. |release|
+
 
 .. Here we render the README.md of the repository as a main page
 .. include:: _dynamic/README.rst
