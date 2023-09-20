@@ -16,7 +16,7 @@
 
 import astropy.units as u
 
-from galaxychop.core import sdynamics
+from galaxychop.core import NoGravitationalPotentialError, mkgalaxy, sdynamics
 
 import numpy as np
 
@@ -39,6 +39,16 @@ def test_stellar_dynamics_real_galaxy(read_hdf5_galaxy):
     assert np.all(result.eps[mask_eps] != np.nan)
     assert np.all(result.eps[mask_eps] <= 1)
     assert np.all(result.eps[mask_eps] >= -1)
+
+
+def test_stellar_dynamics_without_potential(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal_dict = gal.disassemble()
+    gal_dict.update(potential_s=None, potential_dm=None, potential_g=None)
+    gal = mkgalaxy(**gal_dict)
+
+    with pytest.raises(NoGravitationalPotentialError):
+        sdynamics.stellar_dynamics(gal)
 
 
 def test_stellar_dynamics_real_galaxy_reasign(read_hdf5_galaxy):
@@ -129,3 +139,13 @@ def test_GalaxyStellarDynamics_y(read_hdf5_galaxy):
     y_result = np.abs(Jz[mask_bound]) / Jz_max
 
     assert np.isin(result.y, y_result).all()
+
+
+def test_GalaxyStellarDynamics_repr(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    result = repr(sdynamics.stellar_dynamics(gal))
+    expected = (
+        "<_GalaxyStellarDynamics normalized_star_energy=37393, "
+        "normalized_star_Jz=37393, eps=37393, eps_r=37393, x=39, y=39>"
+    )
+    assert result == expected

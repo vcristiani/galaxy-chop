@@ -806,6 +806,8 @@ def test_Galaxy_to_hdf5(galaxy):
 # =============================================================================
 # TO DICT
 # =============================================================================
+
+
 def assert_pset_dict_equals(result, expected):
     assert result.keys() == expected.keys()
     for key in result:
@@ -927,3 +929,28 @@ def test_Galaxy_angular_momentum(galaxy):
     assert np.all(gam[0] == gal.stars.angular_momentum_)
     assert np.all(gam[1] == gal.dark_matter.angular_momentum_)
     assert np.all(gam[2] == gal.gas.angular_momentum_)
+
+
+# =============================================================================
+# STELLAR
+# =============================================================================
+
+
+def test_Galaxy_stellar_dynamics(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+
+    sd_from_gal = gal.stellar_dynamics()
+    sd_from_func = core.sdynamics.stellar_dynamics(gal)
+
+    np.testing.assert_array_equal(sd_from_gal.x, sd_from_func.x)
+    np.testing.assert_array_equal(sd_from_gal.y, sd_from_func.y)
+
+    sd_from_gal_dict = sd_from_gal.to_dict()
+    sd_from_func_dict = sd_from_func.to_dict()
+
+    assert sd_from_func_dict.keys() == sd_from_gal_dict.keys()
+    for k, gv in sd_from_gal_dict.items():
+        fv = sd_from_func_dict[k]
+        np.testing.assert_array_equal(gv, fv)
+
+    np.testing.assert_array_equal(gv, fv)

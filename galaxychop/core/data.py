@@ -26,6 +26,16 @@ import uttr
 from .. import constants as const
 
 # =============================================================================
+# EXCEPTIONS
+# =============================================================================
+
+
+class NoGravitationalPotentialError(ValueError):
+    """Used to inform that a calculation cannot be performed if the galaxy \
+    does not have potential."""
+
+
+# =============================================================================
 # PARTICLE SET
 # =============================================================================
 
@@ -130,8 +140,6 @@ class ParticleSet:
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
     # UTTRS Orchestration =====================================================
-
-
 
     @has_potential_.default
     def _has_potential__default(self):
@@ -734,7 +742,7 @@ class Galaxy:
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
         >>> gsd = galaxy.stellar_dynamics(
-        ...     bin0=0.05, bin1=0.005, reassign=[False]
+        ...     bin0=0.05, bin1=0.005, reassign=False
         ... )
         >>> gsd
         GalaxyStellarDynamics(

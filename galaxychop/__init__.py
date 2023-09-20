@@ -28,6 +28,7 @@ __version__ = "0.3.dev0"
 from . import constants, models, preproc, utils
 from .core import (
     Galaxy,
+    NoGravitationalPotentialError,
     ParticleSet,
     ParticleSetType,
     mkgalaxy,
@@ -39,6 +40,7 @@ __all__ = [
     "Galaxy",
     "ParticleSet",
     "ParticleSetType",
+    "NoGravitationalPotentialError",
     "io",
     "models",
     "preproc",

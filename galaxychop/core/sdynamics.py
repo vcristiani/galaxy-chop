@@ -22,7 +22,7 @@ import numpy as np
 
 import uttr
 
-from .data import ParticleSetType
+from .data import NoGravitationalPotentialError, ParticleSetType
 from .. import constants as const
 
 
@@ -31,8 +31,8 @@ from .. import constants as const
 # =============================================================================
 
 
-@uttr.s(frozen=True, slots=True)
-class GalaxyStellarDynamics:
+@uttr.s(frozen=True, slots=True, repr=False)
+class _GalaxyStellarDynamics:
     """Circularity information about the stars particles of a galaxy.
 
     Parameters
@@ -54,19 +54,27 @@ class GalaxyStellarDynamics:
 
     """
 
-    normalized_star_energy = uttr.ib()
-    normalized_star_Jz = uttr.ib()
-    eps = uttr.ib()
-    eps_r = uttr.ib()
+    normalized_star_energy = uttr.ib(converter=np.copy)
+    normalized_star_Jz = uttr.ib(converter=np.copy)
+    eps = uttr.ib(converter=np.copy)
+    eps_r = uttr.ib(converter=np.copy)
 
-    x = uttr.ib(metadata={"asdict": False})
-    y = uttr.ib(metadata={"asdict": False})
+    x = uttr.ib(converter=np.copy, metadata={"asdict": False})
+    y = uttr.ib(converter=np.copy, metadata={"asdict": False})
 
     def __attrs_post_init__(self):
         """Turn all fields into Read-only."""
         for field in attr.astuple(self):
             if isinstance(field, np.ndarray):
                 field.setflags(write=False)
+
+    def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
+        cls_name = type(self).__name__
+        attrs = ", ".join(
+            f"{k}={len(v)}" for k, v in attr.asdict(self).items()
+        )
+        return f"<{cls_name} {attrs}>"
 
     @classmethod
     def circularity_attributes(cls):
@@ -230,7 +238,7 @@ def _stellar_dynamics(galaxy, bin0, bin1, reassign):
         eps_[mask] = np.nan
         eps_r_[mask] = np.nan
 
-    return GalaxyStellarDynamics(
+    return _GalaxyStellarDynamics(
         normalized_star_energy=E_star_norm_,
         normalized_star_Jz=Jz_star_norm_,
         eps=eps_,
@@ -279,8 +287,20 @@ def stellar_dynamics(
 
     Return
     ------
-    GalaxyStellarDynamics :
-        Circularity attributes of the star components of the galaxy
+    _GalaxyStellarDynamics :
+        Circularity attributes of the star components of the galaxy.
+
+        - Normalized specific energy of stars (*normalized_star_energy*)
+        - Z-component normalized specific angular momentum of the stars
+          (*normalized_star_Jz*)
+        - Circularity parameters:
+            - ``eps``: J_z/J_circ
+            - ``eps_r``: J_p/J_circ
+        - Normalized specific energy for the particle with the maximum
+          z-component of the normalized specific angular momentum
+          per bin (``x``)
+        - Maximum value of the z-component of the normalized specific
+          angular momentum per bin (``y``)
 
     Notes
     -----
@@ -292,14 +312,6 @@ def stellar_dynamics(
 
     Examples
     --------
-    This returns the normalized specific energy of stars (E_star_norm), the
-    z-component normalized specific angular momentum of the stars
-    (Jz_star_norm), the circularity parameters (eps : J_z/J_circ and
-    eps_r: J_p/J_circ), and the normalized specific energy for the particle
-    with the maximum z-component of the normalized specific angular momentum
-    per bin (`x`) and the maximum value of the z-component of the normalized
-    specific angular momentum per bin (`y`).
-
     >>> import galaxychop as gchop
     >>> galaxy = gchop.Galaxy(...)
     >>> gsd = stellar_dynamics(
@@ -314,6 +326,12 @@ def stellar_dynamics(
     )
 
     """
+    if not galaxy.has_potential_:
+        raise NoGravitationalPotentialError(
+            "You cannot calculate stellar dynamics in a "
+            "galaxy without potential."
+        )
+
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
         return _stellar_dynamics(galaxy, bin0, bin1, reassign)

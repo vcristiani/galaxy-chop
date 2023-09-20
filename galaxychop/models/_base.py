@@ -33,7 +33,7 @@ from ..utils import doc_inherit
 # CONSTANTS
 # =============================================================================
 
-_CIRCULARITY_ATTRIBUTES = sdyn.GalaxyStellarDynamics.circularity_attributes()
+_CIRCULARITY_ATTRIBUTES = sdyn._GalaxyStellarDynamics.circularity_attributes()
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in core.ParticleSetType)
 

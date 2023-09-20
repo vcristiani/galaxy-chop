@@ -11,11 +11,18 @@
 # =============================================================================
 
 from . import plot, sdynamics
-from .data import Galaxy, ParticleSet, ParticleSetType, mkgalaxy
+from .data import (
+    Galaxy,
+    NoGravitationalPotentialError,
+    ParticleSet,
+    ParticleSetType,
+    mkgalaxy,
+)
 
 
 __all__ = [
     "Galaxy",
+    "NoGravitationalPotentialError",
     "ParticleSet",
     "ParticleSetType",
     "mkgalaxy",
