@@ -1,28 +1,38 @@
-cmake_minimum_required(VERSION 3.17.0)
+cmake_minimum_required(VERSION 3.18)
 
-project(galaxychop C)
+project(galaxychop
+  VERSION 0.3.0
+  DESCRIPTION "Potential calculator"
+  LANGUAGES C Fortran
+)
 
-option(SKBUILD "Should be ON of being build by skbuild, 
-and OFF of being build by regular cmake" OFF)
-
-if (NOT SKBUILD)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake/")
+if(SKBUILD)
+  message(STATUS "The project is built using scikit-build")
 endif()
 
-if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+# Safety net
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+  message(
+    FATAL_ERROR
+      "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.\n"
+  )
 endif()
 
-find_package(PythonExtensions REQUIRED)
-find_package(NumPy)
-find_package(F2PY REQUIRED)
+find_package(PythonExtensions)
+find_package(OpenMP)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 
-message(STATUS "F2PY included from: ${F2PY_INCLUDE_DIR}")
+# F2PY headers
+execute_process(
+  COMMAND "${Python_EXECUTABLE}"
+  -c "import numpy.f2py; print(numpy.f2py.get_include())"
+  OUTPUT_VARIABLE F2PY_INCLUDE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 # =============================================================================
-# Potential module
-# =============================================================================
-message(STATUS "Compiling fortran potential backend...")
+# Compíling potential module
+message(STATUS "Compiling fortran potential...")
 set(f2py_module_name "potential")
 set(f2py_module_dir "galaxychop/preproc/fortran")
 set(
@@ -31,27 +41,22 @@ set(
 )
 set(
     generated_module_file 
-    ${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_name}${PYTHON_EXTENSION_MODULE_SUFFIX}
+    "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_dir}/${f2py_module_name}${PYTHON_EXTENSION_MODULE_SUFFIX}"
 )
-
-add_custom_target(${f2py_module_name} ALL
-  DEPENDS ${generated_module_file}
-)
-
+message(STATUS "Module_file: ${generated_module_file}")
+add_custom_target(${f2py_module_name}_mod ALL DEPENDS ${generated_module_file})
 add_custom_command(
   OUTPUT ${generated_module_file}
-  COMMAND ${F2PY_EXECUTABLE}
-    -m ${f2py_module_name}
+  COMMAND ${PYTHON_EXECUTABLE}  -m "numpy.f2py"
     -c
     ${fortran_src_file}
-    --f90flags="-fopenmp" -lgomp
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    -m ${f2py_module_name}
+    --f90flags='-fopenmp' -lgomp
+  WORKING_DIRECTORY ${f2py_module_dir}
   DEPENDS ${fortran_src_file}
 )
+install(
+  FILES ${generated_module_file} 
+  DESTINATION ${f2py_module_dir}
+)
 # =============================================================================
-
-if (SKBUILD)
-    install(FILES ${generated_module_file} DESTINATION ${f2py_module_dir})
-else()
-  install(FILES ${generated_module_file} DESTINATION ${f2py_module_dir})
-endif()
