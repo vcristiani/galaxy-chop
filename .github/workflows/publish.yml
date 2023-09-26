@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -31,7 +31,7 @@ jobs:
           pip install setuptools wheel numpy
       - uses: knicknic/os-specific-run@v1
         with:
-          linux: python setup.py sdist
+          linux: python setup.py bdist_wheel build_ext
           windows: python setup.py bdist_wheel build_ext --fcompiler=gnu95 --compiler=mingw32
       - uses: actions/upload-artifact@v2
         with:
