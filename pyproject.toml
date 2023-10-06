@@ -1,3 +1,22 @@
+[project]
+name="galaxychop"
+dynamic = ["version"]
+description="Galaxy dynamic de-composition"
+license={ file="LICENSE.txt" }
+
+
+dependencies=[
+    "numpy >= 1.13.3",
+    "scipy >= 1.0",
+    "scikit-learn",
+    "astropy",
+    "uttrs",
+    "pandas",
+    "h5py",
+    "custom_inherit",
+    "seaborn"
+]
+
 [tool.black]
 line-length = 79
 target-version = ['py38', 'py39']
@@ -12,13 +31,14 @@ testpaths = [
     "tests",
 ]
 
+[tool.setuptools.dynamic]
+version = {attr = "package.__version__"}
+
 [build-system]
-build-backend = "setuptools.build_meta"
+build-backend = 'mesonpy'
 requires = [
+    "meson-python",
     "setuptools>=42",
-    "scikit-build",
-    "scikit-build-core",
-    "cmake",
     "ninja; platform_system!='Windows'",
     "numpy",
     "wheel"

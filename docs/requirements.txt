@@ -1,5 +1,15 @@
 ipykernel
 ipython
+seaborn
+matplotlib
+astropy
+pandas
+numpy
+uttrs
+custom_inherit
+joblib
+scikit-learn
+h5py
 Sphinx
 sphinx-rtd-theme
 nbsphinx
