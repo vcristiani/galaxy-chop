@@ -1,7 +1,7 @@
 project('galaxychop', 'c',
   version : '0.3.dev0',
   license: 'BSD-3',
-  meson_version: '>=0.64.0',
+  meson_version: '>=1.3.2',
   default_options : ['warning_level=2'],
 )
 
@@ -26,7 +26,7 @@ omp = dependency('openmp')
 inc_np = include_directories(incdir_numpy, incdir_f2py)
 
 potential_source = custom_target('potentialmodule.c',
-  input : ['galaxychop/preproc/fortran/potential.f90'],
+  input : ['galaxychop/preproc/potential_energy/fortran/potential.f90'],
   output : [
     'potentialmodule.c', 
     'potential-f2pywrappers2.f90'
@@ -37,10 +37,12 @@ potential_source = custom_target('potentialmodule.c',
   ]
 )
 
-f_sources = ['galaxychop/preproc/fortran/__init__.py']
-py.install_sources(f_sources, subdir:'galaxychop/preproc/fortran')
+f_sources = ['galaxychop/preproc/potential_energy/fortran/__init__.py']
+py.install_sources(f_sources, subdir:'galaxychop/preproc/potential_energy/fortran')
+
 
 main_sources = [
+  'galaxychop/pipeline.py',
   'galaxychop/constants.py',
   'galaxychop/io.py',
   'galaxychop/__init__.py',
@@ -53,6 +55,7 @@ core_sources = [
   'galaxychop/core/__init__.py',
   'galaxychop/core/plot.py',
   'galaxychop/core/data.py',
+  'galaxychop/core/methods.py',
 ]
 py.install_sources(core_sources, subdir:'galaxychop/core')
 
@@ -69,44 +72,33 @@ py.install_sources(models_sources, subdir:'galaxychop/models')
 preproc_sources = [
   'galaxychop/preproc/pcenter.py',
   'galaxychop/preproc/__init__.py',
-  'galaxychop/preproc/potential_energy.py',
-  'galaxychop/preproc/salign.py',
-  'galaxychop/preproc/smr_crop.py',
-]
-
-py.install_sources(preproc_sources, subdir:'galaxychop/preproc')
-
-utils_sources = [
-  'galaxychop/utils/__init__.py',
-  'galaxychop/utils/decorators.py'
-]
-py.install_sources(models_sources, subdir:'galaxychop/models')
-
-preproc_sources = [
-  'galaxychop/preproc/pcenter.py',
-  'galaxychop/preproc/__init__.py',
-  'galaxychop/preproc/potential_energy.py',
+  'galaxychop/preproc/_base.py',
   'galaxychop/preproc/salign.py',
   'galaxychop/preproc/smr_crop.py',
 ]
 py.install_sources(preproc_sources, subdir:'galaxychop/preproc')
-  
-f_sources = ['galaxychop/preproc/fortran/__init__.py']
-py.install_sources(f_sources, subdir:'galaxychop/preproc/fortran')
+
+preproc_potential_energy_sources = [
+  'galaxychop/preproc/potential_energy/__init__.py',
+  'galaxychop/preproc/potential_energy/grispy_calculation.py',
+]
+py.install_sources(preproc_potential_energy_sources, subdir:'galaxychop/preproc/potential_energy')
 
 utils_sources = [
   'galaxychop/utils/__init__.py',
-  'galaxychop/utils/decorators.py'
+  'galaxychop/utils/bunch.py',
+  'galaxychop/utils/decorators.py',
+  'galaxychop/utils/unames.py'
 ]
 py.install_sources(utils_sources, subdir:'galaxychop/utils')
 
 py.extension_module('potential',
-  ['galaxychop/preproc/fortran/potential.f90', potential_source],
+  ['galaxychop/preproc/potential_energy/fortran/potential.f90', potential_source],
   incdir_f2py / 'fortranobject.c',
   include_directories: inc_np,
   dependencies : [py_dep, omp],
   c_args : '-fopenmp',
   link_args : '-lgomp',
   install : true,
-  subdir: 'galaxychop/preproc/fortran/'
+  subdir: 'galaxychop/preproc/potential_energy/fortran/'
 )

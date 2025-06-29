@@ -16,5 +16,6 @@ capabilities and many other topics related to dynamic decomposition.
 
    quickstart.ipynb
    galaxies.ipynb
-   plotting.ipynb
    decomposers.ipynb
+   pre-proccesing_and_decomposition.ipynb
+   pipeline.ipynb

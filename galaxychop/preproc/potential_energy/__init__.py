@@ -8,24 +8,32 @@
 # DOCS
 # =============================================================================
 
-"""Different potential implementations."""
+"""Module for calculus of potential energy."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
+import warnings
+
 import astropy.units as u
 
 import numpy as np
 
-from .. import (
+from .grispy_calculation import (
+    make_grid,
+    potential_grispy,
+)
+from .._base import GalaxyTransformerABC
+from ... import (
     constants as const,
     core,
 )
+from ...utils import doc_inherit
 
 try:
     from .fortran import potential as potential_f
-except ImportError:  # pragma: no cover
+except ImportError:
     potential_f = None
 
 #: The default potential backend to use.
@@ -38,7 +46,8 @@ DEFAULT_POTENTIAL_BACKEND = "numpy" if potential_f is None else "fortran"
 
 
 def fortran_potential(x, y, z, m, softening):
-    """Wrap the Fortran implementation of the gravitational potential.
+    """
+    Wrap the Fortran implementation of the gravitational potential.
 
     Parameters
     ----------
@@ -61,8 +70,47 @@ def fortran_potential(x, y, z, m, softening):
     return epot * const.G, np.asarray
 
 
+def grispy_potential(x, y, z, m, softening):
+    """
+    Grispy implementation of the gravitational potential energy calculation.
+
+    Parameters
+    ----------
+    x, y, z : np.ndarray
+        Positions of particles. Shape: (n,1).
+    m : np.ndarray
+        Masses of particles. Shape: (n,1).
+    softening : float, optional
+        Softening parameter. Shape: (1,).
+
+    Returns
+    -------
+    np.ndarray : float
+        Specific potential energy of particles.
+
+    """
+    # Make the grid of the system
+    l_box, grid = make_grid(x, y, z)
+
+    # For each particle, compute its potential energy
+    epot = np.empty(len(m))
+    for idx, particle in enumerate(m):
+        centre = np.array([[x[idx], y[idx], z[idx]]])
+        epot[idx] = potential_grispy(
+            centre,
+            m,
+            bubble_size=5 * softening,
+            shell_width=0.1 * l_box,
+            l_box=l_box,
+            grid=grid,
+        )
+
+    return epot * const.G, np.asarray
+
+
 def numpy_potential(x, y, z, m, softening):
-    """Numpy implementation for the gravitational potential energy calculation.
+    """
+    Numpy implementation for the gravitational potential energy calculation.
 
     Parameters
     ----------
@@ -95,22 +143,69 @@ def numpy_potential(x, y, z, m, softening):
 
 
 # =============================================================================
-# API
+# POTENTIALIZER CLASS
 # =============================================================================
 
 POTENTIAL_BACKENDS = {
     "fortran": fortran_potential,
+    "grispy": grispy_potential,
     "numpy": numpy_potential,
 }
 
 
-#: The default potential backend to use.
+class Potentializer(GalaxyTransformerABC):
+    """
+    Potentializer class.
+
+    Given the positions and masses of particles, calculate
+    their specific gravitational potential energy.
+
+    Parameters
+    ----------
+    galaxy : ``Galaxy class`` object
+        The galaxy object without the potential energy of particles
+    backends : str, default="numpy"
+        Method to calculate the potential energy of each particle
+
+    Returns
+    -------
+    galaxy: new ``Galaxy class`` object
+        A new galaxy object with the specific potential energy of particles
+        calculated.
+
+    """
+
+    def __init__(self, backend=DEFAULT_POTENTIAL_BACKEND):
+        self.backend = backend
+
+        if self.backend not in POTENTIAL_BACKENDS:
+            raise TypeError(
+                "The backend entered is not in the possible Backends"
+            )
+        else:
+            print("CREATED POTENCIALIZER WITH BACKEND  " + self.backend)
+            pass
+
+    @doc_inherit(GalaxyTransformerABC.transform)
+    def transform(self, galaxy):
+        return potential(galaxy, backend=self.backend)
+
+    @doc_inherit(GalaxyTransformerABC.checker)
+    def checker(self, galaxy, **kwargs):
+        return galaxy.has_potential_
+
+
+# =============================================================================
+# API FUNCTIONS
+# =============================================================================
+
+
 def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     """
     Potential energy calculation.
 
     Given the positions and masses of particles, calculate
-    their specific gravitational potential energy.
+    their specific gravitational potential energy as a function.
 
     Parameters
     ----------
@@ -123,7 +218,11 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
         calculated.
     """
     if galaxy.has_potential_:
-        raise ValueError("galaxy potential are already calculated")
+        warnings.warn(
+            "Galaxy potential is already calculated. \
+            Resuming...",
+            UserWarning,
+        )
 
     # extract the implementation
     backend_function = POTENTIAL_BACKENDS[backend]

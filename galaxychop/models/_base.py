@@ -4,14 +4,18 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Common functionalities for galaxy decomposition."""
+# =============================================================================
+# DOCS
+# =============================================================================
 
+"""Common functionalities for galaxy decomposition."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
 import abc
+import warnings
 from collections import OrderedDict
 
 import attr
@@ -21,13 +25,13 @@ import numpy as np
 
 import pandas as pd
 
-from .. import (
-    constants as consts,
-    core,
-)
-from ..core import sdynamics as sdyn
-from ..utils import doc_inherit
+import uttr
 
+from .. import constants as consts
+from .. import core
+from ..core import sdynamics as sdyn
+from ..preproc import is_centered, is_star_aligned
+from ..utils import doc_inherit
 
 # =============================================================================
 # CONSTANTS
@@ -45,7 +49,8 @@ _PTYPES_ORDER = tuple(p.name.lower() for p in core.ParticleSetType)
 
 @attr.s(frozen=True, slots=True, repr=False)
 class Components:
-    """Class of components resulting from dynamic decomposition.
+    """
+    Class of components resulting from dynamic decomposition.
 
     This class creates the components of the galaxy from the result of the
     dynamic decomposition.
@@ -59,7 +64,7 @@ class Components:
         Indicates the type of particle: stars = 0, dark matter = 1, gas = 2.
         Shape: (n,1).
     m : np.ndarray
-        Particle masses.
+        Particle masses. Shape: (n,1).
     lmap : dict
         Meaning of the component numbers.
     probabilities : np.ndarray or None
@@ -78,7 +83,8 @@ class Components:
     )
 
     def __attrs_post_init__(self):
-        """Length validator.
+        """
+        Length validator.
 
         This method validates that the lengths of labels, ptypes are equal.
         On the other hand, if probabilities is not None, its length must be the
@@ -92,7 +98,8 @@ class Components:
             raise ValueError("All length must be the same")
 
     def map_labels(self, lmap=None):
-        """Access all the labels mapped to the lmap dictionary.
+        """
+        Access all the labels mapped to the lmap dictionary.
 
         If no lmap is provided, the function tries to use the internal
         lmap dict. If the instance doesn't has an lmap dict this method
@@ -114,14 +121,18 @@ class Components:
     def __repr__(self):
         """x.__repr__() <==> repr(x)."""
         length = len(self)
-        labels = {
-            self.lmap.get(label, label) for label in np.unique(self.labels)
-        }
+        labels = sorted(
+            {
+                str(self.lmap.get(label, label))
+                for label in np.unique(self.labels)
+            }
+        )
         lmap = bool(self.lmap)
         probs = True if self.probabilities is not None else False
+
         return (
             f"<Components length={length}, labels={labels}, "
-            f"probabilities={probs}, lmap={lmap}>"
+            + f"probabilities={probs}, lmap={lmap}>"
         )
 
     def to_dataframe(self, attributes=None, lmap=None):
@@ -165,7 +176,8 @@ class Components:
         return df
 
     def describe(self, lmap=None):
-        """Create a description of the sizes and masses of each component.
+        """
+        Create a description of the sizes and masses of each component.
 
         The method takes into account only stellar particles that could be
         classified.
@@ -205,7 +217,7 @@ class Components:
             )
 
             # add all the mass_prob and convert to a dict
-            # {"proba_0": X.xxx, "probs_1": Y.yyy}
+            # {"probs_0": X.xxx, "probs_1": Y.yyy}
             # where X.xxx and Y.yyy are the mass probability
             probs_m = probs_m_particles.sum().to_dict()
 
@@ -254,7 +266,8 @@ class Components:
 
 
 def hparam(default, **kwargs):
-    """Create a hyper parameter for decomposers.
+    """
+    Create a hyper parameter for decomposers.
 
     By design decision, hyper-parameter is required to have a sensitive default
     value.
@@ -283,9 +296,12 @@ def hparam(default, **kwargs):
 # =============================================================================
 # ABC
 # =============================================================================
+
+
 @attr.s(frozen=True, repr=False)
 class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
-    """Abstract class to facilitate the creation of decomposers.
+    """
+    Abstract class to facilitate the creation of decomposers.
 
     This class requests the redefinition of three methods: get_attributes,
     get_rows_mask and split.
@@ -322,7 +338,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     # block meta checks =======================================================
     def __init_subclass__(cls):
-        """Initiate of subclasses.
+        """
+        Initiate of subclasses.
 
         It ensures that every inherited class is decorated by ``attr.s()`` and
         assigns as class configuration the parameters defined in the class
@@ -344,7 +361,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_attributes(self):
-        """Attributes for the parameter space.
+        """
+        Attributes for the parameter space.
 
         Returns
         -------
@@ -355,7 +373,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_rows_mask(self, X, y, attributes):
-        """Mask for the valid rows to operate clustering.
+        """
+        Mask for the valid rows to operate clustering.
 
         This method gets the mask for the valid rows to operate clustering.
 
@@ -363,13 +382,13 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         ----------
         X : np.ndarray(n_particles, attributes)
             2D array where each file it is a diferent particle and each column
-            is a attribute of the particles. n_particles is the total number of
-            particles.
+            is an attribute of the particles.
+            n_particles is the total number of particles.
         y : np.ndarray(n_particles,)
-            1D array where is identified the nature of each particle:
+            1D array where is identified the type of each particle:
             0 = stars, 1 = dark matter, 2 = gas. n_particles is the total
             number of particles.
-        attributes: tuple
+        attributes : tuple
             Dictionary keys of ``ParticleSet class`` parameters with particle
             attributes used to operate the clustering.
 
@@ -377,12 +396,14 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         -------
         mask : nd.array(m_particles)
             Mask only with valid values to operate the clustering.
+
         """
         raise NotImplementedError()
 
     @abc.abstractmethod
     def split(self, X, y, attributes):
-        """Compute clustering.
+        """
+        Compute clustering.
 
         Parameters
         ----------
@@ -402,6 +423,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             Probabilities of the particles to belong to each component, in case
             the dynamic decomposition model includes them. Otherwise it adopts
             the value None.
+
         """
         raise NotImplementedError()
 
@@ -457,7 +479,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return pd.concat([stars_df, dm_df, gas_df], ignore_index=True)
 
     def attributes_matrix(self, galaxy, attributes):
-        """Matrix of particle attributes.
+        """
+        Matrix of particle attributes.
 
         This method obtains the matrix with the particles and attributes
         necessary to operate the clustering.
@@ -479,6 +502,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             1D array where is identified the nature of each particle:
             0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
             particles.
+
         """
         # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
@@ -522,15 +546,15 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # remove if ptypev is duplicated
         df = df.loc[:, ~df.columns.duplicated()]
 
-        # separamos la matriz y las clases
+        # separate matrix and classes
         X = df[attributes].to_numpy()
         y = df.ptypev.to_numpy()
 
-        # retornamos
         return X, y
 
     def complete_labels(self, X, labels, rows_mask):
-        """Complete the labels of all particles.
+        """
+        Complete the labels of all particles.
 
         This method assigns the labels obtained from clustering to the
         particles used for this purpose. The rest are assigned as label=Nan.
@@ -562,7 +586,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return new_labels
 
     def complete_probs(self, X, probs, rows_mask):
-        """Complete the probabilities of all particles.
+        """
+        Complete the probabilities of all particles.
 
         This method assigns the probabilities obtained from clustering to the
         particles used for this purpose, the rest are assigned as label=Nan.
@@ -593,6 +618,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             total number of particles. Particles that do not belong to any
             component are assigned the label Nan. This method returns None in
             case the clustering method returns None probabilities.
+
         """
         if probs is None:
             return None
@@ -600,7 +626,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # the number of particles are incorrect so we simple remove the data
         probs_shape = list(np.shape(probs)[1:])
 
-        # We need this many rows
+        # we need this many rows
         complete_shape = tuple([len(X)] + probs_shape)
 
         # now we create the container for the probabilities
@@ -617,7 +643,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return {}
 
     def decompose(self, galaxy):
-        """Decompose method.
+        """
+        Decompose method.
 
         Assign the component of the galaxy to which each particle belongs.
         Validation of the input galaxy instance.
@@ -632,7 +659,25 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         Components :
             Instance of the ``Component class``, with the result of the dynamic
             decomposition.
+
         """
+        # Before anything, check if centered and aligned (!)
+        if not is_centered(galaxy):
+            warnings.warn(
+                "Input Galaxy is not centered. Please, center it \
+                    with Centralizer.transform(galaxy) \
+                    or proceed with caution.",
+                UserWarning,
+            )
+
+        if not is_star_aligned(galaxy):
+            warnings.warn(
+                "Input Galaxy is not aligned. Please, align it \
+                    with Aligner.transform(galaxy) \
+                    or proceed with caution.",
+                UserWarning,
+            )
+
         attributes = self.get_attributes()
 
         X, y = self.attributes_matrix(galaxy, attributes=attributes)
@@ -646,7 +691,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         # retrieve and fix the labels
         final_labels = self.complete_labels(
-            X=X, labels=labels, rows_mask=rows_mask
+            X=X, labels=sorted(labels), rows_mask=rows_mask
         )
         final_probs = self.complete_probs(
             X=X, probs=probs, rows_mask=rows_mask
@@ -660,13 +705,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             ptypes=_PTYPES_ORDER, attributes=["m"]
         ).m.to_numpy()
 
-        return Components(
+        # we make the components and wrap they with the galaxy
+        # in a "DecomposedGalaxy" class.
+        components = Components(
             labels=final_labels,
             ptypes=final_y,
             probabilities=final_probs,
             m=mass,
             lmap=self.get_lmap().copy(),
         )
+
+        return DecomposedGalaxy(galaxy, components)
 
 
 # =============================================================================
@@ -675,7 +724,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
 
 class DynamicStarsDecomposerMixin:
-    """Dynamic Stars Decomposer Mixin Class.
+    """
+    Dynamic Stars Decomposer Mixin Class.
 
     This class redefines the get_row_mask method so that dynamic decomposition
     is performed using only stellar particles.
@@ -695,3 +745,41 @@ class DynamicStarsDecomposerMixin:
         only_stars = np.equal(y, core.ParticleSetType.STARS.value)
         finite_values = np.isfinite(X).all(axis=1)
         return only_stars & finite_values
+
+
+# =============================================================================
+# DECOMPOSEDGALAXY CLASS
+# =============================================================================
+
+
+@uttr.s(frozen=True, repr=False)
+class DecomposedGalaxy:
+    """
+    DecomposedGalaxy class.
+
+    Builds an object from a ``Galaxy`` and its ``Components`` obtained
+    after applying a dynamical decomposition method to it.
+
+    Parameters
+    ----------
+    Galaxy : ``Galaxy``
+        Instance of ``Galaxy``.
+    Component : ``Component``
+        Instance of ``Component``.
+
+    Attributes
+    ----------
+    WIP
+
+    """
+
+    galaxy = uttr.ib(validator=attr.validators.instance_of(core.data.Galaxy))
+    components = uttr.ib(validator=attr.validators.instance_of(Components))
+
+    def __len__(self):
+        """len(x) <=> x.__len__()."""
+        return len(self.galaxy)
+
+    def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
+        return repr(self.galaxy) + "\n" + repr(self.components)

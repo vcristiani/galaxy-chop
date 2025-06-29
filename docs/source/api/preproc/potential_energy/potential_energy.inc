@@ -4,4 +4,4 @@
 .. automodule:: galaxychop.preproc.potential_energy
    :members:
    :undoc-members:
-   :show-inheritance:
+   :show-inheritance: 

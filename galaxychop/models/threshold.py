@@ -4,6 +4,10 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+# =============================================================================
+# DOCS
+# =============================================================================
+
 """Monodimensional Models."""
 
 # =============================================================================
@@ -22,7 +26,8 @@ from ..utils import doc_inherit
 
 
 class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """JThreshold class.
+    """
+    JThreshold class.
 
     Implementation of galaxy dynamical decomposition model using only the
     circularity parameter. Tissera et al.(2012) [2]_,
@@ -75,16 +80,19 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         Spheroid of Field Galaxies at z = 0.7”, The Astrophysical Journal,
         vol. 883, no. 1, 2019. doi:10.3847/1538-4357/ab3afe.
         `<https://ui.adsabs.harvard.edu/abs/2019ApJ...883...25P/abstract>`_
+
     """
 
     eps_cut = hparam(default=0.6)
 
     @eps_cut.validator
     def check_eps_cut(self, attribute, value):
-        """Eps_cut value validator.
+        """
+        Eps_cut value validator.
 
         This method validates that the value of eps_cut is in the interval
         (-1,1).
+
         """
         eps_cut = self.eps_cut
         if eps_cut > 1.0 or eps_cut < -1.0:
@@ -100,6 +108,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         -----
         In this model the parameter space is given by
             eps: circularity parameter (J_z/J_circ).
+
         """
         return ["eps"]
 
@@ -110,6 +119,7 @@ class JThreshold(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         -----
         The attributes used by the model are described in detail in the class
         documentation.
+
         """
         eps_cut = self.eps_cut
 

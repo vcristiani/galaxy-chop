@@ -4,6 +4,10 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+# =============================================================================
+# DOCS
+# =============================================================================
+
 """Module galaxy-chop."""
 
 # =============================================================================
@@ -46,6 +50,7 @@ class ParticleSetType(enum.IntEnum):
 
     Name and number that are used to describe the particle
     type in the ``ParticleSet class``.
+
     """
 
     STARS = 0
@@ -90,7 +95,7 @@ class ParticleSet:
     potential : Quantity, default value = 0
         Specific potential energy of particles. Shape: (n,1). Default unit:
         (km/s)**2.
-    softening : Quantity, default value = 0
+    softening : Quantity. Default value = 0
         Softening radius of particles. Shape: (1,). Default unit: kpc.
     kinetic_energy : Quantity
         Specific kinetic energy of particles. Shape: (n,1). Default unit:
@@ -105,8 +110,9 @@ class ParticleSet:
         Indicates if the specific potential energy is computed.
     arr_ : Instances of ``ArrayAccessor``
         Access to the attributes (defined with uttrs) of the provided instance,
-        and if they are of atropy.units.Quantity type it converts them into
+        and if they are of astropy.units.Quantity type it converts them into
         numpy.ndarray.
+
     """
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
@@ -128,9 +134,10 @@ class ParticleSet:
         repr=False,
     )
 
-    softening: float = uttr.ib(converter=float, repr=False)
+    softening: float = uttr.ib(unit=u.kpc, converter=float, repr=False)
 
     has_potential_: bool = uttr.ib(init=False)
+
     kinetic_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
     total_energy_: np.ndarray = uttr.ib(unit=(u.km / u.s) ** 2, init=False)
 
@@ -163,6 +170,7 @@ class ParticleSet:
         return kenergy + penergy
 
     # angular momentum
+
     @Jx_.default
     def _Jx__default(self):
         arr = self.arr_
@@ -226,7 +234,8 @@ class ParticleSet:
         """repr(x) <=> x.__repr__()."""
         return (
             f"<ParticleSet {self.ptype.name!r}, size={len(self)}, "
-            f"softening={self.softening}, potentials={self.has_potential_}>"
+            f"softening={self.softening.value}, \
+            potentials={self.has_potential_}>"
         )
 
     def __len__(self):
@@ -262,7 +271,7 @@ class ParticleSet:
             "vx": lambda: arr.vx,
             "vy": lambda: arr.vy,
             "vz": lambda: arr.vz,
-            "softening": lambda: np.full(len(self), self.softening),
+            "softening": lambda: arr.softening,
             "potential": lambda: (
                 arr.potential
                 if self.has_potential_
@@ -323,7 +332,7 @@ class ParticleSet:
             vy=self.vy.copy(),
             vz=self.vz.copy(),
             potential=self.potential.copy(),
-            softening=float(self.softening),
+            softening=float(self.softening.value),
         )
         return new
 
@@ -354,6 +363,13 @@ class Galaxy:
     ----------
     has_potential_: bool
         Indicates if this Galaxy instance has the potential energy computed.
+    is_aligned_ : bool.
+        Indicates if this Galaxy instance has been already aligned i.e. the
+        Z-axis is parallel to the minor axis of the particle system.
+    is_centered_ : bool.
+        Indicates if this Galaxy instance has been already centered i.e.
+        the most bound particle defines the origin of the system.
+
     """
 
     stars = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
@@ -401,12 +417,13 @@ class Galaxy:
         dm_repr = f"dark_matter={len(self.dark_matter)}"
         gas_repr = f"gas={len(self.gas)}"
         has_pot = f"potential={self.has_potential_}"
-        return f"<Galaxy {stars_repr}, {dm_repr}, {gas_repr}, {has_pot}>"
+        return f"<Galaxy {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
 
     # UTILITIES ===============================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
-        """Convert the galaxy to pandas DataFrame.
+        """
+        Convert the galaxy to pandas DataFrame.
 
         This method builds a data frame from the particles of the Galaxy.
 
@@ -437,7 +454,8 @@ class Galaxy:
         return pd.concat(parts, ignore_index=True)
 
     def to_hdf5(self, path_or_stream, *, metadata=None, **kwargs):
-        """Shortcut to ``galaxychop.io.to_hdf5()``.
+        """
+        Shortcut to ``galaxychop.io.to_hdf5()``.
 
         It is responsible for storing a galaxy in HDF5 format. The procedure
         only stores the attributes ``m``, ``x``, ``y``, ``z``, ``vx``, ``vy``
@@ -466,7 +484,8 @@ class Galaxy:
         )
 
     def to_dict(self, *, ptypes=None, attributes=None):
-        """Convert the galaxy to dict with information as a numpy array with \
+        """
+        Convert the galaxy to dict with information as a numpy array with \
         coerced units.
 
         Parameters
@@ -498,7 +517,8 @@ class Galaxy:
         return the_dict
 
     def disassemble(self):
-        """Convert all the attributes of the galaxy into a play dict.
+        """
+        Convert all the attributes of the galaxy into a play dict.
 
         The resulting dict can be used to build a new galaxy with
         ``galaxychop.mkgalaxy``.
@@ -562,7 +582,8 @@ class Galaxy:
 
     @property
     def kinetic_energy_(self):
-        """Specific kinetic energy of stars, dark matter and gas particles.
+        """
+        Specific kinetic energy of stars, dark matter and gas particles.
 
         Returns
         -------
@@ -587,11 +608,13 @@ class Galaxy:
 
     @property
     def potential_energy_(self):
-        """Specific potential energy of stars, dark matter and gas particles.
+        """
+        Specific potential energy of stars, dark matter and gas particles.
 
         This property doesn't compute the potential energy, only returns its
         value if it is already computed, i.e. ``has_potential_`` is True. To
-        compute the potential use the ``galaxychop.potential`` function.
+        compute the potential use the
+        ``galaxychop.preproc.potential_energy`` module.
 
         Returns
         -------
@@ -606,7 +629,9 @@ class Galaxy:
 
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
-        >>> galaxy_with_potential = gchop.potential(galaxy)
+        >>> pot = gchop.preproc.potential_energy.Potentializer(
+            backend="frotran")
+        >>> galaxy_with_potential = pot.transform(galaxy)
         >>> p_s, p_dm, p_g = galaxy_with_potential.potential_energy_
         """
         if self.has_potential_:
@@ -614,6 +639,10 @@ class Galaxy:
                 self.stars.potential,
                 self.dark_matter.potential,
                 self.gas.potential,
+            )
+        else:
+            raise NoGravitationalPotentialError(
+                "Galaxy does not have the potential energy calculated"
             )
 
     @property
@@ -645,6 +674,10 @@ class Galaxy:
                 self.stars.total_energy_,
                 self.dark_matter.total_energy_,
                 self.gas.total_energy_,
+            )
+        else:
+            raise NoGravitationalPotentialError(
+                "Galaxy does not have the potential energy calculated"
             )
 
     @property
@@ -688,7 +721,8 @@ class Galaxy:
         reassign=const.SD_DEFAULT_REASSIGN,
         runtime_warnings=const.SD_RUNTIME_WARNING_ACTION,
     ):
-        """Calculate galaxy stars particles circularity information.
+        """
+        Calculate galaxy stars particles circularity information.
 
         Shortcut to ``galaxychop.core.sdynamics.stellar_dynamics()``.
 
@@ -711,8 +745,8 @@ class Galaxy:
             to 1 or -1, depending on the case. False discards these particles.
         runtime_warnings : Any warning filter action (default "ignore")
             stellar_synamics usually launches RuntimeWarning during the eps
-            calculation because there may be some particle with jcirc=0.
-            By default the function decides to ignore these warnings.
+            (J_z/J_circ) calculation because there may be some particle with
+            jcirc=0. By default the function decides to ignore these warnings.
             `runtime_warnings` can be set to any valid "action" in the python
             warnings module.
 
@@ -831,16 +865,20 @@ def mkgalaxy(
         Specific potential energy of dark matter particles. Shape: (n,1).
     potential_g : np.ndarray, default value = None
         Specific potential energy of gas particles. Shape: (n,1).
-    softening_s : float, default value = 0
+    softening_s : Quantity. Default value = 0
         Softening radius of stellar particles. Shape: (1,).
-    softening_dm : float, default value = 0
+        Default unit: kpc.
+    softening_dm : Quantity. Default value = 0
         Softening radius of dark matter particles. Shape: (1,).
-    softening_g : float, default value = 0
+        Default unit: kpc.
+    softening_g : Quantity. Default value = 0
         Softening radius of gas particles. Shape: (1,).
+        Default unit: kpc.
 
     Return
     ------
     galaxy: ``Galaxy class`` object.
+
     """
     stars = ParticleSet(
         ParticleSetType.STARS,
@@ -854,6 +892,7 @@ def mkgalaxy(
         softening=softening_s,
         potential=potential_s,
     )
+
     dark_matter = ParticleSet(
         ParticleSetType.DARK_MATTER,
         m=m_dm,

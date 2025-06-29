@@ -16,6 +16,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+
 from custom_inherit import doc_inherit as _doc_inherit
 
 # =============================================================================
@@ -24,7 +25,8 @@ from custom_inherit import doc_inherit as _doc_inherit
 
 
 def doc_inherit(parent):
-    """Inherit the 'parent' docstring.
+    """
+    Inherit the 'parent' docstring.
 
     Returns a function/method decorator that, given parent, updates
     the docstring of the decorated function/method based on the `numpy`
@@ -42,7 +44,6 @@ def doc_inherit(parent):
     py:function:`custom_inherit.doc_inherit decorator`.
 
     Check: <github `https://github.com/rsokl/custom_inherit`>__
-
 
     """
     return _doc_inherit(parent, style="numpy")

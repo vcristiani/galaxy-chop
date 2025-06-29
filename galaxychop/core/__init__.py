@@ -4,7 +4,11 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""Base objects and functions og galaxychop."""
+# =============================================================================
+# DOCS
+# =============================================================================
+
+"""Base objects and functions of galaxychop."""
 
 # =============================================================================
 # IMPORTS
@@ -18,6 +22,7 @@ from .data import (
     ParticleSetType,
     mkgalaxy,
 )
+from .methods import GchopMethodABC
 
 
 __all__ = [
@@ -28,4 +33,5 @@ __all__ = [
     "mkgalaxy",
     "plot",
     "sdynamics",
+    "GchopMethodABC",
 ]

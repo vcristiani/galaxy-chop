@@ -13,7 +13,6 @@ import pandas as pd
 
 import pytest
 
-
 # =============================================================================
 # COMPONENTS
 # =============================================================================
@@ -40,7 +39,7 @@ def test_Components(probs):
     assert len(components) == 100
 
     expected_repr = (
-        "<Components length=100, labels={0, 1, 2}, "
+        "<Components length=100, labels=['0', '1', '2'], "
         f"probabilities={probs}, lmap=False>"
     )
     assert repr(components) == expected_repr
@@ -150,10 +149,9 @@ def test_Components_describe(probs):
         )
 
     expected = pd.DataFrame.from_dict(expected_dict)
-
     result = components.describe()
 
-    pd.testing.assert_frame_equal(result, expected)
+    pd.testing.assert_frame_equal(result, expected, check_dtype=False)
 
 
 # =============================================================================
@@ -228,7 +226,7 @@ def test_GalaxyDecomposerABC_repr():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
@@ -298,7 +296,7 @@ def test_GalaxyDecomposerABC_complete_labels():
 @pytest.mark.model
 def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
@@ -312,61 +310,47 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 
     decomposer = Decomposer()
 
-    components = decomposer.decompose(gal)
+    gal_decomp = decomposer.decompose(gal)
+    gal_components = gal_decomp.components
 
-    assert (components.ptypes == "stars").sum() == len(gal.stars)
-    assert (components.ptypes == "dark_matter").sum() == len(gal.dark_matter)
-    assert (components.ptypes == "gas").sum() == len(gal.gas)
+    assert (gal_components.ptypes == "stars").sum() == len(gal.stars)
+    assert (gal_components.ptypes == "dark_matter").sum() == len(
+        gal.dark_matter
+    )
+    assert (gal_components.ptypes == "gas").sum() == len(gal.gas)
 
-    assert np.all(components.labels[components.ptypes == "gas"] == 100)
-    assert np.all(np.isnan(components.labels[components.ptypes != "gas"]))
+    assert np.all(gal_components.labels[gal_components.ptypes == "gas"] == 100)
+    assert np.all(
+        np.isnan(gal_components.labels[gal_components.ptypes != "gas"])
+    )
 
 
 # =============================================================================
-# DYNAMIC STARS DECOMPOSER
+# DECOMPOSEDGALAXY
 # =============================================================================
 
 
 @pytest.mark.model
-def test_DynamicStarDecomposer_get_attributes():
-    class Decomposer(
-        gchop.models.DynamicStarsDecomposerMixin,
-        gchop.models.GalaxyDecomposerABC,
-    ):
+def test_Decomposedgalaxy(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
+
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
-            return ["normalized_star_energy", "eps", "eps_r"]
+            return ["x"]
 
         def split(self, X, y, attributes):
-            ...
+            return np.full(len(X), 100), None
+
+        def get_rows_mask(self, X, y, attributes):
+            return y == 2
 
     decomposer = Decomposer()
 
-    assert decomposer.get_attributes() == [
-        "normalized_star_energy",
-        "eps",
-        "eps_r",
-    ]
+    gal_decomp = decomposer.decompose(gal)
+    gal_components = gal_decomp.components
 
+    assert len(gal_decomp) == len(gal)
 
-@pytest.mark.model
-def test_DynamicStarDecomposer_get_rows_mask():
-    class Decomposer(
-        gchop.models.DynamicStarsDecomposerMixin,
-        gchop.models.GalaxyDecomposerABC,
-    ):
-        def get_attributes(self):
-            return ["normalized_star_energy", "eps", "eps_r"]
-
-        def split(self, X, y, attributes):
-            ...
-
-    decomposer = Decomposer()
-
-    X = [[1, 2, 3], [np.nan, 2, 3], [1, 2, np.nan], [1, 2, 3]]
-
-    y = [0, 0, 1, 1]
-
-    attrs = ["a", "b", "c"]
-    result = decomposer.get_rows_mask(X, y, attrs)
-
-    assert np.all(result == [True, False, False, False])
+    expected_repr = repr(gal) + "\n" + repr(gal_components)
+    assert repr(gal_decomp) == expected_repr

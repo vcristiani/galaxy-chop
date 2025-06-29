@@ -6,7 +6,7 @@
 module potential
 
 use iso_fortran_env
-!$ use omp_lib
+!$use omp_lib
 
 implicit none
 private

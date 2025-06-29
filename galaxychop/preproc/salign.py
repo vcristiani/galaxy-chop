@@ -14,12 +14,17 @@
 # IMPORTS
 # =============================================================================
 
+import warnings
+
 import numpy as np
 
+from ._base import GalaxyTransformerABC
 from ..core import data
+from ..preproc import is_centered
+from ..utils import doc_inherit
 
 # =============================================================================
-# API
+# INTERNALS
 # =============================================================================
 
 
@@ -36,8 +41,10 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     """
     Rotation matrix calculation.
 
-    Calculates the rotation matrix that aligns the TOTAL angular momentum of
-    the particles with the z-axis. Optionally, only particles within a cutting
+    Calculates the rotation matrix that aligns the
+    TOTAL angular momentum of
+    the particles with the z-axis. Optionally,
+    only particles within a cutting
     radius `(r_cut)` can be used.
 
     Parameters
@@ -47,16 +54,20 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     x, y, z : np.ndarray
         Positions x, y, z of particles. Shape: (n,1).
     Jx, Jy, Jz : np.ndarray
-        Components of angular momentum of particles. Shape: (n,1).
+        Components of angular momentum of particles.
+        Shape: (n,1).
     r_cut : float, optional
-        Default value =  None. If it's provided, it must be positive and the
-        rotation matrix `A` is calculated from the particles with radii smaller
+        Default value =  None. If it's provided,
+        it must be positive and the
+        rotation matrix `A` is calculated from
+        the particles with radii smaller
         than r_cut.
 
     Returns
     -------
     A : np.ndarray
         Rotation matrix. Shape: (3,3).
+
     """
     mask = _make_mask(x, y, z, r_cut)
 
@@ -86,8 +97,41 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     return A
 
 
+# =============================================================================
+# ALIGNER CLASS
+# =============================================================================
+
+
+class Aligner(GalaxyTransformerABC):
+    """
+    Aligner class.
+
+    Given the positions and velocities of particles, check and
+    align them to make the Z-axis perpendicular to the galaxy-plane
+    i.e. make the "face-on" projection the new XY plane.
+
+    """
+
+    def __init__(self, r_cut=30):
+        self.r_cut = r_cut
+
+    @doc_inherit(GalaxyTransformerABC.transform)
+    def transform(self, galaxy):
+        return star_align(galaxy, r_cut=self.r_cut)
+
+    @doc_inherit(GalaxyTransformerABC.checker)
+    def checker(self, galaxy, **kwargs):
+        return is_star_aligned(galaxy, **kwargs)
+
+
+# =============================================================================
+# API FUNCTIONS
+# =============================================================================
+
+
 def star_align(galaxy, *, r_cut=None):
-    """Align the galaxy.
+    """
+    Align the galaxy.
 
     Rotates the positions, velocities and angular momentum of the
     particles so that the total angular moment of the stars particles coincides
@@ -107,9 +151,18 @@ def star_align(galaxy, *, r_cut=None):
     galaxy: new ``Galaxy class`` object
         A new galaxy object with their total angular momentum aligned with the
         z-axis.
+
     """
+    if not is_centered(galaxy):
+        warnings.warn(
+            "Input Galaxy is not centered. Please, center it \
+                with Centralizer.transform(galaxy) \
+                or proceed with caution.",
+            UserWarning,
+        )
+
     if r_cut is not None and r_cut <= 0.0:
-        raise ValueError("r_cut must not be lower than 0.")
+        raise ValueError("r_cut must be larger than 0.")
 
     # declare all the different groups of columns
     pos_columns = ["x", "y", "z"]
@@ -147,7 +200,7 @@ def star_align(galaxy, *, r_cut=None):
     pos_rot_g = np.dot(A, gas_df[pos_columns].T.values)
     vel_rot_g = np.dot(A, gas_df[vel_columns].T.values)
 
-    # recreate the valaxy
+    # recreate the galaxy
     new = galaxy.disassemble()
 
     new.update(
@@ -182,8 +235,10 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     ----------
     galaxy : ``Galaxy class`` object
     r_cut : float, optional
-        Default value =  None. If it's provided, it must be positive and the
-        rotation matrix `A` is calculated from the particles with radii smaller
+        Default value =  None. If it's provided,
+        it must be positive and the
+        rotation matrix `A` is calculated from
+        the particles with radii smaller
         than r_cut.
     rtol : float
         Relative tolerance. Default value = 1e-05.
@@ -196,6 +251,7 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
         True if galaxy is centered respect to the position of the lowest
         potential particle, and if the total angular momentum of the galaxy
         is aligned with the z-axis, False otherwise.
+
     """
     # Now we extract only the needed column to rotate the galaxy
     df = galaxy.stars.to_dataframe(
@@ -207,6 +263,8 @@ def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     Jxtot = np.sum(df.Jx.values[mask] * df.m.values[mask])
     Jytot = np.sum(df.Jy.values[mask] * df.m.values[mask])
     Jztot = np.sum(df.Jz.values[mask] * df.m.values[mask])
-    Jtot = np.sqrt(Jxtot**2 + Jytot**2 + Jztot**2)
+    # B: Para checkear que esté alineada, 1st check que esté
+    # centrada and then check que Jz sea positivo y mayor
+    # a los demás...
 
-    return np.allclose(Jztot, Jtot, rtol=rtol, atol=atol)
+    return Jztot > 0 and Jztot > Jxtot and Jztot > Jytot
