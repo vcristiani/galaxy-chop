@@ -20,6 +20,8 @@ import astropy.units as u
 
 import numpy as np
 
+#import numba as nb
+
 from .grispy_calculation import (
     make_grid,
     potential_grispy,
@@ -142,6 +144,68 @@ def numpy_potential(x, y, z, m, softening):
     return mdist.sum(axis=1) * const.G, np.asarray
 
 
+#_numba_eager_signature = nb.float32[:](
+#    nb.float32[:],
+#    nb.float32[:],
+#    nb.float32[:],
+#    nb.float32[:],
+#    nb.float32,
+#)
+
+
+#@nb.jit(_numba_eager_signature, nopython=True, parallel=True, fastmath=True)
+#def _numba_potential(x, y, z, m, softening):
+#    """ """
+#    n = len(x)
+#    potential_energy = np.zeros(n, dtype=nb.float32)
+#    soft2 = softening * softening
+
+#    for i in nb.prange(n):
+#        pe_i = 0.0
+#        x_i = x[i]
+#        y_i = y[i]
+#        z_i = z[i]
+
+#        for j in range(n):
+#            if i != j:
+#                dx = x_i - x[j]
+#                dy = y_i - y[j]
+#                dz = z_i - z[j]
+
+#                dist_sq = dx * dx + dy * dy + dz * dz + soft2
+#                dist = np.sqrt(dist_sq)
+
+#                pe_i = pe_i + m[j] / dist
+#
+#        potential_energy[i] = pe_i
+
+#    return potential_energy
+
+
+#def numba_potential(x, y, z, m, softening):
+#    """Wrap the Numba implementation of the gravitational potential.
+
+#    Parameters
+#    ----------
+#    x, y, z : np.ndarray
+#        Positions of particles. Shape: (n,1).
+#    m : np.ndarray
+#        Masses of particles. Shape: (n,1).
+#    softening : float, optional
+#        Softening parameter. Shape: (1,).
+
+#    Returns
+#    -------
+#    np.ndarray : float
+#        Specific potential energy of particles.
+
+#    """
+#    soft = np.float32(softening)
+#    epot = _numba_potential(x, y, z, m, soft)
+
+#    return epot * const.G, np.asarray
+
+
 # =============================================================================
 # POTENTIALIZER CLASS
 # =============================================================================
@@ -150,6 +214,7 @@ POTENTIAL_BACKENDS = {
     "fortran": fortran_potential,
     "grispy": grispy_potential,
     "numpy": numpy_potential,
+#   "numba":numba_potential,    
 }
 
 
