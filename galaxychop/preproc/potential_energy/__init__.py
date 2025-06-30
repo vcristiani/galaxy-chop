@@ -20,7 +20,7 @@ import astropy.units as u
 
 import numpy as np
 
-#import numba as nb
+# import numba as nb
 
 from .grispy_calculation import (
     make_grid,
@@ -144,17 +144,17 @@ def numpy_potential(x, y, z, m, softening):
     return mdist.sum(axis=1) * const.G, np.asarray
 
 
-#_numba_eager_signature = nb.float32[:](
+# _numba_eager_signature = nb.float32[:](
 #    nb.float32[:],
 #    nb.float32[:],
 #    nb.float32[:],
 #    nb.float32[:],
 #    nb.float32,
-#)
+# )
 
 
-#@nb.jit(_numba_eager_signature, nopython=True, parallel=True, fastmath=True)
-#def _numba_potential(x, y, z, m, softening):
+# @nb.jit(_numba_eager_signature, nopython=True, parallel=True, fastmath=True)
+# def _numba_potential(x, y, z, m, softening):
 #    """ """
 #    n = len(x)
 #    potential_energy = np.zeros(n, dtype=nb.float32)
@@ -182,7 +182,7 @@ def numpy_potential(x, y, z, m, softening):
 #    return potential_energy
 
 
-#def numba_potential(x, y, z, m, softening):
+# def numba_potential(x, y, z, m, softening):
 #    """Wrap the Numba implementation of the gravitational potential.
 
 #    Parameters
@@ -214,7 +214,7 @@ POTENTIAL_BACKENDS = {
     "fortran": fortran_potential,
     "grispy": grispy_potential,
     "numpy": numpy_potential,
-#   "numba":numba_potential,    
+    #   "numba":numba_potential,
 }
 
 
