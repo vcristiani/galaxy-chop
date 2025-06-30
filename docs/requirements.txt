@@ -1,5 +1,15 @@
 ipykernel
 ipython
+seaborn
+matplotlib
+astropy
+pandas
+numpy
+uttrs
+custom_inherit
+joblib
+scikit-learn
+h5py
 Sphinx
 sphinx-rtd-theme
 nbsphinx
@@ -7,3 +17,4 @@ Cython >= 0.28.5
 m2r2
 mistune==0.8.4
 sphinx-fortran
+

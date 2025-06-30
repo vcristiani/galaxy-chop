@@ -1,11 +1,30 @@
-.
+# .
 ipdb
 tox
 pytest
 pytest-cov
 black
+h5py
+scikit-learn
+grispy
+joblib
+astropy
+custom_inherit
+seaborn
+uttrs
+pandas
 isort
+numpy
+scikit-build
+meson==1.3.2
+autodocsumm==0.1.13
+# agregados para meson 
+meson-python
+importlib.metadata
+importlib_metadata
 https://github.com/quatrope/qafan/archive/refs/heads/master.zip
 
 -r docs/requirements.txt
 sphinx-autobuild
+# pip install nbconvert==6.5.3 lxml_html_clean for a workaround on newest make-docs dependencies?
+matplotlib

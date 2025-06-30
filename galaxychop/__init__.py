@@ -15,13 +15,6 @@ Implementation of a few galaxy dynamic decomposition methods.
 """
 
 # =============================================================================
-# META
-# =============================================================================
-
-__version__ = "0.3.dev0"
-
-
-# =============================================================================
 # IMPORTS
 # =============================================================================
 
@@ -34,7 +27,10 @@ from .core import (
     mkgalaxy,
 )
 from .io import read_hdf5, to_hdf5
+from .pipeline import GchopPipeline, mkpipe
 
+
+__version__ = tuple(constants.VERSION.split("."))
 
 __all__ = [
     "Galaxy",
@@ -49,4 +45,6 @@ __all__ = [
     "read_hdf5",
     "to_hdf5",
     "constants",
+    "GchopPipeline",
+    "mkpipe",
 ]

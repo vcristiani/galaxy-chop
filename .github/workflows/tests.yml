@@ -5,12 +5,18 @@
 name: Testing
 
 on:
+  push:
+    branches: 
+      - "dev"
+  pull_request:
+      branches: 
+      - "dev"
   workflow_call:
 
 jobs:
   test:
 
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest]
     strategy:
 
       # continues even if an environment fails
@@ -19,32 +25,32 @@ jobs:
       matrix:
 
         # all the tox with the default python version
-        py_version: [3.9]
+        py_version: ["3.11"]
         tox_env:
           - style
           - docstyle
-          - check-manifest
           - check-headers
-          - coverage
           - make-docs
 
         # check version by version
         include:
-          - py_version: 3.7
-            tox_env: py37
-          - py_version: 3.8
-            tox_env: py38
-          - py_version: 3.9
+          - py_version: "3.9"
             tox_env: py39
+          - py_version: "3.10"
+            tox_env: py310
+          - py_version: "3.11"
+            tox_env: py311
+          - py_version: "3.12"
+            tox_env: py312
 
     # the steps of the CI
     steps:
       - uses: actions/checkout@master
 
       # optionals
-      - name: Install pandoc
+      - name: Install pandoc 2.x  # Extremely important for make-docs...
         if: ${{ matrix.tox_env == 'make-docs'}}
-        run: sudo apt-get install pandoc
+        run: sudo apt-get install pandoc=2.*  # Extremely important for make-docs...
       # tox steps
       - name: Set up Python
         uses: actions/setup-python@v2

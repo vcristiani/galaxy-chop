@@ -11,5 +11,5 @@
    :maxdepth: 2
    :glob:
 
-   fortran/index
    *
+   potential_energy/index

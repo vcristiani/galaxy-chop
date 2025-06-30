@@ -23,11 +23,13 @@ import pytest
 @pytest.mark.model
 def test_GaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
 
-    components = decomposer.decompose(gal)
+    # Bruno: A ver si no le importa que el atributo se llame igual que
+    # la variable donde se guarde...
+    components = decomposer.decompose(gal).components
 
     assert len(components) == len(gal)
     assert len(gal.stars) == np.sum(components.ptypes == "stars")
@@ -73,11 +75,11 @@ def test_GaussianMixture(read_hdf5_galaxy):
 @pytest.mark.model
 def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
-    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
 
-    components = decomposer.decompose(gal)
+    components = decomposer.decompose(gal).components
 
     assert len(components) == len(gal)
     assert len(gal.stars) == np.sum(components.ptypes == "stars")

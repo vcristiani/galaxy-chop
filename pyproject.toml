@@ -1,6 +1,51 @@
+[project]
+name = "galaxychop"
+version = "0.3.dev0"
+authors = [{name = "Valeria Cristiani et al", email = "valeria.cristiani@unc.edu.ar"}]
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+description = "Galaxy dynamic de-composition"
+keywords = [
+    "galaxy",
+    "dynamics"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering",
+]
+
+urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" = "https://github.com/vcristiani/galaxy-chop" }
+
+dependencies = [
+    "numpy >= 1.13.3,<2.0",
+    "scipy >= 1.0",
+    "scikit-learn",
+    "astropy",
+    "uttrs",
+    "pandas",
+    "h5py",
+    "custom_inherit",
+    "seaborn",
+    "grispy",
+    "importlib_metadata",
+    "meson-python"
+]
+
 [tool.black]
 line-length = 79
-target-version = ['py38', 'py39']
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.pytest.ini_options]
 markers = [
@@ -12,14 +57,22 @@ testpaths = [
     "tests",
 ]
 
+[tool.setuptools.dynamic]
+version = {attr = "package.__version__"}
+
 [build-system]
-build-backend = "setuptools.build_meta"
+build-backend = "mesonpy"
 requires = [
+    "meson-python",
     "setuptools>=42",
-    "scikit-build",
-    "scikit-build-core",
-    "cmake",
     "ninja; platform_system!='Windows'",
     "numpy",
     "wheel"
 ]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["galaxychop", "galaxychop.*"]
+namespaces = false

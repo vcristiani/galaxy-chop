@@ -9,6 +9,7 @@
 
 .. toctree::
    :maxdepth: 2
-   :glob:
 
-   *
+   bunch.rst
+   decorators.rst
+   unames.rst

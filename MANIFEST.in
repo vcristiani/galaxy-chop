@@ -2,20 +2,42 @@ include LICENSE.txt
 include README.md
 include CHANGELOG.md
 include CMakeLists.txt
+include pyproject.toml
+include meson.build
+
+include *.cmake
+include *.ninja
+include *.txt
+
+
+recursive-include CMakeFiles *.F
+recursive-include CMakeFiles *.bin
+recursive-include CMakeFiles *.c
+recursive-include CMakeFiles *.check_cache
+recursive-include CMakeFiles *.cmake
+recursive-include CMakeFiles *.ninja
+recursive-include CMakeFiles *.out
+recursive-include CMakeFiles *.txt
+recursive-include CMakeFiles *.yaml
 
 recursive-include galaxychop *.dat
 recursive-include galaxychop *.npy
 recursive-include galaxychop *.f90
+recursive-include galaxychop *.py
+recursive-include galaxychop *.c
+recursive-include galaxychop *.ipynb
 
 recursive-exclude docs *
+recursive-exclude draft *
 recursive-exclude legacy *
 recursive-exclude legacy_test *
 recursive-exclude resource *
 recursive-exclude tests *
 recursive-exclude tools *
+recursive-exclude _skbuild *
 
 exclude tox.ini
-exclude pyproject.toml
 exclude requirements_dev.txt
 exclude .header-template
 exclude .readthedocs.yml
+exclude .flake8

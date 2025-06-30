@@ -28,6 +28,7 @@ It runs in numerical N-body simulations populated with semi-analytical models an
 - **KMeans:** Implementation of [Scikit-Learn](https://scikit-learn.org/stable/about.html#citing-scikit-learn) K-means as a model for dynamical decomposing of galaxies.
 - **GaussianMixture:** Implementation of the dynamic decomposition model of galaxies described by [Obreja et al.(2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.477.4915O/abstract).
 - **AutoGaussianMixture:** Implementation of the  dynamic decomposition model of galaxies described by [Du et al.(2019)](https://ui.adsabs.harvard.edu/abs/2019ApJ...884..129D/abstract)
+- **JEHistogram:** Implementation of the dynamic decomposition model of galaxies described by [Cristiani et al.(2024)](https://ui.adsabs.harvard.edu/abs/2024A%26A...692A..63C/abstract).
 
 **And many more**
 
@@ -58,7 +59,9 @@ $ pip -r requirements-dev
 - Antonela Taverna ([IATE-OAC-CONICET][]).
 - Juan Cabral ([IATE-OAC-CONICET][], [CONAE][]).
 - Federico Benelli ([IPQA-CONICET][], [FCEFyN-UNC][]).
-- - Bruno Sanchez ([Duke University][]).
+- Bruno Sanchez ([Duke University][]).
+- Bruno Celiz [bruno.celiz@mi.unc.edu.ar](bruno.celiz@mi.unc.edu.ar) ([IATE-OAC-CONICET][], [FaMAF-UNC][]).
+- Daniela Stauber ([FaMAF-UNC][]).
 
 
   [IATE-OAC-CONICET]: http://iate.oac.uncor.edu/
@@ -68,3 +71,13 @@ $ pip -r requirements-dev
   [Duke University]: https://duke.edu/
   [IPQA-CONICET]: https://ipqa.unc.edu.ar/en/
   [FCEFyN-UNC]: https://fcefyn.unc.edu.ar/
+
+
+
+<!---
+D: (consideraciones para la instalacion
+, que me tope al correr tox)
+dpkg -l python3*-dev
+ si no tiene el paquete  python3.*-dev
+instalarlo sudo apt-get install python3.*-dev
+para que el Cmake ande easy peace --->

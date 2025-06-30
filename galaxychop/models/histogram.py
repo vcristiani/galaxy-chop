@@ -4,6 +4,10 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+# =============================================================================
+# DOCS
+# =============================================================================
+
 """Monodimensional Models."""
 
 # =============================================================================
@@ -22,7 +26,8 @@ from ..utils import doc_inherit
 
 
 class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
-    """JHistogram class.
+    """
+    JHistogram class.
 
     Implementation of galaxy dynamical decomposition model described in
     Abadi et al. (2003) [1]_.
@@ -59,6 +64,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         The Fine Structure of Simulated Galactic Disks”, The Astrophysical
         Journal, vol. 597, no. 1, pp. 21–34, 2003. doi:10.1086/378316.
         `<https://ui.adsabs.harvard.edu/abs/2003ApJ...597...21A/abstract>`_
+
     """
 
     n_bin = hparam(default=100)
@@ -127,6 +133,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         -----
         In this model the parameter space is given by
             eps: circularity parameter (J_z/J_circ).
+
         """
         return ["eps"]
 
@@ -137,6 +144,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
         -----
         The attributes used by the Abadi model are described in detail in the
         class documentation.
+
         """
         n_bin = self.n_bin
 
@@ -192,8 +200,11 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 # =============================================================================
 # CRISTIANI
 # =============================================================================
+
+
 class JEHistogram(JHistogram):
-    """JEHistogram class.
+    """
+    JEHistogram class.
 
     Implementation of a modification of Abadi galaxy dynamical decomposition
     model using the circularity parameter and specific energy distribution.
@@ -222,6 +233,7 @@ class JEHistogram(JHistogram):
     >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
     >>> chopper = gchop.JEHistogram()
     >>> chopper.decompose(galaxy)
+
     """
 
     n_bin_E = hparam(default=20)
@@ -332,6 +344,7 @@ class JEHistogram(JHistogram):
         In this model the parameter space is given by
             normalized_star_energy: normalized specific energy of the stars
             eps: circularity parameter (J_z/J_circ).
+
         """
         return ["normalized_star_energy", "eps"]
 
@@ -342,6 +355,7 @@ class JEHistogram(JHistogram):
         -----
         The attributes used by the modified Abadi model are described in detail
         in the class documentation.
+
         """
         n_bin = self.n_bin
         n_bin_E = self.n_bin_E

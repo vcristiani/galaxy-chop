@@ -33,7 +33,8 @@ from .. import constants as const
 
 @uttr.s(frozen=True, slots=True, repr=False)
 class _GalaxyStellarDynamics:
-    """Circularity information about the stars particles of a galaxy.
+    """
+    Circularity information about the stars particles of a galaxy.
 
     Parameters
     ----------
@@ -42,7 +43,7 @@ class _GalaxyStellarDynamics:
     normalized_star_Jz: np.array
         z-component normalized specific angular momentum of the stars.
     eps: np.array
-        Circularity parameter (eps : J_z/J_circ).
+        Circularity parameter (eps: J_z/J_circ).
     eps_r: np.array
         Projected circularity parameter (eps_r: J_p/J_circ).
     x: np.array
@@ -78,7 +79,8 @@ class _GalaxyStellarDynamics:
 
     @classmethod
     def circularity_attributes(cls):
-        """Retrieve all the circularity attributes stored in the JCirc class.
+        """
+        Retrieve all the circularity attributes stored in the JCirc class.
 
         This method returns a tuple of str ignoring those that are marked as
         "asdict=False".
@@ -91,7 +93,8 @@ class _GalaxyStellarDynamics:
         return tuple(fields)
 
     def to_dict(self):
-        """Convert the instance to a dict.
+        """
+        Convert the instance to a dict.
 
         Attributes are ignored if they are marked as "asdict=False".
 
@@ -101,7 +104,8 @@ class _GalaxyStellarDynamics:
         )
 
     def isfinite(self):
-        """Return a mask of which elements are finite in all attributes.
+        """
+        Return a mask of which elements are finite in all attributes.
 
         Attributes are ignored if they are marked as "asdict=False".
 
@@ -217,22 +221,22 @@ def _stellar_dynamics(galaxy, bin0, bin1, reassign):
     # values > 1 or <-1.
     if reassign:
         # We reassign particles that have circularity > 1 to circularity = 1.
-        mask = np.where(eps_ > 1.0)[0]
+        (mask,) = np.where(eps_ > 1.0)
         eps_[mask] = 1.0
 
         # We reassign particles that have circularity < -1 to circularity = -1.
-        mask = np.where(eps_ < -1.0)[0]
+        (mask,) = np.where(eps_ < -1.0)
         eps_[mask] = -1.0
 
     else:
         # We remove particles that have circularity < -1 and circularity > 1.
-        mask = np.where(eps_ > 1.0)[0]
+        (mask,) = np.where(eps_ > 1.0)
         E_star_norm_[mask] = np.nan
         Jz_star_norm_[mask] = np.nan
         eps_[mask] = np.nan
         eps_r_[mask] = np.nan
 
-        mask = np.where(eps_ < -1.0)[0]
+        (mask,) = np.where(eps_ < -1.0)
         E_star_norm_[mask] = np.nan
         Jz_star_norm_[mask] = np.nan
         eps_[mask] = np.nan
@@ -276,7 +280,7 @@ def stellar_dynamics(
         in the range of (-0.1, 0) of the normalized energy.
     reassign : list. Default=False
         It allows to define what to do with stellar particles with circularity
-        parameter values >1 or <-1. True reassigns the value to 1 or -1,
+        parameter values > 1 or < -1. True reassigns the value to 1 or -1,
         depending on the case. False discards these particles.
     runtime_warnings : Any warning filter action (default "ignore")
         stellar_synamics usually launches RuntimeWarning during the eps
@@ -328,10 +332,8 @@ def stellar_dynamics(
     """
     if not galaxy.has_potential_:
         raise NoGravitationalPotentialError(
-            "You cannot calculate stellar dynamics in a "
-            "galaxy without potential."
+            "Galaxy does not have the potential energy calculated"
         )
-
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
         return _stellar_dynamics(galaxy, bin0, bin1, reassign)

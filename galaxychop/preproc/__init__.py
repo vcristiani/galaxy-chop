@@ -4,28 +4,41 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
-"""preprocessing module."""
+# =============================================================================
+# DOCS
+# =============================================================================
+
+"""Preprocessing module."""
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
-from .pcenter import center, is_centered
-from .potential_energy import potential
-from .salign import is_star_aligned, star_align
-from .smr_crop import half_star_mass_radius_crop
+
+from .pcenter import Centralizer, center, is_centered
+from .potential_energy import (
+    Potentializer,
+    potential,
+)
+from .salign import Aligner, is_star_aligned, star_align
+from .smr_crop import Cutter, half_star_mass_radius_crop, is_star_cutted
 
 
 __all__ = [
-    # pcenter
     "center",
     "is_centered",
+    "Centralizer",
     "potential",
+    "Potentializer",
     "star_align",
     "is_star_aligned",
+    "Aligner",
     "center_and_align",
+    "Cutter",
     "half_star_mass_radius_crop",
+    "is_star_cutted",
 ]
+
 
 # =============================================================================
 # FUNCTIONS
@@ -33,9 +46,10 @@ __all__ = [
 
 
 def center_and_align(galaxy, *, r_cut=None):
-    """Sequentially performs centering and alignment.
+    """
+    Sequentially performs centering and alignment.
 
-    ``center_and_align(gal) <==> star_align(center(gal))``
+    ``center_and_align(galaxy) <==> star_align(center(galaxy))``
 
     Parameters
     ----------
@@ -53,16 +67,20 @@ def center_and_align(galaxy, *, r_cut=None):
         with the z-axis.
 
     """
-    centered = center(galaxy)
-    aligned = star_align(centered, r_cut=r_cut)
+    center = Centralizer()
+    galaxy = center.transform(galaxy)
+    align = Aligner(r_cut)
+    galaxy = align.transform(galaxy)
 
-    return aligned
+    return galaxy
 
 
 def is_centered_and_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
-    """Validate if the galaxy is centered and aligned.
+    """
+    Validate if the galaxy is centered and aligned.
 
-    ``is_center_and_align(gal) <==> is_centered(gal) and is_star_aligned(gal)``
+    ``is_center_and_align(galaxy) <==> is_centered(galaxy) and \
+                                       is_star_aligned(galaxy)``
 
     Parameters
     ----------
@@ -84,6 +102,10 @@ def is_centered_and_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
         is aligned with the z-axis, False otherwise.
 
     """
-    return is_centered(galaxy, rtol=rtol, atol=atol) and is_star_aligned(
-        galaxy, r_cut=r_cut, rtol=rtol, atol=atol
-    )
+    center = Centralizer()
+    align = Aligner(r_cut)
+
+    check_center = center.checker(galaxy, rtol=rtol, atol=atol)
+    check_align = align.checker(galaxy, r_cut=r_cut, rtol=rtol, atol=atol)
+
+    return check_center and check_align
