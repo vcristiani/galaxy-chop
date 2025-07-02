@@ -24,9 +24,9 @@ import warnings
 
 import astropy.units as u
 
-import numpy as np
-
 import numba as nb
+
+import numpy as np
 
 from .grispy_calculation import (
     make_grid,
