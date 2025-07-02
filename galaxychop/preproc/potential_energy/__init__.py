@@ -178,8 +178,9 @@ def numba_potential(x, y, z, m, softening):
 
 
 # =============================================================================
-# POTENTIALIZER CLASS
+# API FUNCTIONS
 # =============================================================================
+
 
 POTENTIAL_BACKENDS = {
     "grispy": grispy_potential,
@@ -188,52 +189,6 @@ POTENTIAL_BACKENDS = {
 }
 
 DEFAULT_POTENTIAL_BACKEND = "numba"
-
-class Potentializer(GalaxyTransformerABC):
-    """
-    Potentializer class.
-
-    Given the positions and masses of particles, calculate
-    their specific gravitational potential energy.
-
-    Parameters
-    ----------
-    galaxy : ``Galaxy class`` object
-        The galaxy object without the potential energy of particles
-    backends : str, default="numpy"
-        Method to calculate the potential energy of each particle
-
-    Returns
-    -------
-    galaxy: new ``Galaxy class`` object
-        A new galaxy object with the specific potential energy of particles
-        calculated.
-
-    """
-
-    def __init__(self, backend=DEFAULT_POTENTIAL_BACKEND):
-        self.backend = backend
-
-        if self.backend not in POTENTIAL_BACKENDS:
-            raise TypeError(
-                "The backend entered is not in the possible Backends"
-            )
-        else:
-            print("CREATED POTENCIALIZER WITH BACKEND  " + self.backend)
-            pass
-
-    @doc_inherit(GalaxyTransformerABC.transform)
-    def transform(self, galaxy):
-        return potential(galaxy, backend=self.backend)
-
-    @doc_inherit(GalaxyTransformerABC.checker)
-    def checker(self, galaxy, **kwargs):
-        return galaxy.has_potential_
-
-
-# =============================================================================
-# API FUNCTIONS
-# =============================================================================
 
 
 def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
@@ -300,3 +255,50 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     )
 
     return core.mkgalaxy(**new)
+
+
+# =============================================================================
+# POTENTIALIZER CLASS
+# =============================================================================
+
+
+class Potentializer(GalaxyTransformerABC):
+    """
+    Potentializer class.
+
+    Given the positions and masses of particles, calculate
+    their specific gravitational potential energy.
+
+    Parameters
+    ----------
+    galaxy : ``Galaxy class`` object
+        The galaxy object without the potential energy of particles
+    backends : str, default="numpy"
+        Method to calculate the potential energy of each particle
+
+    Returns
+    -------
+    galaxy: new ``Galaxy class`` object
+        A new galaxy object with the specific potential energy of particles
+        calculated.
+
+    """
+
+    def __init__(self, backend=DEFAULT_POTENTIAL_BACKEND):
+        self.backend = backend
+
+        if self.backend not in POTENTIAL_BACKENDS:
+            raise TypeError(
+                "The backend entered is not in the possible Backends"
+            )
+        else:
+            print("CREATED POTENCIALIZER WITH BACKEND  " + self.backend)
+            pass
+
+    @doc_inherit(GalaxyTransformerABC.transform)
+    def transform(self, galaxy):
+        return potential(galaxy, backend=self.backend)
+
+    @doc_inherit(GalaxyTransformerABC.checker)
+    def checker(self, galaxy, **kwargs):
+        return galaxy.has_potential_
