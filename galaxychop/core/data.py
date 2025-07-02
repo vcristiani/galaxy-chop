@@ -544,7 +544,7 @@ class Galaxy:
             the_flatten_dict = {}
             for k, v in pset_dict.items():
                 flat_k = f"{k}_{suffix}"
-                flat_v = v[0] if np.issctype(attributes[k].converter) else v
+                flat_v = v[0] if np.isscalar(attributes[k].converter) else v
                 the_flatten_dict[flat_k] = flat_v
             return the_flatten_dict
 
