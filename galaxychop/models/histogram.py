@@ -123,7 +123,7 @@ class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
 
         for key in range(lim, len(sph)):
             arr, flt = bin_to_particle[key], sph[key]
-            dsk[key] = np.unique(arr[~np.in1d(arr, flt)])
+            dsk[key] = np.unique(arr[~np.isin(arr, flt)])
         return dsk
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
