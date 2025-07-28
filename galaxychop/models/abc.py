@@ -24,12 +24,11 @@ import numpy as np
 
 import pandas as pd
 
+from . import dgalaxy
 from .. import constants as consts
 from .. import core
 from ..core import sdynamics as sdyn
 from ..preproc import is_centered, is_star_aligned
-from ..utils import doc_inherit
-from . import dgalaxy
 
 # =============================================================================
 # CONSTANTS
@@ -139,7 +138,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     # block  to implement in every method =====================================
 
     @abc.abstractmethod
-    def get_attributes(self):
+    def get_attributes():
         """
         Attributes for the parameter space.
 
@@ -497,6 +496,3 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         )
 
         return dgalaxy.DecomposedGalaxy(galaxy, components)
-
-
-
