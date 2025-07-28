@@ -105,7 +105,8 @@ def is_centered_and_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     center = Centralizer()
     align = Aligner(r_cut)
 
-    check_center = center.checker(galaxy, rtol=rtol, atol=atol)
-    check_align = align.checker(galaxy, r_cut=r_cut, rtol=rtol, atol=atol)
-
-    return check_center and check_align
+    # fmt: off
+    return (
+        center.checker(galaxy, rtol=rtol, atol=atol)
+        and align.checker(galaxy, r_cut=r_cut, rtol=rtol, atol=atol)
+    )
