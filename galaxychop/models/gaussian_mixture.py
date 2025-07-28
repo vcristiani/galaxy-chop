@@ -20,7 +20,7 @@ import numpy as np
 
 from sklearn import mixture
 
-from ._base import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from .abc import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 
