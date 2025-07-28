@@ -14,12 +14,10 @@
 # IMPORTS
 # =============================================================================
 
-# import importlib.metadata
+from importlib.metadata import version
 
 from astropy import constants as c
 from astropy import units as u
-
-import importlib_metadata
 
 # =============================================================================
 # PROJECT VERSION
@@ -27,9 +25,7 @@ import importlib_metadata
 
 NAME = "galaxychop"
 
-# VERSION = importlib.metadata.version(NAME)
-VERSION = importlib_metadata.version(NAME)
-
+VERSION = version(NAME)
 
 # =============================================================================
 # STELLAR DYNAMICS

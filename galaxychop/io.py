@@ -14,9 +14,9 @@
 # IMPORTS
 # =============================================================================
 
-import datetime as dt
 import platform
 import sys
+from datetime import UTC, datetime
 
 from astropy.io.misc.hdf5 import write_table_hdf5
 from astropy.table import Table
@@ -160,7 +160,7 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
 
     # prepare metadata
     h5_metadata = _DEFAULT_METADATA.copy()
-    h5_metadata["utc_timestamp"] = dt.datetime.utcnow().isoformat()
+    h5_metadata["utc_timestamp"] = datetime.now(UTC).isoformat()
     h5_metadata.update(metadata or {})
 
     # prepare kwargs
