@@ -150,7 +150,6 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
     def get_rows_mask(self, X, y, attributes):
         """
         Mask for the valid rows to operate clustering.
@@ -177,7 +176,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             Mask only with valid values to operate the clustering.
 
         """
-        raise NotImplementedError()
+        # all the rows where every value is finite
+        only_stars = np.equal(y, core.ParticleSetType.STARS.value)
+        finite_values = np.isfinite(X).all(axis=1)
+        return only_stars & finite_values
 
     @abc.abstractmethod
     def split(self, X, y, attributes):
@@ -497,30 +499,4 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return dgalaxy.DecomposedGalaxy(galaxy, components)
 
 
-# =============================================================================
-# MIXIN
-# =============================================================================
 
-
-class DynamicStarsDecomposerMixin:
-    """
-    Dynamic Stars Decomposer Mixin Class.
-
-    This class redefines the get_row_mask method so that dynamic decomposition
-    is performed using only stellar particles.
-
-    """
-
-    @doc_inherit(GalaxyDecomposerABC.get_rows_mask)
-    def get_rows_mask(self, X, y, attributes):
-        """
-        Note
-        ----
-        Only stellar particles are used to carry out the dynamic decomposition.
-        In addition, the parameters of the parameter space, where the dynamic
-        decomposition is carried out, must have finite values.
-        """
-        # all the rows where every value is finite
-        only_stars = np.equal(y, core.ParticleSetType.STARS.value)
-        finite_values = np.isfinite(X).all(axis=1)
-        return only_stars & finite_values

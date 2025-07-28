@@ -179,9 +179,6 @@ def test_GalaxyDecomposerABC_not_implemethed():
     with pytest.raises(NotImplementedError):
         decomposer.split(None, None, None)
 
-    with pytest.raises(NotImplementedError):
-        decomposer.get_rows_mask(None, None, None)
-
 
 @pytest.mark.model
 @pytest.mark.parametrize(

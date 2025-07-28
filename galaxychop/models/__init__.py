@@ -15,7 +15,6 @@
 # =============================================================================
 
 from .abc import (
-    DynamicStarsDecomposerMixin,
     GalaxyDecomposerABC,
     hparam,
 )
@@ -38,7 +37,6 @@ __all__ = [
     "DecomposedGalaxy",
     "Components",
     "GalaxyDecomposerABC",
-    "DynamicStarsDecomposerMixin",
     "JThreshold",
     "JHistogram",
     "JEHistogram",

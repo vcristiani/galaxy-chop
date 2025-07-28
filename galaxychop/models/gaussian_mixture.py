@@ -20,7 +20,7 @@ import numpy as np
 
 from sklearn import mixture
 
-from .abc import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from .abc import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 
@@ -29,9 +29,7 @@ from ..utils import doc_inherit
 # =============================================================================
 
 
-class DynamicStarsGaussianDecomposerABC(
-    DynamicStarsDecomposerMixin, GalaxyDecomposerABC
-):
+class DynamicStarsGaussianDecomposerABC(GalaxyDecomposerABC):
     """
     Dynamic Stars Gaussian Decomposer Class.
 

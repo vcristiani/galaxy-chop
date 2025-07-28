@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from .abc import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from .abc import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 
@@ -25,7 +25,7 @@ from ..utils import doc_inherit
 # =============================================================================
 
 
-class JHistogram(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+class JHistogram(GalaxyDecomposerABC):
     """
     JHistogram class.
 

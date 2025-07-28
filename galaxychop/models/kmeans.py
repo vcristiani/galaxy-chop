@@ -18,7 +18,7 @@ import numpy as np
 
 from sklearn import cluster
 
-from .abc import DynamicStarsDecomposerMixin, GalaxyDecomposerABC, hparam
+from .abc import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 # =============================================================================
@@ -26,7 +26,7 @@ from ..utils import doc_inherit
 # =============================================================================
 
 
-class KMeans(DynamicStarsDecomposerMixin, GalaxyDecomposerABC):
+class KMeans(GalaxyDecomposerABC):
     """
     KMeans class.
 
