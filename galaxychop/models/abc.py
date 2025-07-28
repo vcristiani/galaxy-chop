@@ -138,7 +138,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     # block  to implement in every method =====================================
 
     @abc.abstractmethod
-    def get_attributes():
+    def get_attributes(self):
         """
         Attributes for the parameter space.
 
