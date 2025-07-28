@@ -106,7 +106,7 @@ def test_Components_describe(probs):
 
     labels = random.integers(0, 3, 100)
     ptypes = np.ones(100)
-    mass = np.normal(loc=1000933.2, scale=252304.96, size=100)
+    mass = random.normal(loc=1000933.2, scale=252304.96, size=100)
     probabilities = random.uniform(size=(100, 3)) if probs else None
 
     components = gchop.models.Components(
