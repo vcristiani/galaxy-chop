@@ -38,6 +38,7 @@ def GalaxyTransformerABC_not_implemethed():
 
 @pytest.mark.model
 def test_GalaxyTransformerABC_repr():
+    # fmt: off
     class Transformer(gchop.preproc._base.GalaxyTransformerABC):
         def transform(self, galaxy):
             ...

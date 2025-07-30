@@ -146,9 +146,7 @@ def test_potential_recover(read_hdf5_galaxy):
     kwargs = {
         k: v for k, v in gal.disassemble().items() if "potential_" not in k
     }
-    new = potential_energy.potential(
-        data.mkgalaxy(**kwargs), backend="numba"
-    )
+    new = potential_energy.potential(data.mkgalaxy(**kwargs), backend="numba")
 
     original_potential = (
         gal.to_dataframe(attributes=["potential"]).to_numpy().flatten()

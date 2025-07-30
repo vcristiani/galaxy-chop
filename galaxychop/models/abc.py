@@ -300,7 +300,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         df = self._get_jcirc_df(galaxy, attributes)
 
         # remove if ptypev is duplicated
-        df = df.loc[:, ~df.columns.duplicated()]
+        # df = df.loc[:, ~df.columns.duplicated()]
 
         # separate matrix and classes
         X = df[attributes].to_numpy()
