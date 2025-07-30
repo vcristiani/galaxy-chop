@@ -43,6 +43,7 @@ _PTYPES_ORDER = tuple(p.name.lower() for p in core.ParticleSetType)
 # FUNCTIONS
 # =============================================================================
 
+
 def hparam(default, **kwargs):
     """
     Create a hyper parameter for decomposers.
@@ -219,7 +220,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             filter=lambda attr, _: attr.repr,
         )
         attrs_str = ", ".join([f"{k}={repr(v)}" for k, v in selfd.items()])
-        return f"{clsname}({attrs_str})"
+        return f"<{clsname} {attrs_str}>"
 
     # API =====================================================================
 
@@ -286,42 +287,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """
         # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
-        circ_attrs, df_attrs = [], []
         for attr_name in attributes:
-            container = (
-                circ_attrs
-                if attr_name in _CIRCULARITY_ATTRIBUTES
-                else df_attrs
-            )
-            container.append(attr_name)
-
-        # this crap is going to have all the dataframes that contain as a
-        # column each attribute
-        result = []
-
-        # If we have attributes of "to_dataframe" =============================
-        #     now we take out all the attributes of "to_dataframe" and save
-        #     them in a list where all the resulting dataframes will be stored
-        if df_attrs:
-            # we need this to create the array of classes
-            if "ptypev" not in df_attrs:
-                df_attrs.append("ptypev")
-
-            dfgal = galaxy.to_dataframe(
-                ptypes=_PTYPES_ORDER, attributes=df_attrs
-            )
-            result.append(dfgal)
+            if attr_name not in _CIRCULARITY_ATTRIBUTES:
+                raise ValueError(
+                    f"Attribute {attr_name} is not a circularity attribute"
+                )
 
         # If we have JCIRC attributes =========================================
         #     I'm going to need a lot of NANs that represent that gas and dm
         #     have no circularity.
-        if circ_attrs:
-            circ_attrs.append("ptypev")
-            dfcirc = self._get_jcirc_df(galaxy, circ_attrs)
-            result.append(dfcirc)
-
-        # the attributes as dataframe
-        df = pd.concat(result, axis=1)
+        attributes = list(attributes) + ["ptypev"]
+        df = self._get_jcirc_df(galaxy, attributes)
 
         # remove if ptypev is duplicated
         df = df.loc[:, ~df.columns.duplicated()]

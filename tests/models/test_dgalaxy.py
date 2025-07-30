@@ -166,13 +166,13 @@ def test_Decomposedgalaxy(read_hdf5_galaxy):
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
-            return ["x"]
+            return ["eps"]
 
         def split(self, X, y, attributes):
             return np.full(len(X), 100), None
 
         def get_rows_mask(self, X, y, attributes):
-            return y == 2
+            return y == gchop.ParticleSetType.STARS.value
 
     decomposer = Decomposer()
 

@@ -41,6 +41,7 @@ def test_GalaxyDecomposerABC_not_implemethed():
     "bins_value", [None, (1.0,), (1.0, 2.0, 3.0), (1.0, 2)]
 )
 def test_GalaxyDecomposerABC_invalid_bins(bins_value):
+    # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
@@ -57,6 +58,7 @@ def test_GalaxyDecomposerABC_invalid_bins(bins_value):
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_repr():
+    # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         other = gchop.models.hparam(default=1)
 
@@ -71,7 +73,7 @@ def test_GalaxyDecomposerABC_repr():
 
     decomposer = Decomposer(cbins=(0.3, 0.2), reassign=True, other="zaraza")
     result = repr(decomposer)
-    expected = "Decomposer(cbins=(0.3, 0.2), reassign=True, other='zaraza')"
+    expected = "<Decomposer cbins=(0.3, 0.2), reassign=True, other='zaraza'>"
 
     assert result == expected
 
@@ -81,6 +83,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
+    # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
@@ -93,36 +96,34 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 
     decomposer = Decomposer()
 
-    attributes = ["x", "eps"]
+    attributes = ["eps"]
 
     X, t = decomposer.attributes_matrix(gal, attributes=attributes)
 
     # check types stars-dm-gas
     assert np.all(t[: len(gal.stars)] == gchop.ParticleSetType.STARS.value)
     assert np.all(
-        t[len(gal.stars) : len(gal.dark_matter)]  # noqa
+        t[len(gal.stars) : len(gal.stars) + len(gal.dark_matter)]  # noqa
         == gchop.ParticleSetType.DARK_MATTER.value
     )
     assert np.all(
-        t[len(gal.stars) + len(gal.dark_matter) : len(gal.gas)]  # noqa
+        t[len(gal.stars) + len(gal.dark_matter) :]  # noqa
         == gchop.ParticleSetType.GAS.value
     )
-
-    # check as_dataframe attrs
-    assert np.all(X[:, 0] == gal.to_dataframe(attributes=["x"])["x"])
 
     # check jcirc eps
     jcirc = gal.stellar_dynamics()
 
     X_stars = X[t == gchop.ParticleSetType.STARS.value]
-    assert np.array_equal(X_stars[:, 1], jcirc.eps, equal_nan=True)
+    assert np.array_equal(X_stars[:, 0], jcirc.eps, equal_nan=True)
 
     X_nostars = X[t != gchop.ParticleSetType.STARS.value]
-    assert np.all(np.isnan(X_nostars[:, 1]))
+    assert np.all(np.isnan(X_nostars[:, 0]))
 
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_complete_labels():
+    # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             ...
@@ -153,13 +154,13 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
-            return ["x"]
+            return ["eps"]
 
         def split(self, X, y, attributes):
             return np.full(len(X), 100), None
 
         def get_rows_mask(self, X, y, attributes):
-            return y == 2
+            return y == gchop.ParticleSetType.STARS.value
 
     decomposer = Decomposer()
 
@@ -172,7 +173,9 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     )
     assert (gal_components.ptypes == "gas").sum() == len(gal.gas)
 
-    assert np.all(gal_components.labels[gal_components.ptypes == "gas"] == 100)
     assert np.all(
-        np.isnan(gal_components.labels[gal_components.ptypes != "gas"])
+        gal_components.labels[gal_components.ptypes == "stars"] == 100
+    )
+    assert np.all(
+        np.isnan(gal_components.labels[gal_components.ptypes != "stars"])
     )

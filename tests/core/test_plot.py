@@ -186,8 +186,8 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
 
 
 # PLOTS =======================================================================
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot(galaxy, format):
     gal = galaxy(seed=42)
@@ -206,8 +206,8 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
     )
 
 
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
     gal = galaxy(seed=42)
@@ -233,7 +233,6 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
     )
 
 
-@pytest.mark.slow
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
@@ -252,7 +251,6 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
     sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax, marker=".")
 
 
-@pytest.mark.slow
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
@@ -269,8 +267,8 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     sns.histplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
 
 
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
@@ -464,8 +462,8 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_lmap_callable(read_hdf5_galaxy):
 # PLOTS =======================================================================
 
 
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @pytest.mark.parametrize("format", ["png"])
 def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, format):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -500,7 +498,6 @@ def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, format):
     )
 
 
-@pytest.mark.slow
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_sdyn_scatter(read_hdf5_galaxy, fig_test, fig_ref):
@@ -526,8 +523,8 @@ def test_GalaxyPlotter_sdyn_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     exp_ax.set_ylabel("eps_r")
 
 
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -551,8 +548,8 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
     exp_ax.set_xlabel("eps")
 
 
-@pytest.mark.slow
 @pytest.mark.plot
+@pytest.mark.slow
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
