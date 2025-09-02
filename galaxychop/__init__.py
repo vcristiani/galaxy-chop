@@ -19,6 +19,7 @@ Implementation of a few galaxy dynamic decomposition methods.
 # =============================================================================
 
 from . import constants, models, preproc, utils
+from .config import config
 from .core import (
     Galaxy,
     NoGravitationalPotentialError,
@@ -44,6 +45,7 @@ __all__ = [
     "mkgalaxy",
     "read_hdf5",
     "to_hdf5",
+    "config",
     "constants",
     "GchopPipeline",
     "mkpipe",
