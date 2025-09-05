@@ -32,7 +32,7 @@ dependencies = [
     "scikit-learn",
     "astropy",
     "uttrs",
-    "pandas",
+    "pandas >= 2.0",
     "h5py",
     "custom_inherit",
     "seaborn",
