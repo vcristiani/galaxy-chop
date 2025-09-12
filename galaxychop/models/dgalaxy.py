@@ -33,35 +33,13 @@ from .. import core
 
 
 @attr.s(frozen=True, slots=True, repr=False)
-class Components:
-    """
-    Class of components resulting from dynamic decomposition.
-
-    This class creates the components of the galaxy from the result of the
-    dynamic decomposition.
-
-    Parameters
-    ----------
-    labels : np.ndarray
-        1D array with the index of the component to which each particle
-        belongs. Shape: (n,1).
-    ptypes : np.ndarray
-        Indicates the type of particle: stars = 0, dark matter = 1, gas = 2.
-        Shape: (n,1).
-    m : np.ndarray
-        Particle masses. Shape: (n,1).
-    lmap : dict
-        Meaning of the component numbers.
-    probabilities : np.ndarray or None
-       1D array with probabilities of the particles to belong to each
-       component, in case the dynamic decomposition model includes them.
-       Shape: (n,1).
-       Otherwise it adopts the value None.
+class DecomposedGalaxy(core.Galaxy):
     """
 
-    labels = attr.ib(validator=vldt.instance_of(np.ndarray))
-    ptypes = attr.ib(validator=vldt.instance_of(np.ndarray))
-    m = attr.ib(validator=vldt.instance_of(np.ndarray))
+    """
+
+
+    component = attr.ib(validator=vldt.instance_of(np.ndarray))
     lmap = attr.ib(validator=vldt.instance_of(dict))
     probabilities = attr.ib(
         validator=vldt.optional(vldt.instance_of(np.ndarray))
@@ -76,11 +54,7 @@ class Components:
         same as ptypes and labels.
 
         """
-        lens = {len(self.labels), len(self.ptypes), len(self.m)}
-        if self.probabilities is not None:
-            lens.add(len(self.probabilities))
-        if len(lens) > 1:
-            raise ValueError("All length must be the same")
+        # TODO: VALIDATION
 
     def map_labels(self, lmap=None):
         """
@@ -245,39 +219,6 @@ class Components:
         return describe_df
 
 
-# =============================================================================
-# DECOMPOSEDGALAXY CLASS
-# =============================================================================
 
 
-@uttr.s(frozen=True, repr=False)
-class DecomposedGalaxy:
-    """
-    DecomposedGalaxy class.
 
-    Builds an object from a ``Galaxy`` and its ``Components`` obtained
-    after applying a dynamical decomposition method to it.
-
-    Parameters
-    ----------
-    Galaxy : ``Galaxy``
-        Instance of ``Galaxy``.
-    Component : ``Component``
-        Instance of ``Component``.
-
-    Attributes
-    ----------
-    WIP
-
-    """
-
-    galaxy = uttr.ib(validator=attr.validators.instance_of(core.data.Galaxy))
-    components = uttr.ib(validator=attr.validators.instance_of(Components))
-
-    def __len__(self):
-        """len(x) <=> x.__len__()."""
-        return len(self.galaxy)
-
-    def __repr__(self):
-        """repr(x) <=> x.__repr__()."""
-        return repr(self.galaxy) + "\n" + repr(self.components)
