@@ -44,10 +44,11 @@ class DecomposedGalaxy(Galaxy):
     )
 
     def __attrs_post_init__(self):
+        super().__attrs_post_init__()
         # Validate lengths match
-        if len(self.galaxy) != len(self.components):
+        if len(self) != len(self.components):
             raise ValueError(
-                f"galaxy length ({len(self.galaxy)}) must match "
+                f"galaxy length ({len(self)}) must match "
                 f"components length ({len(self.components)})"
             )
 
@@ -80,176 +81,36 @@ class DecomposedGalaxy(Galaxy):
         if self.probabilities is not None:
             self.probabilities.setflags(write=False)
 
-    def __getattr__(self, a):
-        return getattr(self.pset, a)
+    def to_dict(self, *, ptypes=None, attributes=None):
+        all_dgal_attributes = [
+            "components",
+            "component_labels",
+            "probabilities",
+        ]
+        gal_attributes = [a for a in attributes if a not in dgal_attributes]
 
-    def __repr__(self):
-        """repr(x) <=> x.__repr__()."""
-        n_components = len(self.unique_components)
-        has_probs = self.probabilities is not None
-        return (
-            f"<DecomposedGalaxy n_components={n_components}, "
-            f"has_probs={has_probs}>"
-        )
-
-    def __len__(self):
-        return len(self.pset)
-
-    @property
-    def unique_components(self):
-        """Get unique components in the component set."""
-        return np.unique(self.components)
-
-    def get_particles_by_component(self, component):
-        """
-        Get particles with specific component.
-
-        Parameters
-        ----------
-        component : int or str
-            Component to filter by.
-
-        Returns
-        -------
-        ComponentParticleSet
-            New instance with only particles matching the component.
-        """
-        mask = self.components == component
-
-        # Create filtered ParticleSet
-        filtered_pset = ParticleSet(
-            ptype=self.pset.ptype,
-            m=self.pset.m[mask],
-            x=self.pset.x[mask],
-            y=self.pset.y[mask],
-            z=self.pset.z[mask],
-            vx=self.pset.vx[mask],
-            vy=self.pset.vy[mask],
-            vz=self.pset.vz[mask],
-            potential=(
-                self.pset.potential[mask] if self.pset.has_potential_ else None
-            ),
-            softening=self.pset.softening,
-        )
-
-        filtered_probs = (
-            self.probabilities[mask]
-            if self.probabilities is not None
-            else None
-        )
-
-        return ComponentParticleSet(
-            pset=filtered_pset,
-            components=self.components[mask],
-            component_labels=self.component_labels,
-            probabilities=filtered_probs,
-        )
-
-    def get_component_label(self, component):
-        """
-        Get human-readable label for component.
-
-        Parameters
-        ----------
-        component : int or str
-            Component to get label for.
-
-        Returns
-        -------
-        str
-            Human-readable label for the component.
-        """
-        return self.component_labels.get(component)
-
-    def component_counts(self):
-        """
-        Get count of particles per component.
-
-        Returns
-        -------
-        dict
-            Dictionary mapping component -> count.
-        """
-        unique, counts = np.unique(self.components, return_counts=True)
-        return dict(zip(unique, counts))
-
-    def to_dict(self, *, attributes=None):
-        """
-        Convert to dictionary including components and probabilities.
-
-        Parameters
-        ----------
-        attributes : tuple, optional
-            Attributes to include from the ParticleSet.
-
-        Returns
-        -------
-        dict
-            Dictionary with all data including components and probabilities.
-        """
-        # Get base ParticleSet dict
-        the_dict = self.pset.to_dict(attributes=attributes)
-
-        # Add components
-        the_dict["components"] = self.components.copy()
-        the_dict["components"].setflags(write=True)
-
-        # Add probabilities if available
-        if self.probabilities is not None:
-            the_dict["probabilities"] = self.probabilities.copy()
-            the_dict["probabilities"].setflags(write=True)
-        else:
-            the_dict["probabilities"] = np.full(len(self), np.nan)
-
-        # Add component labels
-        component_names = np.array(
-            [self.component_labels[comp] for comp in self.components]
-        )
-        the_dict["component_names"] = component_names
-
+        the_dict = super().to_dict(ptypes=ptypes, attributes=attributes)
+        the_dict["components"] = self.components
+        the_dict["component_labels"] = self.component_labels
+        the_dict["probabilities"] = self.probabilities
         return the_dict
 
-    def to_dataframe(self, *, attributes=None):
-        """
-        Convert to pandas DataFrame including components and probabilities.
-
-        Parameters
-        ----------
-        attributes : tuple, optional
-            Attributes to include from the ParticleSet.
-
-        Returns
-        -------
-        DataFrame
-            pandas DataFrame with all data.
-        """
-        the_dict = self.to_dict(attributes=attributes)
-        return pd.DataFrame(the_dict)
-
     def copy(self):
-        """
-        Make a copy of the ComponentParticleSet.
-
-        Returns
-        -------
-        ComponentParticleSet
-            New instance with copied data.
-        """
-        probabilities = (
+        new = super().copy()
+        # we need to create a new object with the copied components
+        new_dict = new.disassemble()
+        new_dict["components"] = self.components.copy()
+        new_dict["component_labels"] = self.component_labels.copy()
+        new_dict["probabilities"] = (
             self.probabilities.copy()
             if self.probabilities is not None
             else None
         )
+        return DecomposedGalaxy(**new_dict)
 
-        return ComponentParticleSet(
-            pset=self.pset.copy(),
-            components=self.components.copy(),
-            component_labels=self.component_labels.copy(),
-            probabilities=probabilities,
-        )
-
-
-class DecomposedGalaxy:
-    def __init__(self, galaxy, components):
-        self.galaxy = galaxy
-        self.components = components
+    def disassemble(self):
+        the_dict = super().disassemble()
+        the_dict["components"] = self.components
+        the_dict["component_labels"] = self.component_labels.copy()
+        the_dict["probabilities"] = self.probabilities
+        return the_dict
