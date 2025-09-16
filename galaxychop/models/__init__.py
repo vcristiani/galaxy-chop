@@ -18,7 +18,7 @@ from .abc import (
     GalaxyDecomposerABC,
     hparam,
 )
-from .dgalaxy import Components, DecomposedGalaxy
+from .dgalaxy import  DecomposedGalaxy
 from .gaussian_mixture import (
     AutoGaussianMixture,
     DynamicStarsGaussianDecomposerABC,

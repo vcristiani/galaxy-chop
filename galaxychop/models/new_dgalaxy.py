@@ -14,6 +14,8 @@
 # IMPORTS
 # =============================================================================
 
+import functools
+
 
 from attr import validators as vldt
 
@@ -24,7 +26,7 @@ import pandas as pd
 import uttr
 
 
-from ..core.data import Galaxy
+from ..core.data import Galaxy, mkgalaxy
 
 
 # =============================================================================
@@ -32,10 +34,13 @@ from ..core.data import Galaxy
 # =============================================================================
 
 
-@uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
-class DecomposedGalaxy(Galaxy):
+@uttr.s(frozen=True, slots=True, repr=False)
+class DecomposedGalaxy:
 
     # Decomposed galaxy attributes
+    galaxy: Galaxy = uttr.ib(validator=vldt.instance_of(Galaxy))
+
+    method: str = uttr.ib(converter=str)
     components: np.ndarray = uttr.ib(converter=np.copy)
     component_labels: dict = uttr.ib(validator=vldt.instance_of(dict))
     probabilities: np.ndarray = uttr.ib(
@@ -44,13 +49,16 @@ class DecomposedGalaxy(Galaxy):
     )
 
     def __attrs_post_init__(self):
-        super().__attrs_post_init__()
+        if len(self.method) == 0:
+            raise ValueError("method cannot be empty")
+
         # Validate lengths match
-        if len(self) != len(self.components):
+        if len(self.galaxy) != len(self.components):
             raise ValueError(
                 f"galaxy length ({len(self)}) must match "
                 f"components length ({len(self.components)})"
             )
+        self.components.setflags(write=False)
 
         # Validate probabilities
         if self.probabilities is not None:
@@ -65,52 +73,46 @@ class DecomposedGalaxy(Galaxy):
             ):
                 raise ValueError("probabilities must be in range [0, 1]")
 
-        # Validate component_labels has all necessary keys
-        unique_components = np.unique(self.components)
-        missing_keys = set(unique_components) - set(
-            self.component_labels.keys()
-        )
-        if missing_keys:
-            raise ValueError(
-                "component_labels is missing keys "
-                f"for components: {missing_keys}"
-            )
-
-        # Make arrays read-only like in ParticleSet
-        self.components.setflags(write=False)
-        if self.probabilities is not None:
             self.probabilities.setflags(write=False)
 
-    def to_dict(self, *, ptypes=None, attributes=None):
-        all_dgal_attributes = [
-            "components",
-            "component_labels",
-            "probabilities",
-        ]
-        gal_attributes = [a for a in attributes if a not in dgal_attributes]
+    @property
+    def unique_components(self):
+        return set(np.unique(self.components))
 
-        the_dict = super().to_dict(ptypes=ptypes, attributes=attributes)
-        the_dict["components"] = self.components
-        the_dict["component_labels"] = self.component_labels
-        the_dict["probabilities"] = self.probabilities
-        return the_dict
+    @property
+    def unique_components_labels(self):
+        return {
+            str(self.component_labels.get(component, component))
+            for component in self.unique_components
+        }
+
+    @property
+    def has_probabilities(self):
+        return self.probabilities is not None
+
+    def __len__(self):
+        return len(self.components)
+
+    def __getattr__(self, a):
+        """x.__getattr__(y) <==> x.y."""
+        return getattr(self.galaxy, a)
+
+    def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
+
+        cls_name = type(self).__name__
+        gal_repr = ", ".join(repr(self.galaxy).split(", ")[1:-1])
+        method = f"method={self.method!r}"
+        components = f"components={self.unique_components_labels}"
+        probs = f"probabilities={self.has_probabilities}"
+
+        return f"<{cls_name} {method}, {gal_repr}, {probs}, {components}>"
 
     def copy(self):
-        new = super().copy()
-        # we need to create a new object with the copied components
-        new_dict = new.disassemble()
-        new_dict["components"] = self.components.copy()
-        new_dict["component_labels"] = self.component_labels.copy()
-        new_dict["probabilities"] = (
-            self.probabilities.copy()
-            if self.probabilities is not None
-            else None
+        return self.__class__(
+            galaxy=self.galaxy,
+            method=self.method,
+            components=self.components,
+            component_labels=self.component_labels,
+            probabilities=self.probabilities,
         )
-        return DecomposedGalaxy(**new_dict)
-
-    def disassemble(self):
-        the_dict = super().disassemble()
-        the_dict["components"] = self.components
-        the_dict["component_labels"] = self.component_labels.copy()
-        the_dict["probabilities"] = self.probabilities
-        return the_dict

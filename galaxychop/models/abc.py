@@ -24,7 +24,7 @@ import numpy as np
 
 import pandas as pd
 
-from . import dgalaxy
+from . import new_dgalaxy as dgalaxy
 from .. import constants as consts
 from .. import core
 from ..core import sdynamics as sdyn
@@ -456,19 +456,14 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             [core.ParticleSetType.mktype(yi).humanize() for yi in y]
         )
 
-        # return the instance
-        mass = galaxy.to_dataframe(
-            ptypes=_PTYPES_ORDER, attributes=["m"]
-        ).m.to_numpy()
+        component_labels = self.get_lmap().copy()
 
-        # we make the components and wrap they with the galaxy
-        # in a "DecomposedGalaxy" class.
-        components = dgalaxy.Components(
-            labels=final_labels,
-            ptypes=final_y,
+        cls_name = type(self).__name__
+
+        return dgalaxy.DecomposedGalaxy(
+            galaxy=galaxy,
+            method=cls_name,
+            components=final_labels,
+            component_labels=component_labels,
             probabilities=final_probs,
-            m=mass,
-            lmap=self.get_lmap().copy(),
         )
-
-        return dgalaxy.DecomposedGalaxy(galaxy, components)
