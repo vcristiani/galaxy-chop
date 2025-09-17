@@ -461,9 +461,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         cls_name = type(self).__name__
 
         return dgalaxy.DecomposedGalaxy(
-            galaxy=galaxy,
+            stars=galaxy.stars,
+            dark_matter=galaxy.dark_matter,
+            gas=galaxy.gas,
             method=cls_name,
-            components=final_labels,
+            component=final_labels,
             component_labels=component_labels,
             probabilities=final_probs,
         )

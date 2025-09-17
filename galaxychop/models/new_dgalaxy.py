@@ -17,6 +17,7 @@
 import functools
 
 
+import attr
 from attr import validators as vldt
 
 import numpy as np
@@ -26,7 +27,7 @@ import pandas as pd
 import uttr
 
 
-from ..core.data import Galaxy, mkgalaxy
+from ..core.data import Galaxy, mkgalaxy, ParticleSetType, ParticleSet
 
 
 # =============================================================================
@@ -34,38 +35,38 @@ from ..core.data import Galaxy, mkgalaxy
 # =============================================================================
 
 
-@uttr.s(frozen=True, slots=True, repr=False)
-class DecomposedGalaxy:
-
-    # Decomposed galaxy attributes
-    galaxy: Galaxy = uttr.ib(validator=vldt.instance_of(Galaxy))
+@uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
+class DecomposedGalaxy(Galaxy):
 
     method: str = uttr.ib(converter=str)
-    components: np.ndarray = uttr.ib(converter=np.copy)
+    component: np.ndarray = uttr.ib(converter=np.copy)
     component_labels: dict = uttr.ib(validator=vldt.instance_of(dict))
     probabilities: np.ndarray = uttr.ib(
         default=None,
         converter=lambda v: np.copy(v) if v is not None else v,
     )
 
+    # INTERNAL =================================================================
+
     def __attrs_post_init__(self):
+        super().__attrs_post_init__()
         if len(self.method) == 0:
             raise ValueError("method cannot be empty")
 
         # Validate lengths match
-        if len(self.galaxy) != len(self.components):
+        if len(self) != len(self.component):
             raise ValueError(
                 f"galaxy length ({len(self)}) must match "
-                f"components length ({len(self.components)})"
+                f"component length ({len(self.component)})"
             )
-        self.components.setflags(write=False)
+        self.component.setflags(write=False)
 
         # Validate probabilities
         if self.probabilities is not None:
-            if len(self.probabilities) != len(self.components):
+            if len(self.probabilities) != len(self.component):
                 raise ValueError(
                     f"probabilities length ({len(self.probabilities)}) "
-                    f"must match components length ({len(self.components)})"
+                    f"must match component length ({len(self.component)})"
                 )
 
             if not np.all(
@@ -75,44 +76,118 @@ class DecomposedGalaxy:
 
             self.probabilities.setflags(write=False)
 
-    @property
-    def unique_components(self):
-        return set(np.unique(self.components))
+    def __repr__(self):
+        """repr(x) <=> x.__repr__()."""
+
+        cls_name = type(self).__name__
+        gal_repr = ", ".join(super().__repr__().split(", ")[1:-1])
+        method = f"method={self.method!r}"
+        component = f"component={sorted(self.unique_component_labels)}"
+        probs = f"probabilities={self.has_probabilities}"
+
+        return f"<{cls_name} {method}, {gal_repr}, {probs}, {component}>"
+
+    # PROPERTIES ===============================================================
 
     @property
-    def unique_components_labels(self):
+    def unique_component(self):
+        return set(np.unique(self.component))
+
+    @property
+    def unique_component_labels(self):
         return {
             str(self.component_labels.get(component, component))
-            for component in self.unique_components
+            for component in self.unique_component
         }
 
     @property
     def has_probabilities(self):
         return self.probabilities is not None
 
-    def __len__(self):
-        return len(self.components)
+    # UTILITIES ================================================================
 
-    def __getattr__(self, a):
-        """x.__getattr__(y) <==> x.y."""
-        return getattr(self.galaxy, a)
+    def label_component(self, labels=None):
+        """
+        Access all the labels mapped to the lmap dictionary.
 
-    def __repr__(self):
-        """repr(x) <=> x.__repr__()."""
+        If no lmap is provided, the function tries to use the internal
+        lmap dict. If the instance doesn't has an lmap dict this method
+        is equivalent to access the labels attribute, but returns a copy
+        with object as dtype.
 
-        cls_name = type(self).__name__
-        gal_repr = ", ".join(repr(self.galaxy).split(", ")[1:-1])
-        method = f"method={self.method!r}"
-        components = f"components={self.unique_components_labels}"
-        probs = f"probabilities={self.has_probabilities}"
+        """
+        lmap = self.component_labels if labels is None else lmap
 
-        return f"<{cls_name} {method}, {gal_repr}, {probs}, {components}>"
+        def lmapper(k):
+            return lmap.get(k, k)
+
+        return np.fromiter(map(lmapper, self.component), object)
+
+    def to_dataframe(self, *, ptypes=None, attributes=None):
+    
+        value_makers = {
+            "method": lambda: np.full(len(self), self.method),
+            "component": lambda: self.component.copy(),
+            "label": lambda: self.label_component(),
+            "has_probabilities": lambda: (
+                np.full(len(self), self.has_probabilities)
+            ),
+            "probabilities": lambda: (
+                self.probabilities.copy()
+                if self.has_probabilities
+                else np.full(len(self), np.nan)
+            ),
+        }
+
+        all_dgal_attributes = set(value_makers)
+
+        if attributes is not None:
+
+            attributes = set(attributes)
+
+            dgal_attributes = attributes & all_dgal_attributes
+            gal_attributes = attributes - all_dgal_attributes
+            gal_attributes.update(["ptype", "ptypev"])
+
+        else:
+            gal_attributes = None
+            dgal_attributes = all_dgal_attributes
+
+        df = super().to_dataframe(ptypes=None, attributes=gal_attributes)
+
+        for aname in sorted(dgal_attributes):
+            mkvalue = value_makers[aname]
+            avalue = mkvalue()
+            avalue.setflags(write=True)
+            df[aname] = avalue
+
+        if ptypes is not None:
+            ptypesv = list(map(ParticleSetType.mktype, ptypes))
+            df = df[df.ptypev.isin(ptypesv)]
+
+        if "label" in df:
+            df['label'] = df['label'].fillna(df['ptype'])
+
+        if "ptypev" not in attributes:
+            df.drop("ptypev", axis=1, inplace=True)
+        if "ptype" not in attributes:
+            df.drop("ptype", axis=1, inplace=True)
+
+        return df
 
     def copy(self):
-        return self.__class__(
-            galaxy=self.galaxy,
+        cls = type(self)
+        new = cls(
+            stars=self.stars.copy(),
+            dark_matter=self.dark_matter.copy(),
+            gas=self.gas.copy(),
             method=self.method,
-            components=self.components,
+            component=self.component,
             component_labels=self.component_labels,
             probabilities=self.probabilities,
         )
+        return new
+
+    def to_dict(self):
+        # primero filtrar
+        ...
