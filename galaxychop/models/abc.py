@@ -208,6 +208,11 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError()
 
+    def get_lmap(self):
+        """Map the numeric labels of the components into a human readable \
+        text."""
+        return {}
+
     # internal ================================================================
 
     def __repr__(self):
@@ -377,7 +382,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         """
         if probs is None:
-            return None
+            return np.full((len(X), 1), np.nan)
 
         # the number of particles are incorrect so we simple remove the data
         probs_shape = list(np.shape(probs)[1:])
@@ -393,10 +398,24 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return new_probs
 
-    def get_lmap(self):
-        """Map the numeric labels of the components into a human readable \
-        text."""
-        return {}
+
+
+    def humanize_components(self, X, labels, component_label_mapper):
+
+        def mapper(x, ptype):
+            if x in component_label_mapper:
+                return component_label_mapper[x]
+            return core.ParticleSetType.mktype(ptype).humanize()
+
+        import ipdb; ipdb.set_trace()
+
+        # new_labels[rows_mask] = np.fromiter(component_label_mapper.get(l, "") for l in labels, dtype=object)
+        # return new_labels
+
+
+        # np.array(
+        #     [core.ParticleSetType.mktype(yi).humanize() for yi in y]
+        # )
 
     def decompose(self, galaxy):
         """
@@ -446,15 +465,21 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         labels, probs = self.split(X=X_clean, y=y_clean, attributes=attributes)
 
         # retrieve and fix the labels
-        final_labels = self.complete_labels(
+        component = self.complete_labels(
             X=X, labels=sorted(labels), rows_mask=rows_mask
         )
-        final_probs = self.complete_probs(
+        probs = self.complete_probs(
             X=X, probs=probs, rows_mask=rows_mask
         )
-        final_y = np.array(
-            [core.ParticleSetType.mktype(yi).humanize() for yi in y]
+
+        import ipdb; ipdb.set_trace()
+
+        component_labels = self.humanize_components(
+            X=X, labels=component, component_label_mapper=self.get_lmap()
         )
+
+
+        import ipdb; ipdb.set_trace()
 
         component_labels = self.get_lmap().copy()
 
@@ -465,7 +490,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             dark_matter=galaxy.dark_matter,
             gas=galaxy.gas,
             method=cls_name,
-            component=final_labels,
+            component=component,
             component_labels=component_labels,
-            probabilities=final_probs,
+            probabilities=probs,
         )

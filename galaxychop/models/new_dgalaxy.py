@@ -46,7 +46,7 @@ class DecomposedGalaxy(Galaxy):
         converter=lambda v: np.copy(v) if v is not None else v,
     )
 
-    # INTERNAL =================================================================
+    # INTERNAL ================================================================
 
     def __attrs_post_init__(self):
         super().__attrs_post_init__()
@@ -87,7 +87,7 @@ class DecomposedGalaxy(Galaxy):
 
         return f"<{cls_name} {method}, {gal_repr}, {probs}, {component}>"
 
-    # PROPERTIES ===============================================================
+    # PROPERTIES ==============================================================
 
     @property
     def unique_component(self):
@@ -104,7 +104,7 @@ class DecomposedGalaxy(Galaxy):
     def has_probabilities(self):
         return self.probabilities is not None
 
-    # UTILITIES ================================================================
+    # UTILITIES ===============================================================
 
     def label_component(self, labels=None):
         """
@@ -124,7 +124,7 @@ class DecomposedGalaxy(Galaxy):
         return np.fromiter(map(lmapper, self.component), object)
 
     def to_dataframe(self, *, ptypes=None, attributes=None):
-    
+
         value_makers = {
             "method": lambda: np.full(len(self), self.method),
             "component": lambda: self.component.copy(),
