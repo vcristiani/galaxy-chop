@@ -398,24 +398,25 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return new_probs
 
+    def humanize_components(self, X, labels, probs, component_label_mapper):
 
+        def mapper(component, ptypev):
+            ptype = core.ParticleSetType.mktype(ptypev).humanize()
+            return component_label_mapper.get(component, ptype)
 
-    def humanize_components(self, X, labels, component_label_mapper):
+        coso = np.column_stack(
+            (X[:, -1], labels, probs)
+        )  # coso y df deberias cambiar el nombre
+        probs_columns = [f"prob_{i}" for i in range(probs.shape[1])]
+        df = pd.DataFrame(
+            coso, columns=["ptypev", "component"] + probs_columns
+        )
 
-        def mapper(x, ptype):
-            if x in component_label_mapper:
-                return component_label_mapper[x]
-            return core.ParticleSetType.mktype(ptype).humanize()
+        df["label"] = df.apply(
+            lambda x: mapper(x["component"], x["ptypev"]), axis=1
+        )
 
-        import ipdb; ipdb.set_trace()
-
-        # new_labels[rows_mask] = np.fromiter(component_label_mapper.get(l, "") for l in labels, dtype=object)
-        # return new_labels
-
-
-        # np.array(
-        #     [core.ParticleSetType.mktype(yi).humanize() for yi in y]
-        # )
+        return df
 
     def decompose(self, galaxy):
         """
@@ -468,18 +469,19 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         component = self.complete_labels(
             X=X, labels=sorted(labels), rows_mask=rows_mask
         )
-        probs = self.complete_probs(
-            X=X, probs=probs, rows_mask=rows_mask
-        )
+        probs = self.complete_probs(X=X, probs=probs, rows_mask=rows_mask)
 
-        import ipdb; ipdb.set_trace()
-
+        # this make a series for convenience
         component_labels = self.humanize_components(
-            X=X, labels=component, component_label_mapper=self.get_lmap()
+            X=X,
+            labels=component,
+            probs=probs,
+            component_label_mapper=self.get_lmap(),
         )
 
+        import ipdb
 
-        import ipdb; ipdb.set_trace()
+        ipdb.set_trace()
 
         component_labels = self.get_lmap().copy()
 

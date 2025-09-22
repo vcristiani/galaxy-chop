@@ -256,4 +256,3 @@ config = bunch.Bunch(
         "halo": _halo,
     },
 )
-

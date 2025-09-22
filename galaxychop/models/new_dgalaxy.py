@@ -166,7 +166,7 @@ class DecomposedGalaxy(Galaxy):
             df = df[df.ptypev.isin(ptypesv)]
 
         if "label" in df:
-            df['label'] = df['label'].fillna(df['ptype'])
+            df["label"] = df["label"].fillna(df["ptype"])
 
         if "ptypev" not in attributes:
             df.drop("ptypev", axis=1, inplace=True)

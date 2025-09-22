@@ -418,7 +418,9 @@ class Galaxy:
         dm_repr = f"dark_matter={len(self.dark_matter)}"
         gas_repr = f"gas={len(self.gas)}"
         has_pot = f"potential={self.has_potential_}"
-        return f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
+        return (
+            f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
+        )
 
     # UTILITIES ===============================================================
 
@@ -802,7 +804,6 @@ class Galaxy:
 # =============================================================================
 # API FUNCTIONS
 # =============================================================================
-
 
 
 def mkgalaxy(

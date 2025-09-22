@@ -34,10 +34,7 @@ from .. import core
 
 @attr.s(frozen=True, slots=True, repr=False)
 class DecomposedGalaxy(core.Galaxy):
-    """
-
-    """
-
+    """ """
 
     component = attr.ib(validator=vldt.instance_of(np.ndarray))
     lmap = attr.ib(validator=vldt.instance_of(dict))
@@ -217,8 +214,3 @@ class DecomposedGalaxy(core.Galaxy):
         describe_df = pd.DataFrame(rows, index=components, columns=row.keys())
 
         return describe_df
-
-
-
-
-
