@@ -18,8 +18,8 @@ import pytest
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemethed():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_attributes(self):
-            return super().get_attributes()
+        def get_stellar_attributes(self):
+            return super().get_stellar_attributes()
 
         def split(self, X, y, attributes):
             return super().split(X, y, attributes)
@@ -30,7 +30,7 @@ def test_GalaxyDecomposerABC_not_implemethed():
     decomposer = Decomposer()
 
     with pytest.raises(NotImplementedError):
-        decomposer.get_attributes()
+        decomposer.get_stellar_attributes()
 
     with pytest.raises(NotImplementedError):
         decomposer.split(None, None, None)
@@ -43,7 +43,7 @@ def test_GalaxyDecomposerABC_not_implemethed():
 def test_GalaxyDecomposerABC_invalid_bins(bins_value):
     # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_attributes(self):
+        def get_stellar_attributes(self):
             ...
 
         def split(self, X, y, attributes):
@@ -62,7 +62,7 @@ def test_GalaxyDecomposerABC_repr():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         other = gchop.models.hparam(default=1)
 
-        def get_attributes(self):
+        def get_stellar_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
 
         def split(self, X, y, attributes):
@@ -85,7 +85,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 
     # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_attributes(self):
+        def get_stellar_attributes(self):
             ...
 
         def split(self, X, y, attributes):
@@ -125,7 +125,7 @@ def test_GalaxyDecomposerABC_attributes_matrix(read_hdf5_galaxy):
 def test_GalaxyDecomposerABC_complete_labels():
     # fmt: off
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_attributes(self):
+        def get_stellar_attributes(self):
             ...
 
         def split(self):
@@ -153,7 +153,7 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_attributes(self):
+        def get_stellar_attributes(self):
             return ["eps"]
 
         def split(self, X, y, attributes):

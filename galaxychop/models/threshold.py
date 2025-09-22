@@ -101,8 +101,8 @@ class JThreshold(GalaxyDecomposerABC):
                 f"(-1,1). Got eps_cut {eps_cut}"
             )
 
-    @doc_inherit(GalaxyDecomposerABC.get_attributes)
-    def get_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
+    def get_stellar_attributes(self):
         """
         Notes
         -----
@@ -132,6 +132,6 @@ class JThreshold(GalaxyDecomposerABC):
 
         return labels, None
 
-    @doc_inherit(GalaxyDecomposerABC.get_lmap)
-    def get_lmap(self):
+    @doc_inherit(GalaxyDecomposerABC.get_component_name_mapping)
+    def get_component_name_mapping(self):
         return {0: "Spheroid", 1: "Disk"}
