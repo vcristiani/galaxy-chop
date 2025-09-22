@@ -15,6 +15,7 @@
 # =============================================================================
 
 import functools
+from collections import OrderedDict
 
 
 import attr
@@ -36,15 +37,102 @@ from ..core.data import Galaxy, mkgalaxy, ParticleSetType, ParticleSet
 
 
 @uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
+class ComponentParticleSet(ParticleSet):
+    """A set of particles with component information.
+
+    This class extends `ParticleSet` to include information about the
+    kinematic components to which the particles belong.
+
+    Parameters
+    ----------
+    components : np.ndarray
+        An array of integers identifying the component of each particle.
+    labels : np.ndarray
+        An array of strings with the label of the component for each particle.
+    probabilities : np.ndarray
+        An array of probabilities, one for each particle, indicating the
+        likelihood of it belonging to its assigned component.
+
+    """
+
+    components: np.ndarray = uttr.ib(converter=np.copy)
+    labels: np.ndarray = uttr.ib(converter=np.copy)
+    probabilities: np.ndarray = uttr.ib(converter=np.copy)
+
+    def __attrs_post_init__(self):
+        # This method is called after all attributes are initialized.
+        super().__attrs_post_init__()
+
+        if len(self) != len(self.components):
+            raise ValueError(
+                f"galaxy length ({len(self)}) must match "
+                f"components length ({len(self.components)})"
+            )
+        self.components.setflags(write=False)
+
+        if len(self) != len(self.labels):
+            raise ValueError(
+                f"galaxy length ({len(self)}) must match "
+                f"labels length ({len(self.labels)})"
+            )
+        self.labels.setflags(write=False)
+
+        # Validate probabilities.
+        if len(self.probabilities) != len(self):
+            raise ValueError(
+                f"probabilities length ({len(self.probabilities)}) "
+                f"must match particle set length ({len(self)})"
+            )
+
+        # Ensure all probability values are between 0 and 1, ignoring NaNs.
+        non_nan_probs = self.probabilities[~np.isnan(self.probabilities)]
+        if not np.all((non_nan_probs >= 0) & (non_nan_probs <= 1)):
+            raise ValueError(
+                "probabilities must be in the range [0, 1] (ignoring nans)"
+            )
+
+        # Make the probabilities array read-only.
+        self.probabilities.setflags(write=False)
+
+    def get_value_makers(self):
+        value_makers = super().get_value_makers()
+        value_makers.update(
+            {
+                "components": lambda: self.components.copy(),
+                "labels": lambda: self.labels.copy(),
+                "probabilities": lambda: self.probabilities.copy(),
+            }
+        )
+        return value_makers
+
+    def copy(self):
+        "Make a copy of the ComponentParticleSet."
+        cls = type(self)
+        new = cls(
+            ptype=self.ptype,
+            m=self.m.copy(),
+            x=self.x.copy(),
+            y=self.y.copy(),
+            z=self.z.copy(),
+            vx=self.vx.copy(),
+            vy=self.vy.copy(),
+            vz=self.vz.copy(),
+            potential=self.potential.copy() if self.has_potential_ else None,
+            softening=float(self.softening.value),
+            components=self.components.copy(),
+            labels=self.labels.copy(),
+            probabilities=self.probabilities.copy(),
+        )
+        return new
+
+
+@uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
 class DecomposedGalaxy(Galaxy):
 
     method: str = uttr.ib(converter=str)
     component: np.ndarray = uttr.ib(converter=np.copy)
     component_labels: dict = uttr.ib(validator=vldt.instance_of(dict))
-    probabilities: np.ndarray = uttr.ib(
-        default=None,
-        converter=lambda v: np.copy(v) if v is not None else v,
-    )
+    probabilities: np.ndarray = uttr.ib(converter=np.copy)
 
     # INTERNAL ================================================================
 
@@ -62,19 +150,20 @@ class DecomposedGalaxy(Galaxy):
         self.component.setflags(write=False)
 
         # Validate probabilities
-        if self.probabilities is not None:
-            if len(self.probabilities) != len(self.component):
-                raise ValueError(
-                    f"probabilities length ({len(self.probabilities)}) "
-                    f"must match component length ({len(self.component)})"
-                )
+        if len(self.probabilities) != len(self.component):
+            raise ValueError(
+                f"probabilities length ({len(self.probabilities)}) "
+                f"must match component length ({len(self.component)})"
+            )
 
-            if not np.all(
-                (self.probabilities >= 0) & (self.probabilities <= 1)
-            ):
-                raise ValueError("probabilities must be in range [0, 1]")
+        # Ensure all probability values are between 0 and 1, ignoring NaNs.
+        non_nan_probs = self.probabilities[~np.isnan(self.probabilities)]
+        if not np.all((non_nan_probs >= 0) & (non_nan_probs <= 1)):
+            raise ValueError(
+                "probabilities must be in the range [0, 1] (ignoring nans)"
+            )
 
-            self.probabilities.setflags(write=False)
+        self.probabilities.setflags(write=False)
 
     def __repr__(self):
         """repr(x) <=> x.__repr__()."""

@@ -243,23 +243,7 @@ class ParticleSet:
         return len(self.m)
 
     # UTILITIES ===============================================================
-    def to_dict(self, *, attributes=None):
-        """
-        Convert the galaxy into a dict of array with coerced units.
-
-        Parameters
-        ----------
-        attributes: tuple, default value = None
-            Dictionary keys of ParticleSet parameters used to create the dict
-            If it's None, the data frame is constructed from all the
-            parameters of the ``ParticleSet class``.
-
-        Return
-        ------
-        dict :
-            dictionary with coerced units.
-
-        """
+    def get_value_makers(self):
         arr = self.arr_
         value_makers = {
             "ptype": lambda: np.full(len(self), self.ptype.humanize()),
@@ -287,6 +271,26 @@ class ParticleSet:
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
         }
+        return value_makers
+
+    def to_dict(self, *, attributes=None):
+        """
+        Convert the galaxy into a dict of array with coerced units.
+
+        Parameters
+        ----------
+        attributes: tuple, default value = None
+            Dictionary keys of ParticleSet parameters used to create the dict
+            If it's None, the data frame is constructed from all the
+            parameters of the ``ParticleSet class``.
+
+        Return
+        ------
+        dict :
+            dictionary with coerced units.
+
+        """
+        value_makers = self.get_value_makers()
         attributes = value_makers.keys() if attributes is None else attributes
         the_dict = OrderedDict()
         for aname in attributes:

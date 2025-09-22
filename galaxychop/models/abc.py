@@ -241,13 +241,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # we add the colum with the types, all the values from stellar_dynamics_dict
         # are stars
         stellar_dynamics_dict["ptypev"] = core.ParticleSetType.STARS.value
-        stellar_dynamics_df = pd.DataFrame({attr: stellar_dynamics_dict[attr] for attr in stellar_properties})
+        stellar_dynamics_df = pd.DataFrame(
+            {attr: stellar_dynamics_dict[attr] for attr in stellar_properties}
+        )
 
         # DARK_MATTER
         dark_matter_count = len(galaxy.dark_matter)
         dark_matter_nans = np.full(dark_matter_count, np.nan)
 
-        dark_matter_columns = {attr: dark_matter_nans for attr in stellar_properties}
+        dark_matter_columns = {
+            attr: dark_matter_nans for attr in stellar_properties
+        }
         dark_matter_columns["ptypev"] = core.ParticleSetType.DARK_MATTER.value
 
         dark_matter_df = pd.DataFrame(dark_matter_columns)
@@ -261,7 +265,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         gas_df = pd.DataFrame(gas_columns)
 
-        return pd.concat([stellar_dynamics_df, dark_matter_df, gas_df], ignore_index=True)
+        return pd.concat(
+            [stellar_dynamics_df, dark_matter_df, gas_df], ignore_index=True
+        )
 
     def extract_stellar_dynamics_matrix(self, galaxy, stellar_properties):
         """
@@ -301,7 +307,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         #     I'm going to need a lot of NANs that represent that gas and dm
         #     have no circularity.
         all_properties = list(stellar_properties) + ["ptypev"]
-        dynamics_dataframe = self._extract_stellar_dynamics_dataframe(galaxy, all_properties)
+        dynamics_dataframe = self._extract_stellar_dynamics_dataframe(
+            galaxy, all_properties
+        )
 
         # remove if ptypev is duplicated
         # dynamics_dataframe = dynamics_dataframe.loc[:, ~dynamics_dataframe.columns.duplicated()]
@@ -312,7 +320,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return X, y
 
-    def assign_components_to_all_particles(self, X, galactic_components, valid_stellar_mask):
+    def assign_components_to_all_particles(
+        self, X, galactic_components, valid_stellar_mask
+    ):
         """
         Assign galactic components to all particles.
 
@@ -345,7 +355,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         full_component_assignment[valid_stellar_mask] = galactic_components
         return full_component_assignment
 
-    def assign_probabilities_to_all_particles(self, X, membership_probabilities, valid_stellar_mask):
+    def assign_probabilities_to_all_particles(
+        self, X, membership_probabilities, valid_stellar_mask
+    ):
         """
         Assign membership probabilities to all particles.
 
@@ -393,22 +405,41 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         full_membership_probabilities = np.full(complete_shape, np.nan)
 
         # and now we inject the probs in the correct order
-        full_membership_probabilities[valid_stellar_mask] = membership_probabilities
+        full_membership_probabilities[valid_stellar_mask] = (
+            membership_probabilities
+        )
 
         return full_membership_probabilities
 
-    def create_physical_component_labels(self, X, full_component_assignment, full_membership_probabilities, component_name_mapper):
+    def create_physical_component_labels(
+        self,
+        X,
+        full_component_assignment,
+        full_membership_probabilities,
+        component_name_mapper,
+    ):
 
         def physical_name_mapper(galactic_component, particle_type_value):
-            particle_type_name = core.ParticleSetType.mktype(particle_type_value).humanize()
-            return component_name_mapper.get(galactic_component, particle_type_name)
+            particle_type_name = core.ParticleSetType.mktype(
+                particle_type_value
+            ).humanize()
+            return component_name_mapper.get(
+                galactic_component, particle_type_name
+            )
 
         particle_component_data = np.column_stack(
-            (X[:, -1], full_component_assignment, full_membership_probabilities)
+            (
+                X[:, -1],
+                full_component_assignment,
+                full_membership_probabilities,
+            )
         )
-        probability_columns = [f"prob_{i}" for i in range(full_membership_probabilities.shape[1])]
+        probability_columns = [
+            f"prob_{i}" for i in range(full_membership_probabilities.shape[1])
+        ]
         component_dataframe = pd.DataFrame(
-            particle_component_data, columns=["ptypev", "component"] + probability_columns
+            particle_component_data,
+            columns=["ptypev", "component"] + probability_columns,
         )
 
         component_dataframe["label"] = component_dataframe.apply(
@@ -468,9 +499,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # 3. Select valid stellar particles
         # =====================================================================
         valid_stellar_mask = self.get_valid_stellar_mask(
-            X=X,
-            y=y,
-            stellar_properties=stellar_properties
+            X=X, y=y, stellar_properties=stellar_properties
         )
         X_clean, y_clean = X[valid_stellar_mask], y[valid_stellar_mask]
 
@@ -478,9 +507,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # 4. Identify galactic components
         # =====================================================================
         galactic_components, membership_probabilities = self.split(
-            X=X_clean,
-            y=y_clean,
-            stellar_properties=stellar_properties
+            X=X_clean, y=y_clean, stellar_properties=stellar_properties
         )
 
         # =====================================================================
@@ -489,12 +516,14 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         full_component_assignment = self.assign_components_to_all_particles(
             X=X,
             galactic_components=sorted(galactic_components),
-            valid_stellar_mask=valid_stellar_mask
+            valid_stellar_mask=valid_stellar_mask,
         )
-        full_membership_probabilities = self.assign_probabilities_to_all_particles(
-            X=X,
-            membership_probabilities=membership_probabilities,
-            valid_stellar_mask=valid_stellar_mask
+        full_membership_probabilities = (
+            self.assign_probabilities_to_all_particles(
+                X=X,
+                membership_probabilities=membership_probabilities,
+                valid_stellar_mask=valid_stellar_mask,
+            )
         )
 
         # Convert component numbers to physical names (disk, bulge, halo, etc.)
