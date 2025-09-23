@@ -448,6 +448,24 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return component_dataframe
 
+    def _create_decomposed_particle_set(self, components_df, pset):
+        data = components_df[components_df.ptypev == pset.ptype]
+
+        prob_columns = data.columns[data.columns.str.startswith("prob_")]
+
+        components = data.component.to_numpy(copy=True)
+        labels = data.label.to_numpy(copy=True)
+        probabilities = data[prob_columns].to_numpy(copy=True)
+
+        component_pset = dgalaxy.ComponentParticleSet.from_pset(
+            pset,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+        )
+
+        return component_pset
+
     def decompose(self, galaxy):
         """
         Decompose galaxy into its structural components.
@@ -527,30 +545,35 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         )
 
         # Convert component numbers to physical names (disk, bulge, halo, etc.)
-        physical_component_labels = self.create_physical_component_labels(
+        components_df = self.create_physical_component_labels(
             X=X,
             full_component_assignment=full_component_assignment,
             full_membership_probabilities=full_membership_probabilities,
             component_name_mapper=self.get_component_name_mapping(),
         )
 
-        import ipdb
-
-        ipdb.set_trace()
-
-        physical_component_labels = self.get_component_name_mapping().copy()
-
         decomposition_method_name = type(self).__name__
+        component_name_mapping = self.get_component_name_mapping().copy()
+
+        stars_wc = self._create_decomposed_particle_set(
+            components_df, galaxy.stars
+        )
+        dark_matter_wc = self._create_decomposed_particle_set(
+            components_df, galaxy.dark_matter
+        )
+        gas_wc = self._create_decomposed_particle_set(
+            components_df, galaxy.gas
+        )
+
+        del components_df
 
         # =====================================================================
         # 6. Build decomposed galaxy result
         # =====================================================================
         return dgalaxy.DecomposedGalaxy(
-            stars=galaxy.stars,
-            dark_matter=galaxy.dark_matter,
-            gas=galaxy.gas,
+            stars=stars_wc,
+            dark_matter=dark_matter_wc,
+            gas=gas_wc,
             method=decomposition_method_name,
-            component=full_component_assignment,
-            component_labels=physical_component_labels,
-            probabilities=full_membership_probabilities,
+            component_name_mapping=component_name_mapping,
         )

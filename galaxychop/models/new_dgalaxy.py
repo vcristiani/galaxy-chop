@@ -59,6 +59,26 @@ class ComponentParticleSet(ParticleSet):
     labels: np.ndarray = uttr.ib(converter=np.copy)
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
 
+    @classmethod
+    def from_pset(
+        cls,
+        pset,
+        components,
+        labels,
+        probabilities,
+    ):
+        data = attr.asdict(pset, filter=lambda a, _: a.init)
+
+        data["softening"] = pset.softening.value
+
+        instance = cls(
+            **data,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+        )
+        return instance
+
     def __attrs_post_init__(self):
         # This method is called after all attributes are initialized.
         super().__attrs_post_init__()
@@ -130,9 +150,7 @@ class ComponentParticleSet(ParticleSet):
 class DecomposedGalaxy(Galaxy):
 
     method: str = uttr.ib(converter=str)
-    component: np.ndarray = uttr.ib(converter=np.copy)
-    component_labels: dict = uttr.ib(validator=vldt.instance_of(dict))
-    probabilities: np.ndarray = uttr.ib(converter=np.copy)
+    component_name_mapping: dict = uttr.ib(converter=dict)
 
     # INTERNAL ================================================================
 
@@ -140,30 +158,12 @@ class DecomposedGalaxy(Galaxy):
         super().__attrs_post_init__()
         if len(self.method) == 0:
             raise ValueError("method cannot be empty")
-
-        # Validate lengths match
-        if len(self) != len(self.component):
-            raise ValueError(
-                f"galaxy length ({len(self)}) must match "
-                f"component length ({len(self.component)})"
-            )
-        self.component.setflags(write=False)
-
-        # Validate probabilities
-        if len(self.probabilities) != len(self.component):
-            raise ValueError(
-                f"probabilities length ({len(self.probabilities)}) "
-                f"must match component length ({len(self.component)})"
-            )
-
-        # Ensure all probability values are between 0 and 1, ignoring NaNs.
-        non_nan_probs = self.probabilities[~np.isnan(self.probabilities)]
-        if not np.all((non_nan_probs >= 0) & (non_nan_probs <= 1)):
-            raise ValueError(
-                "probabilities must be in the range [0, 1] (ignoring nans)"
-            )
-
-        self.probabilities.setflags(write=False)
+        for pset in (self.stars, self.dark_matter, self.gas):
+            if not isinstance(pset, ComponentParticleSet):
+                raise TypeError(
+                    f"particle set {pset!r} "
+                    "must be of type ComponentParticleSet"
+                )
 
     def __repr__(self):
         """repr(x) <=> x.__repr__()."""
@@ -211,72 +211,3 @@ class DecomposedGalaxy(Galaxy):
             return lmap.get(k, k)
 
         return np.fromiter(map(lmapper, self.component), object)
-
-    def to_dataframe(self, *, ptypes=None, attributes=None):
-
-        value_makers = {
-            "method": lambda: np.full(len(self), self.method),
-            "component": lambda: self.component.copy(),
-            "label": lambda: self.label_component(),
-            "has_probabilities": lambda: (
-                np.full(len(self), self.has_probabilities)
-            ),
-            "probabilities": lambda: (
-                self.probabilities.copy()
-                if self.has_probabilities
-                else np.full(len(self), np.nan)
-            ),
-        }
-
-        all_dgal_attributes = set(value_makers)
-
-        if attributes is not None:
-
-            attributes = set(attributes)
-
-            dgal_attributes = attributes & all_dgal_attributes
-            gal_attributes = attributes - all_dgal_attributes
-            gal_attributes.update(["ptype", "ptypev"])
-
-        else:
-            gal_attributes = None
-            dgal_attributes = all_dgal_attributes
-
-        df = super().to_dataframe(ptypes=None, attributes=gal_attributes)
-
-        for aname in sorted(dgal_attributes):
-            mkvalue = value_makers[aname]
-            avalue = mkvalue()
-            avalue.setflags(write=True)
-            df[aname] = avalue
-
-        if ptypes is not None:
-            ptypesv = list(map(ParticleSetType.mktype, ptypes))
-            df = df[df.ptypev.isin(ptypesv)]
-
-        if "label" in df:
-            df["label"] = df["label"].fillna(df["ptype"])
-
-        if "ptypev" not in attributes:
-            df.drop("ptypev", axis=1, inplace=True)
-        if "ptype" not in attributes:
-            df.drop("ptype", axis=1, inplace=True)
-
-        return df
-
-    def copy(self):
-        cls = type(self)
-        new = cls(
-            stars=self.stars.copy(),
-            dark_matter=self.dark_matter.copy(),
-            gas=self.gas.copy(),
-            method=self.method,
-            component=self.component,
-            component_labels=self.component_labels,
-            probabilities=self.probabilities,
-        )
-        return new
-
-    def to_dict(self):
-        # primero filtrar
-        ...
