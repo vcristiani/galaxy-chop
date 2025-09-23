@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from .abc import GalaxyDecomposerABC, hparam
+from .core import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 

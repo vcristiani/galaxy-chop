@@ -14,11 +14,12 @@
 # IMPORTS
 # =============================================================================
 
-from .abc import (
+from .core import (
     GalaxyDecomposerABC,
     hparam,
+    DecomposedGalaxy,
+    ComponentParticleSet,
 )
-from .dgalaxy import DecomposedGalaxy
 from .gaussian_mixture import (
     AutoGaussianMixture,
     DynamicStarsGaussianDecomposerABC,
@@ -35,8 +36,8 @@ from .threshold import JThreshold
 
 __all__ = [
     "DecomposedGalaxy",
-    "Components",
     "GalaxyDecomposerABC",
+    "ComponentParticleSet",
     "JThreshold",
     "JHistogram",
     "JEHistogram",

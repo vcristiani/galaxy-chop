@@ -24,7 +24,7 @@ import numpy as np
 
 import pandas as pd
 
-from . import new_dgalaxy as dgalaxy
+from . import decomposed_galaxy
 from .. import constants as consts
 from .. import core
 from ..core import sdynamics as sdyn
@@ -570,7 +570,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # =====================================================================
         # 6. Build decomposed galaxy result
         # =====================================================================
-        return dgalaxy.DecomposedGalaxy(
+        return decomposed_galaxy.DecomposedGalaxy(
             stars=stars_wc,
             dark_matter=dark_matter_wc,
             gas=gas_wc,

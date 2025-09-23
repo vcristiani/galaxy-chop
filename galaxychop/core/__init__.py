@@ -15,7 +15,7 @@
 # =============================================================================
 
 from . import plot, sdynamics
-from .data import (
+from .galaxy import (
     Galaxy,
     NoGravitationalPotentialError,
     ParticleSet,

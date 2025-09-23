@@ -22,7 +22,7 @@ import numpy as np
 
 import uttr
 
-from .data import NoGravitationalPotentialError, ParticleSetType
+from .galaxy import NoGravitationalPotentialError, ParticleSetType
 from .. import constants as const
 
 

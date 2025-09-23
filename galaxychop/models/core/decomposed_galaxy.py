@@ -58,6 +58,7 @@ class ComponentParticleSet(ParticleSet):
     components: np.ndarray = uttr.ib(converter=np.copy)
     labels: np.ndarray = uttr.ib(converter=np.copy)
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
+    probabilities_n = uttr.ib(init=False)
 
     @classmethod
     def from_pset(
@@ -78,6 +79,11 @@ class ComponentParticleSet(ParticleSet):
             probabilities=probabilities,
         )
         return instance
+
+    @probabilities_n.default
+    def _proabilities_n_default(self):
+        probs_n = np.shape(self.probabilities)[-1]
+        return probs_n - 1
 
     def __attrs_post_init__(self):
         # This method is called after all attributes are initialized.
@@ -114,15 +120,22 @@ class ComponentParticleSet(ParticleSet):
         # Make the probabilities array read-only.
         self.probabilities.setflags(write=False)
 
+    @property
+    def has_probabilities(self):
+        return bool(self.probabilities_n)
+
     def get_value_makers(self):
         value_makers = super().get_value_makers()
-        value_makers.update(
-            {
-                "components": lambda: self.components.copy(),
-                "labels": lambda: self.labels.copy(),
-                "probabilities": lambda: self.probabilities.copy(),
-            }
-        )
+        component_makers = {
+            "components": lambda: self.components.copy(),
+            "labels": lambda: self.labels.copy(),
+        }
+
+        for n in range(self.probabilities_n):
+            prob_maker = lambda: self.probabilities[:, n].copy()
+            component_makers[f"prob_{n}"] = prob_maker
+
+        value_makers.update(component_makers)
         return value_makers
 
     def copy(self):
@@ -146,6 +159,11 @@ class ComponentParticleSet(ParticleSet):
         return new
 
 
+# =============================================================================
+# GALAXY
+# =============================================================================
+
+
 @uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
 class DecomposedGalaxy(Galaxy):
 
@@ -158,12 +176,22 @@ class DecomposedGalaxy(Galaxy):
         super().__attrs_post_init__()
         if len(self.method) == 0:
             raise ValueError("method cannot be empty")
+
+        has_probs = {}
         for pset in (self.stars, self.dark_matter, self.gas):
             if not isinstance(pset, ComponentParticleSet):
                 raise TypeError(
                     f"particle set {pset!r} "
                     "must be of type ComponentParticleSet"
                 )
+            has_probs[pset.ptype.name] = pset.has_probabilities
+
+        if len(set(has_probs.values())) > 1:
+            raise TypeError(
+                "Inconsistent probability configurations across particle sets. "
+                f"Found configurations: {has_probs}. All particle sets must have "
+                "the same probability setting (all True or all False)."
+            )
 
     def __repr__(self):
         """repr(x) <=> x.__repr__()."""
@@ -171,7 +199,7 @@ class DecomposedGalaxy(Galaxy):
         cls_name = type(self).__name__
         gal_repr = ", ".join(super().__repr__().split(", ")[1:-1])
         method = f"method={self.method!r}"
-        component = f"component={sorted(self.unique_component_labels)}"
+        component = f"components={sorted(self.unique_components_labels)}"
         probs = f"probabilities={self.has_probabilities}"
 
         return f"<{cls_name} {method}, {gal_repr}, {probs}, {component}>"
@@ -179,35 +207,33 @@ class DecomposedGalaxy(Galaxy):
     # PROPERTIES ==============================================================
 
     @property
-    def unique_component(self):
-        return set(np.unique(self.component))
-
-    @property
-    def unique_component_labels(self):
-        return {
-            str(self.component_labels.get(component, component))
-            for component in self.unique_component
-        }
-
-    @property
     def has_probabilities(self):
-        return self.probabilities is not None
+        return self.stars.has_probabilities
 
-    # UTILITIES ===============================================================
+    @property
+    def unique_components(self):
+        df = self.to_dataframe(attributes=["components"])
+        components_list = df["components"].unique().tolist()
+        the_unique_components = set(sorted(components_list))
+        return the_unique_components
 
-    def label_component(self, labels=None):
-        """
-        Access all the labels mapped to the lmap dictionary.
+    @property
+    def unique_components_labels(self):
+        df = self.to_dataframe(attributes=["labels"])
+        labels_list = df["labels"].unique().tolist()
+        the_unique_labels = set(sorted(labels_list))
+        return the_unique_labels
 
-        If no lmap is provided, the function tries to use the internal
-        lmap dict. If the instance doesn't has an lmap dict this method
-        is equivalent to access the labels attribute, but returns a copy
-        with object as dtype.
+    # REDEFINE ================================================================
 
-        """
-        lmap = self.component_labels if labels is None else lmap
-
-        def lmapper(k):
-            return lmap.get(k, k)
-
-        return np.fromiter(map(lmapper, self.component), object)
+    def copy(self):
+        """Make a copy of the Galaxy."""
+        cls = type(self)
+        new = cls(
+            method=self.method,
+            component_name_mapping=self.component_name_mapping.copy(),
+            stars=self.stars.copy(),
+            dark_matter=self.dark_matter.copy(),
+            gas=self.gas.copy(),
+        )
+        return new

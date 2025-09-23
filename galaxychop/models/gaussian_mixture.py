@@ -20,7 +20,7 @@ import numpy as np
 
 from sklearn import mixture
 
-from .abc import GalaxyDecomposerABC, hparam
+from .core import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
 
