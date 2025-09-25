@@ -101,8 +101,8 @@ class JThreshold(GalaxyDecomposerABC):
                 f"(-1,1). Got eps_cut {eps_cut}"
             )
 
-    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
-    def get_stellar_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    def get_attributes(self):
         """
         Notes
         -----

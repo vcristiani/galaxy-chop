@@ -126,8 +126,8 @@ class JHistogram(GalaxyDecomposerABC):
             dsk[key] = np.unique(arr[~np.isin(arr, flt)])
         return dsk
 
-    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
-    def get_stellar_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    def get_attributes(self):
         """
         Notes
         -----
@@ -138,7 +138,7 @@ class JHistogram(GalaxyDecomposerABC):
         return ["eps"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
-    def split(self, X, y, stellar_properties):
+    def split(self, X, y, attributes):
         """
         Notes
         -----
@@ -336,8 +336,8 @@ class JEHistogram(JHistogram):
                 # to the bin corr of the sph.
                 sph[corot_bin] = aux0
 
-    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
-    def get_stellar_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    def get_attributes(self):
         """
         Notes
         -----
@@ -349,7 +349,7 @@ class JEHistogram(JHistogram):
         return ["normalized_star_energy", "eps"]
 
     @doc_inherit(GalaxyDecomposerABC.split)
-    def split(self, X, y, stellar_properties):
+    def split(self, X, y, attributes):
         """
         Notes
         -----

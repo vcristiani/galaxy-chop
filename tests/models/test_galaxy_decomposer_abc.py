@@ -19,16 +19,16 @@ import pytest
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemented():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_stellar_attributes(self):
-            return super().get_stellar_attributes()
+        def get_attributes(self):
+            return super().get_attributes()
 
-        def split(self, X, y, stellar_properties):
-            return super().split(X, y, stellar_properties)
+        def split(self, X, y, attributes):
+            return super().split(X, y, attributes)
 
     decomposer = Decomposer()
 
     with pytest.raises(NotImplementedError):
-        decomposer.get_stellar_attributes()
+        decomposer.get_attributes()
 
     with pytest.raises(NotImplementedError):
         decomposer.split(None, None, None)
@@ -39,10 +39,10 @@ def test_GalaxyDecomposerABC_not_implemented():
 )
 def test_GalaxyDecomposerABC_invalid_bins(bins_value):
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_stellar_attributes(self):
+        def get_attributes(self):
             ...
 
-        def split(self, X, y, stellar_properties):
+        def split(self, X, y, attributes):
             ...
 
     with pytest.raises(ValueError):
@@ -54,10 +54,10 @@ def test_GalaxyDecomposerABC_repr():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         other = gchop.models.hparam(default=1)
 
-        def get_stellar_attributes(self):
+        def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
 
-        def split(self, X, y, stellar_properties):
+        def split(self, X, y, attributes):
             ...
 
     decomposer = Decomposer(cbins=(0.3, 0.2), reassign=True, other="zaraza")
@@ -72,10 +72,10 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_stellar_attributes(self):
+        def get_attributes(self):
             return ["eps"]
 
-        def split(self, X, y, stellar_properties):
+        def split(self, X, y, attributes):
             return np.full(len(X), 100), None
 
     decomposer = Decomposer()

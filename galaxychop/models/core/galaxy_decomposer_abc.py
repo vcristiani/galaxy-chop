@@ -25,10 +25,10 @@ import numpy as np
 import pandas as pd
 
 from . import decomposed_galaxy
-from .. import constants as consts
-from .. import core
-from ..core import sdynamics as sdyn
-from ..preproc import is_centered, is_star_aligned
+from ... import constants as consts
+from ... import core
+from ...core import sdynamics as sdyn
+from ...preproc import is_centered, is_star_aligned
 
 # =============================================================================
 # CONSTANTS
@@ -82,7 +82,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     """
     Abstract class to facilitate the creation of decomposers.
 
-    This class requests the redefinition of three methods: get_stellar_attributes,
+    This class requests the redefinition of three methods: get_attributes,
     get_valid_stellar_mask and identify_galactic_components.
 
     Parameters
@@ -139,7 +139,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
     # block  to implement in every method =====================================
 
     @abc.abstractmethod
-    def get_stellar_attributes(self):
+    def get_attributes(self):
         """
         Attributes for the parameter space.
 
@@ -150,7 +150,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError()
 
-    def get_valid_stellar_mask(self, X, y, stellar_properties):
+    def get_valid_stellar_mask(self, X, y, attributes):
         """
         Mask for valid stellar particles to operate clustering.
 
@@ -166,7 +166,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             1D array where is identified the type of each particle:
             0 = stars, 1 = dark matter, 2 = gas. n_particles is the total
             number of particles.
-        stellar_properties : tuple
+        attributes : tuple
             Dictionary keys of ``ParticleSet class`` parameters with particle
             attributes used to operate the clustering.
 
@@ -182,7 +182,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return only_stellar_particles & finite_dynamics_values
 
     @abc.abstractmethod
-    def split(self, X, y, stellar_properties):
+    def split(self, X, y, attributes):
         """
         Identify galactic components through clustering.
 
@@ -228,7 +228,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     # API =====================================================================
 
-    def _extract_stellar_dynamics_dataframe(self, galaxy, stellar_properties):
+    def _extract_stellar_dynamics_dataframe(self, galaxy, attributes):
         # STARS
         # turn the galaxy into jcirc dict
         # all the calculation cames together so we can't optimize here
@@ -242,7 +242,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # are stars
         stellar_dynamics_dict["ptypev"] = core.ParticleSetType.STARS.value
         stellar_dynamics_df = pd.DataFrame(
-            {attr: stellar_dynamics_dict[attr] for attr in stellar_properties}
+            {attr: stellar_dynamics_dict[attr] for attr in attributes}
         )
 
         # DARK_MATTER
@@ -250,7 +250,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         dark_matter_nans = np.full(dark_matter_count, np.nan)
 
         dark_matter_columns = {
-            attr: dark_matter_nans for attr in stellar_properties
+            attr: dark_matter_nans for attr in attributes
         }
         dark_matter_columns["ptypev"] = core.ParticleSetType.DARK_MATTER.value
 
@@ -260,7 +260,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         gas_count = len(galaxy.gas)
         gas_nans = np.full(gas_count, np.nan)
 
-        gas_columns = {attr: gas_nans for attr in stellar_properties}
+        gas_columns = {attr: gas_nans for attr in attributes}
         gas_columns["ptypev"] = core.ParticleSetType.GAS.value
 
         gas_df = pd.DataFrame(gas_columns)
@@ -269,7 +269,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             [stellar_dynamics_df, dark_matter_df, gas_df], ignore_index=True
         )
 
-    def extract_stellar_dynamics_matrix(self, galaxy, stellar_properties):
+    def extract_stellar_dynamics_matrix(self, galaxy, attributes):
         """
         Matrix of stellar dynamical properties.
 
@@ -280,7 +280,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         ----------
         galaxy : ``Galaxy class`` object
             Instance of Galaxy class.
-        stellar_properties : keys of ``ParticleSet class`` parameters
+        attributes : keys of ``ParticleSet class`` parameters
             Stellar particle attributes used to operate the clustering.
 
         Returns
@@ -295,18 +295,18 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             particles.
 
         """
-        # first we split the stellar_properties between the ones from circularity
+        # first we split the attributes between the ones from circularity
         # and the ones from "galaxy.to_dataframe()"
-        for stellar_attribute in stellar_properties:
+        for stellar_attribute in attributes:
             if stellar_attribute not in _CIRCULARITY_ATTRIBUTES:
                 raise ValueError(
                     f"Attribute {stellar_attribute} is not a circularity attribute"
                 )
 
-        # If we have JCIRC stellar_properties =========================================
+        # If we have JCIRC attributes =========================================
         #     I'm going to need a lot of NANs that represent that gas and dm
         #     have no circularity.
-        all_properties = list(stellar_properties) + ["ptypev"]
+        all_properties = list(attributes) + ["ptypev"]
         dynamics_dataframe = self._extract_stellar_dynamics_dataframe(
             galaxy, all_properties
         )
@@ -457,7 +457,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         labels = data.label.to_numpy(copy=True)
         probabilities = data[prob_columns].to_numpy(copy=True)
 
-        component_pset = dgalaxy.ComponentParticleSet.from_pset(
+        component_pset = decomposed_galaxy.ComponentParticleSet.from_pset(
             pset,
             components=components,
             labels=labels,
@@ -507,17 +507,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # =====================================================================
         # 2. Extract stellar dynamical properties
         # =====================================================================
-        stellar_properties = self.get_stellar_attributes()
+        attributes = self.get_attributes()
 
         X, y = self.extract_stellar_dynamics_matrix(
-            galaxy, stellar_properties=stellar_properties
+            galaxy, attributes=attributes
         )
 
         # =====================================================================
         # 3. Select valid stellar particles
         # =====================================================================
         valid_stellar_mask = self.get_valid_stellar_mask(
-            X=X, y=y, stellar_properties=stellar_properties
+            X=X, y=y, attributes=attributes
         )
         X_clean, y_clean = X[valid_stellar_mask], y[valid_stellar_mask]
 
@@ -525,7 +525,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # 4. Identify galactic components
         # =====================================================================
         galactic_components, membership_probabilities = self.split(
-            X=X_clean, y=y_clean, stellar_properties=stellar_properties
+            X=X_clean, y=y_clean, attributes=attributes
         )
 
         # =====================================================================

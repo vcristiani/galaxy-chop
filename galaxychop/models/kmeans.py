@@ -86,8 +86,8 @@ class KMeans(GalaxyDecomposerABC):
     random_state = hparam(default=None, converter=np.random.default_rng)
     algorithm = hparam(default="lloyd")
 
-    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
-    def get_stellar_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    def get_attributes(self):
         """
         Notes
         -----

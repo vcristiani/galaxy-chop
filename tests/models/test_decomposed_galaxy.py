@@ -27,10 +27,10 @@ def test_Decomposedgalaxy(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     class Decomposer(gchop.models.GalaxyDecomposerABC):
-        def get_stellar_attributes(self):
+        def get_attributes(self):
             return ["eps"]
 
-        def split(self, X, y, stellar_properties):
+        def split(self, X, y, attributes):
             return np.full(len(X), 100), None
 
     decomposer = Decomposer()

@@ -88,8 +88,8 @@ class DynamicStarsGaussianDecomposerABC(GalaxyDecomposerABC):
     verbose = hparam(default=0)
     verbose_interval = hparam(default=10)
 
-    @doc_inherit(GalaxyDecomposerABC.get_stellar_attributes)
-    def get_stellar_attributes(self):
+    @doc_inherit(GalaxyDecomposerABC.get_attributes)
+    def get_attributes(self):
         """
         Notes
         -----
