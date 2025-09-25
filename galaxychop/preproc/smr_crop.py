@@ -17,7 +17,7 @@
 import numpy as np
 
 from ._base import GalaxyTransformerABC
-from ..core import data
+from .. import core
 from ..utils import doc_inherit
 
 # =============================================================================
@@ -114,8 +114,8 @@ def half_star_mass_radius_crop(galaxy, *, num_radii=3):
     trim_stars_df = stars_df.drop(to_trim_idxs, axis="rows")
 
     # We create a new particle set with the new stars.
-    trim_stars = data.ParticleSet(
-        ptype=data.ParticleSetType.STARS,
+    trim_stars = core.ParticleSet(
+        ptype=core.ParticleSetType.STARS,
         m=trim_stars_df["m"].to_numpy(),
         x=trim_stars_df["x"].to_numpy(),
         y=trim_stars_df["y"].to_numpy(),
@@ -132,7 +132,7 @@ def half_star_mass_radius_crop(galaxy, *, num_radii=3):
     dm = galaxy.dark_matter.copy()
     gas = galaxy.gas.copy()
 
-    trim_galaxy = data.Galaxy(stars=trim_stars, dark_matter=dm, gas=gas)
+    trim_galaxy = core.Galaxy(stars=trim_stars, dark_matter=dm, gas=gas)
 
     return trim_galaxy
 
@@ -209,8 +209,8 @@ def get_radius_half_mass(galaxy, particle="stars"):
         # We convert the particles into a dataframe
         df = galaxy.to_dataframe()
     else:
-        particle_type = data.ParticleSetType.mktype(particle)
-        particle_type = data.ParticleSetType.humanize(particle_type)
+        particle_type = core.ParticleSetType.mktype(particle)
+        particle_type = core.ParticleSetType.humanize(particle_type)
         if particle_type == "stars":
             df = galaxy.stars.to_dataframe()
         elif particle_type == "dark_matter":

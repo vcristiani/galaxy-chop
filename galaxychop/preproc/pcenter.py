@@ -17,7 +17,7 @@
 import numpy as np
 
 from ._base import GalaxyTransformerABC
-from ..core import data
+from .. import core
 from ..utils import doc_inherit
 
 # =============================================================================
@@ -168,9 +168,9 @@ def center(galaxy, with_potential=True):
     df.loc[:, "vz"] -= vz_cm
 
     # We split the dataframe by particle type.
-    stars = df[df.ptypev == data.ParticleSetType.STARS.value]
-    dark_matter = df[df.ptypev == data.ParticleSetType.DARK_MATTER.value]
-    gas = df[df.ptypev == data.ParticleSetType.GAS.value]
+    stars = df[df.ptypev == core.ParticleSetType.STARS.value]
+    dark_matter = df[df.ptypev == core.ParticleSetType.DARK_MATTER.value]
+    gas = df[df.ptypev == core.ParticleSetType.GAS.value]
 
     # patch
     new = galaxy.disassemble()
@@ -196,7 +196,7 @@ def center(galaxy, with_potential=True):
         vz_g=gas.vz.to_numpy(),
     )
 
-    return data.mkgalaxy(**new)
+    return core.mkgalaxy(**new)
 
 
 def is_centered(galaxy, *, rtol=1e-05, atol=1e-08):

@@ -28,7 +28,7 @@ import pandas as pd
 import uttr
 
 
-from ..core.data import Galaxy, mkgalaxy, ParticleSetType, ParticleSet
+from ...core import Galaxy, mkgalaxy, ParticleSetType, ParticleSet
 
 
 # =============================================================================

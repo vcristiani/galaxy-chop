@@ -26,7 +26,7 @@ import h5py
 import numpy as np
 
 from .constants import VERSION
-from .core import data
+from . import core
 
 
 # =============================================================================
@@ -117,7 +117,7 @@ def read_hdf5(
     gas_kws = _table_to_dict(gas_table, "g")
     galaxy_kws.update(gas_kws)
 
-    galaxy = data.mkgalaxy(**galaxy_kws)
+    galaxy = core.mkgalaxy(**galaxy_kws)
 
     return galaxy
 
@@ -136,7 +136,7 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
     ----------
     path_or_stream : str or file-like
         Path or file like object to the h5 to store the galaxy.
-    galaxy : galaxychop.data.Galaxy
+    galaxy : galaxychop.core.Galaxy
         The galaxy to store.
     metadata : dict or None (default None)
         Extra metadata to store in the h5 file.
@@ -154,9 +154,9 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
     # create the id column for all the
     df.insert(0, "id", df.index.to_numpy())
 
-    stars_table = _df_to_table(df, data.ParticleSetType.STARS)
-    dm_table = _df_to_table(df, data.ParticleSetType.DARK_MATTER)
-    gas_table = _df_to_table(df, data.ParticleSetType.GAS)
+    stars_table = _df_to_table(df, core.ParticleSetType.STARS)
+    dm_table = _df_to_table(df, core.ParticleSetType.DARK_MATTER)
+    gas_table = _df_to_table(df, core.ParticleSetType.GAS)
 
     # prepare metadata
     h5_metadata = _DEFAULT_METADATA.copy()
@@ -267,6 +267,6 @@ def read_npy(
     gas_kws = _table_to_dict(gas_table, "g")
     galaxy_kws.update(gas_kws)
 
-    galaxy = data.mkgalaxy(**galaxy_kws)
+    galaxy = core.mkgalaxy(**galaxy_kws)
 
     return galaxy

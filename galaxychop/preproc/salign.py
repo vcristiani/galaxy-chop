@@ -19,7 +19,7 @@ import warnings
 import numpy as np
 
 from ._base import GalaxyTransformerABC
-from ..core import data
+from .. import core
 from ..preproc import is_centered
 from ..utils import doc_inherit
 
@@ -224,7 +224,7 @@ def star_align(galaxy, *, r_cut=None):
         vz_g=vel_rot_g.T[:, 2],
     )
 
-    return data.mkgalaxy(**new)
+    return core.mkgalaxy(**new)
 
 
 def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
