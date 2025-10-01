@@ -10,14 +10,15 @@ nbconvert==6.5.3
 lxml_html_clean
 
 # Científicas: distintas según versión de Python
-numpy>=2.0; python_version >= "3.9"
-numpy<2.0; python_version < "3.9"
+numba<0.59; python_version <= "3.9"
+numba>=0.59; python_version >= "3.10"
 
-pandas>=2.0; python_version >= "3.9"
-pandas<2.0; python_version < "3.9"
+numpy<2.0; python_version <= "3.9"
+numpy>=2.0; python_version >= "3.10"
 
-numba>=0.59; python_version >= "3.9"
-numba<0.59; python_version < "3.9"
+pandas<2.0; python_version <= "3.9"
+pandas>=2.0; python_version >= "3.10"
+
 
 scipy>=1.0
 h5py

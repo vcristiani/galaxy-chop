@@ -29,8 +29,9 @@ urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" 
 dependencies = [
     # Compatibles con todas las versiones
     "scipy >= 1.0",
-    "scikit-learn",
-    "astropy",
+    "scikit-learn < 1.7",
+    "astropy>=6; python_version >= '3.10'",
+    "astropy<6,>=5.3; python_version < '3.10'",
     "uttrs",
     "h5py",
     "custom_inherit",
@@ -38,17 +39,17 @@ dependencies = [
     "grispy",
     "joblib",
 
-    # Numpy: >=2.0 en Python 3.9+, <2.0 en Python <3.9
-    "numpy >= 2.0; python_version >= '3.9'",
-    "numpy < 2.0; python_version < '3.9'",
+    # Numpy: 1.24.4 en Python <=3.9, >=2.0 en Python >=3.10
+    "numpy == 1.24.4; python_version <= '3.9'",
+    "numpy >= 2.0; python_version >= '3.10'",
 
-    # Pandas: >=2.0 en Python 3.9+, <2.0 en Python <3.9
-    "pandas >= 2.0; python_version >= '3.9'",
-    "pandas < 2.0; python_version < '3.9'",
+    # Pandas: <2.0 en Python <3.10, >=2.0 en Python >=3.10
+    "pandas < 2.0; python_version <= '3.9'",
+    "pandas >= 2.0; python_version >= '3.10'",
 
-    # Numba: >=0.59 en Python 3.9+, <0.59 en Python <3.9
-    "numba >= 0.59; python_version >= '3.9'",
-    "numba < 0.59; python_version < '3.9'",
+    # Numba: <0.59 en Python <3.10, >=0.59 en Python >=3.10
+    "numba < 0.59; python_version <= '3.9'",
+    "numba >= 0.59; python_version >= '3.10'",
 ]
 
 [tool.black]
