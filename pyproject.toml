@@ -27,30 +27,40 @@ classifiers = [
 urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" = "https://github.com/vcristiani/galaxy-chop" }
 
 dependencies = [
-    # Compatibles con todas las versiones
+    # --- Core ---
     "scipy >= 1.0",
     "scikit-learn < 1.7",
-    "astropy>=6; python_version >= '3.10'",
-    "astropy<6,>=5.3; python_version < '3.10'",
     "uttrs",
     "h5py",
     "custom_inherit",
-    "seaborn",
     "grispy",
     "joblib",
 
-    # Numpy: 1.24.4 en Python <=3.9, >=2.0 en Python >=3.10
-    "numpy == 1.24.4; python_version <= '3.9'",
+    # --- Astropy ---
+    "astropy >= 6; python_version >= '3.10'",
+    "astropy < 6,>=5.3; python_version < '3.10'",
+
+    # --- Seaborn y matplotlib ---
+    "seaborn >= 0.12, < 0.13; python_version < '3.10'",
+    "matplotlib >= 3.6, < 3.8; python_version < '3.10'",
+
+    "seaborn >= 0.12; python_version >= '3.10'",
+    "matplotlib >= 3.8; python_version >= '3.10'",
+
+    # --- Numpy ---
+    "numpy >= 1.22, <= 1.24.4; python_version < '3.10'",
     "numpy >= 2.0; python_version >= '3.10'",
 
-    # Pandas: <2.0 en Python <3.10, >=2.0 en Python >=3.10
-    "pandas < 2.0; python_version <= '3.9'",
+    # --- Pandas ---
+    "pandas >= 1.3, <= 1.5.3; python_version < '3.10'",
     "pandas >= 2.0; python_version >= '3.10'",
 
-    # Numba: <0.59 en Python <3.10, >=0.59 en Python >=3.10
-    "numba < 0.59; python_version <= '3.9'",
+    # --- Numba ---
+    "numba >= 0.55, < 0.59; python_version < '3.10'",
     "numba >= 0.59; python_version >= '3.10'",
 ]
+
+
 
 [tool.black]
 line-length = 79

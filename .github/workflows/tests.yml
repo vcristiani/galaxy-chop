@@ -34,14 +34,14 @@ jobs:
 
         # check version by version
         include:
-          - py_version: "3.9"
-            tox_env: py39
           - py_version: "3.10"
             tox_env: py310
           - py_version: "3.11"
             tox_env: py311
           - py_version: "3.12"
             tox_env: py312
+          - py_version: "3.13"
+            tox_env: py313
 
     # the steps of the CI
     steps:
