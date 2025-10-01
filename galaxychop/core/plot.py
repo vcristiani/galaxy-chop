@@ -97,8 +97,12 @@ class GalaxyPlotter:
         """
         # if we use the components as labels we need to extract the labels
         # and the lmap if lmap is None
-        if isinstance(labels, models.Components):
-            lmap = labels.lmap if lmap is None else lmap
+        if isinstance(
+            labels,
+            (getattr(models, "Components", tuple), models.ComponentParticleSet)
+        ):
+            if hasattr(labels, "lmap"):
+                lmap = labels.lmap if lmap is None else lmap
             labels = labels.labels
 
         attributes = ["x", "y", "z"] if attributes is None else attributes
@@ -347,8 +351,12 @@ class GalaxyPlotter:
         """
         # if we use the components as laberls we need to extract the labels
         # and the lmap if lmap is None
-        if isinstance(labels, models.Components):
-            lmap = labels.lmap if lmap is None else lmap
+        if isinstance(
+            labels,
+            (getattr(models, "Components", tuple), models.ComponentParticleSet)
+        ):
+            if hasattr(labels, "lmap"):
+                lmap = labels.lmap if lmap is None else lmap
             labels = labels.labels
 
         # first we extract the circularity parameters from the galaxy

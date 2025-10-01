@@ -244,6 +244,33 @@ class ParticleSet:
 
     # UTILITIES ===============================================================
     def get_value_makers(self):
+        """
+        Build a dictionary of value generator functions for particle attribute.
+
+        This method constructs a mapping where each key corresponds to a
+        particle property name (e.g., position, velocity, energy), and the
+        associated value is a callable that returns a NumPy array with the
+        corresponding values for all particles. Arrays are returned directly
+        from the internal storage or created on demand (e.g., filling with NaNs
+        if a quantity is unavailable).
+
+        Returns
+        -------
+        dict of {str: callable}
+            Dictionary mapping attribute names to zero-argument functions that
+            return NumPy arrays of values for all particles. Includes:
+
+            - ``ptype`` : human-readable particle type.
+            - ``ptypev`` : numeric particle type value.
+            - ``m`` : particle masses.
+            - ``x``, ``y``, ``z`` : spatial coordinates.
+            - ``vx``, ``vy``, ``vz`` : velocity components.
+            - ``softening`` : softening length.
+            - ``potential`` : gravitational potential (NaN if unavailable).
+            - ``kinetic_energy`` : kinetic energy per particle.
+            - ``total_energy``: total energy per particle (NaN if unavailable).
+            - ``Jx``, ``Jy``, ``Jz`` : angular momentum components.
+        """
         arr = self.arr_
         value_makers = {
             "ptype": lambda: np.full(len(self), self.ptype.humanize()),

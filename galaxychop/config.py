@@ -46,8 +46,9 @@ frozenset({<_ComponentConf bar>, <_ComponentConf cold_disk>,
 # =============================================================================
 
 import dataclasses
-from typing import Optional
 import weakref
+from typing import Optional
+
 
 from .utils import bunch
 

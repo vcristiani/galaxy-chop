@@ -50,8 +50,6 @@ release = version
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinxfortran.fortran_domain",
-    "sphinxfortran.fortran_autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
@@ -60,6 +58,13 @@ extensions = [
     "sphinx.ext.autosummary",
     "nbsphinx",
 ]
+
+# -- Napoleon settings -----------------------------------------------------
+napoleon_google_docstring = False   # No usar estilo Google
+napoleon_numpy_docstring = True     # Sí usar estilo NumPy
+napoleon_use_param = True           # Reconocer "Parameters"
+napoleon_use_rtype = True           # Reconocer "Returns"
+autodoc_docstring_signature = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

@@ -12,42 +12,40 @@ import galaxychop as gchop
 
 import numpy as np
 
+import pandas as pd
+
 import pytest
 
 
 # =============================================================================
 # TESTS
 # =============================================================================
-
-
 @pytest.mark.model
 def test_JHistogram(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.JHistogram()
+    dgal = decomposer.decompose(gal)
 
-    components = decomposer.decompose(gal).components
+    assert len(dgal) == len(gal)
+    assert len(dgal.stars) == len(gal.stars)
+    assert len(dgal.dark_matter) == len(gal.dark_matter)
+    assert len(dgal.gas) == len(gal.gas)
 
-    assert len(components) == len(gal)
-    assert len(gal.stars) == np.sum(components.ptypes == "stars")
-    assert len(gal.dark_matter) == np.sum(components.ptypes == "dark_matter")
-    assert len(gal.gas) == np.sum(components.ptypes == "gas")
-
-    # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels).sum()
+    total_labels_no_nans = pd.notna(dgal.stars.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels).sum()
-    assert total_labels_nans == (
-        len(gal.stars)
-        - total_labels_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    total_labels_nans = pd.isna(dgal.stars.labels).sum()
+    assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    assert components.probabilities is None
+    assert np.all(dgal.dark_matter.labels == "dark_matter")
+    assert np.all(dgal.gas.labels == "gas")
+
+    for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
+        assert (
+            (pset.probabilities is None) or np.isnan(pset.probabilities).all()
+        )
 
 
 @pytest.mark.model
@@ -56,25 +54,23 @@ def test_JEHistogram(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.JEHistogram()
+    dgal = decomposer.decompose(gal)
 
-    components = decomposer.decompose(gal).components
+    assert len(dgal) == len(gal)
+    assert len(dgal.stars) == len(gal.stars)
+    assert len(dgal.dark_matter) == len(gal.dark_matter)
+    assert len(dgal.gas) == len(gal.gas)
 
-    assert len(components) == len(gal)
-    assert len(gal.stars) == np.sum(components.ptypes == "stars")
-    assert len(gal.dark_matter) == np.sum(components.ptypes == "dark_matter")
-    assert len(gal.gas) == np.sum(components.ptypes == "gas")
-
-    # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels).sum()
+    total_labels_no_nans = pd.notna(dgal.stars.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels).sum()
-    assert total_labels_nans == (
-        len(gal.stars)
-        - total_labels_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    total_labels_nans = pd.isna(dgal.stars.labels).sum()
+    assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    assert components.probabilities is None
+    assert np.all(dgal.dark_matter.labels == "dark_matter")
+    assert np.all(dgal.gas.labels == "gas")
+
+    for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
+        assert (
+            (pset.probabilities is None) or np.isnan(pset.probabilities).all()
+        )

@@ -27,18 +27,28 @@ classifiers = [
 urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" = "https://github.com/vcristiani/galaxy-chop" }
 
 dependencies = [
-    "numpy >= 2.0",
+    # Compatibles con todas las versiones
     "scipy >= 1.0",
     "scikit-learn",
     "astropy",
     "uttrs",
-    "pandas >= 2.0",
     "h5py",
     "custom_inherit",
     "seaborn",
     "grispy",
     "joblib",
-    "numba",
+
+    # Numpy: >=2.0 en Python 3.9+, <2.0 en Python <3.9
+    "numpy >= 2.0; python_version >= '3.9'",
+    "numpy < 2.0; python_version < '3.9'",
+
+    # Pandas: >=2.0 en Python 3.9+, <2.0 en Python <3.9
+    "pandas >= 2.0; python_version >= '3.9'",
+    "pandas < 2.0; python_version < '3.9'",
+
+    # Numba: >=0.59 en Python 3.9+, <0.59 en Python <3.9
+    "numba >= 0.59; python_version >= '3.9'",
+    "numba < 0.59; python_version < '3.9'",
 ]
 
 [tool.black]

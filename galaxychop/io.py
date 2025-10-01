@@ -25,10 +25,8 @@ import h5py
 
 import numpy as np
 
-from .constants import VERSION
 from . import core
-
-
+from .constants import VERSION
 # =============================================================================
 # CONSTANTS
 # =============================================================================

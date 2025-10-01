@@ -47,15 +47,12 @@ def test_pipeline_mkpipe(read_hdf5_galaxy):
 
     pipe = pipeline.mkpipe(*steps)
     result = pipe.decompose(gal)
-    df_result = result.components.to_dataframe()
+    df_result = result.to_dataframe()
 
     gal_center = center(gal)
     gal_center_align = star_align(gal_center, r_cut=30)
     result_decompose_with_func = JThreshold().decompose(gal_center_align)
-    df_result_decompose_with_func = (
-        result_decompose_with_func.components.to_dataframe()
-    )
-
+    df_result_decompose_with_func = result_decompose_with_func.to_dataframe()
     pd.testing.assert_frame_equal(df_result_decompose_with_func, df_result)
 
 

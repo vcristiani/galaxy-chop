@@ -14,21 +14,21 @@
 # IMPORTS
 # =============================================================================
 
-import functools
-from collections import OrderedDict
+# import functools
+# from collections import OrderedDict
 
 
 import attr
-from attr import validators as vldt
+# from attr import validators as vldt
 
 import numpy as np
 
-import pandas as pd
+# import pandas as pd
 
 import uttr
 
 
-from ...core import Galaxy, mkgalaxy, ParticleSetType, ParticleSet
+from ...core import Galaxy, ParticleSet
 
 
 # =============================================================================
@@ -68,6 +68,32 @@ class ComponentParticleSet(ParticleSet):
         labels,
         probabilities,
     ):
+        """
+        Create a new instance from a particle set.
+
+        This class method extracts initialized attributes from `pset`
+        using `attr.asdict`, assigns the `softening` value, and builds
+        a new instance of the class with the provided components, labels,
+        and probabilities.
+
+        Parameters
+        ----------
+        pset : object
+            A particle set object from which to extract initialized data.
+            Must contain the attribute `softening`.
+        components : array-like
+            Component assignment for each particle.
+        labels : array-like
+            Labels associated with each particle.
+        probabilities : array-like
+            Membership probabilities of each particle across components.
+
+        Returns
+        -------
+        cls
+            A new instance of the class with component, label, and
+            probability information.
+        """
         data = attr.asdict(pset, filter=lambda a, _: a.init)
 
         data["softening"] = pset.softening.value
@@ -86,7 +112,24 @@ class ComponentParticleSet(ParticleSet):
         return probs_n - 1
 
     def __attrs_post_init__(self):
-        # This method is called after all attributes are initialized.
+        """
+        Perform validation and adjustments after attribute initialization.
+
+        This special method runs automatically after all attributes
+        of the class have been initialized (specific to `attrs`).
+        It validates the consistency between the particle array size
+        and the lengths of the `components`,`labels`,and `probabilities`arrays.
+        It also ensures that the arrays are read-only
+        and that the probabilities are within the valid range [0, 1].
+
+        Raises
+        ------
+        ValueError
+            If the lengths of `components`, `labels`, or `probabilities`
+            do not match the length of the particle array.
+        ValueError
+            If probabilities exist outside the range [0, 1] (ignoring NaNs).
+        """
         super().__attrs_post_init__()
 
         if len(self) != len(self.components):
@@ -122,9 +165,35 @@ class ComponentParticleSet(ParticleSet):
 
     @property
     def has_probabilities(self):
+        """
+        Indicates whether the set of particles has associated probabilities.
+
+        Returns
+        -------
+        bool
+            `True` if probabilities exist (`probabilities_n > 0`),
+            `False` otherwise.
+        """
         return bool(self.probabilities_n)
 
     def get_value_makers(self):
+        """
+        Return value maker functions for particle set attributes.
+
+        The result is a dictionary mapping attribute names to
+        functions that return copies of the corresponding data.
+        In addition to inherited makers, it includes `components`,
+        `labels`, and one key for each probability column (`prob_i`).
+
+        Returns
+        -------
+        dict
+            A dictionary of value maker functions.
+            Includes:
+            - `"components"`: copy of the components array.
+            - `"labels"`: copy of the labels array.
+            - `"prob_i"`: copy of the i-th probability column.
+        """
         value_makers = super().get_value_makers()
         component_makers = {
             "components": lambda: self.components.copy(),
@@ -132,14 +201,26 @@ class ComponentParticleSet(ParticleSet):
         }
 
         for n in range(self.probabilities_n):
-            prob_maker = lambda: self.probabilities[:, n].copy()
+            def prob_maker(n=n):
+                return self.probabilities[:, n].copy()
             component_makers[f"prob_{n}"] = prob_maker
 
         value_makers.update(component_makers)
         return value_makers
 
     def copy(self):
-        "Make a copy of the ComponentParticleSet."
+        """
+        Create a deep copy of the ComponentParticleSet.
+
+        All relevant particle set attributes are cloned, including mass,
+        positions, velocities, potential, softening, components, labels,
+        and probabilities.
+
+        Returns
+        -------
+        ComponentParticleSet
+            A new instance identical to the original, with data copied.
+        """
         cls = type(self)
         new = cls(
             ptype=self.ptype,
@@ -166,6 +247,31 @@ class ComponentParticleSet(ParticleSet):
 
 @uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
 class DecomposedGalaxy(Galaxy):
+    """
+    Represent a galaxy decomposed into physical components.
+
+    Represent a galaxy decompos
+    A `DecomposedGalaxy` contains stars, dark matter, and gas,
+    each represented as a `ComponentParticleSet`, along with
+    labels and membership probabilities.
+
+
+    Attributes
+    ----------
+    method : str
+        The method used for the decomposition (e.g., clustering).
+    component_name_mapping : dict
+        Dictionary mapping component identifiers to human-readable names.
+
+    Raises
+    ------
+    ValueError
+        If `method` is an empty string.
+    TypeError
+        If any particle set is not of type `ComponentParticleSet`.
+    TypeError
+        If probability configurations are inconsistent across particle sets.
+    """
 
     method: str = uttr.ib(converter=str)
     component_name_mapping: dict = uttr.ib(converter=dict)
@@ -173,6 +279,23 @@ class DecomposedGalaxy(Galaxy):
     # INTERNAL ================================================================
 
     def __attrs_post_init__(self):
+        """
+        Validate attributes after initialization.
+
+        Ensures that the `method` string is not empty and that all
+        particle sets (`stars`, `dark_matter`, `gas`) are instances
+        of `ComponentParticleSet`. Also verifies that probability
+        configurations are consistent across particle sets.
+
+        Raises
+        ------
+        ValueError
+            If `method` is empty.
+        TypeError
+            If particle sets are not of type `ComponentParticleSet`.
+        TypeError
+            If probability configurations differ between particle sets.
+        """
         super().__attrs_post_init__()
         if len(self.method) == 0:
             raise ValueError("method cannot be empty")
@@ -188,14 +311,21 @@ class DecomposedGalaxy(Galaxy):
 
         if len(set(has_probs.values())) > 1:
             raise TypeError(
-                "Inconsistent probability configurations across particle sets. "
-                f"Found configurations: {has_probs}. All particle sets must have "
+                "Inconsistent probability configurations across particle sets"
+                f"Found configurations:{has_probs}.All particle sets must have"
                 "the same probability setting (all True or all False)."
             )
 
     def __repr__(self):
-        """repr(x) <=> x.__repr__()."""
+        """
+        Return the string representation of the object.
 
+        Returns
+        -------
+        str
+            A string summarizing the method, probabilities, and
+            component labels of the galaxy.
+        """
         cls_name = type(self).__name__
         gal_repr = ", ".join(super().__repr__().split(", ")[1:-1])
         method = f"method={self.method!r}"
@@ -208,10 +338,26 @@ class DecomposedGalaxy(Galaxy):
 
     @property
     def has_probabilities(self):
+        """
+        Indicate whether the galaxy particle sets include probabilities.
+
+        Returns
+        -------
+        bool
+            True if probabilities are defined, False otherwise.
+        """
         return self.stars.has_probabilities
 
     @property
     def unique_components(self):
+        """
+        Return the unique component identifiers in the galaxy.
+
+        Returns
+        -------
+        set
+            A set of unique component indices.
+        """
         df = self.to_dataframe(attributes=["components"])
         components_list = df["components"].unique().tolist()
         the_unique_components = set(sorted(components_list))
@@ -219,6 +365,14 @@ class DecomposedGalaxy(Galaxy):
 
     @property
     def unique_components_labels(self):
+        """
+        Return the unique component labels in the galaxy.
+
+        Returns
+        -------
+        set
+            A set of unique component labels.
+        """
         df = self.to_dataframe(attributes=["labels"])
         labels_list = df["labels"].unique().tolist()
         the_unique_labels = set(sorted(labels_list))

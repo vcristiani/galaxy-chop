@@ -8,13 +8,14 @@ import galaxychop as gchop
 
 import numpy as np
 
-import pandas as pd
+# import pandas as pd
 
 import pytest
 
 # =============================================================================
 # DECOMPOSER ABC
 # =============================================================================
+
 
 @pytest.mark.model
 def test_GalaxyDecomposerABC_not_implemented():
@@ -32,6 +33,7 @@ def test_GalaxyDecomposerABC_not_implemented():
 
     with pytest.raises(NotImplementedError):
         decomposer.split(None, None, None)
+
 
 @pytest.mark.model
 @pytest.mark.parametrize(
@@ -66,6 +68,7 @@ def test_GalaxyDecomposerABC_repr():
 
     assert result == expected
 
+
 @pytest.mark.model
 def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
@@ -85,3 +88,51 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
     assert len(gal_decomp) == len(gal)
     assert isinstance(gal_decomp, gchop.models.DecomposedGalaxy)
     assert gal_decomp.method == "Decomposer"
+
+
+@pytest.mark.model
+def test_get_valid_stellar_mask():
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["eps"]
+
+        def split(self, X, y, attributes):
+            return np.array([0]), None
+
+    dec = Decomposer()
+    X = np.array([[1.0], [np.nan]])
+    y = np.array([gchop.core.ParticleSetType.STARS.value,
+                  gchop.core.ParticleSetType.STARS.value])
+
+    mask = dec.get_valid_stellar_mask(X, y, ["eps"])
+    assert mask.shape == (2,)
+    assert mask.sum() == 1
+
+
+@pytest.mark.model
+def test_assign_components_and_probabilities():
+    class Decomposer(gchop.models.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["eps"]
+
+        def split(self, X, y, attributes):
+            return np.array([1, 2]), np.array([[0.1, 0.9], [0.8, 0.2]])
+
+    dec = Decomposer()
+    X = np.ones((2, 1))
+    valid_mask = np.array([True, True])
+
+    comp = dec.assign_components_to_all_particles(
+        X,
+        np.array([1, 2]), valid_mask
+    )
+    assert np.array_equal(comp, [1, 2])
+
+    probs = dec.assign_probabilities_to_all_particles(
+        X,
+        np.array([[0.1, 0.9], [0.8, 0.2]]), valid_mask
+    )
+    assert probs.shape == (2, 2)
+
+    probs_none = dec.assign_probabilities_to_all_particles(X, None, valid_mask)
+    assert np.isnan(probs_none).all()

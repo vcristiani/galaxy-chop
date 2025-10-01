@@ -12,4 +12,4 @@
    :glob:
 
    *
-   potential_energy/index
+   potential_energy/*

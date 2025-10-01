@@ -17,9 +17,7 @@
 # IMPORTS
 # =============================================================================
 
-import warnings
-
-from galaxychop.core import data
+from galaxychop.core.galaxy import Galaxy
 from galaxychop.preproc import potential_energy
 
 import numpy as np
@@ -45,13 +43,11 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
 
     potential_energy.potential(gal)
 
-    # Catch the warning:
-    with pytest.warns(UserWarning):
-        warnings.warn(
-            "Galaxy potential is already calculated. \
-            Resuming...",
-            UserWarning,
-        )
+    with (pytest.warns(
+        UserWarning,
+        match="Galaxy potential is already calculated"
+    )):
+        potential_energy.potential(gal)
 
 
 def test_Galaxy_potential_energy(galaxy):
@@ -64,7 +60,7 @@ def test_Galaxy_potential_energy(galaxy):
 
     pgal = potential_energy.potential(gal)
 
-    assert isinstance(pgal, data.Galaxy)
+    assert isinstance(pgal, Galaxy)
     assert np.all(pgal.stars.potential == pgal.potential_energy_[0])
     assert np.all(pgal.dark_matter.potential == pgal.potential_energy_[1])
     assert np.all(pgal.gas.potential == pgal.potential_energy_[2])
@@ -80,7 +76,7 @@ def test_Galaxy_potential_energy_numba_backend(galaxy):
 
     pgal_b = potential_energy.potential(gal, backend="numba")
 
-    assert isinstance(pgal_b, data.Galaxy)
+    assert isinstance(pgal_b, Galaxy)
     assert np.all(pgal_b.stars.potential == pgal_b.potential_energy_[0])
     assert np.all(pgal_b.dark_matter.potential == pgal_b.potential_energy_[1])
     assert np.all(pgal_b.gas.potential == pgal_b.potential_energy_[2])
@@ -146,7 +142,9 @@ def test_potential_recover(read_hdf5_galaxy):
     kwargs = {
         k: v for k, v in gal.disassemble().items() if "potential_" not in k
     }
-    new = potential_energy.potential(data.mkgalaxy(**kwargs), backend="numba")
+    new = potential_energy.potential(
+        Galaxy.mkgalaxy(**kwargs), backend="numba"
+    )
 
     original_potential = (
         gal.to_dataframe(attributes=["potential"]).to_numpy().flatten()

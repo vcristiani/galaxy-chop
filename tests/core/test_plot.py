@@ -45,10 +45,6 @@ def image_paths(func, format):
 
 
 def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
-    # As the pairplot crap doesn't get neither axes nor figures I can't
-    # use the check_figures_equals functions here, so we have to do
-    # everything by hand...
-
     test_path, ref_path = image_paths(test_func, format)
 
     test_img.savefig(test_path, format=format)
@@ -86,7 +82,6 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
     with pytest.raises(ValueError):
         plotter("__call__")
 
-    # not callable
     super(core.plot.GalaxyPlotter, plotter).__setattr__("zaraza", None)
     with pytest.raises(ValueError):
         plotter("zaraza")
@@ -114,23 +109,33 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 
 @pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_labels_Components(galaxy):
+def test_GalaxyPlotter_get_df_and_hue_labels_ComponentParticleSet(galaxy):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    components = models.Components(
-        labels=np.full(len(gal), 100),
-        ptypes=np.full(len(gal), "foo"),
-        m=np.random.random(size=len(gal)),
-        probabilities=None,
-        lmap={},
+    n = len(gal.stars)
+
+    cps = models.ComponentParticleSet(
+        ptype=gal.stars.ptype,
+        m=np.random.random(size=n),
+        x=gal.stars.x.copy(),
+        y=gal.stars.y.copy(),
+        z=gal.stars.z.copy(),
+        vx=gal.stars.vx.copy(),
+        vy=gal.stars.vy.copy(),
+        vz=gal.stars.vz.copy(),
+        potential=None,
+        softening=float(gal.stars.softening.value),
+        components=np.full(n, 100),
+        labels=np.full(n, "foo"),
+        probabilities=np.zeros((n, 1)),
     )
 
     df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels=components, lmap=None
+        ptypes=["stars"], attributes=None, labels=cps, lmap=None
     )
 
-    assert (df[hue] == components.labels).all()
+    assert (df[hue] == cps.labels).all()
 
 
 @pytest.mark.plot
@@ -242,7 +247,6 @@ def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(
@@ -260,7 +264,6 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.hist("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
@@ -277,7 +280,6 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.kde("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
@@ -291,26 +293,32 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
 # get_circ_df_and_hue =========================================================
 @pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(
-    read_hdf5_galaxy,
-):
+def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     circ = gal.stellar_dynamics()
 
-    components = models.Components(
-        labels=circ.eps,
-        ptypes=np.full(len(circ.eps), "foo"),
+    cps = models.ComponentParticleSet(
+        ptype=gal.stars.ptype,
         m=np.random.random(size=len(circ.eps)),
-        probabilities=None,
-        lmap={},
+        x=gal.stars.x[:len(circ.eps)].copy(),
+        y=gal.stars.y[:len(circ.eps)].copy(),
+        z=gal.stars.z[:len(circ.eps)].copy(),
+        vx=gal.stars.vx[:len(circ.eps)].copy(),
+        vy=gal.stars.vy[:len(circ.eps)].copy(),
+        vz=gal.stars.vz[:len(circ.eps)].copy(),
+        potential=None,
+        softening=float(gal.stars.softening.value),
+        components=np.full(len(circ.eps), 100),
+        labels=circ.eps,
+        probabilities=np.zeros((len(circ.eps), 1)),
     )
 
     df, hue = plotter.get_sdyn_df_and_hue(
         sdyn_kws=None,
         attributes=None,
-        labels=components,
+        labels=cps,
         lmap=None,
     )
 
@@ -507,7 +515,6 @@ def test_GalaxyPlotter_sdyn_scatter(read_hdf5_galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.sdyn_scatter("eps", "eps_r", ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     circ = gal.stellar_dynamics()
@@ -533,7 +540,6 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.sdyn_hist("eps", ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     circ = gal.stellar_dynamics()
@@ -558,7 +564,6 @@ def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
     test_ax = fig_test.subplots()
     plotter.sdyn_kde("eps", ax=test_ax)
 
-    # expected
     exp_ax = fig_ref.subplots()
 
     circ = gal.stellar_dynamics()

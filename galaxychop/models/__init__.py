@@ -15,10 +15,10 @@
 # =============================================================================
 
 from .core import (
+    ComponentParticleSet,
+    DecomposedGalaxy,
     GalaxyDecomposerABC,
     hparam,
-    DecomposedGalaxy,
-    ComponentParticleSet,
 )
 from .gaussian_mixture import (
     AutoGaussianMixture,

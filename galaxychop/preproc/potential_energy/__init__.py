@@ -81,11 +81,6 @@ def grispy_potential(x, y, z, m, softening):
     The GriSPy algorithm constructs a spatial grid to optimize neighbor
     searches. The bubble size is set to 5 times the softening parameter,
     and shell width is 10% of the box size for optimal performance.
-
-    References
-    ----------
-    .. [1] Chalela, M. et al. "GriSPy: A Python package for fixed-radius
-           nearest neighbors search." Astronomy and Computing, 2021.
     """
     # Make the grid of the system
     l_box, grid = make_grid(x, y, z)
@@ -115,19 +110,18 @@ def numpy_potential(x, y, z, m, softening):
     While straightforward, it has O(N²) memory complexity and may be slow
     for large particle numbers due to the full distance matrix calculation.
 
-    Parameters
-    ----------
-    x : np.ndarray, shape (n,)
-        X-coordinates of particles in simulation units.
-    y : np.ndarray, shape (n,)
-        Y-coordinates of particles in simulation units.
-    z : np.ndarray, shape (n,)
-        Z-coordinates of particles in simulation units.
-    m : np.ndarray, shape (n,)
-        Masses of particles in simulation units.
-    softening : float
-        Gravitational softening parameter to avoid singularities.
-        Added to distance calculation as sqrt(r² + ε²).
+    Args
+        x : np.ndarray, shape (n,)
+            X-coordinates of particles in simulation units.
+        y : np.ndarray, shape (n,)
+            Y-coordinates of particles in simulation units.
+        z : np.ndarray, shape (n,)
+            Z-coordinates of particles in simulation units.
+        m : np.ndarray, shape (n,)
+            Masses of particles in simulation units.
+        softening : float
+            Gravitational softening parameter to avoid singularities.
+            Added to distance calculation as sqrt(r² + ε²).
 
     Returns
     -------
@@ -136,23 +130,24 @@ def numpy_potential(x, y, z, m, softening):
         Units: [G * M / L] where G is gravitational constant.
     postproc : callable
         Post-processing function (np.asarray) for result formatting.
-
-    Notes
-    -----
-    The potential energy is calculated as:
-    φᵢ = -G * Σⱼ≠ᵢ (mⱼ / √((rᵢ - rⱼ)² + ε²))
-
-    Memory usage scales as O(N²) due to the full distance matrix.
-    For large N (>10⁴), consider using the Numba or GriSPy backends.
-
-    Examples
-    --------
-    >>> x = np.array([0., 1., 2.])
-    >>> y = np.array([0., 0., 0.])
-    >>> z = np.array([0., 0., 0.])
-    >>> m = np.array([1., 1., 1.])
-    >>> epot, _ = numpy_potential(x, y, z, m, softening=0.1)
     """
+    # Notes
+    # -----
+    # The gravitational potential energy is calculated as:
+
+    # \varphi_i = -G \sum_{j \ne i}
+    # \frac{m_j}{\lvert r_i - r_j \rvert + \varepsilon}
+
+    # Memory usage scales as O(N²) due to the full distance matrix.
+    # For large N (>10⁴), consider using the Numba or GriSPy backends.
+
+    # Examples
+    # --------
+    # >>> x = np.array([0., 1., 2.])
+    # >>> y = np.array([0., 0., 0.])
+    # >>> z = np.array([0., 0., 0.])
+    # >>> m = np.array([1., 1., 1.])
+    # >>> epot, _ = numpy_potential(x, y, z, m, softening=0.1)
     # Calculate pairwise distances with softening
     dist = np.sqrt(
         np.square(x - x.reshape(-1, 1))
@@ -191,18 +186,17 @@ def _numba_potential(x, y, z, m, softening):
     compilation. It uses parallel execution and explicit float32 precision
     for optimal performance.
 
-    Parameters
-    ----------
-    x, y, z : np.ndarray, dtype=float32
-        Particle coordinates.
-    m : np.ndarray, dtype=float32
-        Particle masses.
-    softening : float32
-        Softening parameter.
+    Args:
+        x, y, z : np.ndarray, dtype=float32
+            Particle coordinates.
+        m : np.ndarray, dtype=float32
+            Particle masses.
+        softening : float32
+            Softening parameter.
 
     Returns
     -------
-    potential_energy : np.ndarray, dtype=float32
+        potential_energy : np.ndarray, dtype=float32
         Potential energy array.
 
     Notes
@@ -344,20 +338,6 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     UserWarning
         If potential energy is already calculated for the galaxy.
 
-    Notes
-    -----
-    The gravitational potential energy is calculated as:
-
-    φᵢ = -G * Σⱼ≠ᵢ (mⱼ / |rᵢ - rⱼ + ε|)
-
-    where G is the gravitational constant, mⱼ are particle masses,
-    rᵢ, rⱼ are particle positions, and ε is the softening parameter.
-
-    The softening parameter prevents numerical singularities when particles
-    are very close together. It is taken as the maximum softening value
-    present in the galaxy data.
-
-
     Examples
     --------
     Calculate potential energy using default (numba) backend:
@@ -376,6 +356,18 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     --------
     Potentializer : Class-based interface for potential energy calculation
     """
+    #     Notes
+    # -----
+    # The gravitational potential energy is calculated as:
+
+    # φᵢ = -G * Σⱼ≠ᵢ (mⱼ / |rᵢ - rⱼ + ε|)
+
+    # where G is the gravitational constant, mⱼ are particle masses,
+    # rᵢ, rⱼ are particle positions, and ε is the softening parameter.
+
+    # The softening parameter prevents numerical singularities when particles
+    # are very close together. It is taken as the maximum softening value
+    # present in the galaxy data.
     if galaxy.has_potential_:
         warnings.warn(
             "Galaxy potential is already calculated. Resuming...",

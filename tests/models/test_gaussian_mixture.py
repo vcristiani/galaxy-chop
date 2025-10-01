@@ -10,7 +10,7 @@
 
 import galaxychop as gchop
 
-import numpy as np
+import pandas as pd
 
 import pytest
 
@@ -26,48 +26,27 @@ def test_GaussianMixture(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
+    dgal = decomposer.decompose(gal)
 
-    # Bruno: A ver si no le importa que el atributo se llame igual que
-    # la variable donde se guarde...
-    components = decomposer.decompose(gal).components
+    assert len(dgal) == len(gal)
+    assert len(dgal.stars) == len(gal.stars)
+    assert len(dgal.dark_matter) == len(gal.dark_matter)
+    assert len(dgal.gas) == len(gal.gas)
 
-    assert len(components) == len(gal)
-    assert len(gal.stars) == np.sum(components.ptypes == "stars")
-    assert len(gal.dark_matter) == np.sum(components.ptypes == "dark_matter")
-    assert len(gal.gas) == np.sum(components.ptypes == "gas")
-
-    # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels).sum()
+    total_labels_no_nans = pd.notna(dgal.stars.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels).sum()
-    assert total_labels_nans == (
-        len(gal.stars)
-        - total_labels_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    total_labels_nans = pd.isna(dgal.stars.labels).sum()
+    assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    # shape of the probs must be the size of the galaxy, number of components
-    assert np.shape(components.probabilities) == (
-        len(gal),
+    dm_labels = pd.Series(dgal.dark_matter.labels)
+    gas_labels = pd.Series(dgal.gas.labels)
+    assert (pd.isna(dm_labels).all()) or ((dm_labels == "dark_matter").all())
+    assert (pd.isna(gas_labels).all()) or ((gas_labels == "gas").all())
+
+    assert dgal.stars.probabilities.shape == (
+        len(gal.stars),
         decomposer.n_components,
-    )
-
-    # the total number of no nans must be <= the number of stars
-    total_probs_no_nans = (
-        np.isfinite(components.probabilities).all(axis=1).sum()
-    )
-    assert total_probs_no_nans <= len(gal.stars)
-
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_probs_nans = np.isnan(components.probabilities).any(axis=1).sum()
-    assert total_probs_nans == (
-        len(gal.stars)
-        - total_probs_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
     )
 
 
@@ -78,41 +57,22 @@ def test_AutoGaussianMixture(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
+    dgal = decomposer.decompose(gal)
 
-    components = decomposer.decompose(gal).components
+    assert len(dgal) == len(gal)
+    assert len(dgal.stars) == len(gal.stars)
+    assert len(dgal.dark_matter) == len(gal.dark_matter)
+    assert len(dgal.gas) == len(gal.gas)
 
-    assert len(components) == len(gal)
-    assert len(gal.stars) == np.sum(components.ptypes == "stars")
-    assert len(gal.dark_matter) == np.sum(components.ptypes == "dark_matter")
-    assert len(gal.gas) == np.sum(components.ptypes == "gas")
-
-    # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels).sum()
+    total_labels_no_nans = pd.notna(dgal.stars.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels).sum()
-    assert total_labels_nans == (
-        len(gal.stars)
-        - total_labels_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    total_labels_nans = pd.isna(dgal.stars.labels).sum()
+    assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    # shape of the probs must be the size of the galaxy, and 4
-    assert np.shape(components.probabilities) == (len(gal), 4)
+    dm_labels = pd.Series(dgal.dark_matter.labels)
+    gas_labels = pd.Series(dgal.gas.labels)
+    assert (pd.isna(dm_labels).all()) or ((dm_labels == "dark_matter").all())
+    assert (pd.isna(gas_labels).all()) or ((gas_labels == "gas").all())
 
-    # the total number of no nans must be <= the number of stars
-    total_probs_no_nans = (
-        np.isfinite(components.probabilities).any(axis=1).sum()
-    )
-    assert total_probs_no_nans <= len(gal.stars)
-
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_probs_nans = np.isnan(components.probabilities).any(axis=1).sum()
-    assert total_probs_nans == (
-        len(gal.stars)
-        - total_probs_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    assert dgal.stars.probabilities.shape == (len(gal.stars), 4)

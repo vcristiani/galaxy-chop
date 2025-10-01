@@ -12,6 +12,8 @@ import galaxychop as gchop
 
 import numpy as np
 
+import pandas as pd
+
 import pytest
 
 # =============================================================================
@@ -25,32 +27,38 @@ def test_JThreshold(read_hdf5_galaxy):
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
     decomposer = gchop.models.JThreshold()
+    dgal = decomposer.decompose(gal)
 
-    components = decomposer.decompose(gal).components
+    assert len(dgal) == len(gal)
+    assert len(dgal.stars) == len(gal.stars)
+    assert len(dgal.dark_matter) == len(gal.dark_matter)
+    assert len(dgal.gas) == len(gal.gas)
 
-    assert len(components) == len(gal)
-    assert len(gal.stars) == np.sum(components.ptypes == "stars")
-    assert len(gal.dark_matter) == np.sum(components.ptypes == "dark_matter")
-    assert len(gal.gas) == np.sum(components.ptypes == "gas")
-
-    # the total number of no nans must be <= the number of stars
-    total_labels_no_nans = np.isfinite(components.labels).sum()
+    total_labels_no_nans = pd.notna(dgal.stars.labels).sum()
     assert total_labels_no_nans <= len(gal.stars)
 
-    # the nans must be the subtraction between stars and no_nans + dm + gas
-    total_labels_nans = np.isnan(components.labels).sum()
-    assert total_labels_nans == (
-        len(gal.stars)
-        - total_labels_no_nans
-        + len(gal.dark_matter)
-        + len(gal.gas)
-    )
+    total_labels_nans = pd.isna(dgal.stars.labels).sum()
+    assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    assert components.probabilities is None
+    assert (dgal.dark_matter.labels == "dark_matter").all()
+    assert (dgal.gas.labels == "gas").all()
+
+    assert (
+        dgal.stars.probabilities is None
+        or np.isnan(dgal.stars.probabilities).all()
+    )
+    assert (
+        dgal.dark_matter.probabilities is None
+        or np.isnan(dgal.dark_matter.probabilities).all()
+    )
+    assert (
+        dgal.gas.probabilities is None
+        or np.isnan(dgal.gas.probabilities).all()
+    )
 
 
 @pytest.mark.model
-@pytest.mark.parametrize("eps_cut", [(1.1), (-1.1)])
+@pytest.mark.parametrize("eps_cut", [1.1, -1.1])
 def test_JThreshold_eps_cut_value_error(eps_cut):
     with pytest.raises(ValueError):
         gchop.models.JThreshold(eps_cut=eps_cut)
