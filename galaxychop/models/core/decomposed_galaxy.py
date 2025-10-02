@@ -19,6 +19,7 @@
 
 
 import attr
+
 # from attr import validators as vldt
 
 import numpy as np
@@ -28,7 +29,7 @@ import numpy as np
 import uttr
 
 
-from ...core import Galaxy, ParticleSet
+from ...core import Galaxy, ParticleSet, ParticleSetType
 
 
 # =============================================================================
@@ -198,12 +199,8 @@ class ComponentParticleSet(ParticleSet):
         component_makers = {
             "components": lambda: self.components.copy(),
             "labels": lambda: self.labels.copy(),
+            "probabilities": lambda: self.probabilities.copy(),
         }
-
-        for n in range(self.probabilities_n):
-            def prob_maker(n=n):
-                return self.probabilities[:, n].copy()
-            component_makers[f"prob_{n}"] = prob_maker
 
         value_makers.update(component_makers)
         return value_makers
@@ -239,6 +236,52 @@ class ComponentParticleSet(ParticleSet):
         )
         return new
 
+    def _gchop_h5_(self):
+        """
+        Extract HDF5 serialization data for this ComponentParticleSet.
+
+        Returns metadata about the particle set type and a DataFrame
+        containing the particle data that should be persisted, including
+        component information.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionary containing particle set metadata:
+            - 'pset_type': class name of the particle set
+            - 'ptype': particle type (stars, dark_matter, gas)
+            - 'has_potential': whether potential is computed
+            - 'has_probabilities': whether probabilities are defined
+            - 'probabilities_n': number of probability columns
+        dataframe : pd.DataFrame
+            DataFrame with particle attributes to be saved, including
+            components, labels, and probabilities
+
+        """
+        # Get base metadata and dataframe from parent
+        metadata, df = super()._gchop_h5_()
+
+        # Add component-specific metadata
+        metadata.update(
+            {
+                "has_probabilities": self.has_probabilities,
+                "probabilities_n": self.probabilities_n,
+            }
+        )
+
+        # Add component attributes to dataframe
+        df["components"] = self.components.copy()
+        df["labels"] = self.labels.copy()
+
+        # Add probability columns
+        if self.probabilities.ndim > 1:
+            for i in range(self.probabilities.shape[1]):
+                df[f"prob_{i}"] = self.probabilities[:, i]
+        else:
+            df["prob_0"] = self.probabilities
+
+        return metadata, df
+
 
 # =============================================================================
 # GALAXY
@@ -273,6 +316,8 @@ class DecomposedGalaxy(Galaxy):
         If probability configurations are inconsistent across particle sets.
     """
 
+    PSET_CLS = ComponentParticleSet
+
     method: str = uttr.ib(converter=str)
     component_name_mapping: dict = uttr.ib(converter=dict)
 
@@ -302,11 +347,6 @@ class DecomposedGalaxy(Galaxy):
 
         has_probs = {}
         for pset in (self.stars, self.dark_matter, self.gas):
-            if not isinstance(pset, ComponentParticleSet):
-                raise TypeError(
-                    f"particle set {pset!r} "
-                    "must be of type ComponentParticleSet"
-                )
             has_probs[pset.ptype.name] = pset.has_probabilities
 
         if len(set(has_probs.values())) > 1:
@@ -391,3 +431,209 @@ class DecomposedGalaxy(Galaxy):
             gas=self.gas.copy(),
         )
         return new
+
+    def _gchop_h5_(self):
+        """
+        Extract HDF5 serialization data for this DecomposedGalaxy.
+
+        Returns metadata about the decomposed galaxy and DataFrames for each
+        particle type that should be persisted, including component information.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionary containing decomposed galaxy metadata:
+            - 'galaxy_type': class name of the galaxy
+            - 'has_potential': whether potential is computed
+            - 'pset_types': metadata for each particle set type
+            - 'method': decomposition method used
+            - 'component_name_mapping': mapping of component IDs to names
+            - 'has_probabilities': whether probabilities are defined
+        dataframes : dict
+            Dictionary with keys 'stars', 'dark_matter', 'gas' mapping
+            to their respective DataFrames with component information
+
+        """
+        # Get base metadata and dataframes from parent
+        metadata, dataframes = super()._gchop_h5_()
+
+        # Add decomposed galaxy specific metadata
+        metadata.update(
+            {
+                "method": self.method,
+                "component_name_mapping": self.component_name_mapping,
+                "has_probabilities": self.has_probabilities,
+            }
+        )
+
+        return metadata, dataframes
+
+
+# =============================================================================
+# API FUNCTIONS
+# =============================================================================
+
+
+def mkdgalaxy(
+    method: str,
+    component_name_mapping: dict,
+    m_s: np.ndarray,
+    x_s: np.ndarray,
+    y_s: np.ndarray,
+    z_s: np.ndarray,
+    vx_s: np.ndarray,
+    vy_s: np.ndarray,
+    vz_s: np.ndarray,
+    components_s: np.ndarray,
+    labels_s: np.ndarray,
+    probabilities_s: np.ndarray,
+    m_dm: np.ndarray,
+    x_dm: np.ndarray,
+    y_dm: np.ndarray,
+    z_dm: np.ndarray,
+    vx_dm: np.ndarray,
+    vy_dm: np.ndarray,
+    vz_dm: np.ndarray,
+    m_g: np.ndarray,
+    x_g: np.ndarray,
+    y_g: np.ndarray,
+    z_g: np.ndarray,
+    vx_g: np.ndarray,
+    vy_g: np.ndarray,
+    vz_g: np.ndarray,
+    *,
+    softening_s: float = 0.0,
+    softening_dm: float = 0.0,
+    softening_g: float = 0.0,
+    potential_s: np.ndarray = None,
+    potential_dm: np.ndarray = None,
+    potential_g: np.ndarray = None,
+):
+    """
+    Decomposed galaxy builder.
+
+    This function builds a decomposed galaxy object from star,
+    dark matter and gas ComponentParticleSet. Only stellar particles
+    have meaningful component assignments; dark matter and gas particles
+    are assigned NaN values for components, labels, and probabilities.
+
+    Parameters
+    ----------
+    m_s : np.ndarray
+        Star masses. Shape: (n,1).
+    x_s, y_s, z_s : np.ndarray
+        Star positions. Shapes: (n,1).
+    vx_s, vy_s, vz_s : np.ndarray
+        Star velocities. Shape: (n,1).
+    components_s : np.ndarray
+        Star component identifiers. Shape: (n,1).
+    labels_s : np.ndarray
+        Star component labels. Shape: (n,1).
+    probabilities_s : np.ndarray
+        Star component probabilities. Shape: (n, n_components) or (n,1).
+    m_dm : np.ndarray
+        Dark matter masses. Shape: (n,1).
+    x_dm, y_dm, z_dm : np.ndarray
+        Dark matter positions. Shapes: (n,1).
+    vx_dm, vy_dm, vz_dm : np.ndarray
+        Dark matter velocities. Shapes: (n,1).
+    m_g : np.ndarray
+        Gas masses. Shape: (n,1).
+    x_g, y_g, z_g :  np.ndarray
+        Gas positions. Shapes: (n,1).
+    vx_g, vy_g, vz_g : np.ndarray
+        Gas velocities. Shapes: (n,1).
+    method : str
+        The decomposition method used.
+    component_name_mapping : dict
+        Dictionary mapping component identifiers to human-readable names.
+    potential_s : np.ndarray, default value = None
+        Specific potential energy of star particles. Shape: (n,1).
+    potential_dm : np.ndarray, default value = None
+        Specific potential energy of dark matter particles. Shape: (n,1).
+    potential_g : np.ndarray, default value = None
+        Specific potential energy of gas particles. Shape: (n,1).
+    softening_s : float. Default value = 0
+        Softening radius of stellar particles. Shape: (1,).
+        Default unit: kpc.
+    softening_dm : float. Default value = 0
+        Softening radius of dark matter particles. Shape: (1,).
+        Default unit: kpc.
+    softening_g : float. Default value = 0
+        Softening radius of gas particles. Shape: (1,).
+        Default unit: kpc.
+
+    Return
+    ------
+    decomposed_galaxy: ``DecomposedGalaxy`` object.
+
+    """
+    # Create stellar ComponentParticleSet with actual decomposition data
+    stars = ComponentParticleSet(
+        ParticleSetType.STARS,
+        m=m_s,
+        x=x_s,
+        y=y_s,
+        z=z_s,
+        vx=vx_s,
+        vy=vy_s,
+        vz=vz_s,
+        softening=softening_s,
+        potential=potential_s,
+        components=components_s,
+        labels=labels_s,
+        probabilities=probabilities_s,
+    )
+
+    # Create dark matter ComponentParticleSet with NaN component data
+    # following the pattern in galaxy_decomposer_abc.py:251-257
+    name_dm = ParticleSetType.DARK_MATTER.humanize()
+    count_dm = len(m_dm)
+    prob_shape_dm = probabilities_s.shape[1] if probabilities_s.ndim > 1 else 1
+
+    dark_matter = ComponentParticleSet(
+        ParticleSetType.DARK_MATTER,
+        m=m_dm,
+        x=x_dm,
+        y=y_dm,
+        z=z_dm,
+        vx=vx_dm,
+        vy=vy_dm,
+        vz=vz_dm,
+        softening=softening_dm,
+        potential=potential_dm,
+        components=np.full(count_dm, np.nan),
+        labels=np.full(count_dm, name_dm, dtype=object),
+        probabilities=np.full((count_dm, prob_shape_dm), np.nan),
+    )
+    ParticleSetType.DARK_MATTER.humanize()
+
+    # Create gas ComponentParticleSet with NaN component data
+    # following the pattern in galaxy_decomposer_abc.py:259-266
+    name_gas = ParticleSetType.GAS.humanize()
+    count_gas = len(m_g)
+
+    gas = ComponentParticleSet(
+        ptype=ParticleSetType.GAS,
+        m=m_g,
+        x=x_g,
+        y=y_g,
+        z=z_g,
+        vx=vx_g,
+        vy=vy_g,
+        vz=vz_g,
+        softening=softening_g,
+        potential=potential_g,
+        components=np.full(count_gas, np.nan),
+        labels=np.full(count_gas, name_gas, dtype=object),
+        probabilities=np.full((count_gas, prob_shape_dm), np.nan),
+    )
+
+    decomposed_galaxy = DecomposedGalaxy(
+        method=method,
+        component_name_mapping=component_name_mapping,
+        stars=stars,
+        dark_matter=dark_matter,
+        gas=gas,
+    )
+    return decomposed_galaxy

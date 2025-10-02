@@ -4,11 +4,12 @@ import numpy as np
 # gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_20.h5")
 # gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_60737.h5")
 gal = gchop.read_hdf5("tests/datasets/gal394242.h5")
+
 gal
 gal = gchop.preproc.center_and_align(gal)
 #id(gal.stars), id(gal.stars.copy())
-#comps = gchop.models.JHistogram().decompose(gal)
-comps = gchop.models.AutoGaussianMixture().decompose(gal)
-repr(comps)
+dgal = gchop.models.JHistogram().decompose(gal)
+#dgal = gchop.models.AutoGaussianMixture().decompose(gal)
+dgal.to_hdf5("foo.h5")
 #df = comps.to_dataframe()
 #import ipdb; ipdb.set_trace()

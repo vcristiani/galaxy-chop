@@ -317,6 +317,19 @@ class ParticleSet:
             dictionary with coerced units.
 
         """
+
+        def _make_elements(basename, value):
+            dims = np.ndim(value)
+            elems = OrderedDict()
+            if dims == 1:
+                elems[basename] = value
+            elif dims == 2:
+                for idx, column in enumerate(value.T):
+                    name = f"{basename}_{idx}"
+                    elems[name] = column
+
+            return elems
+
         value_makers = self.get_value_makers()
         attributes = value_makers.keys() if attributes is None else attributes
         the_dict = OrderedDict()
@@ -324,7 +337,8 @@ class ParticleSet:
             mkvalue = value_makers[aname]
             avalue = mkvalue()
             avalue.setflags(write=True)
-            the_dict[aname] = avalue
+            avalue_dict = _make_elements(basename=aname, value=avalue)
+            the_dict.update(avalue_dict)
         return the_dict
 
     def to_dataframe(self, *, attributes=None):
@@ -367,6 +381,47 @@ class ParticleSet:
         )
         return new
 
+    def _gchop_h5_(self):
+        """
+        Extract HDF5 serialization data for this ParticleSet.
+
+        Returns metadata about the particle set type and a DataFrame
+        containing the particle data that should be persisted.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionary containing particle set metadata:
+            - 'pset_type': class name of the particle set
+            - 'ptype': particle type (stars, dark_matter, gas)
+            - 'has_potential': whether potential is computed
+        dataframe : pd.DataFrame
+            DataFrame with particle attributes to be saved
+
+        """
+        # Get attributes to serialize (exclude softening as it's set at read time)
+        cls = type(self)
+        attributes = [
+            f.name
+            for f in attr.fields(cls)
+            if f.init and f.name != "softening"
+        ]
+
+        if not self.has_potential_:
+            attributes.remove("potential")
+
+        # Create metadata
+        metadata = {
+            "pset_type": cls.__name__,
+            "ptype": self.ptype.name,
+            "has_potential": self.has_potential_,
+        }
+
+        # Create DataFrame
+        df = self.to_dataframe(attributes=attributes)
+
+        return metadata, df
+
 
 # =============================================================================
 # GALAXY CLASS
@@ -403,6 +458,8 @@ class Galaxy:
 
     """
 
+    PSET_CLS = ParticleSet
+
     stars = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     dark_matter = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
@@ -438,6 +495,12 @@ class Galaxy:
             if pset.ptype != pstype:
                 raise TypeError(f"{psname} must be of type {pstype}")
 
+            if not isinstance(pset, self.PSET_CLS):
+                raise TypeError(
+                    f"particle set {pset!r} "
+                    f"must be of type {self.PSET_CLS.__name__}"
+                )
+
     def __len__(self):
         """len(x) <=> x.__len__()."""
         return len(self.stars) + len(self.dark_matter) + len(self.gas)
@@ -455,7 +518,7 @@ class Galaxy:
 
     # UTILITIES ===============================================================
 
-    def to_dataframe(self, *, ptypes=None, attributes=None):
+    def to_dataframe(self, *, ptypes=None, attributes=None, sdynamics=True):
         """
         Convert the galaxy to pandas DataFrame.
 
@@ -599,6 +662,52 @@ class Galaxy:
             gas=self.gas.copy(),
         )
         return new
+
+    def _gchop_h5_(self):
+        """
+        Extract HDF5 serialization data for this Galaxy.
+
+        Returns metadata about the galaxy type and DataFrames for each
+        particle type (stars, dark_matter, gas) that should be persisted.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionary containing galaxy metadata:
+            - 'galaxy_type': class name of the galaxy
+            - 'has_potential': whether potential is computed
+            - 'pset_types': metadata for each particle set type
+        dataframes : dict
+            Dictionary with keys 'stars', 'dark_matter', 'gas' mapping
+            to their respective DataFrames
+
+        """
+        cls = type(self)
+
+        # Get particle set data using their _gchop_h5_ methods
+        stars_meta, stars_df = self.stars._gchop_h5_()
+        dm_meta, dm_df = self.dark_matter._gchop_h5_()
+        gas_meta, gas_df = self.gas._gchop_h5_()
+
+        # Create galaxy-level metadata
+        metadata = {
+            "galaxy_type": cls.__name__,
+            "has_potential": self.has_potential_,
+            "pset_types": {
+                "stars": stars_meta,
+                "dark_matter": dm_meta,
+                "gas": gas_meta,
+            },
+        }
+
+        # Create dataframes dict
+        dataframes = {
+            "stars": stars_df,
+            "dark_matter": dm_df,
+            "gas": gas_df,
+        }
+
+        return metadata, dataframes
 
     # ACCESSORS ===============================================================
 

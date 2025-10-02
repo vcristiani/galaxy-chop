@@ -17,9 +17,12 @@
 import platform
 import sys
 from datetime import datetime, timezone
+import json
 
 from astropy.io.misc.hdf5 import write_table_hdf5
 from astropy.table import Table
+
+import attr
 
 import h5py
 
@@ -39,9 +42,10 @@ _DEFAULT_METADATA = {
     "platform": platform.platform(),
     "system_encoding": sys.getfilesystemencoding(),
     "Python": sys.version,
-    "format_version": 0.1,
+    "format_version": 2.0,
 }
 
+FALLBACK_VERSION = 1.0
 
 # =============================================================================
 # UTILS
@@ -63,6 +67,67 @@ def _df_to_table(df, ptype):
 # =============================================================================
 # HDF 5
 # =============================================================================
+
+_READ_HDF5_VERSIONS = {}
+
+
+def _register_read_hdf5(version):
+    def dec(func):
+        _READ_HDF5_VERSIONS[version] = func
+
+    return dec
+
+
+@_register_read_hdf5(1.0)
+def _read_hdf5(stream, *, softening_s: float, softening_dm: float, softening_g: float):
+    star_table = Table.read(stream["stars"])
+    dark_table = Table.read(stream["dark_matter"])
+    gas_table = Table.read(stream["gas"])
+
+    galaxy_kws = {
+        "softening_s": softening_s,
+        "softening_dm": softening_dm,
+        "softening_g": softening_g,
+    }
+
+    star_kws = _table_to_dict(star_table, "s")
+    galaxy_kws.update(star_kws)
+
+    dark_kws = _table_to_dict(dark_table, "dm")
+    galaxy_kws.update(dark_kws)
+
+    gas_kws = _table_to_dict(gas_table, "g")
+    galaxy_kws.update(gas_kws)
+
+    galaxy = core.mkgalaxy(**galaxy_kws)
+
+    return galaxy
+
+
+@_register_read_hdf5(2.0)
+def _read_hdf5(stream, *, softening_s: float, softening_dm: float, softening_g: float):
+    star_table = Table.read(stream["stars"])
+    dark_table = Table.read(stram["dark_matter"])
+    gas_table = Table.read(stream["gas"])
+
+    galaxy_kws = {
+        "softening_s": softening_s,
+        "softening_dm": softening_dm,
+        "softening_g": softening_g,
+    }
+
+    star_kws = _table_to_dict(star_table, "s")
+    galaxy_kws.update(star_kws)
+
+    dark_kws = _table_to_dict(dark_table, "dm")
+    galaxy_kws.update(dark_kws)
+
+    gas_kws = _table_to_dict(gas_table, "g")
+    galaxy_kws.update(gas_kws)
+
+    galaxy = core.mkgalaxy(**galaxy_kws)
+
+    return galaxy
 
 
 def read_hdf5(
@@ -96,28 +161,17 @@ def read_hdf5(
 
     """
     with h5py.File(path_or_stream, "r") as f:
-        star_table = Table.read(f["stars"])
-        dark_table = Table.read(f["dark_matter"])
-        gas_table = Table.read(f["gas"])
+        version = f.attrs.get("format_version", FALLBACK_VERSION)
+        parser = _READ_HDF5_VERSIONS[version]
+        return parser(
+            f,
+            softening_s=softening_s,
+            softening_dm=softening_dm,
+            softening_g=softening_g,
+        )
 
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
 
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
-
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
-
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
-
-    galaxy = core.mkgalaxy(**galaxy_kws)
-
-    return galaxy
+# WRITE =======================================================================
 
 
 def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
@@ -143,9 +197,16 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
         ``astropy.io.misc.hdf5.write_table_hdf5()``
 
     """
-    attributes = ["ptype", "m", "x", "y", "z", "vx", "vy", "vz"]
-    if galaxy.has_potential_:
-        attributes.append("potential")
+
+    gal_cls = type(galaxy)
+    gal_type = gal_cls.__name__
+
+    attributes = [
+        f.name for f in attr.fields(gal_cls.PSET_CLS) if f.init and f != "softening"
+    ]
+
+    if not galaxy.has_potential_:
+        attributes.remove("potential")
 
     df = galaxy.to_dataframe(attributes=attributes)
 
@@ -158,8 +219,9 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
 
     # prepare metadata
     h5_metadata = _DEFAULT_METADATA.copy()
+    h5_metadata["galaxy_type"] = gal_type
     h5_metadata["utc_timestamp"] = datetime.now(timezone.utc).isoformat()
-    h5_metadata.update(metadata or {})
+    h5_metadata["metadata"] = json.dumps(metadata or {})
 
     # prepare kwargs
     kwargs.setdefault("append", True)

@@ -87,3 +87,10 @@ include-package-data = true
 [tool.setuptools.packages.find]
 include = ["galaxychop", "galaxychop.*"]
 namespaces = false
+
+[tool.basedpyright]
+reportUnknownVariableType = false
+reportMissingParameterType = false
+
+[tool.pyright]
+reportMissingParameterType = false

@@ -251,9 +251,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         dark_matter_count = len(galaxy.dark_matter)
         dark_matter_nans = np.full(dark_matter_count, np.nan)
 
-        dark_matter_columns = {
-            attr: dark_matter_nans for attr in attributes
-        }
+        dark_matter_columns = {attr: dark_matter_nans for attr in attributes}
         dark_matter_columns["ptypev"] = core.ParticleSetType.DARK_MATTER.value
 
         dark_matter_df = pd.DataFrame(dark_matter_columns)

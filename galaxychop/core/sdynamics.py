@@ -20,6 +20,8 @@ import attr
 
 import numpy as np
 
+import pandas as pd
+
 import uttr
 
 from .galaxy import NoGravitationalPotentialError, ParticleSetType
@@ -102,6 +104,16 @@ class _GalaxyStellarDynamics:
         return attr.asdict(
             self, filter=lambda a, v: a.metadata.get("asdict", True)
         )
+
+    def to_dataframe(self):
+        """
+        Convert the instance to a DataFrame.
+
+        Attributes are ignored if they are marked as "asdict=False".
+
+        """
+        gsd_dict = self.to_dict()
+        return pd.DataFrame.from_dict(gsd_dict)
 
     def isfinite(self):
         """
@@ -242,14 +254,7 @@ def _stellar_dynamics(galaxy, bin0, bin1, reassign):
         eps_[mask] = np.nan
         eps_r_[mask] = np.nan
 
-    return _GalaxyStellarDynamics(
-        normalized_star_energy=E_star_norm_,
-        normalized_star_Jz=Jz_star_norm_,
-        eps=eps_,
-        eps_r=eps_r_,
-        x=x,
-        y=y,
-    )
+    return E_star_norm_, Jz_star_norm_, eps_, eps_r_, x, y
 
 
 def stellar_dynamics(
@@ -336,4 +341,16 @@ def stellar_dynamics(
         )
     with warnings.catch_warnings():
         warnings.simplefilter(runtime_warnings, category=RuntimeWarning)
-        return _stellar_dynamics(galaxy, bin0, bin1, reassign)
+        values = _stellar_dynamics(galaxy, bin0, bin1, reassign)
+        E_star_norm_, Jz_star_norm_, eps_, eps_r_, x, y = values
+
+    gsd = _GalaxyStellarDynamics(
+        normalized_star_energy=E_star_norm_,
+        normalized_star_Jz=Jz_star_norm_,
+        eps=eps_,
+        eps_r=eps_r_,
+        x=x,
+        y=y,
+    )
+
+    return gsd

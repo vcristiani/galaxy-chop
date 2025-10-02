@@ -14,12 +14,13 @@
 # IMPORTS
 # =============================================================================
 
-from .decomposed_galaxy import ComponentParticleSet, DecomposedGalaxy
+from .decomposed_galaxy import ComponentParticleSet, DecomposedGalaxy, mkdgalaxy
 from .galaxy_decomposer_abc import GalaxyDecomposerABC, hparam
 
 __all__ = [
     "ComponentParticleSet",
     "DecomposedGalaxy",
+    "mkdgalaxy",
     "GalaxyDecomposerABC",
     "hparam",
 ]
