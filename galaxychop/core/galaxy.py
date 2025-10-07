@@ -18,6 +18,7 @@ import enum
 from collections import OrderedDict, defaultdict
 
 from astropy import units as u
+from astropy.table import Table
 
 import attr
 
@@ -404,7 +405,7 @@ class ParticleSet:
         attributes = [
             f.name
             for f in attr.fields(cls)
-            if f.init and f.name != "softening"
+            if f.init and f.name not in ("ptype", "softening")
         ]
 
         if not self.has_potential_:
@@ -417,10 +418,14 @@ class ParticleSet:
             "has_potential": self.has_potential_,
         }
 
-        # Create DataFrame
+        # Create DataFrame and AstropyTable
         df = self.to_dataframe(attributes=attributes)
+        df.insert(0, "id", df.index.to_numpy())
+        table = Table.from_pandas(df)
 
-        return metadata, df
+        del df
+
+        return metadata, table
 
 
 # =============================================================================
