@@ -672,7 +672,7 @@ class Galaxy:
         """
         Extract HDF5 serialization data for this Galaxy.
 
-        Returns metadata about the galaxy type and DataFrames for each
+        Returns metadata about the galaxy type and Astropy Tables for each
         particle type (stars, dark_matter, gas) that should be persisted.
 
         Returns
@@ -681,38 +681,27 @@ class Galaxy:
             Dictionary containing galaxy metadata:
             - 'galaxy_type': class name of the galaxy
             - 'has_potential': whether potential is computed
-            - 'pset_types': metadata for each particle set type
-        dataframes : dict
+        psets : dict
             Dictionary with keys 'stars', 'dark_matter', 'gas' mapping
-            to their respective DataFrames
+            to tuples of (metadata, table) for each particle set
 
         """
         cls = type(self)
-
-        # Get particle set data using their _gchop_h5_ methods
-        stars_meta, stars_df = self.stars._gchop_h5_()
-        dm_meta, dm_df = self.dark_matter._gchop_h5_()
-        gas_meta, gas_df = self.gas._gchop_h5_()
 
         # Create galaxy-level metadata
         metadata = {
             "galaxy_type": cls.__name__,
             "has_potential": self.has_potential_,
-            "pset_types": {
-                "stars": stars_meta,
-                "dark_matter": dm_meta,
-                "gas": gas_meta,
-            },
         }
 
-        # Create dataframes dict
-        dataframes = {
-            "stars": stars_df,
-            "dark_matter": dm_df,
-            "gas": gas_df,
+        # Get particle set data using their _gchop_h5_ methods
+        psets = {
+            "stars": self.stars._gchop_h5_(),
+            "dark_matter": self.dark_matter._gchop_h5_(),
+            "gas": self.gas._gchop_h5_(),
         }
 
-        return metadata, dataframes
+        return metadata, psets
 
     # ACCESSORS ===============================================================
 

@@ -197,31 +197,18 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
         ``astropy.io.misc.hdf5.write_table_hdf5()``
 
     """
+    # Use the _gchop_h5_ method to get metadata and particle set data
+    gal_metadata, psets = galaxy._gchop_h5_()
 
-    gal_cls = type(galaxy)
-    gal_type = gal_cls.__name__
+    # Extract tables and metadata for each particle set
+    stars_meta, stars_table = psets["stars"]
+    dm_meta, dm_table = psets["dark_matter"]
+    gas_meta, gas_table = psets["gas"]
 
-    attributes = [
-        f.name for f in attr.fields(gal_cls.PSET_CLS) if f.init and f != "softening"
-    ]
-
-    if not galaxy.has_potential_:
-        attributes.remove("potential")
-
-    df = galaxy.to_dataframe(attributes=attributes)
-
-    # create the id column for all the
-    df.insert(0, "id", df.index.to_numpy())
-
-    stars_table = _df_to_table(df, core.ParticleSetType.STARS)
-    dm_table = _df_to_table(df, core.ParticleSetType.DARK_MATTER)
-    gas_table = _df_to_table(df, core.ParticleSetType.GAS)
-
-    # prepare metadata
+    # prepare global metadata
     h5_metadata = _DEFAULT_METADATA.copy()
-    h5_metadata["galaxy_type"] = gal_type
     h5_metadata["utc_timestamp"] = datetime.now(timezone.utc).isoformat()
-    h5_metadata["metadata"] = json.dumps(metadata or {})
+    h5_metadata["user_metadata"] = json.dumps(metadata or {})
 
     # prepare kwargs
     kwargs.setdefault("append", True)
@@ -230,10 +217,19 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
     kwargs.setdefault("compression_opts", 9)
 
     with h5py.File(path_or_stream, "a") as h5:
-        write_table_hdf5(stars_table, h5, path="stars", **kwargs)
-        write_table_hdf5(dm_table, h5, path="dark_matter", **kwargs)
-        write_table_hdf5(gas_table, h5, path="gas", **kwargs)
+        write_table_hdf5(stars_table, h5, path="galaxy/stars", **kwargs)
+        write_table_hdf5(dm_table, h5, path="galaxy/dark_matter", **kwargs)
+        write_table_hdf5(gas_table, h5, path="galaxy/gas", **kwargs)
 
+        # Store particle set metadata as attributes on each dataset
+        h5["galaxy/stars"].attrs.update(stars_meta)
+        h5["galaxy/dark_matter"].attrs.update(dm_meta)
+        h5["galaxy/gas"].attrs.update(gas_meta)
+
+        # Store galaxy-level metadata on the galaxy group
+        h5["galaxy"].attrs.update(gal_metadata)
+
+        # Store global metadata at root level
         h5.attrs.update(h5_metadata)
 
 
