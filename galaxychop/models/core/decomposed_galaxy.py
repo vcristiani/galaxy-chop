@@ -14,17 +14,10 @@
 # IMPORTS
 # =============================================================================
 
-# import functools
-# from collections import OrderedDict
 
 
 import attr
-
-# from attr import validators as vldt
-
 import numpy as np
-
-# import pandas as pd
 
 import uttr
 
@@ -57,7 +50,7 @@ class ComponentParticleSet(ParticleSet):
     """
 
     components: np.ndarray = uttr.ib(converter=np.copy)
-    labels: np.ndarray = uttr.ib(converter=np.copy)
+    labels: np.ndarray = uttr.ib(converter=lambda arr: np.astype(arr, np.str_))
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
     probabilities_n = uttr.ib(init=False)
 
@@ -156,9 +149,12 @@ class ComponentParticleSet(ParticleSet):
 
         # Ensure all probability values are between 0 and 1, ignoring NaNs.
         non_nan_probs = self.probabilities[~np.isnan(self.probabilities)]
-        if not np.all((non_nan_probs >= 0) & (non_nan_probs <= 1)):
+        invalid = non_nan_probs[(non_nan_probs < 0) | (non_nan_probs > 1)]
+        if np.size(invalid):
+            invalid_set = set(invalid.flatten())
             raise ValueError(
-                "probabilities must be in the range [0, 1] (ignoring nans)"
+                "probabilities must be in the range [0, 1] (ignoring nans). "
+                f"Found: {invalid_set}"
             )
 
         # Make the probabilities array read-only.
@@ -259,7 +255,7 @@ class ComponentParticleSet(ParticleSet):
 
         """
         # Get base metadata and dataframe from parent
-        metadata, df = super()._gchop_h5_()
+        metadata, table = super()._gchop_h5_()
 
         # Add component-specific metadata
         metadata.update(
@@ -269,18 +265,7 @@ class ComponentParticleSet(ParticleSet):
             }
         )
 
-        # Add component attributes to dataframe
-        df["components"] = self.components.copy()
-        df["labels"] = self.labels.copy()
-
-        # Add probability columns
-        if self.probabilities.ndim > 1:
-            for i in range(self.probabilities.shape[1]):
-                df[f"prob_{i}"] = self.probabilities[:, i]
-        else:
-            df["prob_0"] = self.probabilities
-
-        return metadata, df
+        return metadata, table
 
 
 # =============================================================================
@@ -293,7 +278,6 @@ class DecomposedGalaxy(Galaxy):
     """
     Represent a galaxy decomposed into physical components.
 
-    Represent a galaxy decompos
     A `DecomposedGalaxy` contains stars, dark matter, and gas,
     each represented as a `ComponentParticleSet`, along with
     labels and membership probabilities.
@@ -351,8 +335,8 @@ class DecomposedGalaxy(Galaxy):
 
         if len(set(has_probs.values())) > 1:
             raise TypeError(
-                "Inconsistent probability configurations across particle sets"
-                f"Found configurations:{has_probs}.All particle sets must have"
+                "Inconsistent probability configurations across particle sets. "
+                f"Found configurations: {has_probs}. All particle sets must have "
                 "the same probability setting (all True or all False)."
             )
 

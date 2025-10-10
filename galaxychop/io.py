@@ -30,11 +30,12 @@ import numpy as np
 
 from . import core
 from .constants import VERSION
+
 # =============================================================================
 # CONSTANTS
 # =============================================================================
 
-_DEFAULT_METADATA = {
+_DEFAULT_H5_METADATA = {
     "GalaxyChop": VERSION,
     "author_email": "valeria.cristiani@unc.edu.ar",
     "affiliation": "IATE-OAC-CONICET",
@@ -79,7 +80,9 @@ def _register_read_hdf5(version):
 
 
 @_register_read_hdf5(1.0)
-def _read_hdf5(stream, *, softening_s: float, softening_dm: float, softening_g: float):
+def _read_hdf5(
+    stream, *, softening_s: float, softening_dm: float, softening_g: float
+):
     star_table = Table.read(stream["stars"])
     dark_table = Table.read(stream["dark_matter"])
     gas_table = Table.read(stream["gas"])
@@ -105,9 +108,11 @@ def _read_hdf5(stream, *, softening_s: float, softening_dm: float, softening_g: 
 
 
 @_register_read_hdf5(2.0)
-def _read_hdf5(stream, *, softening_s: float, softening_dm: float, softening_g: float):
+def _read_hdf5(
+    stream, *, softening_s: float, softening_dm: float, softening_g: float
+):
     star_table = Table.read(stream["stars"])
-    dark_table = Table.read(stram["dark_matter"])
+    dark_table = Table.read(stream["dark_matter"])
     gas_table = Table.read(stream["gas"])
 
     galaxy_kws = {
@@ -174,7 +179,15 @@ def read_hdf5(
 # WRITE =======================================================================
 
 
-def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
+def to_hdf5(
+    path_or_stream,
+    galaxy,
+    *,
+    metadata=None,
+    group=None,
+    force_group=False,
+    **kwargs,
+):
     """
     HDF5 file writer.
 
@@ -192,23 +205,28 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
         The galaxy to store.
     metadata : dict or None (default None)
         Extra metadata to store in the h5 file.
+    group : str or None (default None)
+        HDF5 group name to store the galaxy data. If None, defaults to "galaxy".
+    force_group : bool (default False)
+        If True, deletes the group if it already exists.
+        If False, raises ValueError when group exists.
     kwargs :
         Extra arguments to the function
         ``astropy.io.misc.hdf5.write_table_hdf5()``
 
     """
     # Use the _gchop_h5_ method to get metadata and particle set data
-    gal_metadata, psets = galaxy._gchop_h5_()
+    gal_meta, psets = galaxy._gchop_h5_()
 
-    # Extract tables and metadata for each particle set
-    stars_meta, stars_table = psets["stars"]
-    dm_meta, dm_table = psets["dark_matter"]
-    gas_meta, gas_table = psets["gas"]
+    # Set default group name if not provided
+    group = "galaxy" if group is None else group
 
     # prepare global metadata
-    h5_metadata = _DEFAULT_METADATA.copy()
+    h5_metadata = _DEFAULT_H5_METADATA.copy()
     h5_metadata["utc_timestamp"] = datetime.now(timezone.utc).isoformat()
-    h5_metadata["user_metadata"] = json.dumps(metadata or {})
+
+    # prepare galaxy metadata
+    gal_meta["user_metadata"] = json.dumps(metadata or {})
 
     # prepare kwargs
     kwargs.setdefault("append", True)
@@ -217,17 +235,23 @@ def to_hdf5(path_or_stream, galaxy, *, metadata=None, **kwargs):
     kwargs.setdefault("compression_opts", 9)
 
     with h5py.File(path_or_stream, "a") as h5:
-        write_table_hdf5(stars_table, h5, path="galaxy/stars", **kwargs)
-        write_table_hdf5(dm_table, h5, path="galaxy/dark_matter", **kwargs)
-        write_table_hdf5(gas_table, h5, path="galaxy/gas", **kwargs)
+        # Check if group already exists
+        if group in h5 and force_group:
+            del h5[group]
+        elif group in h5:
+            raise ValueError(
+                f"Group '{group}' already exists in the HDF5 file"
+            )
 
-        # Store particle set metadata as attributes on each dataset
-        h5["galaxy/stars"].attrs.update(stars_meta)
-        h5["galaxy/dark_matter"].attrs.update(dm_meta)
-        h5["galaxy/gas"].attrs.update(gas_meta)
+        for pset_name, (pset_meta, pset_table) in psets.items():
+            pset_path = "/".join([group, pset_name])
+
+            # write the tables
+            write_table_hdf5(pset_table, h5, path=pset_path, **kwargs)
+            h5[pset_path].attrs.update(pset_meta)
 
         # Store galaxy-level metadata on the galaxy group
-        h5["galaxy"].attrs.update(gal_metadata)
+        h5[group].attrs.update(gal_meta)
 
         # Store global metadata at root level
         h5.attrs.update(h5_metadata)

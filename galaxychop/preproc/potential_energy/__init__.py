@@ -474,8 +474,6 @@ class Potentializer(GalaxyTransformerABC):
                 f"Available backends: {available_backends}"
             )
 
-        print(f"Created Potentializer with backend: {self.backend}")
-
     @doc_inherit(GalaxyTransformerABC.transform)
     def transform(self, galaxy):
         """
