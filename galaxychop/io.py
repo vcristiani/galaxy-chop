@@ -30,6 +30,7 @@ import numpy as np
 
 from . import core
 from .constants import VERSION
+from .models import DecomposedGalaxy, ComponentParticleSet
 
 # =============================================================================
 # CONSTANTS
@@ -73,74 +74,224 @@ _READ_HDF5_VERSIONS = {}
 
 
 def _register_read_hdf5(version):
-    def dec(func):
-        _READ_HDF5_VERSIONS[version] = func
+    def dec(cls):
+        _READ_HDF5_VERSIONS[version] = cls
+        return cls
 
     return dec
 
 
+class GalaxyHDF5ReaderABC:
+    """Base class for HDF5 readers."""
+
+    def read(self, stream, **kwargs):  # type: ignore
+        """Parse the HDF5 stream and return a galaxy object."""
+        raise NotImplementedError("Subclasses must implement read")
+
+
 @_register_read_hdf5(1.0)
-def _read_hdf5(
-    stream, *, softening_s: float, softening_dm: float, softening_g: float
-):
-    star_table = Table.read(stream["stars"])
-    dark_table = Table.read(stream["dark_matter"])
-    gas_table = Table.read(stream["gas"])
+class HDF5ReaderV1(GalaxyHDF5ReaderABC):
+    """HDF5 reader for format version 1.0."""
 
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
+    def read(
+        self,
+        stream,
+        *,
+        softening_s: float = 0,
+        softening_dm: float = 0,
+        softening_g: float = 0,
+    ):
+        star_table = Table.read(stream["stars"])
+        dark_table = Table.read(stream["dark_matter"])
+        gas_table = Table.read(stream["gas"])
 
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
+        galaxy_kws = {
+            "softening_s": softening_s,
+            "softening_dm": softening_dm,
+            "softening_g": softening_g,
+        }
 
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
+        star_kws = _table_to_dict(star_table, "s")
+        galaxy_kws.update(star_kws)
 
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
+        dark_kws = _table_to_dict(dark_table, "dm")
+        galaxy_kws.update(dark_kws)
 
-    galaxy = core.mkgalaxy(**galaxy_kws)
+        gas_kws = _table_to_dict(gas_table, "g")
+        galaxy_kws.update(gas_kws)
 
-    return galaxy
+        galaxy = core.mkgalaxy(**galaxy_kws)
+
+        return galaxy
 
 
 @_register_read_hdf5(2.0)
-def _read_hdf5(
-    stream, *, softening_s: float, softening_dm: float, softening_g: float
-):
-    star_table = Table.read(stream["stars"])
-    dark_table = Table.read(stream["dark_matter"])
-    gas_table = Table.read(stream["gas"])
+class HDF5ReaderV2(GalaxyHDF5ReaderABC):
+    """HDF5 reader for format version 2.0."""
 
-    galaxy_kws = {
-        "softening_s": softening_s,
-        "softening_dm": softening_dm,
-        "softening_g": softening_g,
-    }
+    def _galaxy_builder(
+        self,
+        *,
+        stars_dataset,
+        dark_matter_dataset,
+        gas_dataset,
+        gal_meta,
+        softening_s,
+        softening_dm,
+        softening_g,
+    ):
 
-    star_kws = _table_to_dict(star_table, "s")
-    galaxy_kws.update(star_kws)
+        ds_and_soft = zip(
+            [softening_s, softening_dm, softening_g],
+            [stars_dataset, dark_matter_dataset, gas_dataset],
+        )
 
-    dark_kws = _table_to_dict(dark_table, "dm")
-    galaxy_kws.update(dark_kws)
+        psets = {}
+        for softening, dataset in ds_and_soft:
 
-    gas_kws = _table_to_dict(gas_table, "g")
-    galaxy_kws.update(gas_kws)
+            table = Table.read(dataset)
+            meta = dict(dataset.attrs)
 
-    galaxy = core.mkgalaxy(**galaxy_kws)
+            ptype = core.ParticleSetType.mktype(meta["ptype"])
 
-    return galaxy
+            kws = {
+                f"{k}": v
+                for k, v in table.items()
+                if k != "id"
+                and not (k.endswith(".mask") or k.startswith("probabilities"))
+            }
+
+            del table, meta
+
+            pset = core.ParticleSet(
+                ptype=ptype,
+                softening=softening,
+                **kws,
+            )
+
+            psets[ptype.name.lower()] = pset
+
+        gal = core.Galaxy(**psets)
+
+        return gal
+
+    def _decomposed_galaxy_builder(
+        self,
+        *,
+        stars_dataset,
+        dark_matter_dataset,
+        gas_dataset,
+        gal_meta,
+        softening_s,
+        softening_dm,
+        softening_g,
+    ):
+
+        method = gal_meta["method"]
+        component_name_mapping = json.loads(gal_meta["component_name_mapping"])
+
+        ds_and_soft = zip(
+            [softening_s, softening_dm, softening_g],
+            [stars_dataset, dark_matter_dataset, gas_dataset],
+        )
+
+        psets = {}
+        for softening, dataset in ds_and_soft:
+
+            table = Table.read(dataset)
+            meta = dict(dataset.attrs)
+
+            ptype = core.ParticleSetType.mktype(meta["ptype"])
+
+            kws = {
+                f"{k}": v
+                for k, v in table.items()
+                if k != "id"
+                and not (k.endswith(".mask") or k.startswith("probabilities"))
+            }
+
+            has_probabilities = meta["has_probabilities"]
+            probabilities_n = (
+                meta["probabilities_n"] if has_probabilities else 1
+            )
+
+            probabilities_columns = [
+                f"probabilities_{n}" for n in range(probabilities_n)
+            ]
+            probabilities = table[probabilities_columns].to_pandas().values
+
+            del table, meta
+
+            pset = ComponentParticleSet(
+                ptype=ptype,
+                softening=softening,
+                probabilities=probabilities,
+                **kws,
+            )
+
+            psets[ptype.name.lower()] = pset
+
+        gal = DecomposedGalaxy(
+            method=method,
+            component_name_mapping=component_name_mapping,
+            **psets,
+        )
+
+        return gal
+
+    def read(
+        self,
+        stream,
+        *,
+        group=None,
+        softening_s: float = 0,
+        softening_dm: float = 0,
+        softening_g: float = 0,
+    ):
+        # Registry mapping galaxy types to their builders
+        galaxy_builders = {
+            DecomposedGalaxy.__name__: self._decomposed_galaxy_builder,
+            core.Galaxy.__name__: self._galaxy_builder,
+        }
+
+        # Set default group name if not provided
+        group = "galaxy" if group is None else group
+
+        gal_meta = dict(stream[group].attrs)
+        gal_type = gal_meta["galaxy_type"]
+
+        try:
+            builder = galaxy_builders[gal_type]
+        except KeyError:
+            raise ValueError(f"Unknown galaxy type {gal_type}")
+
+        stars_dataset = stream[f"{group}/stars"]
+        dark_matter_dataset = stream[f"{group}/dark_matter"]
+        gas_dataset = stream[f"{group}/gas"]
+
+        galaxy = builder(
+            stars_dataset=stars_dataset,
+            dark_matter_dataset=dark_matter_dataset,
+            gas_dataset=gas_dataset,
+            gal_meta=gal_meta,
+            softening_s=softening_s,
+            softening_dm=softening_dm,
+            softening_g=softening_g,
+        )
+
+        import ipdb
+
+        ipdb.set_trace()
+
+        return galaxy
 
 
 def read_hdf5(
     path_or_stream,
-    *,
-    softening_s: float = 0.0,
-    softening_dm: float = 0.0,
-    softening_g: float = 0.0,
+    softening_s: float = 0,
+    softening_dm: float = 0,
+    softening_g: float = 0,
+    **kwargs,
 ):
     """
     h5py file reader.
@@ -167,12 +318,14 @@ def read_hdf5(
     """
     with h5py.File(path_or_stream, "r") as f:
         version = f.attrs.get("format_version", FALLBACK_VERSION)
-        parser = _READ_HDF5_VERSIONS[version]
-        return parser(
+        parser_class = _READ_HDF5_VERSIONS[version]
+        parser = parser_class()
+        return parser.read(
             f,
             softening_s=softening_s,
             softening_dm=softening_dm,
             softening_g=softening_g,
+            **kwargs,
         )
 
 
@@ -224,17 +377,24 @@ def to_hdf5(
     # prepare global metadata
     h5_metadata = _DEFAULT_H5_METADATA.copy()
     h5_metadata["utc_timestamp"] = datetime.now(timezone.utc).isoformat()
+    h5_metadata["user_metadata"] = json.dumps(metadata or {})
 
     # prepare galaxy metadata
-    gal_meta["user_metadata"] = json.dumps(metadata or {})
+    gal_meta["component_name_mapping"] = json.dumps(
+        gal_meta["component_name_mapping"]
+    )
 
     # prepare kwargs
     kwargs.setdefault("append", True)
     kwargs.setdefault("overwrite", True)
     kwargs.setdefault("compression", "gzip")
+    kwargs.setdefault("serialize_meta", True)
     kwargs.setdefault("compression_opts", 9)
 
-    with h5py.File(path_or_stream, "a") as h5:
+    with h5py.File(
+        path_or_stream,
+        "a",
+    ) as h5:
         # Check if group already exists
         if group in h5 and force_group:
             del h5[group]
@@ -310,6 +470,12 @@ def read_npy(
     Returns
     -------
     galaxy : ``Galaxy class`` object.
+
+
+    Notes
+    -----
+    This is a low-level utility mostly to consume old datasets and try to
+    create a simple galaxy from multiple numpy arrays
 
     """
     particles_star = np.load(path_or_stream_star)
