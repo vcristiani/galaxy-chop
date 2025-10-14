@@ -99,7 +99,10 @@ class GalaxyPlotter:
         # and the lmap if lmap is None
         if isinstance(
             labels,
-            (getattr(models, "Components", tuple), models.ComponentParticleSet)
+            (
+                getattr(models, "Components", tuple),
+                models.ComponentParticleSet,
+            ),
         ):
             if hasattr(labels, "lmap"):
                 lmap = labels.lmap if lmap is None else lmap
@@ -353,7 +356,10 @@ class GalaxyPlotter:
         # and the lmap if lmap is None
         if isinstance(
             labels,
-            (getattr(models, "Components", tuple), models.ComponentParticleSet)
+            (
+                getattr(models, "Components", tuple),
+                models.ComponentParticleSet,
+            ),
         ):
             if hasattr(labels, "lmap"):
                 lmap = labels.lmap if lmap is None else lmap
