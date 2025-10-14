@@ -41,7 +41,7 @@ class NoGravitationalPotentialError(ValueError):
 
 
 # =============================================================================
-# PARTICLE SET
+# PARTICLE SET TYPE
 # =============================================================================
 
 
@@ -73,6 +73,11 @@ class ParticleSetType(enum.IntEnum):
     def humanize(self):
         """Particle type name in lower case."""
         return self.name.lower()
+
+
+# =============================================================================
+# PARTICLE SET
+# =============================================================================
 
 
 @uttr.s(frozen=True, slots=True, repr=False)
@@ -147,7 +152,7 @@ class ParticleSet:
     Jy_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
-    # UTTRS Orchestration =====================================================
+    # INITIALIZATION ==========================================================
 
     @has_potential_.default
     def _has_potential__default(self):
@@ -169,8 +174,6 @@ class ParticleSet:
         penergy = arr.potential
 
         return kenergy + penergy
-
-    # angular momentum
 
     @Jx_.default
     def _Jx__default(self):
@@ -221,20 +224,11 @@ class ParticleSet:
             if isinstance(field, np.ndarray):
                 field.setflags(write=False)
 
-    # PROPERTIES ==============================================================
-
-    @property
-    def angular_momentum_(self):
-        """Components of specific angular momentum in units of kpc*km/s."""
-        arr = self.arr_
-        return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
-
-    # REDEFINITIONS ===========================================================
-
     def __repr__(self):
         """repr(x) <=> x.__repr__()."""
+        cls_name = type(self).__name__
         return (
-            f"<ParticleSet {self.ptype.name!r}, size={len(self)}, "
+            f"<{cls_name} {self.ptype.name!r}, size={len(self)}, "
             f"softening={self.softening.value}, \
             potentials={self.has_potential_}>"
         )
@@ -243,7 +237,16 @@ class ParticleSet:
         """len(x) <=> x.__len__()."""
         return len(self.m)
 
-    # UTILITIES ===============================================================
+    # PROPERTIES ==============================================================
+
+    @property
+    def angular_momentum_(self):
+        """Components of specific angular momentum in units of kpc*km/s."""
+        arr = self.arr_
+        return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
+
+    # PUBLIC METHODS ==========================================================
+
     def get_value_makers(self):
         """
         Build a dictionary of value generator functions for particle attribute.
@@ -365,22 +368,26 @@ class ParticleSet:
         the_dict = self.to_dict(attributes=attributes)
         return pd.DataFrame(the_dict)
 
+    # CONVERSION METHODS ======================================================
+
     def copy(self):
         """Make a copy of the ParticleSet."""
         cls = type(self)
         new = cls(
             ptype=self.ptype,
-            m=self.m.copy(),
-            x=self.x.copy(),
-            y=self.y.copy(),
-            z=self.z.copy(),
-            vx=self.vx.copy(),
-            vy=self.vy.copy(),
-            vz=self.vz.copy(),
-            potential=self.potential.copy(),
+            m=self.m,
+            x=self.x,
+            y=self.y,
+            z=self.z,
+            vx=self.vx,
+            vy=self.vy,
+            vz=self.vz,
+            potential=self.potential,
             softening=float(self.softening.value),
         )
         return new
+
+    # PRIVATE/SPECIAL METHODS =================================================
 
     def _gchop_h5_(self):
         """
@@ -415,7 +422,7 @@ class ParticleSet:
         metadata = {
             "pset_type": cls.__name__,
             "ptype": self.ptype.name,
-            "has_potential": self.has_potential_,
+            "has_potential": bool(self.has_potential_),
         }
 
         # Create DataFrame and AstropyTable
@@ -471,6 +478,8 @@ class Galaxy:
 
     has_potential_ = attr.ib(init=False)
 
+    # INITIALIZATION ==========================================================
+
     @has_potential_.default
     def _has_potential__default(self):
         # this is a set only can have 3 possible values:
@@ -521,7 +530,150 @@ class Galaxy:
             f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
         )
 
-    # UTILITIES ===============================================================
+    # PROPERTIES ==============================================================
+
+    @property
+    def plot(self):
+        """Plot accessor."""
+        if not hasattr(self, "_plot"):
+            from . import plot  # noqa
+
+            plotter = plot.GalaxyPlotter(self)
+            super().__setattr__("_plot", plotter)
+        return self._plot
+
+    @property
+    def kinetic_energy_(self):
+        """
+        Specific kinetic energy of stars, dark matter and gas particles.
+
+        Returns
+        -------
+        tuple : Quantity
+            (k_s, k_dm, k_g): Specific kinetic energy of stars, dark matter and
+            gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+
+        Examples
+        --------
+        This returns the specific kinetic energy of stars, dark matter and gas
+        particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> k_s, k_dm, k_g = galaxy.kinetic_energy_
+        """
+        return (
+            self.stars.kinetic_energy_,
+            self.dark_matter.kinetic_energy_,
+            self.gas.kinetic_energy_,
+        )
+
+    @property
+    def potential_energy_(self):
+        """
+        Specific potential energy of stars, dark matter and gas particles.
+
+        This property doesn't compute the potential energy, only returns its
+        value if it is already computed, i.e. ``has_potential_`` is True. To
+        compute the potential use the
+        ``galaxychop.preproc.potential_energy`` module.
+
+        Returns
+        -------
+        tuple : Quantity
+            (p_s, p_dm, p_g): Specific potential energy of stars, dark matter
+            and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+
+        Examples
+        --------
+        This returns the specific potential energy of stars, dark matter and
+        gas particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> pot = gchop.preproc.potential_energy.Potentializer(
+            backend="frotran")
+        >>> galaxy_with_potential = pot.transform(galaxy)
+        >>> p_s, p_dm, p_g = galaxy_with_potential.potential_energy_
+        """
+        if self.has_potential_:
+            return (
+                self.stars.potential,
+                self.dark_matter.potential,
+                self.gas.potential,
+            )
+        else:
+            raise NoGravitationalPotentialError(
+                "Galaxy does not have the potential energy calculated"
+            )
+
+    @property
+    def total_energy_(self):
+        """
+        Specific total energy calculation.
+
+        Calculates the specific total energy of dark matter, star and gas
+        particles.
+
+        Returns
+        -------
+        tuple : Quantity
+            (Etot_s, Etot_dm, Etot_g): Specific total energy of stars, dark
+            matter and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
+
+        Examples
+        --------
+        This returns the specific total energy of stars, dark matter and gas
+        particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> E_s, E_dm, E_g = galaxy.total_energy_
+
+        """
+        if self.has_potential_:
+            return (
+                self.stars.total_energy_,
+                self.dark_matter.total_energy_,
+                self.gas.total_energy_,
+            )
+        else:
+            raise NoGravitationalPotentialError(
+                "Galaxy does not have the potential energy calculated"
+            )
+
+    @property
+    def angular_momentum_(self):
+        """
+        Specific angular momentum calculation.
+
+        Compute the specific angular momentum of stars, dark matter and gas
+        particles.
+
+        Returns
+        -------
+        tuple : `Quantity`
+            (J_s, J_dm, J_g): Specific angular momentum of stars, dark
+            matter and gas respectively. Shape(n_s, n_dm, n_g).
+            Unit: (kpc * km / s)
+
+        Examples
+        --------
+        This returns the specific angular momentum of stars, dark matter and
+        gas particles respectively.
+
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> J_s, J_dm, J_g = galaxy.angular_momentum_
+
+        """
+        return (
+            self.stars.angular_momentum_,
+            self.dark_matter.angular_momentum_,
+            self.gas.angular_momentum_,
+        )
+
+    # PUBLIC METHODS ==========================================================
 
     def to_dataframe(self, *, ptypes=None, attributes=None, sdynamics=True):
         """
@@ -658,198 +810,6 @@ class Galaxy:
         disassembled = dict(**stars_kws, **dark_matter_kws, **gas_kws)
         return disassembled
 
-    def copy(self):
-        """Make a copy of the Galaxy."""
-        cls = type(self)
-        new = cls(
-            stars=self.stars.copy(),
-            dark_matter=self.dark_matter.copy(),
-            gas=self.gas.copy(),
-        )
-        return new
-
-    def _gchop_h5_(self):
-        """
-        Extract HDF5 serialization data for this Galaxy.
-
-        Returns metadata about the galaxy type and Astropy Tables for each
-        particle type (stars, dark_matter, gas) that should be persisted.
-
-        Returns
-        -------
-        metadata : dict
-            Dictionary containing galaxy metadata:
-            - 'galaxy_type': class name of the galaxy
-            - 'has_potential': whether potential is computed
-        psets : dict
-            Dictionary with keys 'stars', 'dark_matter', 'gas' mapping
-            to tuples of (metadata, table) for each particle set
-
-        """
-        cls = type(self)
-
-        # Create galaxy-level metadata
-        metadata = {
-            "galaxy_type": cls.__name__,
-            "has_potential": self.has_potential_,
-        }
-
-        # Get particle set data using their _gchop_h5_ methods
-        psets = {
-            "stars": self.stars._gchop_h5_(),
-            "dark_matter": self.dark_matter._gchop_h5_(),
-            "gas": self.gas._gchop_h5_(),
-        }
-
-        return metadata, psets
-
-    # ACCESSORS ===============================================================
-
-    @property
-    def plot(self):
-        """Plot accessor."""
-        if not hasattr(self, "_plot"):
-            from . import plot  # noqa
-
-            plotter = plot.GalaxyPlotter(self)
-            super().__setattr__("_plot", plotter)
-        return self._plot
-
-    # ENERGY ===============================================================
-
-    @property
-    def kinetic_energy_(self):
-        """
-        Specific kinetic energy of stars, dark matter and gas particles.
-
-        Returns
-        -------
-        tuple : Quantity
-            (k_s, k_dm, k_g): Specific kinetic energy of stars, dark matter and
-            gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
-
-        Examples
-        --------
-        This returns the specific kinetic energy of stars, dark matter and gas
-        particles respectively.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> k_s, k_dm, k_g = galaxy.kinetic_energy_
-        """
-        return (
-            self.stars.kinetic_energy_,
-            self.dark_matter.kinetic_energy_,
-            self.gas.kinetic_energy_,
-        )
-
-    @property
-    def potential_energy_(self):
-        """
-        Specific potential energy of stars, dark matter and gas particles.
-
-        This property doesn't compute the potential energy, only returns its
-        value if it is already computed, i.e. ``has_potential_`` is True. To
-        compute the potential use the
-        ``galaxychop.preproc.potential_energy`` module.
-
-        Returns
-        -------
-        tuple : Quantity
-            (p_s, p_dm, p_g): Specific potential energy of stars, dark matter
-            and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
-
-        Examples
-        --------
-        This returns the specific potential energy of stars, dark matter and
-        gas particles respectively.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> pot = gchop.preproc.potential_energy.Potentializer(
-            backend="frotran")
-        >>> galaxy_with_potential = pot.transform(galaxy)
-        >>> p_s, p_dm, p_g = galaxy_with_potential.potential_energy_
-        """
-        if self.has_potential_:
-            return (
-                self.stars.potential,
-                self.dark_matter.potential,
-                self.gas.potential,
-            )
-        else:
-            raise NoGravitationalPotentialError(
-                "Galaxy does not have the potential energy calculated"
-            )
-
-    @property
-    def total_energy_(self):
-        """
-        Specific total energy calculation.
-
-        Calculates the specific total energy of dark matter, star and gas
-        particles.
-
-        Returns
-        -------
-        tuple : Quantity
-            (Etot_s, Etot_dm, Etot_g): Specific total energy of stars, dark
-            matter and gas respectively. Shape(n_s, n_dm, n_g). Unit: (km/s)**2
-
-        Examples
-        --------
-        This returns the specific total energy of stars, dark matter and gas
-        particles respectively.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> E_s, E_dm, E_g = galaxy.total_energy_
-
-        """
-        if self.has_potential_:
-            return (
-                self.stars.total_energy_,
-                self.dark_matter.total_energy_,
-                self.gas.total_energy_,
-            )
-        else:
-            raise NoGravitationalPotentialError(
-                "Galaxy does not have the potential energy calculated"
-            )
-
-    @property
-    def angular_momentum_(self):
-        """
-        Specific angular momentum calculation.
-
-        Compute the specific angular momentum of stars, dark matter and gas
-        particles.
-
-        Returns
-        -------
-        tuple : `Quantity`
-            (J_s, J_dm, J_g): Specific angular momentum of stars, dark
-            matter and gas respectively. Shape(n_s, n_dm, n_g).
-            Unit: (kpc * km / s)
-
-        Examples
-        --------
-        This returns the specific angular momentum of stars, dark matter and
-        gas particles respectively.
-
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> J_s, J_dm, J_g = galaxy.angular_momentum_
-
-        """
-        return (
-            self.stars.angular_momentum_,
-            self.dark_matter.angular_momentum_,
-            self.gas.angular_momentum_,
-        )
-
-    # METHODS =================================================================
-
     def stellar_dynamics(
         self,
         *,
@@ -933,6 +893,55 @@ class Galaxy:
             reassign=reassign,
             runtime_warnings=runtime_warnings,
         )
+
+    # CONVERSION METHODS ======================================================
+
+    def copy(self):
+        """Make a copy of the Galaxy."""
+        cls = type(self)
+        new = cls(
+            stars=self.stars.copy(),
+            dark_matter=self.dark_matter.copy(),
+            gas=self.gas.copy(),
+        )
+        return new
+
+    # PRIVATE/SPECIAL METHODS =================================================
+
+    def _gchop_h5_(self):
+        """
+        Extract HDF5 serialization data for this Galaxy.
+
+        Returns metadata about the galaxy type and Astropy Tables for each
+        particle type (stars, dark_matter, gas) that should be persisted.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionary containing galaxy metadata:
+            - 'galaxy_type': class name of the galaxy
+            - 'has_potential': whether potential is computed
+        psets : dict
+            Dictionary with keys 'stars', 'dark_matter', 'gas' mapping
+            to tuples of (metadata, table) for each particle set
+
+        """
+        cls = type(self)
+
+        # Create galaxy-level metadata
+        metadata = {
+            "galaxy_type": cls.__name__,
+            "has_potential": bool(self.has_potential_),
+        }
+
+        # Get particle set data using their _gchop_h5_ methods
+        psets = {
+            "stars": self.stars._gchop_h5_(),
+            "dark_matter": self.dark_matter._gchop_h5_(),
+            "gas": self.gas._gchop_h5_(),
+        }
+
+        return metadata, psets
 
 
 # =============================================================================

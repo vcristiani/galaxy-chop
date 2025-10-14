@@ -53,6 +53,8 @@ class ComponentParticleSet(ParticleSet):
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
     probabilities_n = uttr.ib(init=False)
 
+    # CONSTRUCTORS ============================================================
+
     @classmethod
     def from_pset(
         cls,
@@ -98,6 +100,8 @@ class ComponentParticleSet(ParticleSet):
             probabilities=probabilities,
         )
         return instance
+
+    # INITIALIZATION ==========================================================
 
     @probabilities_n.default
     def _proabilities_n_default(self):
@@ -159,6 +163,8 @@ class ComponentParticleSet(ParticleSet):
         # Make the probabilities array read-only.
         self.probabilities.setflags(write=False)
 
+    # PROPERTIES ==============================================================
+
     @property
     def has_probabilities(self):
         """
@@ -171,6 +177,8 @@ class ComponentParticleSet(ParticleSet):
             `False` otherwise.
         """
         return bool(self.probabilities_n)
+
+    # PUBLIC METHODS ==========================================================
 
     def get_value_makers(self):
         """
@@ -199,6 +207,8 @@ class ComponentParticleSet(ParticleSet):
 
         value_makers.update(component_makers)
         return value_makers
+
+    # CONVERSION METHODS ======================================================
 
     def copy(self):
         """
@@ -257,6 +267,8 @@ class ComponentParticleSet(ParticleSet):
             potential=self.potential,
             softening=float(self.softening.value),
         )
+
+    # PRIVATE/SPECIAL METHODS =================================================
 
     def _gchop_h5_(self):
         """
@@ -331,7 +343,7 @@ class DecomposedGalaxy(Galaxy):
     method: str = uttr.ib(converter=str)
     component_name_mapping: dict = uttr.ib(converter=dict)
 
-    # INTERNAL ================================================================
+    # INITIALIZATION ==========================================================
 
     def __attrs_post_init__(self):
         """
@@ -428,10 +440,17 @@ class DecomposedGalaxy(Galaxy):
         the_unique_labels = set(sorted(labels_list))
         return the_unique_labels
 
-    # REDEFINE ================================================================
+    # CONVERSION METHODS ======================================================
 
     def copy(self):
-        """Make a copy of the Galaxy."""
+        """
+        Make a copy of the DecomposedGalaxy.
+
+        Returns
+        -------
+        DecomposedGalaxy
+            A new instance identical to the original, with data copied.
+        """
         cls = type(self)
         new = cls(
             method=self.method,
@@ -462,6 +481,8 @@ class DecomposedGalaxy(Galaxy):
             dark_matter=self.dark_matter.to_particleset(),
             gas=self.gas.to_particleset(),
         )
+
+    # PRIVATE/SPECIAL METHODS =================================================
 
     def _gchop_h5_(self):
         """
