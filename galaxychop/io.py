@@ -83,20 +83,7 @@ from .models import DecomposedGalaxy, ComponentParticleSet
 # CONSTANTS
 # =============================================================================
 
-#: Default metadata dictionary stored in HDF5 files.
-#:
-#: This dictionary contains global metadata that is written to the root level
-#: of HDF5 files created by GalaxyChop. It includes:
-#:
-#: - GalaxyChop version
-#: - Author contact information
-#: - Project URL
-#: - Platform and system information
-#: - Python version
-#: - HDF5 format version (2.0 is the current version)
-#:
-#: Additional metadata can be provided via the `metadata` parameter in
-#: :func:`to_hdf5`, which will be stored separately in the `user_metadata` field.
+#: Default metadata written to root level of HDF5 files, including version, author, and platform info.
 _DEFAULT_H5_METADATA = {
     "GalaxyChop": VERSION,
     "author_email": "valeria.cristiani@unc.edu.ar",
@@ -108,11 +95,7 @@ _DEFAULT_H5_METADATA = {
     "format_version": 2.0,
 }
 
-#: Fallback format version for HDF5 files without explicit version metadata.
-#:
-#: When reading HDF5 files that don't have a `format_version` attribute,
-#: this version (1.0) is assumed. This ensures backwards compatibility with
-#: older files created before versioning was implemented.
+#: Fallback format version (1.0) assumed when reading HDF5 files without explicit version metadata.
 FALLBACK_VERSION = 1.0
 
 # =============================================================================
@@ -121,61 +104,14 @@ FALLBACK_VERSION = 1.0
 
 
 def _table_to_dict(table, key_suffix):
-    """Convert an Astropy Table to a dictionary with suffixed keys.
-
-    This utility function transforms particle data from a table format into
-    a dictionary suitable for creating Galaxy objects. All column names
-    (except 'id') are suffixed with the provided suffix.
-
-    Parameters
-    ----------
-    table : astropy.table.Table
-        Table containing particle data (mass, positions, velocities, etc.).
-    key_suffix : str
-        Suffix to append to each column name (e.g., 's' for stars, 'dm' for
-        dark matter, 'g' for gas).
-
-    Returns
-    -------
-    dict
-        Dictionary with suffixed keys. The 'potential' key is always included,
-        even if not present in the original table (set to None in that case).
-
-    Examples
-    --------
-    >>> from astropy.table import Table
-    >>> table = Table({'m': [1, 2], 'x': [0, 1], 'id': [0, 1]})
-    >>> _table_to_dict(table, 's')
-    {'m_s': array([1, 2]), 'x_s': array([0, 1]), 'potential_s': None}
-    """
+    """Convert Astropy Table to dictionary with suffixed column keys for Galaxy construction."""
     kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
     kws[f"potential_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
     return kws
 
 
 def _df_to_table(df, ptype):
-    """Convert a DataFrame subset to an Astropy Table for a specific particle type.
-
-    Filters a DataFrame by particle type and converts it to an Astropy Table,
-    removing the 'ptype' column in the process.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame containing particle data with a 'ptype' column.
-    ptype : core.ParticleSetType
-        Particle type to filter by (e.g., STARS, DARK_MATTER, GAS).
-
-    Returns
-    -------
-    astropy.table.Table
-        Table containing only particles of the specified type.
-
-    Notes
-    -----
-    This function is used internally for legacy data conversion and is not
-    typically needed by end users.
-    """
+    """Filter DataFrame by particle type and convert to Astropy Table (for legacy data conversion)."""
     table_df = df[df.ptype == ptype.humanize()]
     del table_df["ptype"]
     return Table.from_pandas(table_df)
@@ -185,44 +121,12 @@ def _df_to_table(df, ptype):
 # HDF 5
 # =============================================================================
 
-#: Registry mapping HDF5 format versions to their reader classes.
-#:
-#: This dictionary is populated automatically by the :func:`_register_read_hdf5`
-#: decorator. It allows :func:`read_hdf5` to select the appropriate reader
-#: based on the format version stored in the file.
+#: Registry mapping format versions to reader classes, populated by @_register_read_hdf5 decorator.
 _READ_HDF5_VERSIONS = {}
 
 
 def _register_read_hdf5(version):
-    """Decorator to register an HDF5 reader class for a specific format version.
-
-    This decorator adds reader classes to the :data:`_READ_HDF5_VERSIONS` registry,
-    enabling automatic selection of the correct reader based on the HDF5 file's
-    format version.
-
-    Parameters
-    ----------
-    version : float
-        Format version number that this reader handles (e.g., 1.0, 2.0).
-
-    Returns
-    -------
-    callable
-        Decorator function that registers the class and returns it unchanged.
-
-    Examples
-    --------
-    >>> @_register_read_hdf5(2.0)
-    ... class HDF5ReaderV2(GalaxyHDF5ReaderABC):
-    ...     def read(self, stream, **kwargs):
-    ...         # Implementation here
-    ...         pass
-
-    Notes
-    -----
-    This is an internal decorator used only for organizing reader classes.
-    End users should not need to use this directly.
-    """
+    """Decorator that registers an HDF5 reader class for a specific format version."""
     def dec(cls):
         _READ_HDF5_VERSIONS[version] = cls
         return cls
@@ -396,34 +300,7 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         softening_dm,
         softening_g,
     ):
-        """Build a basic Galaxy object from HDF5 datasets.
-
-        This internal method constructs a ``core.Galaxy`` from particle datasets,
-        without decomposition information.
-
-        Parameters
-        ----------
-        stars_dataset : h5py.Dataset
-            HDF5 dataset containing stellar particle data.
-        dark_matter_dataset : h5py.Dataset
-            HDF5 dataset containing dark matter particle data.
-        gas_dataset : h5py.Dataset
-            HDF5 dataset containing gas particle data.
-        gal_meta : dict
-            Galaxy-level metadata (not used for basic galaxies, but needed
-            for interface consistency).
-        softening_s : float
-            Softening length for star particles.
-        softening_dm : float
-            Softening length for dark matter particles.
-        softening_g : float
-            Softening length for gas particles.
-
-        Returns
-        -------
-        core.Galaxy
-            Reconstructed Galaxy object.
-        """
+        """Construct a basic Galaxy from HDF5 particle datasets without decomposition information."""
 
         ds_and_soft = zip(
             [softening_s, softening_dm, softening_g],
@@ -470,36 +347,7 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         softening_dm,
         softening_g,
     ):
-        """Build a DecomposedGalaxy object from HDF5 datasets.
-
-        This internal method constructs a ``models.DecomposedGalaxy`` from
-        particle datasets that include component probabilities from a
-        decomposition method.
-
-        Parameters
-        ----------
-        stars_dataset : h5py.Dataset
-            HDF5 dataset containing stellar particle data with probabilities.
-        dark_matter_dataset : h5py.Dataset
-            HDF5 dataset containing dark matter particle data.
-        gas_dataset : h5py.Dataset
-            HDF5 dataset containing gas particle data.
-        gal_meta : dict
-            Galaxy-level metadata including:
-            - 'method' : Name of decomposition method used
-            - 'component_name_mapping' : JSON string mapping component indices to names
-        softening_s : float
-            Softening length for star particles.
-        softening_dm : float
-            Softening length for dark matter particles.
-        softening_g : float
-            Softening length for gas particles.
-
-        Returns
-        -------
-        models.DecomposedGalaxy
-            Reconstructed DecomposedGalaxy object with component information.
-        """
+        """Construct a DecomposedGalaxy from HDF5 datasets including component probabilities."""
 
         method = gal_meta["method"]
         component_name_mapping = json.loads(gal_meta["component_name_mapping"])
