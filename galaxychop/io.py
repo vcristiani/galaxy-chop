@@ -13,8 +13,8 @@
 This module provides functionality to read and write galaxy data in different
 formats. It supports:
 
-- **HDF5 format**: The primary format for storing galaxy data with full metadata
-  and versioning support (versions 1.0 and 2.0)
+- **HDF5 format**: The primary format for storing galaxy data with
+  full metadata and versioning support (versions 1.0 and 2.0)
 - **NumPy format**: Legacy support for reading old datasets from `.npy` files
 
 The module handles both simple `Galaxy` objects and `DecomposedGalaxy` objects
@@ -83,7 +83,8 @@ from .models import DecomposedGalaxy, ComponentParticleSet
 # CONSTANTS
 # =============================================================================
 
-#: Default metadata written to root level of HDF5 files, including version, author, and platform info.
+#: Default metadata written to root level of HDF5 files, including
+#: version, author, and platform info.
 _DEFAULT_H5_METADATA = {
     "GalaxyChop": VERSION,
     "author_email": "valeria.cristiani@unc.edu.ar",
@@ -95,7 +96,8 @@ _DEFAULT_H5_METADATA = {
     "format_version": 2.0,
 }
 
-#: Fallback format version (1.0) assumed when reading HDF5 files without explicit version metadata.
+#: Fallback format version (1.0) assumed when reading HDF5 files
+#: without explicit version metadata.
 FALLBACK_VERSION = 1.0
 
 # =============================================================================
@@ -104,29 +106,63 @@ FALLBACK_VERSION = 1.0
 
 
 def _table_to_dict(table, key_suffix):
-    """Convert Astropy Table to dictionary with suffixed column keys for Galaxy construction."""
+    """Convert Astropy Table to dictionary with suffixed keys.
+
+    Used for Galaxy construction from particle data tables.
+    """
     kws = {f"{k}_{key_suffix}": v for k, v in table.items() if k != "id"}
     kws[f"potential_{key_suffix}"] = kws.pop(f"potential_{key_suffix}", None)
     return kws
 
 
 def _df_to_table(df, ptype):
-    """Filter DataFrame by particle type and convert to Astropy Table (for legacy data conversion)."""
+    """Filter DataFrame by particle type and convert to Astropy Table.
+
+    For legacy data conversion.
+    """
     table_df = df[df.ptype == ptype.humanize()]
     del table_df["ptype"]
     return Table.from_pandas(table_df)
 
 
+def _serialize_nested_dicts(the_dict):
+    """Convert nested dictionaries to JSON strings for HDF5 attribute storage.
+
+    HDF5 attributes cannot store nested Python dictionaries directly.
+    This function serializes any dictionary values to JSON strings while
+    leaving other types unchanged.
+
+    Parameters
+    ----------
+    the_dict : dict
+        Dictionary potentially containing nested dictionaries.
+
+    Returns
+    -------
+    dict
+        Dictionary with nested dicts converted to JSON strings.
+    """
+    parsed = {}
+    for k, v in the_dict.items():
+        if isinstance(v, dict):
+            v = json.dumps(v)
+        parsed[k] = v
+    return parsed
+
+
 # =============================================================================
-# HDF 5
+# HDF5 FORMAT
 # =============================================================================
 
-#: Registry mapping format versions to reader classes, populated by @_register_read_hdf5 decorator.
+# READ ------------------------------------------------------------------------
+
+#: Registry mapping format versions to reader classes, populated by
+#: @_register_read_hdf5 decorator.
 _READ_HDF5_VERSIONS = {}
 
 
 def _register_read_hdf5(version):
-    """Decorator that registers an HDF5 reader class for a specific format version."""
+    """Decorator to register an HDF5 reader class for a format version."""
 
     def dec(cls):
         _READ_HDF5_VERSIONS[version] = cls
@@ -183,9 +219,9 @@ class GalaxyHDF5ReaderABC:
 class HDF5ReaderV1(GalaxyHDF5ReaderABC):
     """HDF5 reader for format version 1.0 (legacy format).
 
-    This reader handles HDF5 files created with the original GalaxyChop format,
-    where particle data was stored in three separate datasets at the root level:
-    ``stars``, ``dark_matter``, and ``gas``.
+    This reader handles HDF5 files created with the original GalaxyChop
+    format, where particle data was stored in three separate datasets
+    at the root level: ``stars``, ``dark_matter``, and ``gas``.
 
     Format version 1.0 files contain only basic ``Galaxy`` objects without
     decomposition information.
@@ -301,7 +337,10 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         softening_dm,
         softening_g,
     ):
-        """Construct a basic Galaxy from HDF5 particle datasets without decomposition information."""
+        """Construct a basic Galaxy from HDF5 particle datasets.
+
+        Without decomposition information.
+        """
 
         ds_and_soft = zip(
             [softening_s, softening_dm, softening_g],
@@ -348,7 +387,10 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         softening_dm,
         softening_g,
     ):
-        """Construct a DecomposedGalaxy from HDF5 datasets including component probabilities."""
+        """Construct a DecomposedGalaxy from HDF5 datasets.
+
+        Including component probabilities.
+        """
 
         method = gal_meta["method"]
         component_name_mapping = json.loads(gal_meta["component_name_mapping"])
@@ -411,19 +453,19 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         softening_dm: float = 0,
         softening_g: float = 0,
     ):
-        """Read a Galaxy or DecomposedGalaxy from an HDF5 file in version 2.0 format.
+        """Read a Galaxy or DecomposedGalaxy from HDF5 v2.0 format.
 
-        This method automatically detects the galaxy type from metadata and uses
-        the appropriate builder method to reconstruct the object.
+        This method automatically detects the galaxy type from metadata
+        and uses the appropriate builder method to reconstruct it.
 
         Parameters
         ----------
         stream : h5py.File
             Opened HDF5 file object.
         group : str, optional
-            HDF5 group name where the galaxy data is stored. If None, defaults
-            to "galaxy". This allows multiple galaxies to be stored in different
-            groups within the same file.
+            HDF5 group name where the galaxy data is stored. If None,
+            defaults to "galaxy". This allows multiple galaxies to be
+            stored in different groups within the same file.
         softening_s : float, default=0
             Softening length for star particles.
         softening_dm : float, default=0
@@ -463,9 +505,6 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         dark_matter_dataset = stream[f"{group}/dark_matter"]
         gas_dataset = stream[f"{group}/gas"]
 
-        import ipdb
-
-        ipdb.set_trace()
         galaxy = builder(
             stars_dataset=stars_dataset,
             dark_matter_dataset=dark_matter_dataset,
@@ -575,23 +614,7 @@ def read_hdf5(
         )
 
 
-# WRITE =======================================================================
-
-
-def _serialize_nested_dicts(the_dict):
-    """Convert nested dictionaries to JSON strings for HDF5 attribute storage.
-
-    HDF5 attributes cannot store nested Python dictionaries directly.
-    This function serializes any dictionary values to JSON strings while
-    leaving other types unchanged.
-
-    """
-    parsed = {}
-    for k, v in the_dict.items():
-        if isinstance(v, dict):
-            v = json.dumps(v)
-        parsed[k] = v
-    return parsed
+# WRITE -----------------------------------------------------------------------
 
 
 def to_hdf5(
@@ -605,10 +628,11 @@ def to_hdf5(
 ):
     """Write galaxy data to an HDF5 file in format version 2.0.
 
-    This function saves galaxy data to HDF5 format with a hierarchical structure.
-    It stores particle data (mass, positions, velocities, and optionally potentials)
-    along with comprehensive metadata about the galaxy, decomposition method (if
-    applicable), and the GalaxyChop environment.
+    This function saves galaxy data to HDF5 format with a hierarchical
+    structure. It stores particle data (mass, positions, velocities, and
+    optionally potentials) along with comprehensive metadata about the
+    galaxy, decomposition method (if applicable), and the GalaxyChop
+    environment.
 
     The function supports both ``Galaxy`` and ``DecomposedGalaxy`` objects. For
     decomposed galaxies, component probabilities are stored as well.
@@ -623,14 +647,14 @@ def to_hdf5(
         The galaxy object to save. Can be either a basic Galaxy or a
         DecomposedGalaxy with component information.
     metadata : dict, optional
-        Additional user-defined metadata to store in the file. This will be
-        serialized as JSON and stored in the root-level ``user_metadata``
-        attribute. Useful for storing information about simulations, parameters,
-        or analysis details.
+        Additional user-defined metadata to store in the file. This will
+        be serialized as JSON and stored in the root-level
+        ``user_metadata`` attribute. Useful for storing information about
+        simulations, parameters, or analysis details.
     group : str, optional
-        HDF5 group name where galaxy data will be stored. If None, defaults to
-        "galaxy". Using different group names allows multiple galaxies to be
-        stored in the same file.
+        HDF5 group name where galaxy data will be stored. If None,
+        defaults to "galaxy". Using different group names allows multiple
+        galaxies to be stored in the same file.
     force_group : bool, default=False
         Controls behavior when the specified group already exists:
 
@@ -638,8 +662,8 @@ def to_hdf5(
         - If False: Raises ValueError to prevent accidental data loss
 
     **kwargs
-        Additional keyword arguments passed to ``astropy.io.misc.hdf5.write_table_hdf5()``.
-        Common options include:
+        Additional keyword arguments passed to
+        ``astropy.io.misc.hdf5.write_table_hdf5()``. Common options:
 
         - ``compression`` (str): Compression algorithm, default "gzip"
         - ``compression_opts`` (int): Compression level (0-9), default 9
@@ -649,7 +673,8 @@ def to_hdf5(
     Raises
     ------
     ValueError
-        If ``force_group=False`` and the specified group already exists in the file.
+        If ``force_group=False`` and the specified group already exists
+        in the file.
 
     Notes
     -----
@@ -659,9 +684,9 @@ def to_hdf5(
     velocity, and potential). Derived properties are not saved, as they can be
     recomputed from these fundamentals.
 
-    Softening lengths are NOT stored in the file. They must be provided when
-    reading the file via the ``softening_s``, ``softening_dm``, and ``softening_g``
-    parameters of :func:`read_hdf5`.
+    Softening lengths are NOT stored in the file. They must be provided
+    when reading the file via the ``softening_s``, ``softening_dm``, and
+    ``softening_g`` parameters of :func:`read_hdf5`.
 
     **File Structure (Format Version 2.0):**
 
@@ -673,9 +698,9 @@ def to_hdf5(
 
     **Compression:**
 
-    By default, data is compressed using gzip with maximum compression level (9).
-    This significantly reduces file size with minimal performance impact for
-    typical use cases.
+    By default, data is compressed using gzip with maximum compression
+    level (9). This significantly reduces file size with minimal
+    performance impact for typical use cases.
 
     Examples
     --------
@@ -709,7 +734,8 @@ def to_hdf5(
     See Also
     --------
     read_hdf5 : Read galaxy data from HDF5 format
-    core.Galaxy._gchop_h5_ : Internal method that prepares galaxy data for storage
+    core.Galaxy._gchop_h5_ : Internal method that prepares galaxy data
+        for storage
     """
     # Use the _gchop_h5_ method to get metadata and particle set data
     gal_meta, psets = galaxy._gchop_h5_()
@@ -756,7 +782,7 @@ def to_hdf5(
 
 
 # =============================================================================
-# NUMPY
+# NUMPY FORMAT (LEGACY)
 # =============================================================================
 
 
@@ -779,8 +805,8 @@ def read_npy(
     (one per particle type) and constructs a basic ``Galaxy`` object.
 
     This format is deprecated. For new projects, use :func:`to_hdf5` and
-    :func:`read_hdf5` instead, which provide better metadata support, compression,
-    and organization.
+    :func:`read_hdf5` instead, which provide better metadata support,
+    compression, and organization.
 
     Parameters
     ----------
@@ -800,7 +826,8 @@ def read_npy(
         Path to a separate .npy file containing stellar particle potentials.
         If provided, potentials will be added to the Galaxy.
     path_or_stream_pot_dm : str or file-like, optional
-        Path to a separate .npy file containing dark matter particle potentials.
+        Path to a separate .npy file containing dark matter particle
+        potentials.
     path_or_stream_pot_g : str or file-like, optional
         Path to a separate .npy file containing gas particle potentials.
     softening_s : float, default=0.0
