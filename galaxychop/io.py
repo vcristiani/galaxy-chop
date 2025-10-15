@@ -127,6 +127,7 @@ _READ_HDF5_VERSIONS = {}
 
 def _register_read_hdf5(version):
     """Decorator that registers an HDF5 reader class for a specific format version."""
+
     def dec(cls):
         _READ_HDF5_VERSIONS[version] = cls
         return cls
@@ -462,6 +463,9 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         dark_matter_dataset = stream[f"{group}/dark_matter"]
         gas_dataset = stream[f"{group}/gas"]
 
+        import ipdb
+
+        ipdb.set_trace()
         galaxy = builder(
             stars_dataset=stars_dataset,
             dark_matter_dataset=dark_matter_dataset,
@@ -572,6 +576,22 @@ def read_hdf5(
 
 
 # WRITE =======================================================================
+
+
+def _serialize_nested_dicts(the_dict):
+    """Convert nested dictionaries to JSON strings for HDF5 attribute storage.
+
+    HDF5 attributes cannot store nested Python dictionaries directly.
+    This function serializes any dictionary values to JSON strings while
+    leaving other types unchanged.
+
+    """
+    parsed = {}
+    for k, v in the_dict.items():
+        if isinstance(v, dict):
+            v = json.dumps(v)
+        parsed[k] = v
+    return parsed
 
 
 def to_hdf5(
@@ -700,12 +720,7 @@ def to_hdf5(
     # prepare global metadata
     h5_metadata = _DEFAULT_H5_METADATA.copy()
     h5_metadata["utc_timestamp"] = datetime.now(timezone.utc).isoformat()
-    h5_metadata["user_metadata"] = json.dumps(metadata or {})
-
-    # prepare galaxy metadata
-    gal_meta["component_name_mapping"] = json.dumps(
-        gal_meta["component_name_mapping"]
-    )
+    h5_metadata["user_metadata"] = metadata or {}
 
     # prepare kwargs
     kwargs.setdefault("append", True)
@@ -731,13 +746,13 @@ def to_hdf5(
 
             # write the tables
             write_table_hdf5(pset_table, h5, path=pset_path, **kwargs)
-            h5[pset_path].attrs.update(pset_meta)
+            h5[pset_path].attrs.update(_serialize_nested_dicts(pset_meta))
 
         # Store galaxy-level metadata on the galaxy group
-        h5[group].attrs.update(gal_meta)
+        h5[group].attrs.update(_serialize_nested_dicts(gal_meta))
 
         # Store global metadata at root level
-        h5.attrs.update(h5_metadata)
+        h5.attrs.update(_serialize_nested_dicts(h5_metadata))
 
 
 # =============================================================================
