@@ -229,8 +229,8 @@ class ParticleSet:
         cls_name = type(self).__name__
         return (
             f"<{cls_name} {self.ptype.name!r}, size={len(self)}, "
-            f"softening={self.softening.value}, \
-            potentials={self.has_potential_}>"
+            f"softening={self.softening.value}, "
+            f"potentials={self.has_potential_}>"
         )
 
     def __len__(self):
@@ -532,7 +532,8 @@ class Galaxy:
         gas_repr = f"gas={len(self.gas)}"
         has_pot = f"potential={self.has_potential_}"
         return (
-            f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
+            f"<{cls_name} {stars_repr}, {dm_repr}, "
+            f"{gas_repr}, {has_pot}>"
         )
 
     # PROPERTIES ==============================================================
