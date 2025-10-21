@@ -77,7 +77,7 @@ import numpy as np
 
 from . import core
 from .constants import VERSION
-from .models import DecomposedGalaxy, ComponentParticleSet
+from .models import DecomposedGalaxy, DecomposedParticleSet
 
 # =============================================================================
 # CONSTANTS
@@ -427,7 +427,7 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
 
             del table, meta
 
-            pset = ComponentParticleSet(
+            pset = DecomposedParticleSet(
                 ptype=ptype,
                 softening=softening,
                 probabilities=probabilities,

@@ -15,7 +15,7 @@
 # =============================================================================
 
 from .core import (
-    ComponentParticleSet,
+    DecomposedParticleSet,
     DecomposedGalaxy,
     GalaxyDecomposerABC,
     hparam,
@@ -37,7 +37,7 @@ from .threshold import JThreshold
 __all__ = [
     "DecomposedGalaxy",
     "GalaxyDecomposerABC",
-    "ComponentParticleSet",
+    "DecomposedParticleSet",
     "JThreshold",
     "JHistogram",
     "JEHistogram",

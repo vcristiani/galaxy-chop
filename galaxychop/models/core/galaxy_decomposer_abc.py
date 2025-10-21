@@ -500,7 +500,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         labels = data.label.to_numpy(copy=True)
         probabilities = data[prob_columns].to_numpy(copy=True)
 
-        component_pset = decomposed_galaxy.ComponentParticleSet.from_pset(
+        component_pset = decomposed_galaxy.DecomposedParticleSet.from_pset(
             pset,
             components=components,
             labels=labels,

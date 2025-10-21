@@ -30,7 +30,7 @@ from ...core import Galaxy, ParticleSet, ParticleSetType
 
 
 @uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
-class ComponentParticleSet(ParticleSet):
+class DecomposedParticleSet(ParticleSet):
     """A set of particles with component information.
 
     This class extends `ParticleSet` to include information about the
@@ -212,7 +212,7 @@ class ComponentParticleSet(ParticleSet):
 
     def copy(self):
         """
-        Create a deep copy of the ComponentParticleSet.
+        Create a deep copy of the DecomposedParticleSet.
 
         All relevant particle set attributes are cloned, including mass,
         positions, velocities, potential, softening, components, labels,
@@ -220,7 +220,7 @@ class ComponentParticleSet(ParticleSet):
 
         Returns
         -------
-        ComponentParticleSet
+        DecomposedParticleSet
             A new instance identical to the original, with data copied.
         """
         cls = type(self)
@@ -272,7 +272,7 @@ class ComponentParticleSet(ParticleSet):
 
     def _gchop_h5_(self):
         """
-        Extract HDF5 serialization data for this ComponentParticleSet.
+        Extract HDF5 serialization data for this DecomposedParticleSet.
 
         Returns metadata about the particle set type and a DataFrame
         containing the particle data that should be persisted, including
@@ -317,7 +317,7 @@ class DecomposedGalaxy(Galaxy):
     Represent a galaxy decomposed into physical components.
 
     A `DecomposedGalaxy` contains stars, dark matter, and gas,
-    each represented as a `ComponentParticleSet`, along with
+    each represented as a `DecomposedParticleSet`, along with
     labels and membership probabilities.
 
 
@@ -333,12 +333,12 @@ class DecomposedGalaxy(Galaxy):
     ValueError
         If `method` is an empty string.
     TypeError
-        If any particle set is not of type `ComponentParticleSet`.
+        If any particle set is not of type `DecomposedParticleSet`.
     TypeError
         If probability configurations are inconsistent across particle sets.
     """
 
-    PSET_CLS = ComponentParticleSet
+    PSET_CLS = DecomposedParticleSet
 
     method: str = uttr.ib(converter=str)
     component_name_mapping: dict = uttr.ib(converter=dict)
@@ -351,7 +351,7 @@ class DecomposedGalaxy(Galaxy):
 
         Ensures that the `method` string is not empty and that all
         particle sets (`stars`, `dark_matter`, `gas`) are instances
-        of `ComponentParticleSet`. Also verifies that probability
+        of `DecomposedParticleSet`. Also verifies that probability
         configurations are consistent across particle sets.
 
         Raises
@@ -359,7 +359,7 @@ class DecomposedGalaxy(Galaxy):
         ValueError
             If `method` is empty.
         TypeError
-            If particle sets are not of type `ComponentParticleSet`.
+            If particle sets are not of type `DecomposedParticleSet`.
         TypeError
             If probability configurations differ between particle sets.
         """
@@ -468,7 +468,7 @@ class DecomposedGalaxy(Galaxy):
         This method creates a new Galaxy instance with the same particle
         data (stars, dark matter, gas) but without the decomposition-specific
         information (method, component mappings, component labels, and
-        probabilities). Each ComponentParticleSet is converted to a regular
+        probabilities). Each DecomposedParticleSet is converted to a regular
         ParticleSet using the to_particleset() method.
 
         Returns

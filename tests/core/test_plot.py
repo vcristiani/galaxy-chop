@@ -116,13 +116,13 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 
 @pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_labels_ComponentParticleSet(galaxy):
+def test_GalaxyPlotter_get_df_and_hue_labels_DecomposedParticleSet(galaxy):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     n = len(gal.stars)
 
-    cps = models.ComponentParticleSet(
+    cps = models.DecomposedParticleSet(
         ptype=gal.stars.ptype,
         m=np.random.random(size=n),
         x=gal.stars.x.copy(),
@@ -306,7 +306,7 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(read_hdf5_galaxy):
 
     circ = gal.stellar_dynamics()
 
-    cps = models.ComponentParticleSet(
+    cps = models.DecomposedParticleSet(
         ptype=gal.stars.ptype,
         m=np.random.random(size=len(circ.eps)),
         x=gal.stars.x[:len(circ.eps)].copy(),

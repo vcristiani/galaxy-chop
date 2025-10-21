@@ -101,7 +101,7 @@ class GalaxyPlotter:
             labels,
             (
                 getattr(models, "Components", tuple),
-                models.ComponentParticleSet,
+                models.DecomposedParticleSet,
             ),
         ):
             if hasattr(labels, "lmap"):
@@ -358,7 +358,7 @@ class GalaxyPlotter:
             labels,
             (
                 getattr(models, "Components", tuple),
-                models.ComponentParticleSet,
+                models.DecomposedParticleSet,
             ),
         ):
             if hasattr(labels, "lmap"):
