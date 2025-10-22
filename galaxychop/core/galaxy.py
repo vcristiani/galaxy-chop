@@ -240,17 +240,23 @@ class ParticleSet:
     # PROPERTIES ==============================================================
 
     @property
-    def total_mass(self):
-        """Total mass of all particles in the set in units of M_sun."""
-        return np.sum(self.m)
-
-    @property
     def angular_momentum_(self):
         """Components of specific angular momentum in units of kpc*km/s."""
         arr = self.arr_
         return np.array([arr.Jx_, arr.Jy_, arr.Jz_]) * (u.kpc * u.km / u.s)
 
     # PUBLIC METHODS ==========================================================
+
+    def total_mass(self):
+        """
+        Calculate total mass of all particles in the set.
+
+        Returns
+        -------
+        Quantity
+            Total mass in M_sun units.
+        """
+        return np.sum(self.m) * u.Msun
 
     def get_value_makers(self):
         """
@@ -539,41 +545,6 @@ class Galaxy:
     # PROPERTIES ==============================================================
 
     @property
-    def total_mass(self):
-        """
-        Total mass for each particle type as a DataFrame.
-
-        Returns
-        -------
-        DataFrame : pandas DataFrame
-            DataFrame with particle types as index and their total masses
-            in M_sun units.
-
-        Examples
-        --------
-        >>> import galaxychop as gchop
-        >>> galaxy = gchop.Galaxy(...)
-        >>> galaxy.total_mass
-                      total_mass
-        stars              1.2e10
-        dark_matter        5.3e11
-        gas                2.1e09
-        """
-        data = {
-            "m": [
-                self.stars.total_mass.value,
-                self.dark_matter.total_mass.value,
-                self.gas.total_mass.value,
-            ]
-        }
-        index = [
-            self.stars.ptype.humanize(),
-            self.dark_matter.ptype.humanize(),
-            self.gas.ptype.humanize(),
-        ]
-        return pd.DataFrame(data, index=index)
-
-    @property
     def plot(self):
         """Plot accessor."""
         if not hasattr(self, "_plot"):
@@ -715,6 +686,40 @@ class Galaxy:
         )
 
     # PUBLIC METHODS ==========================================================
+
+    def total_mass(self):
+        """
+        Calculate total mass for each particle type as a DataFrame.
+
+        Returns
+        -------
+        DataFrame : pandas DataFrame
+            DataFrame with particle types as index and their total masses
+            in M_sun units.
+
+        Examples
+        --------
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> galaxy.total_mass()
+                      total_mass
+        stars              1.2e10
+        dark_matter        5.3e11
+        gas                2.1e09
+        """
+        data = {
+            "total_mass": [
+                self.stars.total_mass().value,
+                self.dark_matter.total_mass().value,
+                self.gas.total_mass().value,
+            ]
+        }
+        index = [
+            self.stars.ptype.humanize(),
+            self.dark_matter.ptype.humanize(),
+            self.gas.ptype.humanize(),
+        ]
+        return pd.DataFrame(data, index=index)
 
     def to_dataframe(self, *, ptypes=None, attributes=None, sdynamics=True):
         """
