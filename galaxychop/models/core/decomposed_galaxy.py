@@ -184,15 +184,34 @@ class DecomposedParticleSet(ParticleSet):
 
     def total_mass(self):
         """
+        Calculate total mass and mass fraction for each component.
 
+        Groups particles by their component labels and calculates
+        the total mass and mass fraction for each component.
+
+        Returns
+        -------
+        DataFrame : pandas DataFrame
+            DataFrame with component labels as index and two columns:
+            - 'm': total mass in M_sun units
+            - 'mf': mass fraction (component mass / total particle set mass)
+
+        Examples
+        --------
+        >>> import galaxychop as gchop
+        >>> dps = gchop.models.DecomposedParticleSet(...)
+        >>> dps.total_mass()
+                      m        mf
+        bulge    3.5e9    0.250
+        disk     6.8e9    0.486
+        halo     3.7e9    0.264
         """
         # Create DataFrame with labels and masses
         df = self.to_dataframe(attributes=["labels", "m"])
-        pset_mass = self.m.sum()
 
         # Group by label and sum masses
         result = df.groupby("labels")[["m"]].sum()
-        result["mf"] = result["m"] /  pset_mass
+        result["mf"] = result["m"] / super().total_mass().value
         return result
 
     def get_value_makers(self):
@@ -458,8 +477,36 @@ class DecomposedGalaxy(Galaxy):
     # PUBLIC METHODS ==========================================================
 
     def total_mass(self):
+        """
+        Calculate total mass and mass fraction for each component by particle type.
 
-        # Collect mass Series from each particle type
+        Creates a hierarchical DataFrame with MultiIndex (ptype, label) containing
+        the total mass and mass fraction for each component within each particle type.
+
+        Returns
+        -------
+        DataFrame : pandas DataFrame
+            DataFrame with MultiIndex (ptype, label) and two columns:
+            - 'm': total mass in M_sun units
+            - 'mf': mass fraction (component mass / particle type total mass)
+
+        Examples
+        --------
+        >>> import galaxychop as gchop
+        >>> dgal = gchop.models.DecomposedGalaxy(...)
+        >>> dgal.total_mass()
+                                     m        mf
+        stars       Bulge       7.16e+09    0.189
+                    Cold disk   1.63e+10    0.430
+                    Halo        3.64e+09    0.096
+                    Warm disk   1.02e+10    0.268
+                    stars       1.40e+08    0.004
+        dark_matter dark_matter 1.22e+11    1.000
+        gas         gas         1.22e+11    1.000
+        """
+        import pandas as pd
+
+        # Collect mass DataFrames from each particle type
         ptype_dfs = []
         for pset in [self.stars, self.dark_matter, self.gas]:
             ptype_name = pset.ptype.humanize()
@@ -471,7 +518,7 @@ class DecomposedGalaxy(Galaxy):
             )
             ptype_dfs.append(pset_mass)
 
-        # Concatenate all particle type Series
+        # Concatenate all particle type DataFrames
         result = pd.concat(ptype_dfs)
 
         return result
