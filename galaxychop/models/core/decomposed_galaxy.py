@@ -182,36 +182,94 @@ class DecomposedParticleSet(ParticleSet):
 
     # PUBLIC METHODS ==========================================================
 
-    def total_mass(self):
+    def _get_probabilistic_mass(self, pset_total_mass):
         """
-        Calculate total mass and mass fraction for each component.
+        Calculate probabilistic mass for each component.
 
-        Groups particles by their component labels and calculates
-        the total mass and mass fraction for each component.
+        Uses probability weights to calculate the mass contribution
+        of each particle to each component.
+
+        Parameters
+        ----------
+        pset_total_mass : float
+            Total mass of the particle set.
 
         Returns
         -------
         DataFrame : pandas DataFrame
             DataFrame with component labels as index and two columns:
-            - 'm': total mass in M_sun units
-            - 'mf': mass fraction (component mass / total particle set mass)
+            - 'mp': probabilistic mass in M_sun units
+            - 'mpf': probabilistic mass fraction
+        """
+        # Get full dataframe with labels, masses and probabilities
+        df = self.to_dataframe(attributes=["labels", "m", "probabilities"])
+
+        # Get unique components (as integers from labels)
+        unique_labels = sorted(df["labels"].unique())
+
+        # Create mapping from label to probability column index
+        # probabilities array has shape (n_particles, n_components + 1)
+        prob_columns = [f"probabilities_{i}" for i in range(self.probabilities_n + 1)]
+
+        # Create dict to store probabilistic masses
+        prob_masses = {}
+
+        for idx, label in enumerate(unique_labels):
+            # Get the probability column for this component
+            prob_col = prob_columns[idx] if idx < len(prob_columns) else prob_columns[0]
+
+            # Multiply probabilities by masses and sum
+            if prob_col in df.columns:
+                prob_mass = (df[prob_col] * df["m"]).sum()
+                prob_masses[label] = {
+                    "mp": prob_mass,
+                    "mpf": prob_mass / pset_total_mass
+                }
+
+        # Convert to DataFrame
+        result = pd.DataFrame.from_dict(prob_masses, orient="index")
+        return result
+
+    def total_mass(self):
+        """
+        Calculate total mass and mass fraction for each component.
+
+        Groups particles by their component labels and calculates
+        the deterministic mass (based on assigned labels) and optionally
+        the probabilistic mass (based on probability weights).
+
+        Returns
+        -------
+        DataFrame : pandas DataFrame
+            DataFrame with component labels as index and columns:
+            - 'm': deterministic total mass in M_sun units
+            - 'mf': deterministic mass fraction
+            - 'mp': probabilistic total mass (if has_probabilities is True)
+            - 'mpf': probabilistic mass fraction (if has_probabilities is True)
 
         Examples
         --------
         >>> import galaxychop as gchop
         >>> dps = gchop.models.DecomposedParticleSet(...)
         >>> dps.total_mass()
-                      m        mf
-        bulge    3.5e9    0.250
-        disk     6.8e9    0.486
-        halo     3.7e9    0.264
+                      m        mf        mp       mpf
+        bulge    3.5e9    0.250    3.4e9    0.243
+        disk     6.8e9    0.486    6.9e9    0.493
+        halo     3.7e9    0.264    3.7e9    0.264
         """
         # Create DataFrame with labels and masses
         df = self.to_dataframe(attributes=["labels", "m"])
+        pset_total_mass = self.m.sum().value
 
-        # Group by label and sum masses
+        # Group by label and sum masses (deterministic)
         result = df.groupby("labels")[["m"]].sum()
-        result["mf"] = result["m"] / super().total_mass().value
+        result["mf"] = result["m"] / pset_total_mass
+
+        # Add probabilistic mass columns if available
+        if self.has_probabilities:
+            prob_mass_df = self._get_probabilistic_mass(pset_total_mass)
+            result = result.join(prob_mass_df, how="left")
+
         return result
 
     def get_value_makers(self):
