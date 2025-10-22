@@ -560,7 +560,7 @@ class Galaxy:
         gas                2.1e09
         """
         data = {
-            "total_mass": [
+            "m": [
                 self.stars.total_mass.value,
                 self.dark_matter.total_mass.value,
                 self.gas.total_mass.value,

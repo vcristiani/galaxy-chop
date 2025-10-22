@@ -16,7 +16,10 @@
 
 
 import attr
+
 import numpy as np
+
+import pandas as pd
 
 import uttr
 
@@ -206,7 +209,7 @@ class DecomposedParticleSet(ParticleSet):
         df = self.to_dataframe(attributes=["labels", "m"])
 
         # Group by label and sum masses
-        result = df.groupby("labels")["m"].sum()
+        result = df.groupby("labels")[["m"]].sum()
 
         return result
 
@@ -498,23 +501,19 @@ class DecomposedGalaxy(Galaxy):
         gas         gas          1.218123e+11
         Name: m, dtype: float64
         """
-        import pandas as pd
-
         # Collect mass Series from each particle set
-        series_list = []
+        pset_dfs = []
         for pset in [self.stars, self.dark_matter, self.gas]:
-            ptype_name = pset.ptype.humanize()
-            mass_series = pset.total_mass
+            pset_name = pset.ptype.humanize()
+            pset_mass_df = pset.total_mass
 
             # Add ptype level to the index
-            mass_series.index = pd.MultiIndex.from_product(
-                [[ptype_name], mass_series.index],
-                names=['ptype', 'label']
+            pset_mass_df.index = pd.MultiIndex.from_product(
+                [[pset_name], pset_mass_df.index], names=["ptype", "label"]
             )
-            series_list.append(mass_series)
+            pset_dfs.append(pset_mass_df)
 
-        # Concatenate all series
-        result = pd.concat(series_list)
+        result = pd.concat(pset_dfs)
 
         return result
 
