@@ -23,7 +23,6 @@ import pandas as pd
 
 import uttr
 
-
 from ...core import Galaxy, ParticleSet, ParticleSetType
 
 
@@ -185,33 +184,15 @@ class DecomposedParticleSet(ParticleSet):
 
     def total_mass(self):
         """
-        Calculate total mass for each component as a Series.
 
-        Groups particles by their component labels and calculates
-        the total mass for each component.
-
-        Returns
-        -------
-        Series : pandas Series
-            Series with component labels as index and their total masses
-            in M_sun units.
-
-        Examples
-        --------
-        >>> import galaxychop as gchop
-        >>> dps = gchop.models.DecomposedParticleSet(...)
-        >>> dps.total_mass()
-        bulge    3.5e9
-        disk     6.8e9
-        halo     1.2e8
-        Name: m, dtype: float64
         """
         # Create DataFrame with labels and masses
         df = self.to_dataframe(attributes=["labels", "m"])
+        pset_mass = self.m.sum()
 
         # Group by label and sum masses
         result = df.groupby("labels")[["m"]].sum()
-
+        result["mf"] = result["m"] /  pset_mass
         return result
 
     def get_value_makers(self):
@@ -477,32 +458,6 @@ class DecomposedGalaxy(Galaxy):
     # PUBLIC METHODS ==========================================================
 
     def total_mass(self):
-        """
-        Calculate total mass for each component by particle type as a Series.
-
-        Creates a hierarchical index (MultiIndex) with particle type as the
-        first level and component labels as the second level.
-
-        Returns
-        -------
-        Series : pandas Series
-            Series with MultiIndex (ptype, label) and total masses in M_sun
-            units.
-
-        Examples
-        --------
-        >>> import galaxychop as gchop
-        >>> dgal = gchop.models.DecomposedGalaxy(...)
-        >>> dgal.total_mass()
-        stars       Bulge        7.157192e+09
-                    Cold disk    1.631676e+10
-                    Halo         3.641281e+09
-                    Warm disk    1.017251e+10
-        dark_matter dark_matter  1.218123e+11
-        gas         gas          1.218123e+11
-        Name: m, dtype: float64
-        """
-        import pandas as pd
 
         # Collect mass Series from each particle type
         ptype_dfs = []
@@ -512,8 +467,7 @@ class DecomposedGalaxy(Galaxy):
 
             # Create MultiIndex with ptype and label levels
             pset_mass.index = pd.MultiIndex.from_product(
-                [[ptype_name], pset_mass.index],
-                names=['ptype', 'label']
+                [[ptype_name], pset_mass.index], names=["ptype", "label"]
             )
             ptype_dfs.append(pset_mass)
 
