@@ -258,18 +258,21 @@ class DecomposedParticleSet(ParticleSet):
         halo     3.7e9    0.264    3.7e9    0.264
         """
         # Create DataFrame with labels and masses
-        df = self.to_dataframe(attributes=["labels", "m"])
+        df = self.to_dataframe(attributes=["components", "labels", "m"])
+        df.components.fillna("-", inplace=True)
+
         pset_total_mass = self.m.sum().value
 
         # Group by label and sum masses (deterministic)
-        result = df.groupby("labels")[["m"]].sum()
+        result = df.groupby(["components", "labels"])[["m"]].sum()
         result["mf"] = result["m"] / pset_total_mass
 
         # Add probabilistic mass columns if available
-        if self.has_probabilities:
-            prob_mass_df = self._get_probabilistic_mass(pset_total_mass)
-            result = result.join(prob_mass_df, how="left")
+        if self.has_probabilities: ...
+            # prob_mass_df = self._get_probabilistic_mass(pset_total_mass)
+            # result = result.join(prob_mass_df, how="left")
 
+        result.reset_index("labels", inplace=True)
         return result
 
     def get_value_makers(self):
@@ -572,7 +575,7 @@ class DecomposedGalaxy(Galaxy):
 
             # Create MultiIndex with ptype and label levels
             pset_mass.index = pd.MultiIndex.from_product(
-                [[ptype_name], pset_mass.index], names=["ptype", "label"]
+                [[ptype_name], pset_mass.index], names=["ptype", "components"]
             )
             ptype_dfs.append(pset_mass)
 
