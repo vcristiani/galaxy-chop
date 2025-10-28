@@ -150,7 +150,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError()
 
-    def get_valid_stellar_mask(self, X, y, attributes):
+    def _get_valid_stellar_mask(self, X, y, attributes):
         """
         Mask for valid stellar particles to operate clustering.
 
@@ -159,22 +159,23 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        X : np.ndarray(n_particles, attributes)
-            2D array where each file it is a diferent particle and each column
+        X : np.ndarray(n_particles, n_attributes)
+            2D array where each row is a different particle and each column
             is an attribute of the particles.
             n_particles is the total number of particles.
-        y : np.ndarray(n_particles,)
-            1D array where is identified the type of each particle:
-            0 = stars, 1 = dark matter, 2 = gas. n_particles is the total
-            number of particles.
-        attributes : tuple
-            Dictionary keys of ``ParticleSet class`` parameters with particle
-            attributes used to operate the clustering.
+        y : np.ndarray(n_particles)
+            1D array identifying the type of each particle:
+            0 = STARS, 1 = DARK_MATTER, 2 = GAS.
+            n_particles is the total number of particles.
+        attributes : tuple of str
+            Particle attributes (keys from ParticleSet class) used to
+            operate the clustering.
 
         Returns
         -------
-        valid_stellar_mask : nd.array(m_particles)
-            Mask only with valid stellar particles to operate the clustering.
+        valid_stellar_mask : np.ndarray(n_particles)
+            Boolean mask indicating valid stellar particles for clustering.
+            True for finite-valued stellar particles, False otherwise.
 
         """
         # all the rows where every value is finite
@@ -269,7 +270,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             [stellar_dynamics_df, dark_matter_df, gas_df], ignore_index=True
         )
 
-    def extract_stellar_dynamics_matrix(self, galaxy, attributes):
+    def _extract_stellar_dynamics_matrix(self, galaxy, attributes):
         """
         Matrix of stellar dynamical properties.
 
@@ -279,21 +280,22 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        galaxy : ``Galaxy class`` object
+        galaxy : Galaxy
             Instance of Galaxy class.
-        attributes : keys of ``ParticleSet class`` parameters
-            Stellar particle attributes used to operate the clustering.
+        attributes : tuple of str
+            Stellar particle attributes (keys from ParticleSet class)
+            used to operate the clustering.
 
         Returns
         -------
-        X : np.ndarray(n_particles, attributes)
-            2D array where each file it is a diferent particle and each column
+        X : np.ndarray(n_particles, n_attributes)
+            2D array where each row is a different particle and each column
             is a dynamical attribute of the particles.
             n_particles is the total number of particles.
         y : np.ndarray(n_particles)
-            1D array where is identified the nature of each particle:
-            0 = STARS, 1=DM, 2=Gas. n_particles is the total number of
-            particles.
+            1D array identifying the nature of each particle:
+            0 = STARS, 1 = DARK_MATTER, 2 = GAS.
+            n_particles is the total number of particles.
 
         """
         # first we split the attributes between the ones from circularity
@@ -323,99 +325,99 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return X, y
 
-    def assign_components_to_all_particles(
+    def _assign_components_to_all_particles(
         self, X, galactic_components, valid_stellar_mask
     ):
         """
         Assign galactic components to all particles.
 
-        This method assigns the galactic component labels
-        obtained from clustering to the stellar particles
-        used for this purpose. The rest are assigned as label=Nan.
+        This method assigns the galactic component labels obtained from
+        clustering to the stellar particles used for this purpose.
+        The rest are assigned as label=NaN.
 
         Parameters
         ----------
-        X : np.ndarray(n_particles, attributes)
-            2D array where each file it is a diferent particle and each column
+        X : np.ndarray(n_particles, n_attributes)
+            2D array where each row is a different particle and each column
             is a parameter of the particles.
             n_particles is the total number of particles.
-        galactic_components: np.ndarray(m_particles)
-            1D array with the index of the galactic components to
-            which each stellar particle belongs.
-            m_particles is the total number of particles with valid
-            values to operate the clustering.
-        valid_stellar_mask : nd.array(m_particles)
-            Mask only with valid stellar particles to operate the clustering.
-            m_particles is the total number of particles
-            with valid values to operate the clustering.
-
-        Return
-        ------
-        full_component_assignment: np.ndarray(n_particles)
+        galactic_components : np.ndarray(m_particles)
             1D array with the index of the galactic components to which
-            each particle belongs.
-            Particles that do not belong to any of them are assigned
-            the label Nan. n_particles is the total number of particles.
+            each valid stellar particle belongs.
+            m_particles is the total number of particles with valid
+            values used in clustering.
+        valid_stellar_mask : np.ndarray(n_particles)
+            Boolean mask indicating valid stellar particles used in clustering.
+            m_particles is the total number of True values in this mask.
+
+        Returns
+        -------
+        full_component_assignment : np.ndarray(n_particles)
+            1D array with the index of the galactic components to which
+            each particle belongs. Particles that were not used in clustering
+            (non-stellar or invalid) are assigned NaN.
+            n_particles is the total number of particles.
         """
         full_component_assignment = np.full(len(X), np.nan)
         full_component_assignment[valid_stellar_mask] = galactic_components
         return full_component_assignment
 
-    def assign_probabilities_to_all_particles(
+    def _assign_probabilities_to_all_particles(
         self, X, membership_probabilities, valid_stellar_mask
     ):
         """
         Assign membership probabilities to all particles.
 
-        This method assigns the membership probabilities
-        obtained from clustering to the stellar particles used
-        for this purpose, the rest are assigned as label=Nan.
-        This method returns None in case the clustering method returns None
-        probabilities.
+        This method assigns the membership probabilities obtained from
+        clustering to the stellar particles used for this purpose. The rest
+        are assigned as label=NaN. When membership probabilities are None
+        (indicating a deterministic decomposition), it returns an array filled
+        with NaN values.
 
         Parameters
         ----------
         X : np.ndarray(n_particles, attributes)
-            2D array where each file it is a diferent particle and each column
+            2D array where each row is a different particle and each column
             is a parameter of the particles.
             n_particles is the total number of particles.
-        membership_probabilities: np.ndarray(n_cluster, m_particles)
-            2D array with probabilities of belonging
-            to each galactic component.
-            n_cluster is the number of components obtained. m_particles is the
-            total number of particles with valid values to operate the
-            clustering.
-        valid_stellar_mask : nd.array(m_particles)
-            Mask only with valid stellar particles to
-            operate the clustering.
-            m_particles is the total number of particles
-            with valid values to operate the clustering.
+        membership_probabilities : np.ndarray(m_particles, n_cluster) or None
+            2D array with probabilities of belonging to each galactic component.
+            m_particles is the total number of valid particles used in clustering.
+            n_cluster is the number of components obtained. If None, indicates
+            a deterministic decomposition without probabilistic assignments.
+        valid_stellar_mask : np.ndarray(n_particles)
+            Boolean mask indicating which particles are valid stellar particles
+            used in the clustering. m_particles is the total number of True
+            values in this mask.
 
-        Return
-        ------
-        full_membership_probabilities:
-            np.ndarray(n_cluster, n_particles)
-            2D array with probabilities of belonging
-            to each galactic component.
+        Returns
+        -------
+        full_membership_probabilities : np.ndarray(n_particles, n_cluster)
+            2D array with probabilities of belonging to each galactic component.
             n_cluster is the number of components obtained. n_particles is the
-            total number of particles. Particles that do not belong to any
-            component are assigned the label Nan. This method returns None in
-            case the clustering method returns None probabilities.
+            total number of particles. Particles that were not used in clustering
+            are assigned NaN values. When membership_probabilities is None, this
+            array contains only NaN values with shape (n_particles, 1).
+        has_probabilities : bool
+            Flag indicating whether valid probabilistic information exists.
+            True if membership_probabilities was provided and contained valid data,
+            False if membership_probabilities was None (deterministic decomposition).
 
         """
         if membership_probabilities is None:
+            # Deterministic decomposition: no probabilistic information available
             return np.full((len(X), 1), np.nan), False
 
-        # the number of particles are incorrect so we simple remove the data
+        # Extract the shape of probability dimensions (excluding particle count)
         prob_shape = list(np.shape(membership_probabilities)[1:])
 
-        # we need this many rows
+        # Create shape for all particles: (n_particles, n_components, ...)
         complete_shape = tuple([len(X)] + prob_shape)
 
-        # now we create the container for the probabilities
+        # Initialize container with NaN for all particles
         full_membership_probabilities = np.full(complete_shape, np.nan)
 
-        # and now we inject the probs in the correct order
+        # Assign probabilities only to valid stellar particles used in clustering
         full_membership_probabilities[valid_stellar_mask] = (
             membership_probabilities
         )
@@ -492,6 +494,34 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         return component_dataframe
 
     def _create_decomposed_particle_set(self, components_df, pset, has_probabilities):
+        """
+        Create a decomposed particle set from component assignments.
+
+        This internal method extracts component assignments, labels, and
+        probabilities for a specific particle type and creates a
+        DecomposedParticleSet instance.
+
+        Parameters
+        ----------
+        components_df : pd.DataFrame
+            DataFrame containing component assignments, labels, and probabilities
+            for all particles. Must include columns: 'ptypev', 'component', 'label',
+            and probability columns prefixed with 'prob_'.
+        pset : ParticleSet
+            The original particle set to decompose (stars, dark_matter, or gas).
+        has_probabilities : bool
+            Flag indicating whether the decomposition includes valid probabilistic
+            information. True for probabilistic decompositions, False for
+            deterministic ones.
+
+        Returns
+        -------
+        DecomposedParticleSet
+            A decomposed particle set containing the component assignments,
+            physical labels, membership probabilities, and the probabilistic
+            flag for the particles of type pset.ptype.
+
+        """
         data = components_df[components_df.ptypev == pset.ptype]
 
         prob_columns = data.columns[data.columns.str.startswith("prob_")]
@@ -554,14 +584,14 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # =====================================================================
         attributes = self.get_attributes()
 
-        X, y = self.extract_stellar_dynamics_matrix(
+        X, y = self._extract_stellar_dynamics_matrix(
             galaxy, attributes=attributes
         )
 
         # =====================================================================
         # 3. Select valid stellar particles
         # =====================================================================
-        valid_stellar_mask = self.get_valid_stellar_mask(
+        valid_stellar_mask = self._get_valid_stellar_mask(
             X=X, y=y, attributes=attributes
         )
         X_clean, y_clean = X[valid_stellar_mask], y[valid_stellar_mask]
@@ -574,15 +604,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         )
 
         # =====================================================================
-        # 5. Assign components to all particles
+        # 5. Assign components and probabilities to all particles
         # =====================================================================
-        full_component_assignment = self.assign_components_to_all_particles(
+        # Assign component labels to all particles (NaN for non-stellar)
+        full_component_assignment = self._assign_components_to_all_particles(
             X=X,
             galactic_components=sorted(galactic_components),
             valid_stellar_mask=valid_stellar_mask,
         )
+        # Assign probabilities to all particles and get probabilistic flag
         full_membership_probabilities, has_probabilities = (
-            self.assign_probabilities_to_all_particles(
+            self._assign_probabilities_to_all_particles(
                 X=X,
                 membership_probabilities=membership_probabilities,
                 valid_stellar_mask=valid_stellar_mask,
@@ -600,6 +632,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         decomposition_method_name = type(self).__name__
         component_name_mapping = self.get_component_name_mapping().copy()
 
+        # Create decomposed particle sets for each particle type
+        # The has_probabilities flag is propagated to track decomposition type
         stars_wc = self._create_decomposed_particle_set(
             components_df, galaxy.stars, has_probabilities
         )

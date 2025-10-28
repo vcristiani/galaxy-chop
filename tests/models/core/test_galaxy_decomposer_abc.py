@@ -91,7 +91,7 @@ def test_GalaxyDecomposerABC_decompose(read_hdf5_galaxy):
 
 
 @pytest.mark.model
-def test_get_valid_stellar_mask():
+def test__get_valid_stellar_mask():
     class Decomposer(gchop.models.GalaxyDecomposerABC):
         def get_attributes(self):
             return ["eps"]
@@ -104,7 +104,7 @@ def test_get_valid_stellar_mask():
     y = np.array([gchop.core.ParticleSetType.STARS.value,
                   gchop.core.ParticleSetType.STARS.value])
 
-    mask = dec.get_valid_stellar_mask(X, y, ["eps"])
+    mask = dec._get_valid_stellar_mask(X, y, ["eps"])
     assert mask.shape == (2,)
     assert mask.sum() == 1
 
@@ -122,17 +122,19 @@ def test_assign_components_and_probabilities():
     X = np.ones((2, 1))
     valid_mask = np.array([True, True])
 
-    comp = dec.assign_components_to_all_particles(
+    comp = dec._assign_components_to_all_particles(
         X,
         np.array([1, 2]), valid_mask
     )
     assert np.array_equal(comp, [1, 2])
 
-    probs = dec.assign_probabilities_to_all_particles(
+    probs, has_probs = dec._assign_probabilities_to_all_particles(
         X,
         np.array([[0.1, 0.9], [0.8, 0.2]]), valid_mask
     )
     assert probs.shape == (2, 2)
+    assert has_probs is True
 
-    probs_none = dec.assign_probabilities_to_all_particles(X, None, valid_mask)
+    probs_none, has_probs_none = dec._assign_probabilities_to_all_particles(X, None, valid_mask)
     assert np.isnan(probs_none).all()
+    assert has_probs_none is False
