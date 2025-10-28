@@ -120,6 +120,11 @@ class ParticleSet:
         numpy.ndarray.
 
     """
+    #: Tuple of attribute names that should NOT be serialized to HDF5 files.
+    #: These are "transient" attributes that are either:
+    #: - Metadata stored separately (ptype: stored in dataset attributes)
+    #: - Runtime parameters (softening: provided at read time via function args)
+    H5_TRANSIENTS = "ptype", "softening"
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
 
@@ -423,7 +428,7 @@ class ParticleSet:
         attributes = [
             f.name
             for f in attr.fields(cls)
-            if f.init and f.name not in ("ptype", "softening")
+            if f.init and f.name not in self.H5_TRANSIENTS
         ]
 
         if not self.has_potential_:
@@ -538,8 +543,7 @@ class Galaxy:
         gas_repr = f"gas={len(self.gas)}"
         has_pot = f"potential={self.has_potential_}"
         return (
-            f"<{cls_name} {stars_repr}, {dm_repr}, "
-            f"{gas_repr}, {has_pot}>"
+            f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
         )
 
     # PROPERTIES ==============================================================

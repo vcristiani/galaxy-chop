@@ -49,21 +49,24 @@ class DecomposedParticleSet(ParticleSet):
         likelihood of it belonging to its assigned component.
 
     """
+    #: Tuple of attribute names that should NOT be serialized to HDF5 files.
+    #: Extends ParticleSet.H5_TRANSIENTS with:
+    #: - has_probabilities: Boolean flag stored in dataset metadata instead of
+    #:   as a column, used to determine decomposition type at read time
+    H5_TRANSIENTS = ParticleSet.H5_TRANSIENTS + ("has_probabilities",)
 
     components: np.ndarray = uttr.ib(converter=np.copy)
     labels: np.ndarray = uttr.ib(converter=lambda arr: np.astype(arr, np.str_))
+    has_probabilities: bool = uttr.ib(converter=bool)
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
+
     probabilities_n = uttr.ib(init=False)
 
     # CONSTRUCTORS ============================================================
 
     @classmethod
     def from_pset(
-        cls,
-        pset,
-        components,
-        labels,
-        probabilities,
+        cls, pset, components, labels, probabilities, has_probabilities
     ):
         """
         Create a new instance from a particle set.
@@ -100,6 +103,7 @@ class DecomposedParticleSet(ParticleSet):
             components=components,
             labels=labels,
             probabilities=probabilities,
+            has_probabilities=has_probabilities,
         )
         return instance
 
@@ -107,8 +111,10 @@ class DecomposedParticleSet(ParticleSet):
 
     @probabilities_n.default
     def _proabilities_n_default(self):
-        probs_n = np.shape(self.probabilities)[-1]
-        return probs_n - 1
+        probs_n = (
+            np.shape(self.probabilities)[-1] if self.has_probabilities else 0
+        )
+        return probs_n
 
     def __attrs_post_init__(self):
         """
@@ -165,70 +171,8 @@ class DecomposedParticleSet(ParticleSet):
         # Make the probabilities array read-only.
         self.probabilities.setflags(write=False)
 
-    # PROPERTIES ==============================================================
-
-    @property
-    def has_probabilities(self):
-        """
-        Indicates whether the set of particles has associated probabilities.
-
-        Returns
-        -------
-        bool
-            `True` if probabilities exist (`probabilities_n > 0`),
-            `False` otherwise.
-        """
-        return bool(self.probabilities_n)
 
     # PUBLIC METHODS ==========================================================
-
-    def _get_probabilistic_mass(self, pset_total_mass):
-        """
-        Calculate probabilistic mass for each component.
-
-        Uses probability weights to calculate the mass contribution
-        of each particle to each component.
-
-        Parameters
-        ----------
-        pset_total_mass : float
-            Total mass of the particle set.
-
-        Returns
-        -------
-        DataFrame : pandas DataFrame
-            DataFrame with component labels as index and two columns:
-            - 'mp': probabilistic mass in M_sun units
-            - 'mpf': probabilistic mass fraction
-        """
-        # Get full dataframe with labels, masses and probabilities
-        df = self.to_dataframe(attributes=["labels", "m", "probabilities"])
-
-        # Get unique components (as integers from labels)
-        unique_labels = sorted(df["labels"].unique())
-
-        # Create mapping from label to probability column index
-        # probabilities array has shape (n_particles, n_components + 1)
-        prob_columns = [f"probabilities_{i}" for i in range(self.probabilities_n + 1)]
-
-        # Create dict to store probabilistic masses
-        prob_masses = {}
-
-        for idx, label in enumerate(unique_labels):
-            # Get the probability column for this component
-            prob_col = prob_columns[idx] if idx < len(prob_columns) else prob_columns[0]
-
-            # Multiply probabilities by masses and sum
-            if prob_col in df.columns:
-                prob_mass = (df[prob_col] * df["m"]).sum()
-                prob_masses[label] = {
-                    "mp": prob_mass,
-                    "mpf": prob_mass / pset_total_mass
-                }
-
-        # Convert to DataFrame
-        result = pd.DataFrame.from_dict(prob_masses, orient="index")
-        return result
 
     def total_mass(self):
         """
@@ -258,8 +202,10 @@ class DecomposedParticleSet(ParticleSet):
         halo     3.7e9    0.264    3.7e9    0.264
         """
         # Create DataFrame with labels and masses
-        df = self.to_dataframe(attributes=["components", "labels", "m"])
-        df.components.fillna("-", inplace=True)
+        df = self.to_dataframe(
+            attributes=["components", "labels", "m", "probabilities"]
+        )
+        df["components"] = df["components"].fillna("")
 
         pset_total_mass = self.m.sum().value
 
@@ -268,9 +214,25 @@ class DecomposedParticleSet(ParticleSet):
         result["mf"] = result["m"] / pset_total_mass
 
         # Add probabilistic mass columns if available
-        if self.has_probabilities: ...
-            # prob_mass_df = self._get_probabilistic_mass(pset_total_mass)
-            # result = result.join(prob_mass_df, how="left")
+        import ipdb
+
+        ipdb.set_trace()
+        print(df.components.unique(), ((self.probabilities).shape))
+
+        if self.has_probabilities:
+            prob_masses_column = []
+            prob_fraction_masses_column = []
+            for component in result.index.levels[0]:
+                if component != "":
+                    prob_column = f"probabilities_{int(component)}"
+                    cosos = df[df["components"] == component]
+                    prob_mass = (cosos["m"] * cosos[prob_column]).sum()
+                    prob_mass_fraction = prob_mass / pset_total_mass
+                    prob_masses_column.append(prob_mass)
+                    prob_fraction_masses_column.append(prob_mass_fraction)
+                else:
+                    prob_masses_column.append("")
+                    prob_fraction_masses_column("")
 
         result.reset_index("labels", inplace=True)
         return result
@@ -333,6 +295,7 @@ class DecomposedParticleSet(ParticleSet):
             components=self.components,
             labels=self.labels,
             probabilities=self.probabilities,
+            has_probabilities=self.has_probabilities,
         )
         return new
 
