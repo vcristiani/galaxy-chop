@@ -404,7 +404,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         """
         if membership_probabilities is None:
-            return np.full((len(X), 1), np.nan)
+            return np.full((len(X), 1), np.nan), False
 
         # the number of particles are incorrect so we simple remove the data
         prob_shape = list(np.shape(membership_probabilities)[1:])
@@ -420,7 +420,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             membership_probabilities
         )
 
-        return full_membership_probabilities
+        return full_membership_probabilities, True
 
     def create_physical_component_labels(
         self,
@@ -491,7 +491,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return component_dataframe
 
-    def _create_decomposed_particle_set(self, components_df, pset):
+    def _create_decomposed_particle_set(self, components_df, pset, has_probabilities):
         data = components_df[components_df.ptypev == pset.ptype]
 
         prob_columns = data.columns[data.columns.str.startswith("prob_")]
@@ -505,6 +505,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             components=components,
             labels=labels,
             probabilities=probabilities,
+            has_probabilities=has_probabilities
         )
 
         return component_pset
@@ -580,7 +581,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             galactic_components=sorted(galactic_components),
             valid_stellar_mask=valid_stellar_mask,
         )
-        full_membership_probabilities = (
+        full_membership_probabilities, has_probabilities = (
             self.assign_probabilities_to_all_particles(
                 X=X,
                 membership_probabilities=membership_probabilities,
@@ -600,13 +601,13 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         component_name_mapping = self.get_component_name_mapping().copy()
 
         stars_wc = self._create_decomposed_particle_set(
-            components_df, galaxy.stars
+            components_df, galaxy.stars, has_probabilities
         )
         dark_matter_wc = self._create_decomposed_particle_set(
-            components_df, galaxy.dark_matter
+            components_df, galaxy.dark_matter, has_probabilities
         )
         gas_wc = self._create_decomposed_particle_set(
-            components_df, galaxy.gas
+            components_df, galaxy.gas, has_probabilities
         )
 
         del components_df
