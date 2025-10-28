@@ -120,6 +120,7 @@ class ParticleSet:
         numpy.ndarray.
 
     """
+
     #: Tuple of attribute names that should NOT be serialized to HDF5 files.
     #: These are "transient" attributes that are either:
     #: - Metadata stored separately (ptype: stored in dataset attributes)
