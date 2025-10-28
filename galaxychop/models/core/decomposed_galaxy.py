@@ -30,6 +30,7 @@ from ...core import Galaxy, ParticleSet, ParticleSetType
 # CLASSES
 # =============================================================================
 
+NAN_STR_REPR = "-"
 
 @uttr.s(frozen=True, slots=True, repr=False, aaccessor=None)
 class DecomposedParticleSet(ParticleSet):
@@ -49,6 +50,7 @@ class DecomposedParticleSet(ParticleSet):
         likelihood of it belonging to its assigned component.
 
     """
+
     #: Tuple of attribute names that should NOT be serialized to HDF5 files.
     #: Extends ParticleSet.H5_TRANSIENTS with:
     #: - has_probabilities: Boolean flag stored in dataset metadata instead of
@@ -205,7 +207,7 @@ class DecomposedParticleSet(ParticleSet):
         df = self.to_dataframe(
             attributes=["components", "labels", "m", "probabilities"]
         )
-        df["components"] = df["components"].fillna("")
+        df["components"] = df["components"].fillna(NAN_STR_REPR)
 
         pset_total_mass = self.m.sum().value
 
@@ -214,25 +216,23 @@ class DecomposedParticleSet(ParticleSet):
         result["mf"] = result["m"] / pset_total_mass
 
         # Add probabilistic mass columns if available
-        import ipdb
-
-        ipdb.set_trace()
-        print(df.components.unique(), ((self.probabilities).shape))
-
         if self.has_probabilities:
             prob_masses_column = []
-            prob_fraction_masses_column = []
+            prob_masses_column_fraction = []
             for component in result.index.levels[0]:
-                if component != "":
+                if component != NAN_STR_REPR:
                     prob_column = f"probabilities_{int(component)}"
                     cosos = df[df["components"] == component]
                     prob_mass = (cosos["m"] * cosos[prob_column]).sum()
                     prob_mass_fraction = prob_mass / pset_total_mass
                     prob_masses_column.append(prob_mass)
-                    prob_fraction_masses_column.append(prob_mass_fraction)
+                    prob_masses_column_fraction.append(prob_mass_fraction)
                 else:
-                    prob_masses_column.append("")
-                    prob_fraction_masses_column("")
+                    prob_masses_column.append(NAN_STR_REPR)
+                    prob_masses_column_fraction.append(NAN_STR_REPR)
+
+            result["pm"] = prob_masses_column
+            result["pmf"] = prob_masses_column_fraction
 
         result.reset_index("labels", inplace=True)
         return result

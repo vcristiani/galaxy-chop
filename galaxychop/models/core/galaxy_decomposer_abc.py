@@ -493,7 +493,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         return component_dataframe
 
-    def _create_decomposed_particle_set(self, components_df, pset, has_probabilities):
+    def _create_decomposed_particle_set(
+        self, components_df, pset, has_probabilities
+    ):
         """
         Create a decomposed particle set from component assignments.
 
@@ -535,7 +537,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             components=components,
             labels=labels,
             probabilities=probabilities,
-            has_probabilities=has_probabilities
+            has_probabilities=has_probabilities,
         )
 
         return component_pset

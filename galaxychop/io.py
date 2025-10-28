@@ -430,6 +430,7 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
             pset = DecomposedParticleSet(
                 ptype=ptype,
                 softening=softening,
+                has_probabilities=has_probabilities,
                 probabilities=probabilities,
                 **kws,
             )
