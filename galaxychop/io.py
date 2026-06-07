@@ -603,8 +603,19 @@ def read_hdf5(
     read_npy : Read galaxy data from NumPy files (legacy)
     """
     with h5py.File(path_or_stream, "r") as f:
+
+        # Files without format_version attr are
+        # assumed to be v1.0 (oldest known format)
         version = f.attrs.get("format_version", FALLBACK_VERSION)
-        parser_class = _READ_HDF5_VERSIONS[version]
+
+        # Some very old files carry an unrecognized version (e.g. 0.1);
+        # fall back to v1.0
+        version = (
+            version if version in _READ_HDF5_VERSIONS else FALLBACK_VERSION
+        )
+
+        # normal reading
+        parser_class = _READ_HDF5_VERSIONS[float(version)]
         parser = parser_class()
         return parser.read(
             f,
