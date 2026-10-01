@@ -119,8 +119,10 @@ class DecomposedParticleSet(ParticleSet):
 
     #: Tuple of attribute names that should NOT be serialized to HDF5 files.
     #: Extends ParticleSet.H5_TRANSIENTS with:
-    #: - has_probabilities: Boolean flag stored in dataset metadata instead of
-    #:   as a column, used to determine decomposition type at read time
+    #:
+    #: - has_probabilities: Boolean flag stored in dataset metadata
+    #:   instead of as a column, used to determine decomposition type
+    #:   at read time
     H5_TRANSIENTS = ParticleSet.H5_TRANSIENTS + ("has_probabilities",)
 
     components: np.ndarray = uttr.ib(converter=np.copy)
