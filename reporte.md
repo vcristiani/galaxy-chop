@@ -1,0 +1,150 @@
+# Reporte de estado del repositorio GalaxyChop
+
+Fecha del análisis inicial: 2026-09-30 · Última actualización: 2026-10-01 · Rama: `newplots` · Versión declarada: `0.3.dev0` · Python del entorno: 3.10.12
+
+## 🔖 Hasta dónde llegamos hoy (01/10) — leer esto primero
+
+Hoy se hizo una sesión de correcciones guiada (uno por uno, con confirmación y commit por cada punto). Resultado: **13 commits**, suite de tests de **47 failed / 141 passed** a **1 failed / 187 passed / 1 xfailed**, `flake8`/`pydocstyle`/`sphinx-build -W` en cero avisos, y un **bug grave de corrección científica preexistente corregido** (`sorted()` en `decompose()`, commit `a10102c` — ver "Progreso de correcciones").
+
+**Último commit de la sesión:** `75ed284` (más este mismo commit del reporte). Todo está pusheado a `origin/newplots`.
+
+### Notas para retomar el trabajo con Claude en la próxima sesión
+
+- **Punto de partida:** este archivo (`reporte.md`) es la fuente de verdad. La sección "Acciones pendientes para generar un release" (al final) es la lista priorizada de lo que falta; está en orden pero sin numerar a propósito, para poder reordenarla.
+- **Forma de trabajar que funcionó bien hoy:** ir ítem por ítem de la lista de pendientes, preguntar antes de tocar código (sobre todo si implica una decisión de diseño, no solo mecánica), aplicar el fix, correr `pytest -q` (y `flake8`/`pydocstyle`/`sphinx-build -W` cuando aplica) para confirmar que no se rompió nada, y recién ahí preguntar si conviene comitear ese cambio solo (commits chicos y aislados, no un commit gigante al final). Pedí que se siga así salvo que digas lo contrario.
+- **Cosas a verificar primero al retomar:** correr `git log --oneline -15` para confirmar que seguís en `75ed284` (o más adelante si hubo otra sesión), y `pytest -q` para confirmar que seguimos en 187 passed / 1 failed antes de seguir tocando código.
+- **El único test que queda fallando** es `tests/core/test_plot.py::test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component`. Ya está diagnosticado y el fix propuesto (no aplicado, a propósito): en `galaxychop/core/plot.py`, dentro de `get_sdyn_df_and_hue()`, cambiar `labels = labels[np.isfinite(labels)]` por `labels = labels[mask]` (reusar la máscara que ya se usa para el resto de las columnas del DataFrame). Es candidato obvio para arrancar la próxima sesión.
+- **Decisión pendiente del usuario, no tomada hoy:** la estrategia de integración de ramas (`newplots`/`persistence-new`/`dev`/`master`) y el número de versión final. Se saltó a propósito al inicio de la sesión porque es una decisión de alcance mayor, no un fix de código.
+- **Qué NO se tocó hoy** (quedó fuera de alcance, no por descarte sino porque son tareas más grandes): implementar `galaxychop/cli.py`, ejecutar/reparar los 5 tutoriales, escribir documentación nueva de API, correr `tox` en Python 3.11/3.12/3.13, y los cambios de CI/CD (`publish.yml`, `CI.yml` apuntando al fork).
+
+## Resumen ejecutivo
+
+El repo **no está listo para un release**. Además hay un entry point de CLI roto, CI/publicación desactualizados, cambios de estilo pendientes y documentación incompleta. La cobertura es buena (87 %) en general, pero el módulo nuevo `decomposed_galaxy.py` está en 31 %.
+
+**Actualización (01/10):** se corrigieron los tests y, de paso, se encontró y corrigió un **bug de corrección científica grave y antiguo** (no introducido en esta rama): `GalaxyDecomposerABC.decompose()` ordenaba (`sorted()`) el array de componentes por partícula antes de reinsertarlo en el array completo, lo que podía asignar partículas al componente equivocado en cualquier decomposer (JThreshold, JHistogram, KMeans, GaussianMixture, etc.) cada vez que las etiquetas no salían ya en orden ascendente de `split()`. Ver "Progreso de correcciones". La suite de tests arrancó en **47 failed / 141 passed / 1 xfailed** y ahora está en **1 failed / 187 passed / 1 xfailed**, en 4 commits (`13e1c59`, `8f9a253`, `5372c1b`, `a10102c`). El único fallo que queda (`get_sdyn_df_and_hue`) se dejó pendiente a propósito porque es deuda de diseño, no un fix mecánico.
+
+## Estado del código
+
+- Paquete: ~8.2k líneas en `galaxychop/` (core, models, preproc, utils, io, pipeline).
+- La rama `newplots` tiene 360 commits por delante de `master` (149 archivos, +22k/−4.9k líneas): es un cambio muy grande respecto de la última versión publicada (tag `0.2`).
+- Cambios sin commitear: `galaxychop/models/core/galaxy_decomposer_abc.py` (un comentario `# TODO: VER ESTO!` agregado en la línea de `sorted(galactic_components)`).
+- Archivos basura sin trackear: `Untitled*.ipynb`, `datasets.h5`, `dgal.h5`, `docs/source/_static/Untitled.ipynb`. Trackeados por error en git: `Untitled1.ipynb`, `Untitled2.ipynb`.
+- Existen ramas dispersas (`dev`, `master`, `persistence-new`, `newplots`, `refactor`, `dev_meson`, etc.) sin una estrategia clara de integración hacia `master`.
+
+### CLI roto (bloqueante)
+
+- `pyproject.toml` declara `galaxychop = "galaxychop.cli:main"` y la dependencia `typer`, pero **el módulo `galaxychop/cli` no existe** (el commit `458b731` sólo agregó la infraestructura). Al instalar el paquete, el comando `galaxychop` fallaría con `ModuleNotFoundError`.
+
+## Tests
+
+Estado original: `pytest --cov=galaxychop` → **47 failed, 141 passed, 1 xfailed** (71 s). Cobertura total **87 %**. Estado actual (post-fixes): **1 failed, 187 passed, 1 xfailed**.
+
+Causas raíz identificadas (ver detalle de cada fix en "Progreso de correcciones"):
+
+- **Fixture `_clip_gmm_probs` desactualizado** (`tests/conftest.py`) → ✅ corregido en `13e1c59`.
+- **`has_probabilities` sin pasar en ~36 instanciaciones directas** de `DecomposedParticleSet`/`.from_pset` en los tests → ✅ corregido en `8f9a253`, junto con un bug real encontrado de paso en `get_value_makers()`.
+- **`softening` desaparecía de `to_dataframe`/`to_dict`/`disassemble`** — no era un tema de diseño (no es que se haya vuelto "transiente" a propósito): era un bug real en el helper `_make_elements()`, que solo manejaba arrays de 1 y 2 dimensiones y descartaba silenciosamente los escalares. Rompía además código de producción (`potential_energy`) → ✅ corregido en `5372c1b`.
+- **`get_sdyn_df_and_hue` en `core/plot.py`** (1 fallo restante): filtra `labels` con `np.isfinite(labels)` en vez de reusar la `mask` ya calculada para el resto de las columnas. Rompe con labels no numéricos (como los strings de `DecomposedParticleSet.labels`) y, aunque fueran numéricos, no está alineado con el resto del DataFrame. **Queda pendiente** (ver acciones pendientes).
+- Tests de energía potencial (`tests/preproc/potential_energy/`) — encadenados al bug de `softening`, ya resueltos.
+
+Cobertura actualizada tras los fixes (`tox -e coverage`, entorno con todas las dependencias de dev): **92.55 % total**, por encima del 90 % exigido. Puntos todavía bajos:
+
+- `models/core/decomposed_galaxy.py`: 69 % (subió de 31 % simplemente porque ahora los tests corren; sigue siendo el módulo con más huecos)
+- `preproc/potential_energy/__init__.py`: 74 %
+- `preproc/_base.py`: 78 %
+- `io.py`: 83 % (26 líneas sin cubrir; relevante por el soporte de formato HDF5 antiguo)
+- No hay tests del CLI (porque no existe) ni carpeta de tests para `models/core` del ABC más allá de un archivo.
+
+## Estilo y calidad
+
+- ✅ **`flake8 galaxychop tests`: 0 avisos** (corregido en `f0dbf86`; eran 58+, incluyendo E501, F401, F811, I100/I101 y A002). También se agregó un `# flake8: noqa: A005` puntual con explicación en `io.py` (el módulo se llama igual que el de la stdlib a propósito; nunca se usa sin el prefijo `galaxychop.`) en vez de ignorarlo globalmente.
+- ✅ **`pydocstyle galaxychop`: 0 avisos** (corregido en `509cafa`; eran 5 reales — el conteo original de ~134 líneas incluía los `.ipynb_checkpoints` ya borrados).
+- ✅ Bug real en `galaxy_decomposer_abc.py` encontrado al investigar el TODO: ver "Progreso de correcciones", commit `a10102c`.
+
+## Documentación
+
+- Sphinx con nbsphinx: existen API docs para todos los módulos actuales (`core`, `models`, `preproc`, `utils`, `io`, `config`, `pipeline`, `constants`) y 5 tutoriales (`quickstart`, `galaxies`, `decomposers`, `pipeline`, `pre-proccesing_and_decomposition`).
+- El `CHANGELOG.md` tiene sección "Version 0.3" pero **no refleja** el trabajo reciente: `DecomposedParticleSet`, `DecomposedGalaxy`, cálculo probabilístico de masa (`total_mass`), `has_probabilities`, soporte del formato HDF5 antiguo, CLI, nuevos plots. Además hay un formato roto en la lista (`Galaxy.to_hdf5():` suelto).
+- `README.md` dice "Python >= 3.8" pero `pyproject.toml` soporta 3.10–3.13. La instrucción de instalación de desarrollo `pip -r requirements-dev` es incorrecta (`pip install -r requirements_dev.txt`). No documenta el CLI.
+- `.readthedocs.yml` usa `ubuntu-20.04` y Python 3.9 (fuera del rango soportado; numpy>=2 y astropy>=6 no instalan en 3.9).
+- `docs/requirements.txt` fija `mistune==0.8.4` y `nbconvert==6.5.3` (antiguos) y `requirements_dev.txt` instala `qafan` desde un zip de GitHub master (no reproducible).
+- Los tutoriales no fueron ejecutados en este análisis: hay que verificar que sigan funcionando con la API nueva (los fallos de tests sugieren que puede haber cambios incompatibles).
+- Los archivos `docs/tutorial.ipynb` y la carpeta `draft/` contienen material obsoleto trackeado.
+
+## Progreso de correcciones (01/10)
+
+Commits en `newplots`, en orden:
+
+1. **`13e1c59`** — `tests/conftest.py`: la firma del fixture `_clip_gmm_probs` no tenía el parámetro `has_probabilities` que `_create_decomposed_particle_set` ya exigía. Arregló 7 tests (GaussianMixture, AutoGaussianMixture, JHistogram, JEHistogram, KMeans, JThreshold, pipeline).
+2. **`8f9a253`** — `tests/models/core/test_decomposed_galaxy.py` + `galaxychop/models/core/decomposed_galaxy.py`:
+   - Se agregó `has_probabilities` a las ~36 instanciaciones directas de `DecomposedParticleSet(...)`/`.from_pset(...)` en el test (campo obligatorio, sin default; los tests eran anteriores a que se volviera requerido).
+   - Bug real encontrado de paso: `DecomposedParticleSet.get_value_makers()` exponía una sola clave `"probabilities"` con el array 2D completo, en vez de una clave `prob_i` por columna como promete su propio docstring y como espera el resto del código (`galaxy_decomposer_abc.create_physical_component_labels`). Corregido para generar `prob_0`, `prob_1`, etc.
+   - Se corrigió también un assert desactualizado (`probabilities_n == 1` con un array de 2 componentes; el valor correcto es 2).
+3. **`5372c1b`** — `galaxychop/core/galaxy.py` + `tests/core/test_galaxy.py` + `tests/core/test_plot.py`:
+   - Bug real: `_make_elements()` (usado por `ParticleSet.to_dict()`) solo manejaba valores de 1 y 2 dimensiones; `softening` es un escalar (ndim=0) y se descartaba en silencio. Esto rompía `to_dataframe()`, `to_dict()`, `disassemble()` **y además código de producción**: `preproc/potential_energy/__init__.py` hace `df.softening.max()` y tiraba `AttributeError`.
+   - Typo preexistente en `test_ParticleSet_repr` (espacios extra en el string esperado).
+   - 2 llamadas a `DecomposedParticleSet(...)` en `test_plot.py` que habían quedado afuera del paso anterior.
+
+4. **`a10102c`** — `galaxychop/models/core/galaxy_decomposer_abc.py`: **bug grave de corrección científica**, no relacionado con tests. `decompose()` llamaba `galactic_components=sorted(galactic_components)` antes de reinsertar ese array en el array completo de partículas vía máscara booleana (`full_component_assignment[valid_stellar_mask] = galactic_components`). `galactic_components` es, por diseño (ver docstring de `_assign_components_to_all_particles`), un array **por partícula**, en el mismo orden que las partículas válidas; `sorted()` lo reordena por valor, rompiendo esa correspondencia. Ejemplo verificado: si la partícula 0 pertenece al componente 2 y la partícula 1 al componente 0, `sorted([2, 0])` da `[0, 2]`, y la partícula 0 termina asignada al componente 0. Afecta a **todos** los decomposers que pasan por `decompose()` (JThreshold, JHistogram, KMeans, GaussianMixture, etc.) cada vez que `split()` no devuelve las etiquetas ya ordenadas ascendentemente. Es un bug preexistente, rastreado hasta el commit `3c38813` (mucho antes de esta rama); solo había quedado marcado con el comentario `# TODO: VER ESTO!` sin corregir. Se sacó el `sorted()`.
+
+5. **`f0dbf86`** — 9 archivos (`galaxy.py`, `io.py`, `models/__init__.py`, `models/core/__init__.py`, `decomposed_galaxy.py`, `galaxy_decomposer_abc.py` y 3 tests): limpieza de `flake8` hasta 0 avisos. Imports desordenados/sin usar, reimport duplicado de `pandas`, parámetro `format` que tapaba el builtin en `test_plot.py`, líneas largas en docstrings/comentarios, 3 stubs `def f(): ...` que `black` había colapsado mal (rompían `E704`), y un `# flake8: noqa: A005` puntual en `io.py` en vez de un ignore global.
+
+6. **`509cafa`** — `io.py` + `decomposed_galaxy.py`: 0 avisos de `pydocstyle` (eran 5 reales).
+7. **`97fa129`** — `sphinx-build -W` pasa a **build succeeded** (eran 5 warnings tratados como error): se borró `api/models/decomposed_galaxy.rst` (huérfano, documentaba `DecomposedParticleSet`/`DecomposedGalaxy` por segunda vez), se arreglaron los toctrees de `api/models/index.rst` y `api/models/core/index.rst` (mismo patrón sibling+subdir glob que ya usa `preproc/index.rst`), y se agregó la línea en blanco que faltaba en los docstrings `#:` de `H5_TRANSIENTS` (`galaxy.py` y `decomposed_galaxy.py`) para que la lista con guiones no quedara pegada al párrafo anterior.
+
+8. **`1279fee`** — `tox.ini`: arreglado el `deps = {[testenv]deps}` roto de `[testenv:coverage]` (ahora apunta a `{[testenv:py312]deps}`) y el typo `usedevelo` → `usedevelop`. Verificado: `tox -e coverage` corre de punta a punta. **Cobertura real con las dependencias completas: 92.55 %**, por encima del 90 % exigido (la medición de 87 % del inicio de este reporte era con un entorno más liviano, sin `requirements_dev.txt`). El único fallo dentro de ese entorno es el ya conocido `get_sdyn_df_and_hue`.
+
+9. **`7980309`** — limpieza de archivos basura: `git rm` de `Untitled1.ipynb`/`Untitled2.ipynb` (ya borrados del disco), borrado de los notebooks sueltos sin trackear (`Untitled.ipynb`, `Untitled3.ipynb`, `docs/source/_static/Untitled.ipynb`), y patrones nuevos en `.gitignore` (`Untitled*.ipynb` — el `.ipynb` existente sólo matcheaba un archivo llamado literalmente `.ipynb`, no `*.ipynb` — y `/*.h5` en la raíz). `datasets.h5`/`dgal.h5` ya no existían en disco.
+
+10. **`1348532`** — `pyproject.toml` + `MANIFEST.in`: se sacó `[tool.setuptools.dynamic]` (sin efecto real, `version` ya es estático) y los restos de CMake/meson/Fortran/skbuild de `MANIFEST.in`. Verificado con `python -m build --sdist`: arma bien y el tarball sigue teniendo todo el código fuente.
+
+11. **`3268f14`** — se borró `.travis.yml` (obsoleto, CI ya está en GitHub Actions).
+
+12. **`fe9b94b`** — `README.md`: "Python >= 3.8" → "Python >= 3.10", y el comando de instalación de desarrollo roto (`pip -r requirements-dev`) → `pip install -r requirements_dev.txt`. El uso del CLI no se documentó todavía a propósito, porque `galaxychop/cli.py` no existe (sigue como punto pendiente aparte).
+
+13. **`75ed284`** — `CHANGELOG.md`: arreglado el bloque roto (`Galaxy.to_hdf5():` suelto), actualizada la mención obsoleta a la clase `Component` (ya no existe) por `DecomposedGalaxy`/`DecomposedParticleSet`, y agregadas entradas nuevas: `has_probabilities`, masa probabilística (`pm`/`pmf`), persistencia HDF5 de `DecomposedGalaxy` (con compatibilidad hacia formatos viejos), y el bug de `sorted()` corregido.
+
+No tocado todavía: el punto 1 de la lista de pendientes (estrategia de integración de ramas, se decidió saltar por ahora), correr `tox` en 3.11/3.12/3.13, y el fallo de `get_sdyn_df_and_hue` (deuda de diseño, se dejó pendiente a propósito).
+
+## Resultado de `tox -r` (todos los entornos)
+
+Corrida original completa (~8 min, antes de los fixes de esta sesión). Resultado en ese momento: **sólo `check-headers` pasaba**, el resto fallaba.
+
+| Entorno | Resultado original | Detalle | Estado actual |
+|---|---|---|---|
+| `style` | FAIL | Ver sección "Estilo y calidad". | ✅ 0 avisos (`f0dbf86`) |
+| `docstyle` | FAIL | Ver sección "Estilo y calidad". | ✅ 0 avisos (`509cafa`) |
+| `check-testdir` | FAIL | Falso positivo por `.ipynb_checkpoints` locales (ya borradas). | ✅ pasa |
+| `check-headers` | **OK** | Todos los archivos tienen el header correcto. | OK (sin cambios) |
+| `check-apidocsdir` | FAIL | Mismo falso positivo que `check-testdir`. | ✅ pasa |
+| `make-docs` | FAIL | 5 warnings tratados como error (toctrees duplicados + docstrings de `H5_TRANSIENTS`). | ✅ `build succeeded` (`97fa129`) |
+| `py310`…`py313` | FAIL (los 4) | 47 tests fallidos. | **Pendiente de re-correr**: localmente (solo 3.10) está en 187 passed/1 failed; falta confirmar en 3.11, 3.12 y 3.13. |
+| `coverage` | FAIL (antes de correr un test) | Bug en `tox.ini` (`deps = {[testenv]deps}` inexistente) + umbral de 90 % con 87 % real. | **Pendiente**, no tocado. |
+
+Nota adicional pendiente: `[testenv]` tiene `usedevelo = True` (typo de `usedevelop`), una clave inválida que tox ignora silenciosamente.
+
+## Empaquetado, versionado y CI
+
+- La versión `0.3.dev0` está en `pyproject.toml`; `constants.VERSION` la lee vía `importlib.metadata`. Hay un `[tool.setuptools.dynamic] version = { attr = "package.__version__" }` que apunta a un módulo inexistente (`package`) y queda sin efecto/confuso.
+- `MANIFEST.in` contiene restos de otros sistemas de build (CMake, meson, skbuild, Fortran) que ya no aplican, e incluye `CHANGELOG.md`, pero excluye `tests` y `docs`.
+- `.github/workflows/publish.yml` usa Python 3.9–3.12 y `cibuildwheel` con `cp37–cp39`: está desactualizado (el paquete es Python puro, 3.10–3.13).
+- `.github/workflows/CI.yml` llama a un workflow reutilizable de un **fork** (`BrunoCeliz/galaxy-chop@<sha>`), no al repositorio oficial. `tests.yml` sólo corre en la rama `dev` (no en `master`).
+- `.travis.yml` es obsoleto (Python 3.8).
+- Dependencia `scikit-learn < 1.7` acotada: revisar si sigue siendo necesario.
+- Sólo hay un dataset de test (`tests/datasets/gal394242.h5`); verificar que no se incluya en el sdist innecesariamente.
+
+## Acciones pendientes para generar un release
+
+- Decidir la estrategia de integración: consolidar `newplots`, `persistence-new` y demás ramas en `dev` y luego en `master`, y definir el número de versión final (0.3.0).
+- Corregir `get_sdyn_df_and_hue()` en `galaxychop/core/plot.py`: filtra `labels` con `np.isfinite(labels)` en vez de reusar la `mask` ya calculada para el resto de las columnas (rompe con labels no numéricos como los de `DecomposedParticleSet`, y ni siquiera está bien alineado si fueran numéricos). Fix propuesto y pendiente de aplicar: `labels = labels[mask]`.
+- Aumentar cobertura puntual en `decomposed_galaxy.py` (69 %), `potential_energy` (74 %), `io.py` (83 %, formato HDF5 antiguo) y `preproc/_base.py` (78 %); el total ya supera el 90 % exigido, esto es afinado, no bloqueante.
+- Implementar `galaxychop/cli.py` con `main` (o quitar el entry point y la dependencia `typer`), y agregarle tests y documentación.
+- Correr `tox` completo (todos los entornos, incluyendo `py311`/`py312`/`py313`) y dejarlo en verde; se verificó sólo `py310`, `style`, `docstyle`, `check-testdir`, `check-headers`, `check-apidocsdir`, `make-docs` y `coverage`.
+- Ejecutar todos los tutoriales y reparar los que se rompan con la API nueva; regenerar salidas.
+- Documentar en la API y en un tutorial `DecomposedGalaxy`, `DecomposedParticleSet`, masas probabilísticas y el nuevo formato/compatibilidad HDF5.
+- Documentar el uso del CLI en `README.md` cuando `galaxychop/cli.py` exista.
+- Actualizar `.readthedocs.yml` (OS y Python 3.11+) y pinear dependencias de docs modernas; verificar que `make-docs` compile sin errores en Read the Docs.
+- Reemplazar la dependencia `qafan` desde zip de GitHub por una versión reproducible o eliminarla.
+- Revisar `draft/` y `docs/tutorial.ipynb` (material obsoleto trackeado); decidir si se borran o se archivan.
+- Reescribir `publish.yml` para un paquete Python puro (`python -m build`, Python 3.10–3.13, publicación a PyPI con token/trusted publishing) y quitar `cibuildwheel`.
+- Apuntar `CI.yml` al repositorio oficial (no a un fork) y hacer que los tests corran también sobre `master` y PRs.
