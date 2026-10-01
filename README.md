@@ -34,7 +34,7 @@ It runs in numerical N-body simulations populated with semi-analytical models an
 
 ## Requirements
 
-You need Python `>= 3.8`, to run GalaxyChop.
+You need Python `>= 3.10`, to run GalaxyChop.
 
 ### Standard Installation
 
@@ -51,7 +51,7 @@ Clone this repo and then inside the local directory execute
 ```bash
 $ git clone https://github.com/vcristiani/galaxy-chop.git
 $ cd galaxy-chop
-$ pip -r requirements-dev
+$ pip install -r requirements_dev.txt
 ```
 
 ## Authors
