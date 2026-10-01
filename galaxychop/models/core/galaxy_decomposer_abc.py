@@ -381,34 +381,39 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             is a parameter of the particles.
             n_particles is the total number of particles.
         membership_probabilities : np.ndarray(m_particles, n_cluster) or None
-            2D array with probabilities of belonging to each galactic component.
-            m_particles is the total number of valid particles used in clustering.
-            n_cluster is the number of components obtained. If None, indicates
-            a deterministic decomposition without probabilistic assignments.
+            2D array with probabilities of belonging to each galactic
+            component. m_particles is the total number of valid particles
+            used in clustering. n_cluster is the number of components
+            obtained. If None, indicates a deterministic decomposition
+            without probabilistic assignments.
         valid_stellar_mask : np.ndarray(n_particles)
-            Boolean mask indicating which particles are valid stellar particles
-            used in the clustering. m_particles is the total number of True
-            values in this mask.
+            Boolean mask indicating which particles are valid stellar
+            particles used in the clustering. m_particles is the total
+            number of True values in this mask.
 
         Returns
         -------
         full_membership_probabilities : np.ndarray(n_particles, n_cluster)
-            2D array with probabilities of belonging to each galactic component.
-            n_cluster is the number of components obtained. n_particles is the
-            total number of particles. Particles that were not used in clustering
-            are assigned NaN values. When membership_probabilities is None, this
-            array contains only NaN values with shape (n_particles, 1).
+            2D array with probabilities of belonging to each galactic
+            component. n_cluster is the number of components obtained.
+            n_particles is the total number of particles. Particles that
+            were not used in clustering are assigned NaN values. When
+            membership_probabilities is None, this array contains only
+            NaN values with shape (n_particles, 1).
         has_probabilities : bool
-            Flag indicating whether valid probabilistic information exists.
-            True if membership_probabilities was provided and contained valid data,
-            False if membership_probabilities was None (deterministic decomposition).
+            Flag indicating whether valid probabilistic information
+            exists. True if membership_probabilities was provided and
+            contained valid data, False if membership_probabilities was
+            None (deterministic decomposition).
 
         """
         if membership_probabilities is None:
-            # Deterministic decomposition: no probabilistic information available
+            # Deterministic decomposition: no probabilistic information
+            # available
             return np.full((len(X), 1), np.nan), False
 
-        # Extract the shape of probability dimensions (excluding particle count)
+        # Extract the shape of probability dimensions (excluding particle
+        # count)
         prob_shape = list(np.shape(membership_probabilities)[1:])
 
         # Create shape for all particles: (n_particles, n_components, ...)
@@ -417,7 +422,8 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # Initialize container with NaN for all particles
         full_membership_probabilities = np.full(complete_shape, np.nan)
 
-        # Assign probabilities only to valid stellar particles used in clustering
+        # Assign probabilities only to valid stellar particles used in
+        # clustering
         full_membership_probabilities[valid_stellar_mask] = (
             membership_probabilities
         )
@@ -506,15 +512,17 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         Parameters
         ----------
         components_df : pd.DataFrame
-            DataFrame containing component assignments, labels, and probabilities
-            for all particles. Must include columns: 'ptypev', 'component', 'label',
-            and probability columns prefixed with 'prob_'.
+            DataFrame containing component assignments, labels, and
+            probabilities for all particles. Must include columns:
+            'ptypev', 'component', 'label', and probability columns
+            prefixed with 'prob_'.
         pset : ParticleSet
-            The original particle set to decompose (stars, dark_matter, or gas).
+            The original particle set to decompose (stars, dark_matter,
+            or gas).
         has_probabilities : bool
-            Flag indicating whether the decomposition includes valid probabilistic
-            information. True for probabilistic decompositions, False for
-            deterministic ones.
+            Flag indicating whether the decomposition includes valid
+            probabilistic information. True for probabilistic
+            decompositions, False for deterministic ones.
 
         Returns
         -------

@@ -15,8 +15,8 @@
 # =============================================================================
 
 from .core import (
-    DecomposedParticleSet,
     DecomposedGalaxy,
+    DecomposedParticleSet,
     GalaxyDecomposerABC,
     hparam,
 )

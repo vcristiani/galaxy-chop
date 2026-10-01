@@ -124,7 +124,8 @@ class ParticleSet:
     #: Tuple of attribute names that should NOT be serialized to HDF5 files.
     #: These are "transient" attributes that are either:
     #: - Metadata stored separately (ptype: stored in dataset attributes)
-    #: - Runtime parameters (softening: provided at read time via function args)
+    #: - Runtime parameters (softening: provided at read time via
+    #:   function args)
     H5_TRANSIENTS = "ptype", "softening"
 
     ptype = uttr.ib(validator=attr.validators.instance_of(ParticleSetType))
@@ -426,7 +427,7 @@ class ParticleSet:
             DataFrame with particle attributes to be saved
 
         """
-        # Get attributes to serialize (exclude softening as it's set at read time)
+        # Get attributes to serialize (exclude softening, set at read time)
         cls = type(self)
         attributes = [
             f.name

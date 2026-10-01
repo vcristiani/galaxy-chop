@@ -7,8 +7,8 @@
 import galaxychop as gchop
 from galaxychop.core.galaxy import ParticleSetType
 from galaxychop.models.core.decomposed_galaxy import (
-    DecomposedParticleSet,
     DecomposedGalaxy,
+    DecomposedParticleSet,
 )
 
 import numpy as np

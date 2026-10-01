@@ -41,21 +41,21 @@ pytestmark = pytest.mark.skipif(
 # =============================================================================
 
 
-def image_paths(func, format):
+def image_paths(func, img_format):
     idir = _image_directories(func)[-1]
     idir.mkdir(parents=True, exist_ok=True)
 
-    test = idir / f"{func.__name__}[{format}]-.{format}"
-    expected = idir / f"{func.__name__}[{format}]-expected.{format}"
+    test = idir / f"{func.__name__}[{img_format}]-.{img_format}"
+    expected = idir / f"{func.__name__}[{img_format}]-expected.{img_format}"
 
     return test, expected
 
 
-def assert_same_image(test_func, format, test_img, ref_img, **kwargs):
-    test_path, ref_path = image_paths(test_func, format)
+def assert_same_image(test_func, img_format, test_img, ref_img, **kwargs):
+    test_path, ref_path = image_paths(test_func, img_format)
 
-    test_img.savefig(test_path, format=format)
-    ref_img.savefig(ref_path, format=format)
+    test_img.savefig(test_path, format=img_format)
+    ref_img.savefig(ref_path, format=img_format)
 
     kwargs.setdefault("tol", 0)
     result = compare_images(test_path, ref_path, **kwargs)
@@ -201,8 +201,8 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
 # PLOTS =======================================================================
 @pytest.mark.plot
 @pytest.mark.slow
-@pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_pairplot(galaxy, format):
+@pytest.mark.parametrize("img_format", ["png"])
+def test_GalaxyPlotter_pairplot(galaxy, img_format):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
@@ -215,14 +215,14 @@ def test_GalaxyPlotter_pairplot(galaxy, format):
     )
 
     assert_same_image(
-        test_GalaxyPlotter_pairplot, format, test_grid, expected_grid
+        test_GalaxyPlotter_pairplot, img_format, test_grid, expected_grid
     )
 
 
 @pytest.mark.plot
 @pytest.mark.slow
-@pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
+@pytest.mark.parametrize("img_format", ["png"])
+def test_GalaxyPlotter_pairplot_external_labels(galaxy, img_format):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
@@ -240,7 +240,7 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, format):
 
     assert_same_image(
         test_GalaxyPlotter_pairplot_external_labels,
-        format,
+        img_format,
         test_grid,
         expected_grid,
     )
@@ -481,8 +481,8 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_lmap_callable(read_hdf5_galaxy):
 
 @pytest.mark.plot
 @pytest.mark.slow
-@pytest.mark.parametrize("format", ["png"])
-def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, format):
+@pytest.mark.parametrize("img_format", ["png"])
+def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, img_format):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
@@ -509,7 +509,7 @@ def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, format):
 
     assert_same_image(
         test_GalaxyPlotter_sdyn_pairplot,
-        format,
+        img_format,
         test_grid,
         expected_grid,
     )

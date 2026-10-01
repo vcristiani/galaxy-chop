@@ -15,8 +15,8 @@
 # =============================================================================
 
 from .decomposed_galaxy import (
-    DecomposedParticleSet,
     DecomposedGalaxy,
+    DecomposedParticleSet,
 )
 from .galaxy_decomposer_abc import GalaxyDecomposerABC, hparam
 

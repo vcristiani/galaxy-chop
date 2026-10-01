@@ -4,6 +4,11 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+# flake8: noqa: A005
+# This module is intentionally named `io`, mirroring the stdlib module it
+# is conceptually analogous to. It is always imported as `galaxychop.io`
+# and never shadows the real `io` module.
+
 # =============================================================================
 # DOCS
 # =============================================================================

@@ -27,11 +27,9 @@ import attr
 
 import numpy as np
 
-import pandas as pd
-
 import uttr
 
-from ...core import Galaxy, ParticleSet, ParticleSetType
+from ...core import Galaxy, ParticleSet
 
 
 # =============================================================================
@@ -72,10 +70,12 @@ class DecomposedParticleSet(ParticleSet):
         membership information. True for soft/fuzzy assignments (e.g., GMM),
         False for hard/deterministic assignments (e.g., k-means).
     probabilities : np.ndarray
-        2D array of membership probabilities. Shape: (n_particles, n_components).
-        For deterministic decompositions (has_probabilities=False), this contains
-        NaN values. For probabilistic decompositions, each row sums to ~1.0
-        and represents the probability of that particle belonging to each component.
+        2D array of membership probabilities.
+        Shape: (n_particles, n_components).
+        For deterministic decompositions (has_probabilities=False), this
+        contains NaN values. For probabilistic decompositions, each row
+        sums to ~1.0 and represents the probability of that particle
+        belonging to each component.
 
     Attributes
     ----------
@@ -161,8 +161,9 @@ class DecomposedParticleSet(ParticleSet):
             Shape: (n_particles, n_components). For deterministic
             decompositions, fill with NaN values.
         has_probabilities : bool
-            Whether the decomposition includes valid probabilistic information.
-            True for soft/probabilistic assignments, False for hard/deterministic.
+            Whether the decomposition includes valid probabilistic
+            information. True for soft/probabilistic assignments, False
+            for hard/deterministic.
 
         Returns
         -------
@@ -280,7 +281,8 @@ class DecomposedParticleSet(ParticleSet):
 
         Groups particles by their component labels and calculates both
         deterministic mass (based on hard component assignments) and,
-        if available, probabilistic mass (weighted by membership probabilities).
+        if available, probabilistic mass (weighted by membership
+        probabilities).
 
         **Deterministic Mass (m, mf):**
         Sums the masses of all particles assigned to each component,
@@ -298,8 +300,10 @@ class DecomposedParticleSet(ParticleSet):
 
             - 'm' (float): Deterministic total mass in M_sun units
             - 'mf' (float): Deterministic mass fraction (m / total_mass)
-            - 'pm' (float): Probabilistic total mass (only if has_probabilities=True)
-            - 'pmf' (float): Probabilistic mass fraction (only if has_probabilities=True)
+            - 'pm' (float): Probabilistic total mass
+              (only if has_probabilities=True)
+            - 'pmf' (float): Probabilistic mass fraction
+              (only if has_probabilities=True)
             - 'labels' (str): Human-readable component label (reset as column)
 
         Notes
@@ -307,9 +311,9 @@ class DecomposedParticleSet(ParticleSet):
         For deterministic decompositions, the probabilistic columns (pm, pmf)
         are not included in the output.
 
-        Probabilistic mass provides a more nuanced view of component masses,
-        especially useful when particles have ambiguous kinematics and significant
-        membership probabilities in multiple components.
+        Probabilistic mass provides a more nuanced view of component
+        masses, especially useful when particles have ambiguous kinematics
+        and significant membership probabilities in multiple components.
 
         Examples
         --------
@@ -333,7 +337,8 @@ class DecomposedParticleSet(ParticleSet):
         1          bulge     3.5e9    0.250    3.4e9    0.243
         2          halo      3.7e9    0.264    3.7e9    0.264
         """
-        # Create DataFrame with component assignments, labels, masses, and probabilities
+        # Create DataFrame with component assignments, labels, masses,
+        # and probabilities
         df = self.to_dataframe(
             attributes=["components", "labels", "m", "probabilities"]
         )
@@ -360,7 +365,8 @@ class DecomposedParticleSet(ParticleSet):
 
                     # Probabilistic mass: Σ(mass × probability)
                     prob_mass = (
-                        component_particles["m"] * component_particles[prob_column]
+                        component_particles["m"]
+                        * component_particles[prob_column]
                     ).sum()
                     prob_mass_fraction = prob_mass / pset_total_mass
 
@@ -403,9 +409,9 @@ class DecomposedParticleSet(ParticleSet):
             "labels": lambda: self.labels.copy(),
         }
         for i in range(self.probabilities_n):
-            component_makers[f"prob_{i}"] = (
-                lambda i=i: self.probabilities[:, i].copy()
-            )
+            component_makers[f"prob_{i}"] = lambda i=i: self.probabilities[
+                :, i
+            ].copy()
 
         value_makers.update(component_makers)
         return value_makers
@@ -536,17 +542,18 @@ class DecomposedGalaxy(Galaxy):
     gas : DecomposedParticleSet
         Gas particles with component assignments.
     method : str
-        Name of the decomposition method used (e.g., "JHistogram", "GaussianMixture").
-        Cannot be empty.
+        Name of the decomposition method used (e.g., "JHistogram",
+        "GaussianMixture"). Cannot be empty.
     component_name_mapping : dict
-        Dictionary mapping component indices (int) to human-readable names (str).
-        Example: {0: "disk", 1: "bulge", 2: "halo"}
+        Dictionary mapping component indices (int) to human-readable
+        names (str). Example: {0: "disk", 1: "bulge", 2: "halo"}
 
     Attributes
     ----------
     has_probabilities : bool
-        Whether the decomposition includes probabilistic membership information.
-        Derived from the particle sets; must be consistent across all three types.
+        Whether the decomposition includes probabilistic membership
+        information. Derived from the particle sets; must be consistent
+        across all three types.
     unique_components : set
         Set of unique component indices across all particles.
     unique_components_labels : set
@@ -617,9 +624,10 @@ class DecomposedGalaxy(Galaxy):
 
         if len(set(has_probs.values())) > 1:
             raise TypeError(
-                "Inconsistent probability configurations across particle sets. "
-                f"Found configurations: {has_probs}. All particle sets must have "
-                "the same probability setting (all True or all False)."
+                "Inconsistent probability configurations across particle "
+                f"sets. Found configurations: {has_probs}. All particle "
+                "sets must have the same probability setting (all True "
+                "or all False)."
             )
 
     def __repr__(self):
@@ -688,10 +696,12 @@ class DecomposedGalaxy(Galaxy):
 
     def total_mass(self):
         """
-        Calculate total mass and mass fraction for each component by particle type.
+        Calculate total mass and mass fraction for each component by
+        particle type.
 
-        Creates a hierarchical DataFrame with MultiIndex (ptype, label) containing
-        the total mass and mass fraction for each component within each particle type.
+        Creates a hierarchical DataFrame with MultiIndex (ptype, label)
+        containing the total mass and mass fraction for each component
+        within each particle type.
 
         Returns
         -------
@@ -781,8 +791,9 @@ class DecomposedGalaxy(Galaxy):
         """
         Extract HDF5 serialization data for this DecomposedGalaxy.
 
-        Returns metadata about the decomposed galaxy and DataFrames for each
-        particle type that should be persisted, including component information.
+        Returns metadata about the decomposed galaxy and DataFrames for
+        each particle type that should be persisted, including component
+        information.
 
         Returns
         -------

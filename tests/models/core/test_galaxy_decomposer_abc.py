@@ -101,8 +101,12 @@ def test__get_valid_stellar_mask():
 
     dec = Decomposer()
     X = np.array([[1.0], [np.nan]])
-    y = np.array([gchop.core.ParticleSetType.STARS.value,
-                  gchop.core.ParticleSetType.STARS.value])
+    y = np.array(
+        [
+            gchop.core.ParticleSetType.STARS.value,
+            gchop.core.ParticleSetType.STARS.value,
+        ]
+    )
 
     mask = dec._get_valid_stellar_mask(X, y, ["eps"])
     assert mask.shape == (2,)
@@ -123,18 +127,18 @@ def test_assign_components_and_probabilities():
     valid_mask = np.array([True, True])
 
     comp = dec._assign_components_to_all_particles(
-        X,
-        np.array([1, 2]), valid_mask
+        X, np.array([1, 2]), valid_mask
     )
     assert np.array_equal(comp, [1, 2])
 
     probs, has_probs = dec._assign_probabilities_to_all_particles(
-        X,
-        np.array([[0.1, 0.9], [0.8, 0.2]]), valid_mask
+        X, np.array([[0.1, 0.9], [0.8, 0.2]]), valid_mask
     )
     assert probs.shape == (2, 2)
     assert has_probs is True
 
-    probs_none, has_probs_none = dec._assign_probabilities_to_all_particles(X, None, valid_mask)
+    probs_none, has_probs_none = dec._assign_probabilities_to_all_particles(
+        X, None, valid_mask
+    )
     assert np.isnan(probs_none).all()
     assert has_probs_none is False
