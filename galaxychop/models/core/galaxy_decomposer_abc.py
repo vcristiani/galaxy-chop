@@ -611,7 +611,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # Assign component labels to all particles (NaN for non-stellar)
         full_component_assignment = self._assign_components_to_all_particles(
             X=X,
-            galactic_components=sorted(galactic_components),
+            galactic_components=galactic_components,
             valid_stellar_mask=valid_stellar_mask,
         )
         # Assign probabilities to all particles and get probabilistic flag
