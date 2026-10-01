@@ -57,7 +57,7 @@ if _APPLY_PATCH:
         """
         orig = _abc.GalaxyDecomposerABC._create_decomposed_particle_set
 
-        def patched(self, components_df, pset):
+        def patched(self, components_df, pset, has_probabilities):
             prob_cols = components_df.columns[
                 components_df.columns.str.startswith("prob_")
             ]
@@ -72,7 +72,7 @@ if _APPLY_PATCH:
             # Forzar copia para evitar arrays read-only en 3.9
             components_df = components_df.copy()
 
-            return orig(self, components_df, pset)
+            return orig(self, components_df, pset, has_probabilities)
 
         monkeypatch.setattr(
             _abc.GalaxyDecomposerABC,
