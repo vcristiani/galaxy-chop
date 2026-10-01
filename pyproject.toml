@@ -78,9 +78,6 @@ markers = [
 ]
 testpaths = ["tests"]
 
-[tool.setuptools.dynamic]
-version = { attr = "package.__version__" }
-
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
