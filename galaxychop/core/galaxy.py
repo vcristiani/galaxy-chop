@@ -342,7 +342,9 @@ class ParticleSet:
         def _make_elements(basename, value):
             dims = np.ndim(value)
             elems = OrderedDict()
-            if dims == 1:
+            if dims == 0:
+                elems[basename] = value
+            elif dims == 1:
                 elems[basename] = value
             elif dims == 2:
                 for idx, column in enumerate(value.T):

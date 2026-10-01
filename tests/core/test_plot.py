@@ -34,7 +34,7 @@ import seaborn as sns
 # los tests en 3.9
 pytestmark = pytest.mark.skipif(
     sys.version_info < (3, 10),
-    reason="Seaborn 0.11.x plotting is incompatible with Python 3.9"
+    reason="Seaborn 0.11.x plotting is incompatible with Python 3.9",
 )
 # =============================================================================
 # UTILITIES
@@ -136,6 +136,7 @@ def test_GalaxyPlotter_get_df_and_hue_labels_DecomposedParticleSet(galaxy):
         components=np.full(n, 100),
         labels=np.full(n, "foo"),
         probabilities=np.zeros((n, 1)),
+        has_probabilities=True,
     )
 
     df, hue = plotter.get_df_and_hue(
@@ -309,17 +310,18 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(read_hdf5_galaxy):
     cps = models.DecomposedParticleSet(
         ptype=gal.stars.ptype,
         m=np.random.random(size=len(circ.eps)),
-        x=gal.stars.x[:len(circ.eps)].copy(),
-        y=gal.stars.y[:len(circ.eps)].copy(),
-        z=gal.stars.z[:len(circ.eps)].copy(),
-        vx=gal.stars.vx[:len(circ.eps)].copy(),
-        vy=gal.stars.vy[:len(circ.eps)].copy(),
-        vz=gal.stars.vz[:len(circ.eps)].copy(),
+        x=gal.stars.x[: len(circ.eps)].copy(),
+        y=gal.stars.y[: len(circ.eps)].copy(),
+        z=gal.stars.z[: len(circ.eps)].copy(),
+        vx=gal.stars.vx[: len(circ.eps)].copy(),
+        vy=gal.stars.vy[: len(circ.eps)].copy(),
+        vz=gal.stars.vz[: len(circ.eps)].copy(),
         potential=None,
         softening=float(gal.stars.softening.value),
         components=np.full(len(circ.eps), 100),
         labels=circ.eps,
         probabilities=np.zeros((len(circ.eps), 1)),
+        has_probabilities=True,
     )
 
     df, hue = plotter.get_sdyn_df_and_hue(
