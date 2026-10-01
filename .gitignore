@@ -76,6 +76,8 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 .ipynb
+# Jupyter's default name for new, unsaved notebooks (stray scratch files)
+Untitled*.ipynb
 
 # pyenv
 .python-version
@@ -115,5 +117,7 @@ result_images/
 .mutmut-cache
 docs/source/_dynamic/*.rst
 docs/source/tutorials/gal394242.h5
+# Stray dataset dumps left at the repo root during manual testing
+/*.h5
 _skbuild/
 docs/source/_build/
