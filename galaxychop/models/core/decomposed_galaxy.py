@@ -401,8 +401,11 @@ class DecomposedParticleSet(ParticleSet):
         component_makers = {
             "components": lambda: self.components.copy(),
             "labels": lambda: self.labels.copy(),
-            "probabilities": lambda: self.probabilities.copy(),
         }
+        for i in range(self.probabilities_n):
+            component_makers[f"prob_{i}"] = (
+                lambda i=i: self.probabilities[:, i].copy()
+            )
 
         value_makers.update(component_makers)
         return value_makers

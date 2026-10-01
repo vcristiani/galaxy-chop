@@ -63,6 +63,7 @@ def test_DecomposedGalaxy_post_init_validations():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -79,6 +80,7 @@ def test_DecomposedGalaxy_post_init_validations():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -95,6 +97,7 @@ def test_DecomposedGalaxy_post_init_validations():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     # Método vacío
@@ -130,6 +133,7 @@ def test_DecomposedGalaxy_has_probabilities():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -146,6 +150,7 @@ def test_DecomposedGalaxy_has_probabilities():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -162,6 +167,7 @@ def test_DecomposedGalaxy_has_probabilities():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
@@ -197,6 +203,7 @@ def test_DecomposedGalaxy_unique_properties():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -213,6 +220,7 @@ def test_DecomposedGalaxy_unique_properties():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -229,6 +237,7 @@ def test_DecomposedGalaxy_unique_properties():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
@@ -265,6 +274,7 @@ def test_DecomposedGalaxy_copy():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -281,6 +291,7 @@ def test_DecomposedGalaxy_copy():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
@@ -297,6 +308,7 @@ def test_DecomposedGalaxy_copy():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
@@ -336,6 +348,7 @@ def test_DecomposedGalaxy_empty_method():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = DecomposedParticleSet(
@@ -352,6 +365,7 @@ def test_DecomposedGalaxy_empty_method():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -368,6 +382,7 @@ def test_DecomposedGalaxy_empty_method():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     with pytest.raises(ValueError, match="method cannot be empty"):
@@ -385,12 +400,14 @@ def make_galaxy(has_probs=True):
     labels = np.array(["disk", "halo", "disk", "halo"])
     probabilities = None
     if has_probs:
-        probabilities = np.array([
-            [0.8, 0.2],
-            [0.1, 0.9],
-            [0.7, 0.3],
-            [0.2, 0.8],
-        ])
+        probabilities = np.array(
+            [
+                [0.8, 0.2],
+                [0.1, 0.9],
+                [0.7, 0.3],
+                [0.2, 0.8],
+            ]
+        )
 
     softening_value = 0.1
 
@@ -406,35 +423,53 @@ def make_galaxy(has_probs=True):
 
     stars = DecomposedParticleSet(
         ptype=ParticleSetType.STARS,
-        m=m, x=x, y=y, z=z,
-        vx=vx, vy=vy, vz=vz,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
         potential=potential,
         softening=softening_value,
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=has_probs,
     )
 
     dark_matter = DecomposedParticleSet(
         ptype=ParticleSetType.DARK_MATTER,
-        m=m, x=x, y=y, z=z,
-        vx=vx, vy=vy, vz=vz,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
         potential=potential,
         softening=softening_value,
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=has_probs,
     )
 
     gas = DecomposedParticleSet(
         ptype=ParticleSetType.GAS,
-        m=m, x=x, y=y, z=z,
-        vx=vx, vy=vy, vz=vz,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
         potential=potential,
         softening=softening_value,
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=has_probs,
     )
 
     return DecomposedGalaxy(
@@ -497,6 +532,7 @@ def test_inconsistent_probabilities():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     try:
@@ -558,6 +594,7 @@ def test_DecomposedGalaxy_repr():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     dark_matter = DecomposedParticleSet(
@@ -574,6 +611,7 @@ def test_DecomposedGalaxy_repr():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -590,6 +628,7 @@ def test_DecomposedGalaxy_repr():
         components=components,
         labels=labels,
         probabilities=probabilities,
+        has_probabilities=True,
     )
 
     galaxy = DecomposedGalaxy(
@@ -605,6 +644,7 @@ def test_DecomposedGalaxy_repr():
         "probabilities=True, components=['disk', 'halo']>"
     )
     assert repr(galaxy) == expected_repr
+
 
 # =============================================================================
 # COMPONENTPARTICLESET
@@ -631,17 +671,15 @@ def test_DecomposedParticleSet():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     assert cps.has_probabilities is True
-    assert cps.probabilities_n == 1
+    assert cps.probabilities_n == 2
     assert (
         cps.get_value_makers()["components"]().tolist() == components.tolist()
     )
-    assert (
-        cps.get_value_makers()["labels"]().tolist() == labels.tolist()
-    )
+    assert cps.get_value_makers()["labels"]().tolist() == labels.tolist()
     assert (
         cps.get_value_makers()["prob_0"]().tolist()
         == probabilities[:, 0].tolist()
@@ -678,15 +716,19 @@ def test_DecomposedParticleSet_validations():
             components,
             labels,
             probabilities_invalid,
+            has_probabilities=True,
         )
 
     with pytest.raises(
-            ValueError,
-            match="galaxy length.*must match components length"
+        ValueError, match="galaxy length.*must match components length"
     ):
         components_invalid = np.array([0, 1])
         gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-            pset, components_invalid, labels, probabilities
+            pset,
+            components_invalid,
+            labels,
+            probabilities,
+            has_probabilities=True,
         )
 
 
@@ -710,7 +752,7 @@ def test_DecomposedParticleSet_from_pset():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     assert np.array_equal(cps.components, components)
@@ -742,13 +784,21 @@ def test_DecomposedParticleSet_post_init_validations():
     ):
         components_invalid = np.array([0, 1])
         gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-            pset, components_invalid, labels, probabilities
+            pset,
+            components_invalid,
+            labels,
+            probabilities,
+            has_probabilities=True,
         )
 
     with pytest.raises(ValueError, match="probabilities must be in the range"):
         probabilities_invalid = np.array([[1.2, -0.2], [0.1, 0.9], [0.7, 0.3]])
         gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-            pset, components, labels, probabilities_invalid
+            pset,
+            components,
+            labels,
+            probabilities_invalid,
+            has_probabilities=True,
         )
 
 
@@ -772,7 +822,7 @@ def test_DecomposedParticleSet_has_probabilities():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities_empty
+        pset, components, labels, probabilities_empty, has_probabilities=True
     )
 
     assert cps.has_probabilities is True
@@ -798,17 +848,13 @@ def test_DecomposedParticleSet_get_value_makers():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     value_makers = cps.get_value_makers()
 
-    assert (
-        value_makers["components"]().tolist() == components.tolist()
-    )
-    assert (
-        value_makers["labels"]().tolist() == labels.tolist()
-    )
+    assert value_makers["components"]().tolist() == components.tolist()
+    assert value_makers["labels"]().tolist() == labels.tolist()
 
     for i in range(cps.probabilities_n):
         assert (
@@ -837,7 +883,7 @@ def test_DecomposedParticleSet_copy():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     cps_copy = cps.copy()
@@ -847,15 +893,17 @@ def test_DecomposedParticleSet_copy():
     assert np.array_equal(cps_copy.probabilities, cps.probabilities)
 
     new_components = np.array([99, 1, 0, 1])
-    new_labels = np.array(
-        ["modified", "halo", "disk", "halo"]
-    )
+    new_labels = np.array(["modified", "halo", "disk", "halo"])
     new_probabilities = np.array(
         [[0.99, 0.01], [0.1, 0.9], [0.7, 0.3], [0.2, 0.8]]
     )
 
     cps_copy = DecomposedParticleSet.from_pset(
-        pset, new_components, new_labels, new_probabilities
+        pset,
+        new_components,
+        new_labels,
+        new_probabilities,
+        has_probabilities=True,
     )
 
     assert not np.array_equal(cps_copy.components, cps.components)
@@ -886,7 +934,11 @@ def test_DecomposedParticleSet_probabilities_validation():
 
     with pytest.raises(ValueError, match="probabilities must be in the range"):
         gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-            pset, components, labels, probabilities_invalid
+            pset,
+            components,
+            labels,
+            probabilities_invalid,
+            has_probabilities=True,
         )
 
 
@@ -910,17 +962,16 @@ def test_DecomposedParticleSet_read_only_arrays():
     )
 
     cps = DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     with pytest.raises(
-        ValueError,
-        match="assignment destination is read-only"
+        ValueError, match="assignment destination is read-only"
     ):
         cps.components[0] = 99
 
     with pytest.raises(
-            ValueError, match="assignment destination is read-only"
+        ValueError, match="assignment destination is read-only"
     ):
         cps.labels[0] = "modified"
 
@@ -950,7 +1001,7 @@ def test_DecomposedParticleSet_get_value_makers_probabilities():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     value_makers = cps.get_value_makers()
@@ -979,7 +1030,7 @@ def test_DecomposedParticleSet_copy_independence():
     )
 
     cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
-        pset, components, labels, probabilities
+        pset, components, labels, probabilities, has_probabilities=True
     )
 
     cps_copy = cps.copy()
