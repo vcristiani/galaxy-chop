@@ -696,8 +696,7 @@ class DecomposedGalaxy(Galaxy):
 
     def total_mass(self):
         """
-        Calculate total mass and mass fraction for each component by
-        particle type.
+        Calculate total mass and mass fraction per component, by particle type.
 
         Creates a hierarchical DataFrame with MultiIndex (ptype, label)
         containing the total mass and mass fraction for each component

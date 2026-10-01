@@ -167,7 +167,7 @@ _READ_HDF5_VERSIONS = {}
 
 
 def _register_read_hdf5(version):
-    """Decorator to register an HDF5 reader class for a format version."""
+    """Decorate and register an HDF5 reader class for a format version."""
 
     def dec(cls):
         _READ_HDF5_VERSIONS[version] = cls
@@ -346,7 +346,6 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
 
         Without decomposition information.
         """
-
         ds_and_soft = zip(
             [softening_s, softening_dm, softening_g],
             [stars_dataset, dark_matter_dataset, gas_dataset],
@@ -396,7 +395,6 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
 
         Including component probabilities.
         """
-
         method = gal_meta["method"]
         component_name_mapping = json.loads(gal_meta["component_name_mapping"])
 
