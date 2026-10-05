@@ -206,47 +206,8 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
-    def scatter(self, x, y, *, ptypes=None, labels=None, lmap=None, **kwargs):
-        """Draw a scatter plot of galaxy properties.
-
-        Shows the relationship between x and y. This function groups the values
-        of all galaxy particles according to some ``ParticleSet class``
-        parameter.
-
-        Parameters
-        ----------
-        x, y : keys of ``ParticleSet class`` parameters.
-            Variables that specify positions on the x and y axes.
-            Default value y = None.
-        ptypes : keys of ``ParticleSet class`` parameters.
-            Particle type. Default value = None
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dict
-            Name assignment to the label.
-            Default value = None
-        **kwargs
-            Additional keyword arguments are passed and are documented
-            in ``seaborn.scatterplot``.
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-        """
-        attributes = [x, y]
-        df, hue = self.get_df_and_hue(
-            ptypes=ptypes,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
-        )
-        kwargs.setdefault("marker", ".")
-        ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
-        return ax
-
     def hist(
-        self, x, *, y=None, ptypes=None, labels=None, lmap=None, **kwargs
+        self, x="x", *, y="z", ptypes=None, labels=None, lmap=None, **kwargs
     ):
         """Draw a histogram of galaxy properties.
 
@@ -258,7 +219,7 @@ class GalaxyPlotter:
         ----------
         x, y : keys of ``ParticleSet class`` parameters.
             Variables that specify positions on the x and y axes.
-            Default value y = None.
+            Default value y = 'z'.
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
         labels : keys of ``ParticleSet class`` parameters.
@@ -478,57 +439,11 @@ class GalaxyPlotter:
         ax = sns.pairplot(data=df, hue=hue, **kwargs)
         return ax
 
-    def sdyn_scatter(
-        self,
-        x,
-        y,
-        *,
-        labels=None,
-        lmap=None,
-        sdyn_kws=None,
-        **kwargs,
-    ):
-        """Draw a scatter plot of stellar dynamics.
-
-        Shows the relationship between x and y. This function groups the values
-        of stellar particles according to some keys of ``JCirc`` tuple.
-
-        Parameters
-        ----------
-        x, y : keys of ``JCirc`` tuple.
-            Variables that specify positions on the x and y axes.
-            Default value y = None.
-        labels : keys of ``JCirc`` tuple.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
-        sdyn_kws: dict
-            Extra parameters for galaxy.stellar_dynamics() method.
-        **kwargs
-            Additional keyword arguments are passed and are documented
-            in ``seaborn.scatterplot``.
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-        """
-        attributes = [x, y]
-        df, hue = self.get_sdyn_df_and_hue(
-            sdyn_kws=sdyn_kws,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
-        )
-        kwargs.setdefault("marker", ".")
-        ax = sns.scatterplot(x=x, y=y, data=df, hue=hue, **kwargs)
-        return ax
-
     def sdyn_hist(
         self,
-        x,
+        x="normalized_star_energy",
         *,
-        y=None,
+        y="eps",
         labels=None,
         lmap=None,
         sdyn_kws=None,
@@ -544,7 +459,7 @@ class GalaxyPlotter:
         ----------
         x, y : keys of ``JCirc`` tuple.
             Variables that specify positions on the x and y axes.
-            Default value y = None.
+            Default value y = 'eps'.
         labels : keys of ``JCirc`` tuple.
             Variable to map plot aspects to different colors.
             Default value = None

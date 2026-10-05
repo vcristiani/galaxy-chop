@@ -248,23 +248,6 @@ def test_GalaxyPlotter_pairplot_external_labels(galaxy, img_format):
 
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_scatter(galaxy, fig_test, fig_ref):
-    gal = galaxy(seed=42)
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    test_ax = fig_test.subplots()
-    plotter.scatter("x", "y", labels="ptype", ptypes=["gas"], ax=test_ax)
-
-    exp_ax = fig_ref.subplots()
-
-    df = gal.to_dataframe(
-        ptypes=["gas"], attributes=["x", "y", "ptype"]
-    ).sort_values("ptype")
-    sns.scatterplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax, marker=".")
-
-
-@pytest.mark.plot
-@check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
@@ -516,30 +499,6 @@ def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, img_format):
 
 
 @pytest.mark.plot
-@check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_sdyn_scatter(read_hdf5_galaxy, fig_test, fig_ref):
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    test_ax = fig_test.subplots()
-    plotter.sdyn_scatter("eps", "eps_r", ax=test_ax)
-
-    exp_ax = fig_ref.subplots()
-
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    df = pd.DataFrame({"eps": circ.eps[mask], "eps_r": circ.eps_r[mask]})
-    sns.scatterplot(x="eps", y="eps_r", data=df, ax=exp_ax, marker=".")
-    exp_ax.set_xlabel("eps")
-    exp_ax.set_ylabel("eps_r")
-
-
-@pytest.mark.plot
 @pytest.mark.slow
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
@@ -547,7 +506,7 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.sdyn_hist("eps", ax=test_ax)
+    plotter.sdyn_hist("eps", y=None, ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
