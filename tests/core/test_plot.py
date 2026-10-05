@@ -116,66 +116,20 @@ def test_GalaxyPlotter_call(galaxy, plot_kind):
 
 
 @pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_labels_DecomposedParticleSet(galaxy):
-    gal = galaxy(seed=42)
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    n = len(gal.stars)
-
-    cps = models.DecomposedParticleSet(
-        ptype=gal.stars.ptype,
-        m=np.random.random(size=n),
-        x=gal.stars.x.copy(),
-        y=gal.stars.y.copy(),
-        z=gal.stars.z.copy(),
-        vx=gal.stars.vx.copy(),
-        vy=gal.stars.vy.copy(),
-        vz=gal.stars.vz.copy(),
-        potential=None,
-        softening=float(gal.stars.softening.value),
-        components=np.full(n, 100),
-        labels=np.full(n, "foo"),
-        probabilities=np.zeros((n, 1)),
-        has_probabilities=True,
-    )
-
-    df, hue = plotter.get_df_and_hue(
-        ptypes=["stars"], attributes=None, labels=cps, lmap=None
-    )
-
-    assert (df[hue] == cps.labels).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_df_and_hue_labels_in_attributes(galaxy):
-    gal = galaxy(seed=42)
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="x", lmap=None
-    )
-
-    expected = np.sort(gal.to_dataframe(attributes=["x"]).x)
-    result = np.sort(df[hue])
-
-    assert (result == expected).all()
-
-
-@pytest.mark.plot
 def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
+    lmap = {"stars": "estrella", "dark_matter": "materia", "gas": "gas"}
 
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="ptype", lmap=lmap
-    )
+    df, style = plotter.get_df_and_hue(ptypes=None, attributes=None, lmap=lmap)
 
-    ptype = gal.to_dataframe(attributes=["ptype"]).sort_values("ptype").ptype
-    mapped = ptype.apply(lmap.get)
-
-    assert (df[hue] == mapped).all()
+    base = gal.to_dataframe(attributes=["ptype"]).ptype.map(lmap)
+    assert (df["ptype"].astype(str).to_numpy() == base.to_numpy()).all()
+    assert set(style["hue_order"]) == set(lmap.values())
+    assert style["palette"]["estrella"] == "black"
+    assert style["palette"]["gas"] == "#7f7f7f"
+    assert style["linestyles"]["gas"] == "--"
 
 
 @pytest.mark.plot
@@ -183,19 +137,20 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    lmap = {"stars": "S", "dark_matter": "DM", "gas": "G"}
-
     def lmap_func(label):
-        return lmap.get(label, label)
+        return label.upper()
 
-    df, hue = plotter.get_df_and_hue(
-        ptypes=None, attributes=None, labels="ptype", lmap=lmap_func
+    df, style = plotter.get_df_and_hue(
+        ptypes=None, attributes=None, lmap=lmap_func
     )
 
-    ptype = gal.to_dataframe(attributes=["ptype"]).sort_values("ptype").ptype
-    mapped = ptype.apply(lmap_func)
+    base = gal.to_dataframe(attributes=["ptype"]).ptype.map(lmap_func)
+    assert (df["ptype"].astype(str).to_numpy() == base.to_numpy()).all()
+    assert set(style["hue_order"]) == {"STARS", "GAS", "DARK_MATTER"}
 
-    assert (df[hue] == mapped).all()
+
+# Same fixed look the plotter uses for each particle type
+PTYPE_PALETTE = {"stars": "black", "gas": "#7f7f7f", "dark_matter": "#bdbdbd"}
 
 
 # PLOTS =======================================================================
@@ -209,40 +164,19 @@ def test_GalaxyPlotter_pairplot(galaxy, img_format):
     test_grid = plotter.pairplot(attributes=["x", "y"])
 
     # EXPECTED
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"]).sort_values("ptype")
+    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
     expected_grid = sns.pairplot(
-        data=df, hue="ptype", kind="hist", diag_kind="kde"
+        data=df,
+        hue="ptype",
+        hue_order=["dark_matter", "gas", "stars"],
+        palette=PTYPE_PALETTE,
+        kind="hist",
+        diag_kind="kde",
+        diag_kws={"fill": False},
     )
 
     assert_same_image(
         test_GalaxyPlotter_pairplot, img_format, test_grid, expected_grid
-    )
-
-
-@pytest.mark.plot
-@pytest.mark.slow
-@pytest.mark.parametrize("img_format", ["png"])
-def test_GalaxyPlotter_pairplot_external_labels(galaxy, img_format):
-    gal = galaxy(seed=42)
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
-    test_grid = plotter.pairplot(
-        attributes=df[["x", "y"]], labels=df.ptype.to_numpy()
-    )
-
-    # EXPECTED
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"]).sort_values("ptype")
-    df.columns = ["x", "y", "Labels"]
-    expected_grid = sns.pairplot(
-        data=df, hue="Labels", kind="hist", diag_kind="kde"
-    )
-
-    assert_same_image(
-        test_GalaxyPlotter_pairplot_external_labels,
-        img_format,
-        test_grid,
-        expected_grid,
     )
 
 
@@ -253,12 +187,20 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.hist("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.hist("x", y="y", ptypes=["gas"], ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
-    sns.histplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
+    sns.histplot(
+        data=df,
+        x="x",
+        y="y",
+        hue="ptype",
+        hue_order=["gas"],
+        palette=PTYPE_PALETTE,
+        ax=exp_ax,
+    )
 
 
 @pytest.mark.plot
@@ -269,12 +211,20 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.kde("x", y="y", labels="ptype", ptypes=["gas"], ax=test_ax)
+    plotter.kde("x", y="y", ptypes=["gas"], ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(ptypes=["gas"], attributes=["x", "y", "ptype"])
-    sns.kdeplot(data=df, x="x", y="y", hue="ptype", ax=exp_ax)
+    sns.kdeplot(
+        data=df,
+        x="x",
+        y="y",
+        fill=False,
+        color=PTYPE_PALETTE["gas"],
+        linestyles="--",
+        ax=exp_ax,
+    )
 
 
 # =============================================================================

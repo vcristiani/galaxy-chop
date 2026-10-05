@@ -18,6 +18,8 @@ from collections import OrderedDict
 
 import attr
 
+import matplotlib.pyplot as plt
+
 import numpy as np
 
 import pandas as pd
@@ -38,6 +40,16 @@ class GalaxyPlotter:
     _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
     _DEFAULT_HUE_COLUMN = "Labels"
     _DEFAULT_HUE_COUNT_COLUMN = "LabelsCnt"
+
+    # Fixed look of the galaxy particle types. Drawing order puts stars last,
+    # so they sit on top of the more diffuse components.
+    _PTYPE_ORDER = ("dark_matter", "gas", "stars")
+    _PTYPE_COLORS = {
+        "stars": "black",
+        "gas": "#7f7f7f",
+        "dark_matter": "#bdbdbd",
+    }
+    _PTYPE_LINESTYLES = {"stars": "-", "gas": "--", "dark_matter": ":"}
 
     _galaxy = attr.ib()
 
@@ -73,95 +85,57 @@ class GalaxyPlotter:
 
     # COMMON PLOTS ============================================================
 
-    def get_df_and_hue(self, ptypes, attributes, labels, lmap):
+    def get_df_and_hue(self, ptypes, attributes, lmap):
         """
-        Dataframe and Hue constructor for plot implementations.
+        Dataframe and style constructor for the galaxy plot implementations.
+
+        The hue is always the particle type. ``lmap`` renames particle types
+        for display (e.g. ``{"stars": "estrella"}``).
 
         Parameters
         ----------
         ptypes : keys of ``ParticleSet class`` parameters.
-            Particle type.
+            Particle type. Default value = None
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters.
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
-        lmap :  dicts
-            Name assignment to the label.
+        lmap : dict or callable
+            Name assignment to the particle types.
 
         Returns
         -------
         df : pandas.DataFrame
-            DataFrame of galaxy properties with labels added.
-        hue : keys of ``ParticleSet class`` parameters.
-            Labels of all galaxy particles.
+            DataFrame of galaxy properties with the particle type in the
+            ``ptype`` column (already renamed through ``lmap``).
+        style : dict
+            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
+            display names of the particle types present in ``df``.
         """
-        # if we use the components as labels we need to extract the labels
-        # and the lmap if lmap is None
-        if isinstance(
-            labels,
-            (
-                getattr(models, "Components", tuple),
-                models.DecomposedParticleSet,
-            ),
-        ):
-            if hasattr(labels, "lmap"):
-                lmap = labels.lmap if lmap is None else lmap
-            labels = labels.labels
-
         attributes = ["x", "y", "z"] if attributes is None else attributes
+        attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
 
-        hue = None  # by default labels is None
-
-        # labels: column used to map plot aspects to different colors (hue).
-        # if is a str and it was not in the attributes I have to take it out
-        # of the dataframe.
-        if isinstance(labels, str):
-            hue = labels
-            attributes = np.unique(list(attributes) + [labels])
-
-        # put all attributes in a df
         df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
 
-        # labels can be an np array and must be added as a column to the
-        # dataframe and assign hue to the name of this new column.
-        if hue is None and labels is not None:
-            hue = (
-                self._DEFAULT_HUE_COLUMN
-            )  # Hue is not in ParticleSet, so it is useful
-            df.insert(0, hue, labels)  # I place it as the first column
+        present = set(df["ptype"].unique())
+        names = {}
+        for ptype in self._PTYPE_ORDER:
+            if ptype in present:
+                if lmap is None:
+                    names[ptype] = ptype
+                elif isinstance(lmap, dict):
+                    names[ptype] = lmap.get(ptype, ptype)
+                else:
+                    names[ptype] = lmap(ptype)
 
-        if hue and lmap is not None:
-            lmap_func = (
-                (lambda label: lmap.get(label, label))
-                if isinstance(lmap, dict)
-                else lmap
-            )
-            df[hue] = df[hue].apply(lmap_func)
+        df["ptype"] = df["ptype"].map(names).astype("category")
 
-        # for consitency if we have a hue, we use the natural order
-        if hue is not None:
-            df[hue] = df[hue].astype("category")
+        style = {
+            "hue_order": list(names.values()),
+            "palette": {names[p]: self._PTYPE_COLORS[p] for p in names},
+            "linestyles": {names[p]: self._PTYPE_LINESTYLES[p] for p in names},
+        }
+        return df, style
 
-            hue_count = df[hue].value_counts()
-            df[self._DEFAULT_HUE_COUNT_COLUMN] = df[hue].map(hue_count)
-
-            df = df.sort_values(
-                by=self._DEFAULT_HUE_COUNT_COLUMN, ascending=True
-            )
-
-            del df[self._DEFAULT_HUE_COUNT_COLUMN]
-
-        return df, hue
-
-    def pairplot(
-        self,
-        *,
-        ptypes=None,
-        attributes=None,
-        labels="ptype",
-        lmap=None,
-        **kwargs,
-    ):
+    def pairplot(self, *, ptypes=None, attributes=None, lmap=None, **kwargs):
         """
         Draw a pairplot of the galaxy properties.
 
@@ -170,8 +144,7 @@ class GalaxyPlotter:
         single row and the x-axes across a single column. The diagonal
         plots drow a univariate distribution to show the marginal distribution
         of the data in each column.
-        This function groups the values of all galaxy particles according to
-        some ``ParticleSet class`` parameter.
+        The values are grouped by particle type (stars, gas and dark matter).
 
         Parameters
         ----------
@@ -179,11 +152,9 @@ class GalaxyPlotter:
             Particle type. Default value = None
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters. Default value = None
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dicts
-            Name assignment to the label.
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
             Default value = None
         **kwargs :
             Additional keyword arguments are passed and are documented in
@@ -193,40 +164,39 @@ class GalaxyPlotter:
         -------
         seaborn.axisgrid.PairGrid
         """
-        df, hue = self.get_df_and_hue(
-            ptypes=ptypes,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
+        df, style = self.get_df_and_hue(
+            ptypes=ptypes, attributes=attributes, lmap=lmap
         )
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
+        kwargs.setdefault("diag_kws", {"fill": False})
 
-        ax = sns.pairplot(data=df, hue=hue, **kwargs)
+        ax = sns.pairplot(
+            data=df,
+            hue="ptype",
+            hue_order=style["hue_order"],
+            palette=style["palette"],
+            **kwargs,
+        )
         return ax
 
-    def hist(
-        self, x="x", *, y="z", ptypes=None, labels=None, lmap=None, **kwargs
-    ):
+    def hist(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
         """Draw a histogram of galaxy properties.
 
         Plot univariate or bivariate histograms to show distributions of
-        datasets. This function groups the values of all galaxy particles
-        according to some ``ParticleSet class`` parameter.
+        the galaxy particles, grouped by particle type.
 
         Parameters
         ----------
         x, y : keys of ``ParticleSet class`` parameters.
             Variables that specify positions on the x and y axes.
-            Default value y = 'z'.
+            Default value y = 'z'. Use ``y=None`` for a univariate histogram.
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
-            Default value = None
-        lmap :  dicts
-            Name assignment to the label.
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
             Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
@@ -237,23 +207,26 @@ class GalaxyPlotter:
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_df_and_hue(
-            ptypes=ptypes,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
+        df, style = self.get_df_and_hue(
+            ptypes=ptypes, attributes=attributes, lmap=lmap
         )
-        ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        ax = sns.histplot(
+            x=x,
+            y=y,
+            data=df,
+            hue="ptype",
+            hue_order=style["hue_order"],
+            palette=style["palette"],
+            **kwargs,
+        )
         return ax
 
-    def kde(self, x, *, y=None, ptypes=None, labels=None, lmap=None, **kwargs):
+    def kde(self, x, *, y=None, ptypes=None, lmap=None, **kwargs):
         """Draw a Kernel Density plot of galaxy properties.
 
         Plot univariate or bivariate distributions using kernel density
-        estimation (KDE). This plot represents the galaxy properties using
-        a continuous probability density curve in one or more dimensions.
-        This function groups the values of all galaxy particles according
-        to some ``ParticleSet class`` parameter.
+        estimation (KDE), as unfilled contours or curves. Each particle type
+        has its own style: stars solid, gas dashed, dark matter dotted.
 
         Parameters
         ----------
@@ -262,27 +235,37 @@ class GalaxyPlotter:
             Default value y = None.
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
-        labels : keys of ``ParticleSet class`` parameters.
-            Variable to map plot aspects to different colors.
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
             Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
-            in ``seaborn.kdeplot``.
+            in ``seaborn.kdeplot``. ``ax`` and ``fill`` can be overridden.
 
         Returns
         -------
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_df_and_hue(
-            ptypes=ptypes,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
+        df, style = self.get_df_and_hue(
+            ptypes=ptypes, attributes=attributes, lmap=lmap
         )
-        ax = sns.kdeplot(x=x, y=y, data=df, hue=hue, **kwargs)
+
+        ax = kwargs.pop("ax", None)
+        ax = plt.gca() if ax is None else ax
+        kwargs.setdefault("fill", False)
+
+        # bivariate kde draws contours (linestyles), univariate draws curves
+        ls_key = "linestyle" if y is None else "linestyles"
+        for name in style["hue_order"]:
+            group = df[df["ptype"] == name]
+            group_kws = {
+                "color": style["palette"][name],
+                ls_key: style["linestyles"][name],
+            }
+            group_kws.update(kwargs)
+            sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
         return ax
 
     # CICULARITY ==============================================================
