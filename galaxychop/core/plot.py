@@ -85,6 +85,35 @@ class GalaxyPlotter:
 
     # COMMON PLOTS ============================================================
 
+    def _coerce_lmap(self, lmap):
+        """
+        Convert ``lmap`` into a callable that maps a label to its name.
+
+        Parameters
+        ----------
+        lmap : dict, callable or None
+            Name assignment to the labels. ``None`` keeps the labels as they
+            are, and a dict leaves the labels it doesn't contain unchanged.
+
+        Returns
+        -------
+        callable
+            Function that receives a label and returns its display name.
+
+        Raises
+        ------
+        TypeError
+            If ``lmap`` is not a dict, a callable or None.
+        """
+        if lmap is None:
+            return lambda label: label  # identity
+        elif isinstance(lmap, dict):
+            return lambda label: lmap.get(label, label)
+        elif not callable(lmap):
+            raise TypeError("'lmap' must be a dict, callable or None")
+
+        return lmap
+
     def get_df_and_hue(self, ptypes, attributes, lmap):
         """
         Dataframe and style constructor for the galaxy plot implementations.
@@ -115,16 +144,13 @@ class GalaxyPlotter:
 
         df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
 
+        lmap = self._coerce_lmap(lmap)
+
         present = set(df["ptype"].unique())
         names = {}
         for ptype in self._PTYPE_ORDER:
             if ptype in present:
-                if lmap is None:
-                    names[ptype] = ptype
-                elif isinstance(lmap, dict):
-                    names[ptype] = lmap.get(ptype, ptype)
-                else:
-                    names[ptype] = lmap(ptype)
+                names[ptype] = lmap(ptype)
 
         df["ptype"] = df["ptype"].map(names).astype("category")
 
@@ -342,19 +368,14 @@ class GalaxyPlotter:
             # if the labels are passed to me as an array,
             # I only delete the nans and inf.
             labels = np.asarray(labels)
-            labels = labels[np.isfinite(labels)]
+            labels = labels[mask]
             hue = self._DEFAULT_HUE_COLUMN
 
             # I place it as the first column
             df.insert(0, hue, labels)
 
         if hue and lmap is not None:
-            lmap_func = (
-                (lambda label: lmap.get(label, label))
-                if isinstance(lmap, dict)
-                else lmap
-            )
-            df[hue] = df[hue].apply(lmap_func)
+            df[hue] = df[hue].apply(self._coerce_lmap(lmap))
 
         # for consitency if we have a hue, we use the natural order
         if hue is not None:

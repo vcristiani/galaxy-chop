@@ -269,9 +269,12 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(read_hdf5_galaxy):
         & np.isfinite(circ.eps)
         & np.isfinite(circ.eps_r)
     )
-    expected = np.sort(circ.eps[mask])
-    result = np.sort(df[hue])
-    assert (result == expected).all()
+    # DecomposedParticleSet stores labels as strings; since the labels
+    # are eps, each row's label must match that same row's eps column
+    assert len(df) == mask.sum()
+    expected = np.asarray(df["eps"]).astype(str)
+    result = np.asarray(df[hue], dtype=str)
+    np.testing.assert_array_equal(result, expected)
 
 
 @pytest.mark.plot
