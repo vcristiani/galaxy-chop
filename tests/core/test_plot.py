@@ -164,7 +164,9 @@ def test_GalaxyPlotter_pairplot(galaxy, img_format):
     test_grid = plotter.pairplot(attributes=["x", "y"])
 
     # EXPECTED
-    df = gal.to_dataframe(attributes=["x", "y", "ptype"])
+    df = gal.to_dataframe(
+        attributes=["x", "y", "ptype"], circular_velocity=False
+    )
     expected_grid = sns.pairplot(
         data=df,
         hue="ptype",

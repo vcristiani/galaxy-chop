@@ -70,9 +70,64 @@ class ParticleSetType(enum.IntEnum):
                 return p
         raise ValueError(f"Can't coerce {v} into ParticleSetType ")
 
+    @property
+    def emoji(self):
+        """A single emoji representing this particle type."""
+        emojis = {
+            self.STARS: "⭐",
+            self.DARK_MATTER: "⚫​",
+            self.GAS: "💨",
+        }
+        return emojis[self]
+
     def humanize(self):
         """Particle type name in lower case."""
         return self.name.lower()
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def _circular_velocity(mass, radius):
+    """
+    Circular velocity from the mass enclosed within each radius.
+
+    Sorts ``mass`` by ``radius``, accumulates it, and returns
+    sqrt(G * M(<r) / r) for every input element, in the original order.
+    Particles at radius 0 get NaN (the enclosed mass there is singular).
+
+    Parameters
+    ----------
+    mass : np.ndarray(n)
+        Particle masses, in M_sun.
+    radius : np.ndarray(n)
+        Distance of each particle to the origin, in kpc.
+
+    Returns
+    -------
+    np.ndarray(n)
+        Circular velocity in km/s, in the same order as the inputs.
+
+    Notes
+    -----
+    If ``mass`` and ``radius`` have different lengths, this returns NaNs
+    instead of raising, so a caller validating lengths elsewhere can raise
+    its own, clearer error.
+    """
+    if len(mass) != len(radius):
+        return np.full(len(radius), np.nan)
+
+    order = np.argsort(radius)
+    enclosed_mass = np.cumsum(mass[order])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        vcirc = np.sqrt(const.G * enclosed_mass / radius[order])
+    vcirc[radius[order] == 0] = np.nan
+
+    result = np.empty_like(vcirc)
+    result[order] = vcirc
+    return result
 
 
 # =============================================================================
@@ -112,6 +167,10 @@ class ParticleSet:
     Jx_, Jy_, Jz_ : Quantity
         Components of angular momentum of particles. Shapes: (n,1). Default
         units: kpc*km/s.
+    radius_ : Quantity
+        Distance of each particle to the origin. Shape: (n,1). Default
+        unit: kpc. See ``Galaxy.circular_velocity_`` for the circular
+        velocity computed from the mass enclosed within the whole galaxy.
     has_potential_ : bool.
         Indicates if the specific potential energy is computed.
     arr_ : Instances of ``ArrayAccessor``
@@ -160,6 +219,8 @@ class ParticleSet:
     Jy_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
+    radius_: np.ndarray = uttr.ib(unit=u.kpc, init=False)
+
     # INITIALIZATION ==========================================================
 
     @has_potential_.default
@@ -197,6 +258,11 @@ class ParticleSet:
     def _Jz__default(self):
         arr = self.arr_
         return arr.x * arr.vy - arr.y * arr.vx  # z
+
+    @radius_.default
+    def _radius__default(self):
+        arr = self.arr_
+        return np.sqrt(arr.x**2 + arr.y**2 + arr.z**2)
 
     def __attrs_post_init__(self):
         """
@@ -239,6 +305,16 @@ class ParticleSet:
             f"<{cls_name} {self.ptype.name!r}, size={len(self)}, "
             f"softening={self.softening.value}, "
             f"potentials={self.has_potential_}>"
+        )
+
+    def _repr_html_(self):
+        """HTML repr(x), used by Jupyter/IPython notebooks."""
+        cls_name = type(self).__name__
+        return (
+            f"<p>{self.ptype.emoji} <b>{cls_name}</b> "
+            f"{self.ptype.name!r}, size={len(self)}, "
+            f"softening={self.softening.value}, "
+            f"potentials={self.has_potential_}</p>"
         )
 
     def __len__(self):
@@ -293,6 +369,7 @@ class ParticleSet:
             - ``kinetic_energy`` : kinetic energy per particle.
             - ``total_energy``: total energy per particle (NaN if unavailable).
             - ``Jx``, ``Jy``, ``Jz`` : angular momentum components.
+            - ``radius`` : distance to the origin.
         """
         arr = self.arr_
         value_makers = {
@@ -320,6 +397,7 @@ class ParticleSet:
             "Jx": lambda: arr.Jx_,
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
+            "radius": lambda: arr.radius_,
         }
         return value_makers
 
@@ -488,6 +566,11 @@ class Galaxy:
     is_centered_ : bool.
         Indicates if this Galaxy instance has been already centered i.e.
         the most bound particle defines the origin of the system.
+    circular_velocity_ : tuple of Quantity
+        (v_s, v_dm, v_g): circular velocity of stars, dark matter and gas
+        particles, from the mass enclosed within the whole galaxy. Computed
+        once at construction time. Unit: km/s. See the
+        ``circular_velocity_`` property docs below for details.
 
     """
 
@@ -498,6 +581,7 @@ class Galaxy:
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
     has_potential_ = attr.ib(init=False)
+    circular_velocity_ = attr.ib(init=False)
 
     # INITIALIZATION ==========================================================
 
@@ -518,6 +602,34 @@ class Galaxy:
                 f"Found: {has_pot}"
             )
         return self.stars.has_potential_
+
+    @circular_velocity_.default
+    def _circular_velocity__default(self):
+        # circular velocity from the mass enclosed within the whole galaxy:
+        # pools the mass of stars, dark matter and gas together before
+        # accumulating it by radius (sqrt(G * M(<r) / r)), computed once
+        # here since the galaxy is immutable.
+
+        # plain-array accessor for each particle set (units already applied)
+        arr_s, arr_dm, arr_g = (
+            self.stars.arr_,
+            self.dark_matter.arr_,
+            self.gas.arr_,
+        )
+
+        # offsets to split the pooled arrays back into stars/dm/gas
+        n_s = len(arr_s.m)
+        n_sdm = n_s + len(arr_dm.m)
+
+        # pool every particle's mass and radius, regardless of type
+        mass = np.concatenate([arr_s.m, arr_dm.m, arr_g.m])
+        radius = np.concatenate([arr_s.radius_, arr_dm.radius_, arr_g.radius_])
+
+        # circular velocity from the mass enclosed by the whole galaxy
+        vcirc = _circular_velocity(mass, radius) * (u.km / u.s)
+
+        # split the pooled result back into one array per particle type
+        return (vcirc[:n_s], vcirc[n_s:n_sdm], vcirc[n_sdm:])
 
     def __attrs_post_init__(self):
         """Validate that the type of each particleset is correct."""
@@ -549,6 +661,57 @@ class Galaxy:
         has_pot = f"potential={self.has_potential_}"
         return (
             f"<{cls_name} {stars_repr}, {dm_repr}, " f"{gas_repr}, {has_pot}>"
+        )
+
+    def _repr_html_(self):
+        """Rich HTML representation, used by Jupyter/IPython notebooks."""
+        # class name for the header
+        cls_name = type(self).__name__
+
+        # one row per particle type: display name (with emoji), particle
+        # count and total mass
+        rows = (
+            (
+                f"Stars {self.stars.ptype.emoji}",
+                len(self.stars),
+                self.stars.total_mass(),
+            ),
+            (
+                f"Dark matter {self.dark_matter.ptype.emoji}",
+                len(self.dark_matter),
+                self.dark_matter.total_mass(),
+            ),
+            (
+                f"Gas {self.gas.ptype.emoji}",
+                len(self.gas),
+                self.gas.total_mass(),
+            ),
+        )
+
+        # render the rows as an HTML table body
+        rows_html = "".join(
+            f"<tr><td>{name}</td><td>{n:,}</td><td>{m.value:.3e}</td></tr>"
+            for name, n, m in rows
+        )
+
+        # whether the potential energy is computed, and the mass unit
+        # (all three particle sets share the same one) as LaTeX for the
+        # table header
+        has_pot = "yes" if self.has_potential_ else "no"
+        m_unit = self.stars.m.unit._repr_latex_()
+
+        # assemble the final HTML
+        return (
+            "<div>"
+            f"<p><b>🌌 {cls_name}</b> &mdash; {len(self):,} particles</p>"
+            "<table>"
+            "<thead><tr>"
+            f"<th>Type</th><th>Particles</th><th>{m_unit}</th>"
+            "</tr></thead>"
+            f"<tbody>{rows_html}</tbody>"
+            "</table>"
+            f"<p><b>Potential computed:</b> {has_pot.title()}</p>"
+            "</div>"
         )
 
     # PROPERTIES ==============================================================
@@ -694,6 +857,30 @@ class Galaxy:
             self.gas.angular_momentum_,
         )
 
+    @property
+    def radius_(self):
+        """
+        Distance of each particle to the origin.
+
+        Returns
+        -------
+        tuple : Quantity
+            (r_s, r_dm, r_g): Distance to the origin of stars, dark matter
+            and gas particles respectively. Shape(n_s, n_dm, n_g).
+            Unit: kpc
+
+        Examples
+        --------
+        >>> import galaxychop as gchop
+        >>> galaxy = gchop.Galaxy(...)
+        >>> r_s, r_dm, r_g = galaxy.radius_
+        """
+        return (
+            self.stars.radius_,
+            self.dark_matter.radius_,
+            self.gas.radius_,
+        )
+
     # PUBLIC METHODS ==========================================================
 
     def total_mass(self):
@@ -730,7 +917,13 @@ class Galaxy:
         ]
         return pd.DataFrame(data, index=index)
 
-    def to_dataframe(self, *, ptypes=None, attributes=None, sdynamics=True):
+    def to_dataframe(
+        self,
+        *,
+        ptypes=None,
+        attributes=None,
+        circular_velocity=True,
+    ):
         """
         Convert the galaxy to pandas DataFrame.
 
@@ -745,6 +938,10 @@ class Galaxy:
             Dictionary keys of ParticleSet parameters used to create the data
             frame. If it's None, the data frame is constructed from all the
             parameters of the ``ParticleSet class``.
+        circular_velocity: bool, default value = True
+            Whether to add the ``circular_velocity`` column (see
+            ``Galaxy.circular_velocity_``). It can't be computed by a
+            single ``ParticleSet``, so it isn't governed by ``attributes``.
 
         Return
         ------
@@ -755,12 +952,18 @@ class Galaxy:
         psets = [self.stars, self.dark_matter, self.gas]
 
         parts = []
-        for pset in psets:
+        vcirc_parts = []
+        for pset, vcirc in zip(psets, self.circular_velocity_):
             if ptypes is None or pset.ptype.humanize() in ptypes:
                 df = pset.to_dataframe(attributes=attributes)
                 parts.append(df)
+                if circular_velocity:
+                    vcirc_parts.append(vcirc.to_value())
 
-        return pd.concat(parts, ignore_index=True)
+        result = pd.concat(parts, ignore_index=True)
+        if circular_velocity:
+            result["circular_velocity"] = np.concatenate(vcirc_parts)
+        return result
 
     def to_hdf5(self, path_or_stream, *, metadata=None, **kwargs):
         """
@@ -792,7 +995,7 @@ class Galaxy:
             **kwargs,
         )
 
-    def to_dict(self, *, ptypes=None, attributes=None):
+    def to_dict(self, *, ptypes=None, attributes=None, circular_velocity=True):
         """
         Convert the galaxy to dict with information as a numpy array with \
         coerced units.
@@ -806,6 +1009,11 @@ class Galaxy:
             Dictionary keys of ParticleSet parameters used to create the dict.
             If it's None, the data frame is constructed from all the
             parameters of the ``ParticleSet class``.
+        circular_velocity: bool, default value = True
+            Whether to add ``circular_velocity`` to each particle type's
+            dict (see ``Galaxy.circular_velocity_``). It can't be computed
+            by a single ``ParticleSet``, so it isn't governed by
+            ``attributes``.
 
         Return
         ------
@@ -817,10 +1025,12 @@ class Galaxy:
         psets = [self.stars, self.dark_matter, self.gas]
 
         the_dict = {}
-        for pset in psets:
+        for pset, vcirc in zip(psets, self.circular_velocity_):
             ptype = pset.ptype.humanize()
             if ptypes is None or ptype in ptypes:
                 p_dict = pset.to_dict(attributes=attributes)
+                if circular_velocity:
+                    p_dict["circular_velocity"] = vcirc.to_value()
                 the_dict[ptype] = p_dict
 
         return the_dict
@@ -857,7 +1067,9 @@ class Galaxy:
                 the_flatten_dict[flat_k] = flat_v
             return the_flatten_dict
 
-        the_dict = self.to_dict(attributes=attributes.keys())
+        the_dict = self.to_dict(
+            attributes=attributes.keys(), circular_velocity=False
+        )
         stars_kws = _flat(the_dict["stars"], "s")
         dark_matter_kws = _flat(the_dict["dark_matter"], "dm")
         gas_kws = _flat(the_dict["gas"], "g")

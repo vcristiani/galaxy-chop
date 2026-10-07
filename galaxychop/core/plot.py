@@ -136,7 +136,9 @@ class GalaxyPlotter:
         attributes = ["x", "y", "z"] if attributes is None else attributes
         attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
 
-        df = self._galaxy.to_dataframe(ptypes=ptypes, attributes=attributes)
+        df = self._galaxy.to_dataframe(
+            ptypes=ptypes, attributes=attributes, circular_velocity=False
+        )
 
         lmap = self._coerce_lmap(lmap)
 

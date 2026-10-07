@@ -207,7 +207,7 @@ def get_radius_half_mass(galaxy, particle="stars"):
     """
     if particle in ["", "all", None, False]:
         # We convert the particles into a dataframe
-        df = galaxy.to_dataframe()
+        df = galaxy.to_dataframe(circular_velocity=False)
     else:
         particle_type = core.ParticleSetType.mktype(particle)
         particle_type = core.ParticleSetType.humanize(particle_type)

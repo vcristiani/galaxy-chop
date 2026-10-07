@@ -56,6 +56,8 @@ def test_star_align_rcur0dot9(galaxy):
         "Jx",
         "Jy",
         "Jz",
+        "radius",
+        "circular_velocity",
         "kinetic_energy",
         "total_energy",
     ]
@@ -99,6 +101,8 @@ def test_star_align(galaxy):
         "Jx",
         "Jy",
         "Jz",
+        "radius",
+        "circular_velocity",
         "kinetic_energy",
         "total_energy",
     ]

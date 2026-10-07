@@ -342,7 +342,8 @@ class DecomposedParticleSet(ParticleSet):
         # Create DataFrame with component assignments, labels, masses,
         # and probabilities
         df = self.to_dataframe(
-            attributes=["components", "labels", "m", "probabilities"]
+            attributes=["components", "labels", "m", "probabilities"],
+            circular_velocity=False,
         )
         # Replace NaN component values with a placeholder for grouping
         df["components"] = df["components"].fillna(NAN_STR_REPR)
@@ -674,7 +675,9 @@ class DecomposedGalaxy(Galaxy):
         set
             A set of unique component indices.
         """
-        df = self.to_dataframe(attributes=["components"])
+        df = self.to_dataframe(
+            attributes=["components"], circular_velocity=False
+        )
         components_list = df["components"].unique().tolist()
         the_unique_components = set(sorted(components_list))
         return the_unique_components
@@ -689,7 +692,7 @@ class DecomposedGalaxy(Galaxy):
         set
             A set of unique component labels.
         """
-        df = self.to_dataframe(attributes=["labels"])
+        df = self.to_dataframe(attributes=["labels"], circular_velocity=False)
         labels_list = df["labels"].unique().tolist()
         the_unique_labels = set(sorted(labels_list))
         return the_unique_labels

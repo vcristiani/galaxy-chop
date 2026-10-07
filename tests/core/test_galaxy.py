@@ -208,6 +208,8 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
         softening=soft,
         potential=pot,
     )
+    radius = np.sqrt(x**2 + y**2 + z**2)
+
     expected = pd.DataFrame(
         {
             "ptype": core.ParticleSetType.STARS.humanize(),
@@ -230,6 +232,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "Jx": y * vz - z * vy,
             "Jy": z * vx - x * vz,
             "Jz": x * vy - y * vx,
+            "radius": radius,
         }
     )
     df = pset.to_dataframe()
@@ -818,11 +821,26 @@ def assert_pset_dict_equals(result, expected):
 
 def test_Galaxy_to_dict(galaxy):
     gal = galaxy()
-    gal_dict = gal.to_dict()
+    gal_dict = gal.to_dict(circular_velocity=False)
 
     assert_pset_dict_equals(gal_dict["stars"], gal.stars.to_dict())
     assert_pset_dict_equals(gal_dict["dark_matter"], gal.dark_matter.to_dict())
     assert_pset_dict_equals(gal_dict["gas"], gal.gas.to_dict())
+
+
+def test_Galaxy_to_dict_circular_velocity(galaxy):
+    gal = galaxy()
+    v_s, v_dm, v_g = gal.circular_velocity_
+
+    gal_dict = gal.to_dict()
+    assert np.array_equal(gal_dict["stars"]["circular_velocity"], v_s.value)
+    assert np.array_equal(
+        gal_dict["dark_matter"]["circular_velocity"], v_dm.value
+    )
+    assert np.array_equal(gal_dict["gas"]["circular_velocity"], v_g.value)
+
+    gal_dict = gal.to_dict(circular_velocity=False)
+    assert "circular_velocity" not in gal_dict["stars"]
 
 
 # =============================================================================

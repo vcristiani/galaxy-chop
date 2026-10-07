@@ -97,7 +97,8 @@ def center(galaxy, with_potential=True):
                 "vz",
                 "potential",
                 "m",
-            ]
+            ],
+            circular_velocity=False,
         )
 
         cond = df["ptypev"].eq(0)
@@ -118,7 +119,8 @@ def center(galaxy, with_potential=True):
     else:
         # We use only positions and mass
         df = galaxy.to_dataframe(
-            attributes=["ptypev", "x", "y", "z", "vx", "vy", "vz", "m"]
+            attributes=["ptypev", "x", "y", "z", "vx", "vy", "vz", "m"],
+            circular_velocity=False,
         )
 
         # Using only stars (account the gas and dark matter particles
@@ -222,7 +224,8 @@ def is_centered(galaxy, *, rtol=1e-05, atol=1e-08):
         raise ValueError("Galaxy must have the potential energy.")
 
     df = galaxy.to_dataframe(
-        attributes=["x", "y", "z", "vx", "vy", "vz", "potential"]
+        attributes=["x", "y", "z", "vx", "vy", "vz", "potential"],
+        circular_velocity=False,
     )
 
     # minimum potential index of all particles and we extract data frame row
