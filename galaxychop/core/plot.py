@@ -393,6 +393,7 @@ class GalaxyPlotter:
             group_kws = {
                 "color": style["palette"][name],
                 ls_key: style["linestyles"][name],
+                "label": name,
             }
             group_kws.update(kwargs)
             sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
@@ -400,6 +401,7 @@ class GalaxyPlotter:
         self._add_units_to_labels(ax, x, y)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
+        ax.legend()
         return ax
 
     def rotation_curve(self, *, ptypes=None, galaxy=True, lmap=None, **kwargs):
@@ -483,6 +485,8 @@ class GalaxyPlotter:
 
         kms = (u.km / u.s).to_string("latex")
         ax.set_ylabel(f"circular velocity [{kms}]")
+
+        ax.set_yscale("log")
 
         ax.legend()
 
@@ -603,6 +607,7 @@ class GalaxyPlotter:
         df, style = self.get_sdyn_df_and_hue(
             sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
+        kwargs.setdefault("legend", False)
         ax = sns.histplot(
             x=x,
             y=y,

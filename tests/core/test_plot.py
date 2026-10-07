@@ -201,6 +201,7 @@ def test_GalaxyPlotter_kde2d(galaxy, fig_test, fig_ref):
         fill=False,
         color=PTYPE_PALETTE["gas"],
         linestyles="--",
+        label="gas",
         ax=exp_ax,
     )
     kpc = u.kpc.to_string("latex")
@@ -208,6 +209,7 @@ def test_GalaxyPlotter_kde2d(galaxy, fig_test, fig_ref):
     exp_ax.set_ylabel(f"y [{kpc}]")
     _zoom(exp_ax, df, "x", "y")
     exp_ax.set_box_aspect(1)
+    exp_ax.legend()
 
 
 @pytest.mark.plot
@@ -264,6 +266,7 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
     )
     exp_ax.set_xlabel(f"radius [{u.kpc.to_string('latex')}]")
     exp_ax.set_ylabel(f"circular velocity [{(u.km / u.s).to_string('latex')}]")
+    exp_ax.set_yscale("log")
     exp_ax.legend()
 
 
@@ -296,6 +299,7 @@ def test_GalaxyPlotter_rotation_curve_no_galaxy(galaxy, fig_test, fig_ref):
     )
     exp_ax.set_xlabel(f"radius [{u.kpc.to_string('latex')}]")
     exp_ax.set_ylabel(f"circular velocity [{(u.km / u.s).to_string('latex')}]")
+    exp_ax.set_yscale("log")
     exp_ax.legend()
 
 
@@ -405,6 +409,7 @@ def test_GalaxyPlotter_sdyn_hist2d(read_hdf5_galaxy, fig_test, fig_ref):
         hue="ptype",
         hue_order=["stars"],
         palette=PTYPE_PALETTE,
+        legend=False,
         ax=exp_ax,
     )
     _zoom(exp_ax, df, "eps")
