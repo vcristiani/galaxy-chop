@@ -19,6 +19,7 @@ from astropy import units as u
 import attr
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 import numpy as np
 
@@ -401,7 +402,23 @@ class GalaxyPlotter:
         self._add_units_to_labels(ax, x, y)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
-        ax.legend()
+        if y is None:
+            # univariate: real Line2D curves, label= works out of the box
+            ax.legend()
+        else:
+            # bivariate: contour sets don't register their label with
+            # matplotlib's legend, so build proxy handles by hand
+            handles = [
+                Line2D(
+                    [],
+                    [],
+                    color=style["palette"][name],
+                    linestyle=style["linestyles"][name],
+                    label=name,
+                )
+                for name in style["hue_order"]
+            ]
+            ax.legend(handles=handles)
         return ax
 
     def rotation_curve(self, *, ptypes=None, galaxy=True, lmap=None, **kwargs):
@@ -607,7 +624,6 @@ class GalaxyPlotter:
         df, style = self.get_sdyn_df_and_hue(
             sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
-        kwargs.setdefault("legend", False)
         ax = sns.histplot(
             x=x,
             y=y,
@@ -699,10 +715,25 @@ class GalaxyPlotter:
             "fill": False,
             "color": style["palette"][name],
             ls_key: style["linestyles"][name],
+            "label": name,
         }
         kde_kws.update(kwargs)
 
         ax = sns.kdeplot(data=df, x=x, y=y, **kde_kws)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
+        if y is None:
+            # univariate: a real Line2D curve, label= works out of the box
+            ax.legend()
+        else:
+            # bivariate: contour sets don't register their label with
+            # matplotlib's legend, so build a proxy handle by hand
+            handle = Line2D(
+                [],
+                [],
+                color=style["palette"][name],
+                linestyle=style["linestyles"][name],
+                label=name,
+            )
+            ax.legend(handles=[handle])
         return ax

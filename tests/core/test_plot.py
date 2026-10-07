@@ -17,6 +17,7 @@ from astropy import units as u
 
 from galaxychop import core
 
+from matplotlib.lines import Line2D
 from matplotlib.testing.decorators import check_figures_equal
 
 import numpy as np
@@ -209,7 +210,15 @@ def test_GalaxyPlotter_kde2d(galaxy, fig_test, fig_ref):
     exp_ax.set_ylabel(f"y [{kpc}]")
     _zoom(exp_ax, df, "x", "y")
     exp_ax.set_box_aspect(1)
-    exp_ax.legend()
+    # bivariate kde: contour sets don't register their label, so the real
+    # implementation builds a proxy handle by hand
+    exp_ax.legend(
+        handles=[
+            Line2D(
+                [], [], color=PTYPE_PALETTE["gas"], linestyle="--", label="gas"
+            )
+        ]
+    )
 
 
 @pytest.mark.plot
@@ -409,7 +418,6 @@ def test_GalaxyPlotter_sdyn_hist2d(read_hdf5_galaxy, fig_test, fig_ref):
         hue="ptype",
         hue_order=["stars"],
         palette=PTYPE_PALETTE,
-        legend=False,
         ax=exp_ax,
     )
     _zoom(exp_ax, df, "eps")
@@ -450,10 +458,12 @@ def test_GalaxyPlotter_sdyn_kde2d(read_hdf5_galaxy, fig_test, fig_ref):
         fill=False,
         color=PTYPE_PALETTE["stars"],
         linestyle="-",
+        label="stars",
         ax=exp_ax,
     )
     _zoom(exp_ax, df, "eps")
     exp_ax.set_box_aspect(1)
+    exp_ax.legend()
 
 
 @pytest.mark.plot
