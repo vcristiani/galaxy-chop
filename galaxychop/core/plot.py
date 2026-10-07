@@ -14,8 +14,6 @@
 # IMPORTS
 # =============================================================================
 
-from collections import OrderedDict
-
 import attr
 
 import matplotlib.pyplot as plt
@@ -26,8 +24,6 @@ import pandas as pd
 
 import seaborn as sns
 
-from .. import models
-
 # =============================================================================
 # ACCESSOR
 # =============================================================================
@@ -37,9 +33,7 @@ from .. import models
 class GalaxyPlotter:
     """Make plots of a Galaxy."""
 
-    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_circ_df_and_hue")
-    _DEFAULT_HUE_COLUMN = "Labels"
-    _DEFAULT_HUE_COUNT_COLUMN = "LabelsCnt"
+    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_sdyn_df_and_hue")
 
     # Fixed look of the galaxy particle types. Drawing order puts stars last,
     # so they sit on top of the more diffuse components.
@@ -154,12 +148,28 @@ class GalaxyPlotter:
 
         df["ptype"] = df["ptype"].map(names).astype("category")
 
-        style = {
+        return df, self._make_ptype_style(names)
+
+    def _make_ptype_style(self, names):
+        """
+        Build the fixed plot style for the given particle types.
+
+        Parameters
+        ----------
+        names : dict
+            Maps each particle type to its display name, in drawing order.
+
+        Returns
+        -------
+        dict
+            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
+            display names of the particle types.
+        """
+        return {
             "hue_order": list(names.values()),
             "palette": {names[p]: self._PTYPE_COLORS[p] for p in names},
             "linestyles": {names[p]: self._PTYPE_LINESTYLES[p] for p in names},
         }
-        return df, style
 
     def pairplot(self, *, ptypes=None, attributes=None, lmap=None, **kwargs):
         """
@@ -247,7 +257,7 @@ class GalaxyPlotter:
         )
         return ax
 
-    def kde(self, x, *, y=None, ptypes=None, lmap=None, **kwargs):
+    def kde(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
         """Draw a Kernel Density plot of galaxy properties.
 
         Plot univariate or bivariate distributions using kernel density
@@ -294,11 +304,15 @@ class GalaxyPlotter:
             sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
         return ax
 
-    # CICULARITY ==============================================================
+    # STELLAR DYNAMICS ========================================================
 
-    def get_sdyn_df_and_hue(self, sdyn_kws, attributes, labels, lmap):
+    def get_sdyn_df_and_hue(self, sdyn_kws, attributes, lmap):
         """
-        Dataframe and Hue constructor for plot implementations.
+        Dataframe and style constructor for the stellar dynamics plots.
+
+        Only stars have stellar dynamics, so the hue is always the ``stars``
+        particle type, with the same fixed look as in the galaxy plots.
+        ``lmap`` renames it for display (e.g. ``{"stars": "estrella"}``).
 
         Parameters
         ----------
@@ -308,93 +322,42 @@ class GalaxyPlotter:
             Keys of the normalized specific energy, the circularity parameter
             (J_z/J_circ) and/or the projected circularity parameter
             (J_p/J_circ) of the stellar particles.
-        labels : keys of ``GalaxyStellarDynamics`` dataframe.
-            Variable to map plot aspects to different colors.
-        lmap :  dict
-            Name assignment to the label.
+        lmap : dict or callable
+            Name assignment to the ``stars`` particle type.
 
         Returns
         -------
         df : pandas.DataFrame
-            DataFrame of the normalized specific energy, the circularity
-            parameter (J_z/J_circ) and/or the projected circularity parameter
-            (J_p/J_circ) of the stellar particles with labels added.
-        hue : keys of ``GalaxyStellarDynamics`` dataframe.
-            Labels of stellar particles.
+            DataFrame of the requested stellar dynamics attributes of the
+            stellar particles with finite values, with the particle type in
+            the ``ptype`` column (already renamed through ``lmap``).
+        style : dict
+            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
+            display name of the stars.
         """
-        # if we use the components as laberls we need to extract the labels
-        # and the lmap if lmap is None
-        if isinstance(
-            labels,
-            (
-                getattr(models, "Components", tuple),
-                models.DecomposedParticleSet,
-            ),
-        ):
-            if hasattr(labels, "lmap"):
-                lmap = labels.lmap if lmap is None else lmap
-            labels = labels.labels
-
-        # first we extract the circularity parameters from the galaxy
-        # as a dictionary
         sdyn_kws = {} if sdyn_kws is None else sdyn_kws
         sdyn = self._galaxy.stellar_dynamics(**sdyn_kws)
         mask = sdyn.isfinite()
 
         sdyn_dict = sdyn.to_dict()
-
-        # determine the correct number of attributes
         attributes = (
             list(sdyn_dict.keys()) if attributes is None else attributes
         )
-        hue = None
 
-        # labels: column used to map plot aspects to different colors (hue).
-        # if is a str and it was not in the attributes but we can retrieve from
-        # circ, we add as an attribute
-        if isinstance(labels, str):
-            hue = labels
-            attributes = np.unique(list(attributes) + [labels])
+        columns = {aname: sdyn_dict[aname][mask] for aname in attributes}
+        df = pd.DataFrame(columns)
 
-        columns = OrderedDict()
-        for aname in attributes:
-            columns[aname] = sdyn_dict[aname][mask]
+        names = {"stars": self._coerce_lmap(lmap)("stars")}
+        df["ptype"] = pd.Categorical(
+            np.full(len(df), names["stars"], dtype=object)
+        )
 
-        df = pd.DataFrame(columns)  # here we create the dataframe
-
-        # At this point if "hue" is still "None" we can assume:
-        # is an array simply paste it into the dataframe.
-        if hue is None and labels is not None:
-            # if the labels are passed to me as an array,
-            # I only delete the nans and inf.
-            labels = np.asarray(labels)
-            labels = labels[mask]
-            hue = self._DEFAULT_HUE_COLUMN
-
-            # I place it as the first column
-            df.insert(0, hue, labels)
-
-        if hue and lmap is not None:
-            df[hue] = df[hue].apply(self._coerce_lmap(lmap))
-
-        # for consitency if we have a hue, we use the natural order
-        if hue is not None:
-            df[hue] = df[hue].astype("category")
-
-            hue_count = df[hue].value_counts()
-            df[self._DEFAULT_HUE_COUNT_COLUMN] = df[hue].map(hue_count)
-
-            df = df.sort_values(
-                by=self._DEFAULT_HUE_COUNT_COLUMN, ascending=True
-            )
-
-        return df, hue
+        return df, self._make_ptype_style(names)
 
     def sdyn_pairplot(
         self,
         *,
         attributes=None,
-        labels=None,
         lmap=None,
         sdyn_kws=None,
         **kwargs,
@@ -407,19 +370,15 @@ class GalaxyPlotter:
         single row and the x-axes across a single column. The diagonal
         plots drow a univariate distribution to show the marginal distribution
         of the data in each column.
-        This function groups the values of stellar particles according to some
-        keys of ``JCirc`` tuple.
 
         Parameters
         ----------
-        attributes : keys of ``GalaxyStarsDynamics class`` parameters.
-            Names of ``GalaxyStarsDynamics class`` parameters.
+        attributes : keys of ``GalaxyStellarDynamics`` dataframe.
+            Names of ``GalaxyStellarDynamics`` attributes.
             Default value = None
-        labels : keys of ``JCirc`` tuple.
-            Variable to map plot aspects to different colors.
+        lmap : dict or callable
+            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
             Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
         sdyn_kws: dict
             Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs :
@@ -430,17 +389,21 @@ class GalaxyPlotter:
         -------
         seaborn.axisgrid.PairGrid
         """
-        df, hue = self.get_sdyn_df_and_hue(
-            attributes=attributes,
-            labels=labels,
-            sdyn_kws=sdyn_kws,
-            lmap=lmap,
+        df, style = self.get_sdyn_df_and_hue(
+            sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
 
         kwargs.setdefault("kind", "hist")
         kwargs.setdefault("diag_kind", "kde")
+        kwargs.setdefault("diag_kws", {"fill": False})
 
-        ax = sns.pairplot(data=df, hue=hue, **kwargs)
+        ax = sns.pairplot(
+            data=df,
+            hue="ptype",
+            hue_order=style["hue_order"],
+            palette=style["palette"],
+            **kwargs,
+        )
         return ax
 
     def sdyn_hist(
@@ -448,7 +411,6 @@ class GalaxyPlotter:
         x="normalized_star_energy",
         *,
         y="eps",
-        labels=None,
         lmap=None,
         sdyn_kws=None,
         **kwargs,
@@ -456,19 +418,17 @@ class GalaxyPlotter:
         """Draw a histogram of stellar dynamics.
 
         Plot univariate or bivariate histograms to show distributions of
-        datasets. This function groups the values of stellar particles
-        according to some keys of ``JCirc`` tuple.
+        the stellar dynamics of the stars.
 
         Parameters
         ----------
-        x, y : keys of ``JCirc`` tuple.
+        x, y : keys of ``GalaxyStellarDynamics`` dataframe.
             Variables that specify positions on the x and y axes.
-            Default value y = 'eps'.
-        labels : keys of ``JCirc`` tuple.
-            Variable to map plot aspects to different colors.
+            Default value y = 'eps'. Use ``y=None`` for a univariate
+            histogram.
+        lmap : dict or callable
+            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
             Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
         sdyn_kws: dict
             Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs
@@ -480,61 +440,69 @@ class GalaxyPlotter:
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_sdyn_df_and_hue(
-            sdyn_kws=sdyn_kws,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
+        df, style = self.get_sdyn_df_and_hue(
+            sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
-        ax = sns.histplot(x=x, y=y, data=df, hue=hue, **kwargs)
+        ax = sns.histplot(
+            x=x,
+            y=y,
+            data=df,
+            hue="ptype",
+            hue_order=style["hue_order"],
+            palette=style["palette"],
+            **kwargs,
+        )
         return ax
 
     def sdyn_kde(
         self,
-        x,
+        x="normalized_star_energy",
         *,
-        y=None,
-        labels=None,
+        y="eps",
         lmap=None,
         sdyn_kws=None,
         **kwargs,
     ):
         """Draw a Kernel Density plot of stellar dynamics.
 
-        Plot univariate or bivariate distributions using kernel density
-        estimation (KDE). This plot represents normalized specific energy, the
-        circularity parameter (J_z/J_circ) and/or the projected circularity
-        parameter (J_p/J_circ)  of the stellar particles using a continuous
-        probability density curve in one or more dimensions.
-        This function groups the values of stellar particles according
-        to some keys of ``JCirc`` tuple.
+        Plot univariate or bivariate distributions of the normalized specific
+        energy, the circularity parameter (J_z/J_circ) and/or the projected
+        circularity parameter (J_p/J_circ) of the stellar particles using
+        kernel density estimation (KDE), as unfilled contours or curves with
+        the stars style.
 
         Parameters
         ----------
-        x, y : keys of ``JCirc`` tuple.
+        x, y : keys of ``GalaxyStellarDynamics`` dataframe.
             Variables that specify positions on the x and y axes.
-            Default value y = None.
-        labels : keys of ``JCirc`` tuple.
-            Variable to map plot aspects to different colors.
+            Default value y = 'eps'. Use ``y=None`` for a univariate kde.
+        lmap : dict or callable
+            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
             Default value = None
-        lmap :  dicts
-            Name assignment to the label. Default value = None
         sdyn_kws: dict
             Extra parameters for galaxy.stellar_dynamics() method.
         **kwargs
             Additional keyword arguments are passed and are documented
-            in ``seaborn.kdeplot``.
+            in ``seaborn.kdeplot``. ``fill`` and the color and line style
+            can be overridden.
 
         Returns
         -------
         matplotlib.axes.Axes
         """
         attributes = [x] if y is None else [x, y]
-        df, hue = self.get_sdyn_df_and_hue(
-            sdyn_kws=sdyn_kws,
-            attributes=attributes,
-            labels=labels,
-            lmap=lmap,
+        df, style = self.get_sdyn_df_and_hue(
+            sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
-        ax = sns.kdeplot(x=x, y=y, data=df, hue=hue, **kwargs)
+
+        (name,) = style["hue_order"]
+        ls_key = "linestyle" if y is None else "linestyles"
+        kde_kws = {
+            "fill": False,
+            "color": style["palette"][name],
+            ls_key: style["linestyles"][name],
+        }
+        kde_kws.update(kwargs)
+
+        ax = sns.kdeplot(data=df, x=x, y=y, **kde_kws)
         return ax

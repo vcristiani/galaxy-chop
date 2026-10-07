@@ -13,7 +13,7 @@
 import sys
 from unittest import mock
 
-from galaxychop import core, models
+from galaxychop import core
 
 from matplotlib.testing.decorators import (
     _image_directories,
@@ -228,151 +228,52 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
 
 # =============================================================================
-# CIRCULARITY PLOTS
+# STELLAR DYNAMICS PLOTS
 # =============================================================================
 
 
-# get_circ_df_and_hue =========================================================
+def _sdyn_finite_df(gal, attributes):
+    """Expected stellar dynamics dataframe: finite rows of the attributes."""
+    circ = gal.stellar_dynamics()
+    mask = circ.isfinite()
+    return pd.DataFrame(
+        {aname: getattr(circ, aname)[mask] for aname in attributes}
+    )
+
+
+# get_sdyn_df_and_hue =========================================================
 @pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_Component(read_hdf5_galaxy):
+def test_GalaxyPlotter_get_sdyn_df_and_hue(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = gal.stellar_dynamics()
-
-    cps = models.DecomposedParticleSet(
-        ptype=gal.stars.ptype,
-        m=np.random.random(size=len(circ.eps)),
-        x=gal.stars.x[: len(circ.eps)].copy(),
-        y=gal.stars.y[: len(circ.eps)].copy(),
-        z=gal.stars.z[: len(circ.eps)].copy(),
-        vx=gal.stars.vx[: len(circ.eps)].copy(),
-        vy=gal.stars.vy[: len(circ.eps)].copy(),
-        vz=gal.stars.vz[: len(circ.eps)].copy(),
-        potential=None,
-        softening=float(gal.stars.softening.value),
-        components=np.full(len(circ.eps), 100),
-        labels=circ.eps,
-        probabilities=np.zeros((len(circ.eps), 1)),
-        has_probabilities=True,
+    df, style = plotter.get_sdyn_df_and_hue(
+        sdyn_kws=None, attributes=["eps", "eps_r"], lmap=None
     )
 
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels=cps,
-        lmap=None,
-    )
-
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-    # DecomposedParticleSet stores labels as strings; since the labels
-    # are eps, each row's label must match that same row's eps column
-    assert len(df) == mask.sum()
-    expected = np.asarray(df["eps"]).astype(str)
-    result = np.asarray(df[hue], dtype=str)
-    np.testing.assert_array_equal(result, expected)
+    expected = _sdyn_finite_df(gal, ["eps", "eps_r"])
+    assert list(df.columns) == ["eps", "eps_r", "ptype"]
+    np.testing.assert_array_equal(df["eps"], expected["eps"])
+    np.testing.assert_array_equal(df["eps_r"], expected["eps_r"])
+    assert (df["ptype"] == "stars").all()
+    assert style == {
+        "hue_order": ["stars"],
+        "palette": {"stars": "black"},
+        "linestyles": {"stars": "-"},
+    }
 
 
 @pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_external_labels_list(
-    read_hdf5_galaxy,
-):
+def test_GalaxyPlotter_get_sdyn_df_and_hue_all_attributes(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = gal.stellar_dynamics()
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels=list(circ.eps_r),
-        lmap=None,
+    df, _ = plotter.get_sdyn_df_and_hue(
+        sdyn_kws=None, attributes=None, lmap=None
     )
 
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_external_labels(
-    read_hdf5_galaxy,
-):
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    circ = gal.stellar_dynamics()
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels=circ.eps_r,
-        lmap=None,
-    )
-
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_not_in_attributes(
-    read_hdf5_galaxy,
-):
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=["normalized_star_energy", "eps"],
-        labels="eps_r",
-        lmap=None,
-    )
-
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
-
-
-@pytest.mark.plot
-def test_GalaxyPlotter_get_sdyn_df_and_hue_labels_in_attributes(
-    read_hdf5_galaxy,
-):
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels="eps_r",
-        lmap=None,
-    )
-
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
-    )
-
-    assert (np.sort(df[hue]) == np.sort(circ.eps_r[mask])).all()
+    sdyn_keys = list(gal.stellar_dynamics().to_dict())
+    assert list(df.columns) == sdyn_keys + ["ptype"]
 
 
 @pytest.mark.plot
@@ -380,18 +281,13 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_lmap_map(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    circ = gal.stellar_dynamics()
-
-    lmap = dict.fromkeys(circ.eps_r, 1)
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels="eps_r",
-        lmap=lmap,
+    df, style = plotter.get_sdyn_df_and_hue(
+        sdyn_kws=None, attributes=["eps"], lmap={"stars": "estrella"}
     )
 
-    assert (df[hue] == 1).all()
+    assert (df["ptype"] == "estrella").all()
+    assert style["hue_order"] == ["estrella"]
+    assert style["palette"] == {"estrella": "black"}
 
 
 @pytest.mark.plot
@@ -399,22 +295,24 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_lmap_callable(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
-    def lmap(label):
-        return 1
-
-    df, hue = plotter.get_sdyn_df_and_hue(
-        sdyn_kws=None,
-        attributes=None,
-        labels="eps_r",
-        lmap=lmap,
+    df, style = plotter.get_sdyn_df_and_hue(
+        sdyn_kws=None, attributes=["eps"], lmap=str.upper
     )
 
-    assert (df[hue] == 1).all()
+    assert (df["ptype"] == "STARS").all()
+    assert style["hue_order"] == ["STARS"]
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_get_sdyn_df_and_hue_invalid_lmap(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    with pytest.raises(TypeError):
+        plotter.get_sdyn_df_and_hue(sdyn_kws=None, attributes=None, lmap=1)
 
 
 # PLOTS =======================================================================
-
-
 @pytest.mark.plot
 @pytest.mark.slow
 @pytest.mark.parametrize("img_format", ["png"])
@@ -425,23 +323,19 @@ def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, img_format):
     test_grid = plotter.sdyn_pairplot()
 
     # expected
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.normalized_star_Jz)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
+    df = _sdyn_finite_df(
+        gal, ["normalized_star_energy", "normalized_star_Jz", "eps", "eps_r"]
     )
-
-    df = pd.DataFrame(
-        {
-            "normalized_star_energy": circ.normalized_star_energy[mask],
-            "normalized_star_Jz": circ.normalized_star_Jz[mask],
-            "eps": circ.eps[mask],
-            "eps_r": circ.eps_r[mask],
-        }
+    df["ptype"] = "stars"
+    expected_grid = sns.pairplot(
+        df,
+        hue="ptype",
+        hue_order=["stars"],
+        palette=PTYPE_PALETTE,
+        kind="hist",
+        diag_kind="kde",
+        diag_kws={"fill": False},
     )
-    expected_grid = sns.pairplot(df, kind="hist", diag_kind="kde")
 
     assert_same_image(
         test_GalaxyPlotter_sdyn_pairplot,
@@ -463,16 +357,16 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
 
     exp_ax = fig_ref.subplots()
 
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
+    df = _sdyn_finite_df(gal, ["eps"])
+    df["ptype"] = "stars"
+    sns.histplot(
+        x="eps",
+        data=df,
+        hue="ptype",
+        hue_order=["stars"],
+        palette=PTYPE_PALETTE,
+        ax=exp_ax,
     )
-
-    df = pd.DataFrame({"eps": circ.eps[mask]})
-    sns.histplot(x="eps", data=df, ax=exp_ax)
-    exp_ax.set_xlabel("eps")
 
 
 @pytest.mark.plot
@@ -483,17 +377,16 @@ def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.sdyn_kde("eps", ax=test_ax)
+    plotter.sdyn_kde("eps", y=None, ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
-    circ = gal.stellar_dynamics()
-    mask = (
-        np.isfinite(circ.normalized_star_energy)
-        & np.isfinite(circ.eps)
-        & np.isfinite(circ.eps_r)
+    df = _sdyn_finite_df(gal, ["eps"])
+    sns.kdeplot(
+        x="eps",
+        data=df,
+        fill=False,
+        color=PTYPE_PALETTE["stars"],
+        linestyle="-",
+        ax=exp_ax,
     )
-
-    df = pd.DataFrame({"eps": circ.eps[mask]})
-    sns.kdeplot(x="eps", data=df, ax=exp_ax)
-    exp_ax.set_xlabel("eps")
