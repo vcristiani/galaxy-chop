@@ -141,12 +141,12 @@ def _zoom(ax, df, x, y=None, pct=1, margin=0.1):
 # PLOTS =======================================================================
 @pytest.mark.plot
 @check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
+def test_GalaxyPlotter_hist2d(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.hist("x", y="y", ptypes=["gas"], ax=test_ax)
+    plotter.hist2d("x", y="y", ptypes=["gas"], ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
@@ -160,19 +160,36 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
         palette=PTYPE_PALETTE,
         ax=exp_ax,
     )
+    kpc = u.kpc.to_string("latex")
+    exp_ax.set_xlabel(f"x [{kpc}]")
+    exp_ax.set_ylabel(f"y [{kpc}]")
     _zoom(exp_ax, df, "x", "y")
     exp_ax.set_box_aspect(1)
 
 
 @pytest.mark.plot
-@pytest.mark.slow
 @check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
+def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
+    """hist(x) is a shortcut for hist2d(x, y=None)."""
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.kde("x", y="y", ptypes=["gas"], ax=test_ax)
+    plotter.hist("x", ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+    plotter.hist2d("x", y=None, ax=exp_ax)
+
+
+@pytest.mark.plot
+@pytest.mark.slow
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_kde2d(galaxy, fig_test, fig_ref):
+    gal = galaxy(seed=42)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.kde2d("x", y="y", ptypes=["gas"], ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
@@ -186,8 +203,25 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
         linestyles="--",
         ax=exp_ax,
     )
+    kpc = u.kpc.to_string("latex")
+    exp_ax.set_xlabel(f"x [{kpc}]")
+    exp_ax.set_ylabel(f"y [{kpc}]")
     _zoom(exp_ax, df, "x", "y")
     exp_ax.set_box_aspect(1)
+
+
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
+    """kde(x) is a shortcut for kde2d(x, y=None)."""
+    gal = galaxy(seed=42)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.kde("x", ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+    plotter.kde2d("x", y=None, ax=exp_ax)
 
 
 @pytest.mark.plot
@@ -354,12 +388,12 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_invalid_lmap(read_hdf5_galaxy):
 @pytest.mark.plot
 @pytest.mark.slow
 @check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
+def test_GalaxyPlotter_sdyn_hist2d(read_hdf5_galaxy, fig_test, fig_ref):
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.sdyn_hist("eps", y=None, ax=test_ax)
+    plotter.sdyn_hist2d("eps", y=None, ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
@@ -380,12 +414,27 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
 @pytest.mark.plot
 @pytest.mark.slow
 @check_figures_equal(extensions=["png"])
-def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
+def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
+    """sdyn_hist(x) is a shortcut for sdyn_hist2d(x, y=None)."""
     gal = read_hdf5_galaxy("gal394242.h5")
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
 
     test_ax = fig_test.subplots()
-    plotter.sdyn_kde("eps", y=None, ax=test_ax)
+    plotter.sdyn_hist("eps", ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+    plotter.sdyn_hist2d("eps", y=None, ax=exp_ax)
+
+
+@pytest.mark.plot
+@pytest.mark.slow
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_sdyn_kde2d(read_hdf5_galaxy, fig_test, fig_ref):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.sdyn_kde2d("eps", y=None, ax=test_ax)
 
     exp_ax = fig_ref.subplots()
 
@@ -400,3 +449,18 @@ def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
     )
     _zoom(exp_ax, df, "eps")
     exp_ax.set_box_aspect(1)
+
+
+@pytest.mark.plot
+@pytest.mark.slow
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
+    """sdyn_kde(x) is a shortcut for sdyn_kde2d(x, y=None)."""
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.sdyn_kde("eps", ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+    plotter.sdyn_kde2d("eps", y=None, ax=exp_ax)

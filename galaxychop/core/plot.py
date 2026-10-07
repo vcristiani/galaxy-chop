@@ -56,7 +56,7 @@ class GalaxyPlotter:
 
     # INTERNAL ================================================================
 
-    def __call__(self, plot_kind="hist", **kwargs):
+    def __call__(self, plot_kind="hist2d", **kwargs):
         """Make plots of the galaxy.
 
         Parameters
@@ -150,6 +150,36 @@ class GalaxyPlotter:
             margin = (hi - lo) * self._ZOOM_MARGIN
             ax.set_ylim(lo - margin, hi + margin)
 
+    def _add_units_to_labels(self, ax, x, y=None):
+        """
+        Append each axis's physical unit, in LaTeX, to its label.
+
+        Looks up ``x``/``y`` as attributes of a ``ParticleSet`` to get
+        their unit; columns with no such attribute (e.g. ``ptype``) or no
+        unit are left alone.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axes whose labels get the unit appended.
+        x : str
+            Column plotted on the x axis.
+        y : str or None
+            Column plotted on the y axis, if any.
+        """
+        gal = self._galaxy
+        try:
+            x_unit = getattr(gal.stars, x).unit.to_string("latex")
+            ax.set_xlabel(f"{ax.get_xlabel()} [{x_unit}]")
+        except AttributeError:
+            pass
+        if y is not None:
+            try:
+                y_unit = getattr(gal.stars, y).unit.to_string("latex")
+                ax.set_ylabel(f"{ax.get_ylabel()} [{y_unit}]")
+            except AttributeError:
+                pass
+
     def _make_ptype_style(self, names):
         """
         Build the fixed plot style for the given particle types.
@@ -226,7 +256,32 @@ class GalaxyPlotter:
 
         return df, self._make_ptype_style(names)
 
-    def hist(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
+    def hist(self, x="x", *, ptypes=None, lmap=None, **kwargs):
+        """Draw a univariate histogram of a galaxy property.
+
+        Shortcut for ``hist2d(x, y=None, ...)``.
+
+        Parameters
+        ----------
+        x : keys of ``ParticleSet class`` parameters.
+            Variable that specifies positions on the x axis.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.histplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        return self.hist2d(x, y=None, ptypes=ptypes, lmap=lmap, **kwargs)
+
+    def hist2d(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
         """Draw a histogram of galaxy properties.
 
         Plot univariate or bivariate histograms to show distributions of
@@ -236,7 +291,8 @@ class GalaxyPlotter:
         ----------
         x, y : keys of ``ParticleSet class`` parameters.
             Variables that specify positions on the x and y axes.
-            Default value y = 'z'. Use ``y=None`` for a univariate histogram.
+            Default value y = 'z'. Use ``y=None`` for a univariate histogram
+            (or call ``hist`` directly).
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
         lmap : dict or callable
@@ -264,11 +320,37 @@ class GalaxyPlotter:
             palette=style["palette"],
             **kwargs,
         )
+        self._add_units_to_labels(ax, x, y)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
         return ax
 
-    def kde(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
+    def kde(self, x="x", *, ptypes=None, lmap=None, **kwargs):
+        """Draw a univariate Kernel Density plot of a galaxy property.
+
+        Shortcut for ``kde2d(x, y=None, ...)``.
+
+        Parameters
+        ----------
+        x : keys of ``ParticleSet class`` parameters.
+            Variable that specifies positions on the x axis.
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.kdeplot``. ``ax`` and ``fill`` can be overridden.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        return self.kde2d(x, y=None, ptypes=ptypes, lmap=lmap, **kwargs)
+
+    def kde2d(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
         """Draw a Kernel Density plot of galaxy properties.
 
         Plot univariate or bivariate distributions using kernel density
@@ -279,7 +361,8 @@ class GalaxyPlotter:
         ----------
         x, y : keys of ``ParticleSet class`` parameters.
             Variables that specify positions on the x and y axes.
-            Default value y = None.
+            Default value y = 'z'. Use ``y=None`` for a univariate kde
+            (or call ``kde`` directly).
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
         lmap : dict or callable
@@ -313,6 +396,8 @@ class GalaxyPlotter:
             }
             group_kws.update(kwargs)
             sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
+
+        self._add_units_to_labels(ax, x, y)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
         return ax
@@ -454,6 +539,34 @@ class GalaxyPlotter:
         return df, self._make_ptype_style(names)
 
     def sdyn_hist(
+        self, x="normalized_star_energy", *, lmap=None, sdyn_kws=None, **kwargs
+    ):
+        """Draw a univariate histogram of a stellar dynamics property.
+
+        Shortcut for ``sdyn_hist2d(x, y=None, ...)``.
+
+        Parameters
+        ----------
+        x : keys of ``GalaxyStellarDynamics`` dataframe.
+            Variable that specifies positions on the x axis.
+        lmap : dict or callable
+            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
+            Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.histplot``.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        return self.sdyn_hist2d(
+            x, y=None, lmap=lmap, sdyn_kws=sdyn_kws, **kwargs
+        )
+
+    def sdyn_hist2d(
         self,
         x="normalized_star_energy",
         *,
@@ -472,7 +585,7 @@ class GalaxyPlotter:
         x, y : keys of ``GalaxyStellarDynamics`` dataframe.
             Variables that specify positions on the x and y axes.
             Default value y = 'eps'. Use ``y=None`` for a univariate
-            histogram.
+            histogram (or call ``sdyn_hist`` directly).
         lmap : dict or callable
             Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
             Default value = None
@@ -504,6 +617,36 @@ class GalaxyPlotter:
         return ax
 
     def sdyn_kde(
+        self, x="normalized_star_energy", *, lmap=None, sdyn_kws=None, **kwargs
+    ):
+        """Draw a univariate Kernel Density plot of a stellar dynamics \
+        property.
+
+        Shortcut for ``sdyn_kde2d(x, y=None, ...)``.
+
+        Parameters
+        ----------
+        x : keys of ``GalaxyStellarDynamics`` dataframe.
+            Variable that specifies positions on the x axis.
+        lmap : dict or callable
+            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
+            Default value = None
+        sdyn_kws: dict
+            Extra parameters for galaxy.stellar_dynamics() method.
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.kdeplot``. ``fill`` and the color and line style
+            can be overridden.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        return self.sdyn_kde2d(
+            x, y=None, lmap=lmap, sdyn_kws=sdyn_kws, **kwargs
+        )
+
+    def sdyn_kde2d(
         self,
         x="normalized_star_energy",
         *,
@@ -524,7 +667,8 @@ class GalaxyPlotter:
         ----------
         x, y : keys of ``GalaxyStellarDynamics`` dataframe.
             Variables that specify positions on the x and y axes.
-            Default value y = 'eps'. Use ``y=None`` for a univariate kde.
+            Default value y = 'eps'. Use ``y=None`` for a univariate kde
+            (or call ``sdyn_kde`` directly).
         lmap : dict or callable
             Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
             Default value = None
