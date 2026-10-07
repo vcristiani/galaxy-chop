@@ -127,8 +127,8 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_map(galaxy):
     base = gal.to_dataframe(attributes=["ptype"]).ptype.map(lmap)
     assert (df["ptype"].astype(str).to_numpy() == base.to_numpy()).all()
     assert set(style["hue_order"]) == set(lmap.values())
-    assert style["palette"]["estrella"] == "black"
-    assert style["palette"]["gas"] == "#7f7f7f"
+    assert style["palette"]["estrella"] == "tab:red"
+    assert style["palette"]["gas"] == "tab:blue"
     assert style["linestyles"]["gas"] == "--"
 
 
@@ -150,7 +150,22 @@ def test_GalaxyPlotter_get_df_and_hue_lmap_callable(galaxy):
 
 
 # Same fixed look the plotter uses for each particle type
-PTYPE_PALETTE = {"stars": "black", "gas": "#7f7f7f", "dark_matter": "#bdbdbd"}
+PTYPE_PALETTE = {
+    "stars": "tab:red",
+    "gas": "tab:blue",
+    "dark_matter": "#222222",
+}
+
+
+def _zoom(ax, df, x, y=None, pct=1, margin=0.1):
+    """Match GalaxyPlotter._zoom_to_data for the hand-built reference axes."""
+    lo, hi = np.percentile(df[x], [pct, 100 - pct])
+    pad = (hi - lo) * margin
+    ax.set_xlim(lo - pad, hi + pad)
+    if y is not None:
+        lo, hi = np.percentile(df[y], [pct, 100 - pct])
+        pad = (hi - lo) * margin
+        ax.set_ylim(lo - pad, hi + pad)
 
 
 # PLOTS =======================================================================
@@ -203,6 +218,8 @@ def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
         palette=PTYPE_PALETTE,
         ax=exp_ax,
     )
+    _zoom(exp_ax, df, "x", "y")
+    exp_ax.set_box_aspect(1)
 
 
 @pytest.mark.plot
@@ -227,6 +244,35 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
         linestyles="--",
         ax=exp_ax,
     )
+    _zoom(exp_ax, df, "x", "y")
+    exp_ax.set_box_aspect(1)
+
+
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
+    gal = galaxy(seed=42)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.rotation_curve(ptypes=["gas"], ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+
+    df = gal.to_dataframe(
+        ptypes=["gas"], attributes=["radius"], circular_velocity=True
+    ).sort_values("radius")
+    sns.lineplot(
+        data=df,
+        x="radius",
+        y="circular_velocity",
+        estimator=None,
+        color=PTYPE_PALETTE["gas"],
+        linestyle="--",
+        ax=exp_ax,
+    )
+    exp_ax.set_xlabel("radius [kpc]")
+    exp_ax.set_ylabel("circular velocity [km/s]")
 
 
 # =============================================================================
@@ -260,7 +306,7 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue(read_hdf5_galaxy):
     assert (df["ptype"] == "stars").all()
     assert style == {
         "hue_order": ["stars"],
-        "palette": {"stars": "black"},
+        "palette": {"stars": "tab:red"},
         "linestyles": {"stars": "-"},
     }
 
@@ -289,7 +335,7 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_lmap_map(read_hdf5_galaxy):
 
     assert (df["ptype"] == "estrella").all()
     assert style["hue_order"] == ["estrella"]
-    assert style["palette"] == {"estrella": "black"}
+    assert style["palette"] == {"estrella": "tab:red"}
 
 
 @pytest.mark.plot
@@ -369,6 +415,8 @@ def test_GalaxyPlotter_sdyn_hist(read_hdf5_galaxy, fig_test, fig_ref):
         palette=PTYPE_PALETTE,
         ax=exp_ax,
     )
+    _zoom(exp_ax, df, "eps")
+    exp_ax.set_box_aspect(1)
 
 
 @pytest.mark.plot
@@ -392,3 +440,5 @@ def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
         linestyle="-",
         ax=exp_ax,
     )
+    _zoom(exp_ax, df, "eps")
+    exp_ax.set_box_aspect(1)

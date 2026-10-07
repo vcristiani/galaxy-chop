@@ -39,17 +39,22 @@ class GalaxyPlotter:
     # so they sit on top of the more diffuse components.
     _PTYPE_ORDER = ("dark_matter", "gas", "stars")
     _PTYPE_COLORS = {
-        "stars": "black",
-        "gas": "#7f7f7f",
-        "dark_matter": "#bdbdbd",
+        "stars": "tab:red",
+        "gas": "tab:blue",
+        "dark_matter": "#222222",
     }
     _PTYPE_LINESTYLES = {"stars": "-", "gas": "--", "dark_matter": ":"}
+
+    # Percentile (and its mirror, 100 - it) used to zoom in on the bulk of
+    # the plotted data, so a handful of far-out particles don't stretch the
+    # axes and shrink everything else down to a speck.
+    _ZOOM_PCT = 1
 
     _galaxy = attr.ib()
 
     # INTERNAL ================================================================
 
-    def __call__(self, plot_kind="pairplot", **kwargs):
+    def __call__(self, plot_kind="hist", **kwargs):
         """Make plots of the galaxy.
 
         Parameters
@@ -108,7 +113,44 @@ class GalaxyPlotter:
 
         return lmap
 
-    def get_df_and_hue(self, ptypes, attributes, lmap):
+    # Extra room left on each side of the zoomed-in range, as a fraction
+    # of that range, so the outermost points don't sit right on the edge.
+    _ZOOM_MARGIN = 0.1
+
+    def _zoom_to_data(self, ax, df, x, y=None):
+        """
+        Zoom the axes in on the bulk of the plotted data.
+
+        Sets the axis limits to the ``[_ZOOM_PCT, 100 - _ZOOM_PCT]``
+        percentile range of the plotted columns, instead of letting a
+        handful of far-out particles (e.g. tidal debris) stretch the axes
+        and shrink the rest of the data down to a speck. A small margin
+        (``_ZOOM_MARGIN``) is added on each side so the edge points aren't
+        flush against the border.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axes to zoom.
+        df : pandas.DataFrame
+            The data actually plotted.
+        x : str
+            Column plotted on the x axis.
+        y : str or None
+            Column plotted on the y axis, if any.
+        """
+        pct = [self._ZOOM_PCT, 100 - self._ZOOM_PCT]
+        lo, hi = np.percentile(df[x], pct)
+        margin = (hi - lo) * self._ZOOM_MARGIN
+        ax.set_xlim(lo - margin, hi + margin)
+        if y is not None:
+            lo, hi = np.percentile(df[y], pct)
+            margin = (hi - lo) * self._ZOOM_MARGIN
+            ax.set_ylim(lo - margin, hi + margin)
+
+    def get_df_and_hue(
+        self, ptypes, attributes, lmap, *, circular_velocity=False
+    ):
         """
         Dataframe and style constructor for the galaxy plot implementations.
 
@@ -123,6 +165,10 @@ class GalaxyPlotter:
             Names of ``ParticleSet class`` parameters.
         lmap : dict or callable
             Name assignment to the particle types.
+        circular_velocity : bool, default value = False
+            Whether to add the ``circular_velocity`` column (see
+            ``Galaxy.circular_velocity_``). Most plots don't use it, so it
+            isn't computed unless asked for.
 
         Returns
         -------
@@ -137,7 +183,9 @@ class GalaxyPlotter:
         attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
 
         df = self._galaxy.to_dataframe(
-            ptypes=ptypes, attributes=attributes, circular_velocity=False
+            ptypes=ptypes,
+            attributes=attributes,
+            circular_velocity=circular_velocity,
         )
 
         lmap = self._coerce_lmap(lmap)
@@ -257,6 +305,8 @@ class GalaxyPlotter:
             palette=style["palette"],
             **kwargs,
         )
+        self._zoom_to_data(ax, df, x, y)
+        ax.set_box_aspect(1)
         return ax
 
     def kde(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
@@ -304,6 +354,63 @@ class GalaxyPlotter:
             }
             group_kws.update(kwargs)
             sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
+        self._zoom_to_data(ax, df, x, y)
+        ax.set_box_aspect(1)
+        return ax
+
+    def rotation_curve(self, *, ptypes=None, lmap=None, **kwargs):
+        """Draw the galaxy's rotation curve (circular velocity vs radius).
+
+        Circular velocity is computed from the mass enclosed within the
+        whole galaxy (stars, dark matter and gas pooled together; see
+        ``Galaxy.circular_velocity_``), not from each particle type on
+        its own. Each particle type keeps its usual style (stars solid,
+        gas dashed, dark matter dotted) to show which radii it covers,
+        but all three trace the same underlying curve.
+
+        Parameters
+        ----------
+        ptypes : keys of ``ParticleSet class`` parameters.
+            Particle type. Default value = None
+        lmap : dict or callable
+            Name assignment to the particle types, e.g.
+            ``{"stars": "estrella"}``.
+            Default value = None
+        **kwargs
+            Additional keyword arguments are passed and are documented
+            in ``seaborn.lineplot``. ``ax`` can be overridden.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        df, style = self.get_df_and_hue(
+            ptypes=ptypes,
+            attributes=["radius"],
+            lmap=lmap,
+            circular_velocity=True,
+        )
+
+        ax = kwargs.pop("ax", None)
+        ax = plt.gca() if ax is None else ax
+        kwargs.setdefault("estimator", None)
+
+        for name in style["hue_order"]:
+            group = df[df["ptype"] == name].sort_values("radius")
+            group_kws = {
+                "color": style["palette"][name],
+                "linestyle": style["linestyles"][name],
+            }
+            group_kws.update(kwargs)
+            sns.lineplot(
+                data=group,
+                x="radius",
+                y="circular_velocity",
+                ax=ax,
+                **group_kws,
+            )
+        ax.set_xlabel("radius [kpc]")
+        ax.set_ylabel("circular velocity [km/s]")
         return ax
 
     # STELLAR DYNAMICS ========================================================
@@ -454,6 +561,8 @@ class GalaxyPlotter:
             palette=style["palette"],
             **kwargs,
         )
+        self._zoom_to_data(ax, df, x, y)
+        ax.set_box_aspect(1)
         return ax
 
     def sdyn_kde(
@@ -507,4 +616,6 @@ class GalaxyPlotter:
         kde_kws.update(kwargs)
 
         ax = sns.kdeplot(data=df, x=x, y=y, **kde_kws)
+        self._zoom_to_data(ax, df, x, y)
+        ax.set_box_aspect(1)
         return ax
