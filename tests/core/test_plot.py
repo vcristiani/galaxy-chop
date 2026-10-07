@@ -13,13 +13,11 @@
 import sys
 from unittest import mock
 
+from astropy import units as u
+
 from galaxychop import core
 
-from matplotlib.testing.decorators import (
-    _image_directories,
-    check_figures_equal,
-    compare_images,
-)
+from matplotlib.testing.decorators import check_figures_equal
 
 import numpy as np
 
@@ -36,34 +34,6 @@ pytestmark = pytest.mark.skipif(
     sys.version_info < (3, 10),
     reason="Seaborn 0.11.x plotting is incompatible with Python 3.9",
 )
-# =============================================================================
-# UTILITIES
-# =============================================================================
-
-
-def image_paths(func, img_format):
-    idir = _image_directories(func)[-1]
-    idir.mkdir(parents=True, exist_ok=True)
-
-    test = idir / f"{func.__name__}[{img_format}]-.{img_format}"
-    expected = idir / f"{func.__name__}[{img_format}]-expected.{img_format}"
-
-    return test, expected
-
-
-def assert_same_image(test_func, img_format, test_img, ref_img, **kwargs):
-    test_path, ref_path = image_paths(test_func, img_format)
-
-    test_img.savefig(test_path, format=img_format)
-    ref_img.savefig(ref_path, format=img_format)
-
-    kwargs.setdefault("tol", 0)
-    result = compare_images(test_path, ref_path, **kwargs)
-
-    if result:
-        pytest.fail(result)
-
-
 # =============================================================================
 # TEST __call__
 # =============================================================================
@@ -95,7 +65,7 @@ def test_GalaxyPlotter_call_invalid_plot_kind(galaxy):
 
 
 @pytest.mark.plot
-@pytest.mark.parametrize("plot_kind", ["pairplot"])
+@pytest.mark.parametrize("plot_kind", ["hist"])
 def test_GalaxyPlotter_call(galaxy, plot_kind):
     gal = galaxy(seed=42)
     plotter = core.plot.GalaxyPlotter(galaxy=gal)
@@ -170,34 +140,6 @@ def _zoom(ax, df, x, y=None, pct=1, margin=0.1):
 
 # PLOTS =======================================================================
 @pytest.mark.plot
-@pytest.mark.slow
-@pytest.mark.parametrize("img_format", ["png"])
-def test_GalaxyPlotter_pairplot(galaxy, img_format):
-    gal = galaxy(seed=42)
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    test_grid = plotter.pairplot(attributes=["x", "y"])
-
-    # EXPECTED
-    df = gal.to_dataframe(
-        attributes=["x", "y", "ptype"], circular_velocity=False
-    )
-    expected_grid = sns.pairplot(
-        data=df,
-        hue="ptype",
-        hue_order=["dark_matter", "gas", "stars"],
-        palette=PTYPE_PALETTE,
-        kind="hist",
-        diag_kind="kde",
-        diag_kws={"fill": False},
-    )
-
-    assert_same_image(
-        test_GalaxyPlotter_pairplot, img_format, test_grid, expected_grid
-    )
-
-
-@pytest.mark.plot
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_hist(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
@@ -260,8 +202,22 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
     exp_ax = fig_ref.subplots()
 
     df = gal.to_dataframe(
-        ptypes=["gas"], attributes=["radius"], circular_velocity=True
+        ptypes=["gas"],
+        attributes=["radius", "circular_velocity"],
+        galaxy_circular_velocity=True,
     ).sort_values("radius")
+    # whole galaxy: a single black curve
+    sns.lineplot(
+        data=df,
+        x="radius",
+        y="galaxy_circular_velocity",
+        estimator=None,
+        color="black",
+        linestyle="-",
+        label="galaxy",
+        ax=exp_ax,
+    )
+    # gas on its own, self-contained circular velocity
     sns.lineplot(
         data=df,
         x="radius",
@@ -269,10 +225,44 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
         estimator=None,
         color=PTYPE_PALETTE["gas"],
         linestyle="--",
+        label="gas",
         ax=exp_ax,
     )
-    exp_ax.set_xlabel("radius [kpc]")
-    exp_ax.set_ylabel("circular velocity [km/s]")
+    exp_ax.set_xlabel(f"radius [{u.kpc.to_string('latex')}]")
+    exp_ax.set_ylabel(f"circular velocity [{(u.km / u.s).to_string('latex')}]")
+    exp_ax.legend()
+
+
+@pytest.mark.plot
+@check_figures_equal(extensions=["png"])
+def test_GalaxyPlotter_rotation_curve_no_galaxy(galaxy, fig_test, fig_ref):
+    gal = galaxy(seed=42)
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    test_ax = fig_test.subplots()
+    plotter.rotation_curve(ptypes=["gas"], galaxy=False, ax=test_ax)
+
+    exp_ax = fig_ref.subplots()
+
+    df = gal.to_dataframe(
+        ptypes=["gas"],
+        attributes=["radius", "circular_velocity"],
+        galaxy_circular_velocity=False,
+    ).sort_values("radius")
+    # no whole-galaxy curve this time: only gas, self-contained
+    sns.lineplot(
+        data=df,
+        x="radius",
+        y="circular_velocity",
+        estimator=None,
+        color=PTYPE_PALETTE["gas"],
+        linestyle="--",
+        label="gas",
+        ax=exp_ax,
+    )
+    exp_ax.set_xlabel(f"radius [{u.kpc.to_string('latex')}]")
+    exp_ax.set_ylabel(f"circular velocity [{(u.km / u.s).to_string('latex')}]")
+    exp_ax.legend()
 
 
 # =============================================================================
@@ -361,38 +351,6 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue_invalid_lmap(read_hdf5_galaxy):
 
 
 # PLOTS =======================================================================
-@pytest.mark.plot
-@pytest.mark.slow
-@pytest.mark.parametrize("img_format", ["png"])
-def test_GalaxyPlotter_sdyn_pairplot(read_hdf5_galaxy, img_format):
-    gal = read_hdf5_galaxy("gal394242.h5")
-    plotter = core.plot.GalaxyPlotter(galaxy=gal)
-
-    test_grid = plotter.sdyn_pairplot()
-
-    # expected
-    df = _sdyn_finite_df(
-        gal, ["normalized_star_energy", "normalized_star_Jz", "eps", "eps_r"]
-    )
-    df["ptype"] = "stars"
-    expected_grid = sns.pairplot(
-        df,
-        hue="ptype",
-        hue_order=["stars"],
-        palette=PTYPE_PALETTE,
-        kind="hist",
-        diag_kind="kde",
-        diag_kws={"fill": False},
-    )
-
-    assert_same_image(
-        test_GalaxyPlotter_sdyn_pairplot,
-        img_format,
-        test_grid,
-        expected_grid,
-    )
-
-
 @pytest.mark.plot
 @pytest.mark.slow
 @check_figures_equal(extensions=["png"])

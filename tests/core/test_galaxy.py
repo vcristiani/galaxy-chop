@@ -14,7 +14,7 @@ from io import BytesIO
 
 import astropy.units as u
 
-from galaxychop import core, io
+from galaxychop import constants, core, io
 
 import numpy as np
 
@@ -209,6 +209,13 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
         potential=pot,
     )
     radius = np.sqrt(x**2 + y**2 + z**2)
+    order = np.argsort(radius)
+    enclosed_mass = np.cumsum(m[order])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        vcirc_sorted = np.sqrt(constants.G * enclosed_mass / radius[order])
+    vcirc_sorted[radius[order] == 0] = np.nan
+    circular_velocity = np.empty_like(vcirc_sorted)
+    circular_velocity[order] = vcirc_sorted
 
     expected = pd.DataFrame(
         {
@@ -233,6 +240,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "Jy": z * vx - x * vz,
             "Jz": x * vy - y * vx,
             "radius": radius,
+            "circular_velocity": circular_velocity,
         }
     )
     df = pset.to_dataframe()
@@ -821,26 +829,37 @@ def assert_pset_dict_equals(result, expected):
 
 def test_Galaxy_to_dict(galaxy):
     gal = galaxy()
-    gal_dict = gal.to_dict(circular_velocity=False)
+    gal_dict = gal.to_dict(galaxy_circular_velocity=False)
 
     assert_pset_dict_equals(gal_dict["stars"], gal.stars.to_dict())
     assert_pset_dict_equals(gal_dict["dark_matter"], gal.dark_matter.to_dict())
     assert_pset_dict_equals(gal_dict["gas"], gal.gas.to_dict())
 
 
-def test_Galaxy_to_dict_circular_velocity(galaxy):
+def test_Galaxy_to_dict_galaxy_circular_velocity(galaxy):
     gal = galaxy()
     v_s, v_dm, v_g = gal.circular_velocity_
 
     gal_dict = gal.to_dict()
-    assert np.array_equal(gal_dict["stars"]["circular_velocity"], v_s.value)
     assert np.array_equal(
-        gal_dict["dark_matter"]["circular_velocity"], v_dm.value
+        gal_dict["stars"]["galaxy_circular_velocity"], v_s.value
     )
-    assert np.array_equal(gal_dict["gas"]["circular_velocity"], v_g.value)
+    assert np.array_equal(
+        gal_dict["dark_matter"]["galaxy_circular_velocity"], v_dm.value
+    )
+    assert np.array_equal(
+        gal_dict["gas"]["galaxy_circular_velocity"], v_g.value
+    )
+    # each particle set's own, self-contained circular_velocity is still
+    # there too, and it's a different value
+    assert "circular_velocity" in gal_dict["stars"]
+    assert not np.array_equal(
+        gal_dict["stars"]["circular_velocity"], v_s.value
+    )
 
-    gal_dict = gal.to_dict(circular_velocity=False)
-    assert "circular_velocity" not in gal_dict["stars"]
+    gal_dict = gal.to_dict(galaxy_circular_velocity=False)
+    assert "galaxy_circular_velocity" not in gal_dict["stars"]
+    assert "circular_velocity" in gal_dict["stars"]
 
 
 # =============================================================================

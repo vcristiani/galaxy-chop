@@ -132,7 +132,7 @@ def _stellar_dynamics(galaxy, bin0, bin1, reassign):
     # extract only the needed columns
     df = galaxy.to_dataframe(
         attributes=["ptypev", "total_energy", "Jx", "Jy", "Jz"],
-        circular_velocity=False,
+        galaxy_circular_velocity=False,
     )
 
     Jr_part = np.sqrt(df.Jx.values**2 + df.Jy.values**2)

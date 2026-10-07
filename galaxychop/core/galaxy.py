@@ -169,8 +169,15 @@ class ParticleSet:
         units: kpc*km/s.
     radius_ : Quantity
         Distance of each particle to the origin. Shape: (n,1). Default
-        unit: kpc. See ``Galaxy.circular_velocity_`` for the circular
-        velocity computed from the mass enclosed within the whole galaxy.
+        unit: kpc.
+    circular_velocity_ : Quantity
+        Circular velocity from the mass enclosed within this set alone,
+        sorted by ``radius_`` (sqrt(G * M(<r) / r)). Assumes the particles
+        of this set are the only source of the potential; it does not
+        account for the mass of other particle sets in the same galaxy.
+        See ``Galaxy.circular_velocity_`` for the version that pools the
+        mass of stars, dark matter and gas together. Shape: (n,1).
+        Default unit: km/s.
     has_potential_ : bool.
         Indicates if the specific potential energy is computed.
     arr_ : Instances of ``ArrayAccessor``
@@ -220,6 +227,7 @@ class ParticleSet:
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
     radius_: np.ndarray = uttr.ib(unit=u.kpc, init=False)
+    circular_velocity_: np.ndarray = uttr.ib(unit=(u.km / u.s), init=False)
 
     # INITIALIZATION ==========================================================
 
@@ -263,6 +271,15 @@ class ParticleSet:
     def _radius__default(self):
         arr = self.arr_
         return np.sqrt(arr.x**2 + arr.y**2 + arr.z**2)
+
+    @circular_velocity_.default
+    def _circular_velocity__default(self):
+        # self-contained circular velocity: assumes this set's own mass
+        # is the only source of the potential. See
+        # Galaxy.circular_velocity_ for the version that pools the mass
+        # of stars, dark matter and gas together.
+        arr = self.arr_
+        return _circular_velocity(arr.m, arr.radius_)
 
     def __attrs_post_init__(self):
         """
@@ -370,6 +387,8 @@ class ParticleSet:
             - ``total_energy``: total energy per particle (NaN if unavailable).
             - ``Jx``, ``Jy``, ``Jz`` : angular momentum components.
             - ``radius`` : distance to the origin.
+            - ``circular_velocity`` : circular velocity from the mass
+              enclosed within this set alone.
         """
         arr = self.arr_
         value_makers = {
@@ -398,6 +417,7 @@ class ParticleSet:
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
             "radius": lambda: arr.radius_,
+            "circular_velocity": lambda: arr.circular_velocity_,
         }
         return value_makers
 
@@ -922,7 +942,7 @@ class Galaxy:
         *,
         ptypes=None,
         attributes=None,
-        circular_velocity=True,
+        galaxy_circular_velocity=True,
     ):
         """
         Convert the galaxy to pandas DataFrame.
@@ -937,9 +957,10 @@ class Galaxy:
         attributes: tuple, default value = None
             Dictionary keys of ParticleSet parameters used to create the data
             frame. If it's None, the data frame is constructed from all the
-            parameters of the ``ParticleSet class``.
-        circular_velocity: bool, default value = True
-            Whether to add the ``circular_velocity`` column (see
+            parameters of the ``ParticleSet class`` (this already includes
+            each particle set's own, self-contained ``circular_velocity``).
+        galaxy_circular_velocity: bool, default value = True
+            Whether to add the ``galaxy_circular_velocity`` column (see
             ``Galaxy.circular_velocity_``). It can't be computed by a
             single ``ParticleSet``, so it isn't governed by ``attributes``.
 
@@ -957,12 +978,12 @@ class Galaxy:
             if ptypes is None or pset.ptype.humanize() in ptypes:
                 df = pset.to_dataframe(attributes=attributes)
                 parts.append(df)
-                if circular_velocity:
+                if galaxy_circular_velocity:
                     vcirc_parts.append(vcirc.to_value())
 
         result = pd.concat(parts, ignore_index=True)
-        if circular_velocity:
-            result["circular_velocity"] = np.concatenate(vcirc_parts)
+        if galaxy_circular_velocity:
+            result["galaxy_circular_velocity"] = np.concatenate(vcirc_parts)
         return result
 
     def to_hdf5(self, path_or_stream, *, metadata=None, **kwargs):
@@ -995,7 +1016,9 @@ class Galaxy:
             **kwargs,
         )
 
-    def to_dict(self, *, ptypes=None, attributes=None, circular_velocity=True):
+    def to_dict(
+        self, *, ptypes=None, attributes=None, galaxy_circular_velocity=True
+    ):
         """
         Convert the galaxy to dict with information as a numpy array with \
         coerced units.
@@ -1008,11 +1031,12 @@ class Galaxy:
         attributes: tuple, default value = None
             Dictionary keys of ParticleSet parameters used to create the dict.
             If it's None, the data frame is constructed from all the
-            parameters of the ``ParticleSet class``.
-        circular_velocity: bool, default value = True
-            Whether to add ``circular_velocity`` to each particle type's
-            dict (see ``Galaxy.circular_velocity_``). It can't be computed
-            by a single ``ParticleSet``, so it isn't governed by
+            parameters of the ``ParticleSet class`` (this already includes
+            each particle set's own, self-contained ``circular_velocity``).
+        galaxy_circular_velocity: bool, default value = True
+            Whether to add ``galaxy_circular_velocity`` to each particle
+            type's dict (see ``Galaxy.circular_velocity_``). It can't be
+            computed by a single ``ParticleSet``, so it isn't governed by
             ``attributes``.
 
         Return
@@ -1029,8 +1053,8 @@ class Galaxy:
             ptype = pset.ptype.humanize()
             if ptypes is None or ptype in ptypes:
                 p_dict = pset.to_dict(attributes=attributes)
-                if circular_velocity:
-                    p_dict["circular_velocity"] = vcirc.to_value()
+                if galaxy_circular_velocity:
+                    p_dict["galaxy_circular_velocity"] = vcirc.to_value()
                 the_dict[ptype] = p_dict
 
         return the_dict
@@ -1068,7 +1092,7 @@ class Galaxy:
             return the_flatten_dict
 
         the_dict = self.to_dict(
-            attributes=attributes.keys(), circular_velocity=False
+            attributes=attributes.keys(), galaxy_circular_velocity=False
         )
         stars_kws = _flat(the_dict["stars"], "s")
         dark_matter_kws = _flat(the_dict["dark_matter"], "dm")

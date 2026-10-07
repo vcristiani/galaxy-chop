@@ -380,7 +380,7 @@ def potential(galaxy, *, backend=DEFAULT_POTENTIAL_BACKEND):
     # Convert the galaxy to multiple arrays
     df = galaxy.to_dataframe(
         attributes=["x", "y", "z", "m", "softening"],
-        circular_velocity=False,
+        galaxy_circular_velocity=False,
     )
     x = df.x.to_numpy(dtype=np.float32)
     y = df.y.to_numpy(dtype=np.float32)

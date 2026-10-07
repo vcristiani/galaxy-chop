@@ -14,6 +14,8 @@
 # IMPORTS
 # =============================================================================
 
+from astropy import units as u
+
 import attr
 
 import matplotlib.pyplot as plt
@@ -60,8 +62,8 @@ class GalaxyPlotter:
         Parameters
         ----------
         kind : str
-            The kind of plot to produce:
-                - 'pairplot' : pairplot matrix of any coordinates (default)
+            The kind of plot to produce, e.g. 'hist' (default), 'kde' or
+            'rotation_curve'.
 
         **kwargs
             Options to pass to subjacent plotting method.
@@ -82,7 +84,7 @@ class GalaxyPlotter:
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         return method(**kwargs)
 
-    # COMMON PLOTS ============================================================
+    # COMMON UTILS ============================================================
 
     def _coerce_lmap(self, lmap):
         """
@@ -148,58 +150,6 @@ class GalaxyPlotter:
             margin = (hi - lo) * self._ZOOM_MARGIN
             ax.set_ylim(lo - margin, hi + margin)
 
-    def get_df_and_hue(
-        self, ptypes, attributes, lmap, *, circular_velocity=False
-    ):
-        """
-        Dataframe and style constructor for the galaxy plot implementations.
-
-        The hue is always the particle type. ``lmap`` renames particle types
-        for display (e.g. ``{"stars": "estrella"}``).
-
-        Parameters
-        ----------
-        ptypes : keys of ``ParticleSet class`` parameters.
-            Particle type. Default value = None
-        attributes : keys of ``ParticleSet class`` parameters.
-            Names of ``ParticleSet class`` parameters.
-        lmap : dict or callable
-            Name assignment to the particle types.
-        circular_velocity : bool, default value = False
-            Whether to add the ``circular_velocity`` column (see
-            ``Galaxy.circular_velocity_``). Most plots don't use it, so it
-            isn't computed unless asked for.
-
-        Returns
-        -------
-        df : pandas.DataFrame
-            DataFrame of galaxy properties with the particle type in the
-            ``ptype`` column (already renamed through ``lmap``).
-        style : dict
-            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
-            display names of the particle types present in ``df``.
-        """
-        attributes = ["x", "y", "z"] if attributes is None else attributes
-        attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
-
-        df = self._galaxy.to_dataframe(
-            ptypes=ptypes,
-            attributes=attributes,
-            circular_velocity=circular_velocity,
-        )
-
-        lmap = self._coerce_lmap(lmap)
-
-        present = set(df["ptype"].unique())
-        names = {}
-        for ptype in self._PTYPE_ORDER:
-            if ptype in present:
-                names[ptype] = lmap(ptype)
-
-        df["ptype"] = df["ptype"].map(names).astype("category")
-
-        return df, self._make_ptype_style(names)
-
     def _make_ptype_style(self, names):
         """
         Build the fixed plot style for the given particle types.
@@ -221,51 +171,60 @@ class GalaxyPlotter:
             "linestyles": {names[p]: self._PTYPE_LINESTYLES[p] for p in names},
         }
 
-    def pairplot(self, *, ptypes=None, attributes=None, lmap=None, **kwargs):
-        """
-        Draw a pairplot of the galaxy properties.
+    # COMMON PLOTS ============================================================
 
-        By default, this function will create a grid of Axes such that each
-        numeric variable in data will by shared across the y-axes across a
-        single row and the x-axes across a single column. The diagonal
-        plots drow a univariate distribution to show the marginal distribution
-        of the data in each column.
-        The values are grouped by particle type (stars, gas and dark matter).
+    def get_df_and_hue(
+        self, ptypes, attributes, lmap, *, galaxy_circular_velocity=False
+    ):
+        """
+        Dataframe and style constructor for the galaxy plot implementations.
+
+        The hue is always the particle type. ``lmap`` renames particle types
+        for display (e.g. ``{"stars": "estrella"}``).
 
         Parameters
         ----------
         ptypes : keys of ``ParticleSet class`` parameters.
             Particle type. Default value = None
         attributes : keys of ``ParticleSet class`` parameters.
-            Names of ``ParticleSet class`` parameters. Default value = None
+            Names of ``ParticleSet class`` parameters. Each particle set's
+            own, self-contained ``circular_velocity`` is one of them.
         lmap : dict or callable
-            Name assignment to the particle types, e.g.
-            ``{"stars": "estrella"}``.
-            Default value = None
-        **kwargs :
-            Additional keyword arguments are passed and are documented in
-            ``seaborn.pairplot``.
+            Name assignment to the particle types.
+        galaxy_circular_velocity : bool, default value = False
+            Whether to add the ``galaxy_circular_velocity`` column (see
+            ``Galaxy.circular_velocity_``). Most plots don't use it, so it
+            isn't computed unless asked for.
 
         Returns
         -------
-        seaborn.axisgrid.PairGrid
+        df : pandas.DataFrame
+            DataFrame of galaxy properties with the particle type in the
+            ``ptype`` column (already renamed through ``lmap``).
+        style : dict
+            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
+            display names of the particle types present in ``df``.
         """
-        df, style = self.get_df_and_hue(
-            ptypes=ptypes, attributes=attributes, lmap=lmap
+        attributes = ["x", "y", "z"] if attributes is None else attributes
+        attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
+
+        df = self._galaxy.to_dataframe(
+            ptypes=ptypes,
+            attributes=attributes,
+            galaxy_circular_velocity=galaxy_circular_velocity,
         )
 
-        kwargs.setdefault("kind", "hist")
-        kwargs.setdefault("diag_kind", "kde")
-        kwargs.setdefault("diag_kws", {"fill": False})
+        lmap = self._coerce_lmap(lmap)
 
-        ax = sns.pairplot(
-            data=df,
-            hue="ptype",
-            hue_order=style["hue_order"],
-            palette=style["palette"],
-            **kwargs,
-        )
-        return ax
+        present = set(df["ptype"].unique())
+        names = {}
+        for ptype in self._PTYPE_ORDER:
+            if ptype in present:
+                names[ptype] = lmap(ptype)
+
+        df["ptype"] = df["ptype"].map(names).astype("category")
+
+        return df, self._make_ptype_style(names)
 
     def hist(self, x="x", *, y="z", ptypes=None, lmap=None, **kwargs):
         """Draw a histogram of galaxy properties.
@@ -358,15 +317,19 @@ class GalaxyPlotter:
         ax.set_box_aspect(1)
         return ax
 
-    def rotation_curve(self, *, ptypes=None, lmap=None, **kwargs):
+    def rotation_curve(self, *, ptypes=None, galaxy=True, lmap=None, **kwargs):
         """Draw the galaxy's rotation curve (circular velocity vs radius).
 
-        Circular velocity is computed from the mass enclosed within the
-        whole galaxy (stars, dark matter and gas pooled together; see
-        ``Galaxy.circular_velocity_``), not from each particle type on
-        its own. Each particle type keeps its usual style (stars solid,
-        gas dashed, dark matter dotted) to show which radii it covers,
-        but all three trace the same underlying curve.
+        Draws two kinds of curves:
+
+        - The whole galaxy's rotation curve, in solid black: circular
+          velocity computed from the mass enclosed by stars, dark matter
+          and gas pooled together (see ``Galaxy.circular_velocity_``).
+        - One curve per particle type, in its usual style (stars solid,
+          gas dashed, dark matter dotted), computed from that type's own
+          mass alone (see ``ParticleSet.circular_velocity_``). These show
+          each component's own contribution, not the galaxy's real
+          dynamics.
 
         Parameters
         ----------
@@ -378,7 +341,8 @@ class GalaxyPlotter:
             Default value = None
         **kwargs
             Additional keyword arguments are passed and are documented
-            in ``seaborn.lineplot``. ``ax`` can be overridden.
+            in ``seaborn.lineplot``. ``ax`` and the line style of every
+            curve can be overridden.
 
         Returns
         -------
@@ -386,20 +350,39 @@ class GalaxyPlotter:
         """
         df, style = self.get_df_and_hue(
             ptypes=ptypes,
-            attributes=["radius"],
+            attributes=["radius", "circular_velocity"],
             lmap=lmap,
-            circular_velocity=True,
+            galaxy_circular_velocity=True,
         )
 
         ax = kwargs.pop("ax", None)
         ax = plt.gca() if ax is None else ax
         kwargs.setdefault("estimator", None)
 
+        if galaxy:
+            # whole galaxy: a single curve pooling every particle type
+            whole_galaxy = df.sort_values("radius")
+            whole_galaxy_kws = {
+                "color": "black",
+                "linestyle": "-",
+                "label": "galaxy",
+            }
+            whole_galaxy_kws.update(kwargs)
+            sns.lineplot(
+                data=whole_galaxy,
+                x="radius",
+                y="galaxy_circular_velocity",
+                ax=ax,
+                **whole_galaxy_kws,
+            )
+
+        # each particle type on its own, with its usual style
         for name in style["hue_order"]:
             group = df[df["ptype"] == name].sort_values("radius")
             group_kws = {
                 "color": style["palette"][name],
                 "linestyle": style["linestyles"][name],
+                "label": name,
             }
             group_kws.update(kwargs)
             sns.lineplot(
@@ -409,8 +392,15 @@ class GalaxyPlotter:
                 ax=ax,
                 **group_kws,
             )
-        ax.set_xlabel("radius [kpc]")
-        ax.set_ylabel("circular velocity [km/s]")
+
+        kpc = u.kpc.to_string("latex")
+        ax.set_xlabel(f"radius [{kpc}]")
+
+        kms = (u.km / u.s).to_string("latex")
+        ax.set_ylabel(f"circular velocity [{kms}]")
+
+        ax.legend()
+
         return ax
 
     # STELLAR DYNAMICS ========================================================
@@ -462,58 +452,6 @@ class GalaxyPlotter:
         )
 
         return df, self._make_ptype_style(names)
-
-    def sdyn_pairplot(
-        self,
-        *,
-        attributes=None,
-        lmap=None,
-        sdyn_kws=None,
-        **kwargs,
-    ):
-        """
-        Draw a pairplot of stellar dynamics.
-
-        By default, this function will create a grid of Axes such that each
-        numeric variable in data will by shared across the y-axes across a
-        single row and the x-axes across a single column. The diagonal
-        plots drow a univariate distribution to show the marginal distribution
-        of the data in each column.
-
-        Parameters
-        ----------
-        attributes : keys of ``GalaxyStellarDynamics`` dataframe.
-            Names of ``GalaxyStellarDynamics`` attributes.
-            Default value = None
-        lmap : dict or callable
-            Name assignment to the stars, e.g. ``{"stars": "estrella"}``.
-            Default value = None
-        sdyn_kws: dict
-            Extra parameters for galaxy.stellar_dynamics() method.
-        **kwargs :
-            Additional keyword arguments are passed and are documented in
-            ``seaborn.pairplot``.
-
-        Returns
-        -------
-        seaborn.axisgrid.PairGrid
-        """
-        df, style = self.get_sdyn_df_and_hue(
-            sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
-        )
-
-        kwargs.setdefault("kind", "hist")
-        kwargs.setdefault("diag_kind", "kde")
-        kwargs.setdefault("diag_kws", {"fill": False})
-
-        ax = sns.pairplot(
-            data=df,
-            hue="ptype",
-            hue_order=style["hue_order"],
-            palette=style["palette"],
-            **kwargs,
-        )
-        return ax
 
     def sdyn_hist(
         self,

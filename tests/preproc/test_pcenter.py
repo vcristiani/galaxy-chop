@@ -59,6 +59,7 @@ def test_center_without_potential_energy(galaxy, with_potential):
             "Jz",
             "radius",
             "circular_velocity",
+            "galaxy_circular_velocity",
             "potential",
             "kinetic_energy",
             "total_energy",
@@ -106,6 +107,7 @@ def test_center(galaxy):
         "Jz",
         "radius",
         "circular_velocity",
+        "galaxy_circular_velocity",
         "kinetic_energy",
         "total_energy",
     ]
