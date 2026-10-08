@@ -43,10 +43,13 @@ def test_ComponentConf_childrens():
 def test_config_hierarchy():
     """Test the parent references in the configuration (actual API)."""
 
-    assert config.disk.parent is config.stars or config.disk.parent is None
+    assert config.galaxy.parent is None
+
+    assert config.disk.parent is config.galaxy
+    assert config.stars.parent is config.galaxy
+    assert config.dark_matter.parent is config.galaxy
+    assert config.gas.parent is config.galaxy
+    assert config.no_component.parent is config.galaxy
+
     assert config.spheroid.parent is config.stars
-
     assert config.cold_disk.parent is config.disk
-
-    assert config.stars.parent is None
-    assert config.dark_matter.parent is None

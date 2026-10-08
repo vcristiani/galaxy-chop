@@ -27,7 +27,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from ..constants import PLOT_ORDER, plot_config
+from ..constants import PLOT_ORDER, make_component_styles, plot_config
 
 # =============================================================================
 # ACCESSOR
@@ -173,28 +173,16 @@ class GalaxyPlotter:
             except AttributeError:
                 pass
 
-    def _make_ptype_style(self, names):
-        """
-        Build the fixed plot style for the given particle types.
+    def _drop_legend_title(self, ax):
+        """Remove the legend title, if any.
 
-        Parameters
-        ----------
-        names : dict
-            Maps each particle type to its display name, in drawing order.
-
-        Returns
-        -------
-        dict
-            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
-            display names of the particle types.
+        ``seaborn`` plots built from ``hue=`` default to using the hue
+        column's name (e.g. ``"ptype"``) as the legend title, which isn't
+        meant to be shown.
         """
-        return {
-            "hue_order": list(names.values()),
-            "palette": {names[p]: plot_config[p].plot_color for p in names},
-            "linestyles": {
-                names[p]: plot_config[p].plot_linestyle for p in names
-            },
-        }
+        legend = ax.get_legend()
+        if legend is not None:
+            legend.set_title(None)
 
     # COMMON PLOTS ============================================================
 
@@ -227,8 +215,9 @@ class GalaxyPlotter:
             DataFrame of galaxy properties with the particle type in the
             ``ptype`` column (already renamed through ``lmap``).
         style : dict
-            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
-            display names of the particle types present in ``df``.
+            Keys ``hue_order``, ``palette``, ``linestyles``, ``alphas`` and
+            ``linewidths``, indexed by the display names of the particle
+            types present in ``df``.
         """
         attributes = ["x", "y", "z"] if attributes is None else attributes
         attributes = list(dict.fromkeys(list(attributes) + ["ptype"]))
@@ -249,7 +238,7 @@ class GalaxyPlotter:
 
         df["ptype"] = df["ptype"].map(names).astype("category")
 
-        return df, self._make_ptype_style(names)
+        return df, make_component_styles(names)
 
     def hist(self, x="x", *, ptypes=None, lmap=None, **kwargs):
         """Draw a univariate histogram of a galaxy property.
@@ -315,6 +304,7 @@ class GalaxyPlotter:
             palette=style["palette"],
             **kwargs,
         )
+        self._drop_legend_title(ax)
         self._add_units_to_labels(ax, x, y)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
@@ -381,13 +371,17 @@ class GalaxyPlotter:
         ax = plt.gca() if ax is None else ax
         kwargs.setdefault("fill", False)
 
-        # bivariate kde draws contours (linestyles), univariate draws curves
+        # bivariate kde draws contours (linestyles/linewidths), univariate
+        # draws curves (linestyle/linewidth)
         ls_key = "linestyle" if y is None else "linestyles"
+        lw_key = "linewidth" if y is None else "linewidths"
         for name in style["hue_order"]:
             group = df[df["ptype"] == name]
             group_kws = {
                 "color": style["palette"][name],
                 ls_key: style["linestyles"][name],
+                lw_key: style["linewidths"][name],
+                "alpha": style["alphas"][name],
                 "label": name,
             }
             group_kws.update(kwargs)
@@ -413,6 +407,7 @@ class GalaxyPlotter:
                 for name in style["hue_order"]
             ]
             ax.legend(handles=handles)
+        self._drop_legend_title(ax)
         return ax
 
     def rotation_curve(self, *, ptypes=None, galaxy=True, lmap=None, **kwargs):
@@ -461,8 +456,7 @@ class GalaxyPlotter:
             # whole galaxy: a single curve pooling every particle type
             whole_galaxy = df.sort_values("radius")
             whole_galaxy_kws = {
-                "color": "black",
-                "linestyle": "-",
+                **plot_config.galaxy.get_mplstyle(),
                 "label": "galaxy",
             }
             whole_galaxy_kws.update(kwargs)
@@ -480,6 +474,8 @@ class GalaxyPlotter:
             group_kws = {
                 "color": style["palette"][name],
                 "linestyle": style["linestyles"][name],
+                "alpha": style["alphas"][name],
+                "linewidth": style["linewidths"][name],
                 "label": name,
             }
             group_kws.update(kwargs)
@@ -500,6 +496,7 @@ class GalaxyPlotter:
         ax.set_yscale("log")
 
         ax.legend()
+        self._drop_legend_title(ax)
 
         return ax
 
@@ -531,8 +528,8 @@ class GalaxyPlotter:
             stellar particles with finite values, with the particle type in
             the ``ptype`` column (already renamed through ``lmap``).
         style : dict
-            Keys ``hue_order``, ``palette`` and ``linestyles``, indexed by the
-            display name of the stars.
+            Keys ``hue_order``, ``palette``, ``linestyles``, ``alphas`` and
+            ``linewidths``, indexed by the display name of the stars.
         """
         sdyn_kws = {} if sdyn_kws is None else sdyn_kws
         sdyn = self._galaxy.stellar_dynamics(**sdyn_kws)
@@ -551,7 +548,7 @@ class GalaxyPlotter:
             np.full(len(df), names["stars"], dtype=object)
         )
 
-        return df, self._make_ptype_style(names)
+        return df, make_component_styles(names)
 
     def sdyn_hist(
         self, x="normalized_star_energy", *, lmap=None, sdyn_kws=None, **kwargs
@@ -627,6 +624,7 @@ class GalaxyPlotter:
             palette=style["palette"],
             **kwargs,
         )
+        self._drop_legend_title(ax)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
         return ax
@@ -705,10 +703,13 @@ class GalaxyPlotter:
 
         (name,) = style["hue_order"]
         ls_key = "linestyle" if y is None else "linestyles"
+        lw_key = "linewidth" if y is None else "linewidths"
         kde_kws = {
             "fill": False,
             "color": style["palette"][name],
             ls_key: style["linestyles"][name],
+            lw_key: style["linewidths"][name],
+            "alpha": style["alphas"][name],
             "label": name,
         }
         kde_kws.update(kwargs)
@@ -730,4 +731,5 @@ class GalaxyPlotter:
                 label=name,
             )
             ax.legend(handles=[handle])
+        self._drop_legend_title(ax)
         return ax

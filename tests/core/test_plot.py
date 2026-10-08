@@ -126,6 +126,11 @@ PTYPE_PALETTE = {
     "gas": "tab:blue",
     "dark_matter": "#222222",
 }
+PTYPE_ALPHA = {"stars": 1.0, "gas": 0.5, "dark_matter": 0.5}
+PTYPE_LINEWIDTH = {"stars": 2, "gas": 2, "dark_matter": 2}
+GALAXY_COLOR = "black"
+GALAXY_ALPHA = 1.0
+GALAXY_LINEWIDTH = 2.5
 
 
 def _zoom(ax, df, x, y=None, pct=1, margin=0.1):
@@ -161,6 +166,7 @@ def test_GalaxyPlotter_hist2d(galaxy, fig_test, fig_ref):
         palette=PTYPE_PALETTE,
         ax=exp_ax,
     )
+    exp_ax.get_legend().set_title(None)
     kpc = u.kpc.to_string("latex")
     exp_ax.set_xlabel(f"x [{kpc}]")
     exp_ax.set_ylabel(f"y [{kpc}]")
@@ -202,6 +208,8 @@ def test_GalaxyPlotter_kde2d(galaxy, fig_test, fig_ref):
         fill=False,
         color=PTYPE_PALETTE["gas"],
         linestyles="--",
+        linewidths=PTYPE_LINEWIDTH["gas"],
+        alpha=PTYPE_ALPHA["gas"],
         label="gas",
         ax=exp_ax,
     )
@@ -257,8 +265,10 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
         x="radius",
         y="galaxy_circular_velocity",
         estimator=None,
-        color="black",
+        color=GALAXY_COLOR,
         linestyle="-",
+        alpha=GALAXY_ALPHA,
+        linewidth=GALAXY_LINEWIDTH,
         label="galaxy",
         ax=exp_ax,
     )
@@ -270,6 +280,8 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
         estimator=None,
         color=PTYPE_PALETTE["gas"],
         linestyle="--",
+        alpha=PTYPE_ALPHA["gas"],
+        linewidth=PTYPE_LINEWIDTH["gas"],
         label="gas",
         ax=exp_ax,
     )
@@ -303,6 +315,8 @@ def test_GalaxyPlotter_rotation_curve_no_galaxy(galaxy, fig_test, fig_ref):
         estimator=None,
         color=PTYPE_PALETTE["gas"],
         linestyle="--",
+        alpha=PTYPE_ALPHA["gas"],
+        linewidth=PTYPE_LINEWIDTH["gas"],
         label="gas",
         ax=exp_ax,
     )
@@ -345,6 +359,8 @@ def test_GalaxyPlotter_get_sdyn_df_and_hue(read_hdf5_galaxy):
         "hue_order": ["stars"],
         "palette": {"stars": "tab:red"},
         "linestyles": {"stars": "-"},
+        "alphas": {"stars": 1.0},
+        "linewidths": {"stars": 2},
     }
 
 
@@ -420,6 +436,7 @@ def test_GalaxyPlotter_sdyn_hist2d(read_hdf5_galaxy, fig_test, fig_ref):
         palette=PTYPE_PALETTE,
         ax=exp_ax,
     )
+    exp_ax.get_legend().set_title(None)
     _zoom(exp_ax, df, "eps")
     exp_ax.set_box_aspect(1)
 
@@ -458,6 +475,8 @@ def test_GalaxyPlotter_sdyn_kde2d(read_hdf5_galaxy, fig_test, fig_ref):
         fill=False,
         color=PTYPE_PALETTE["stars"],
         linestyle="-",
+        linewidth=PTYPE_LINEWIDTH["stars"],
+        alpha=PTYPE_ALPHA["stars"],
         label="stars",
         ax=exp_ax,
     )

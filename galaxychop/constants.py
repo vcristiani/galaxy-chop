@@ -27,9 +27,9 @@ To access the configuration of a component:
 >>> from galaxychop import constants
 >>> constants.plot_config.dark_matter.label
 'Dark Matter'
->>> constants.plot_config.cold_disk.plot_color
+>>> constants.plot_config.cold_disk.color
 '#4477AA'
->>> constants.plot_config.disk.plot_linestyle
+>>> constants.plot_config.disk.linestyle
 '-'
 
 To find the children of a component:
@@ -105,9 +105,14 @@ G = c.G.to(G_UNIT).to_value()
 
 
 @dataclasses.dataclass(frozen=True)
-class _ComponentConf:
+class _ComponentPlotStyle:
     """
-    Immutable dataclass to store the configuration of a single component.
+    Immutable dataclass to store the plotting style of a single component.
+
+    Field names match the matplotlib/seaborn kwargs they end up feeding
+    (``color``, ``alpha``, ``linestyle``, ``linewidth``) so a style can be
+    propagated with a plain ``**get_mplstyle()`` instead of a hand-written
+    translation at every call site.
 
     This class tracks all its instances via a `weakref.WeakSet` to dynamically
     determine the parent-child relationships between components.
@@ -116,31 +121,31 @@ class _ComponentConf:
     ----------
     label : str
         The human-readable name of the component (e.g., "Cold Disk").
-    parent : _ComponentConf or None
+    parent : _ComponentPlotStyle or None
         A direct reference to the parent component object, if any.
         This creates a hierarchy.
-    plot_color : str
+    color : str
         The hexadecimal color code to be used for plotting this component.
         Main components use black, subcomponents use Paul Tol colors.
-    plot_alpha : float
+    alpha : float
         The alpha (transparency) value to be used for plotting.
-    plot_zorder : int
+    zorder : int
         The drawing order for plots (higher numbers are drawn on top).
-    plot_linestyle : str
+    linestyle : str
         The line style for plotting (matplotlib format).
         Main components have unique line styles for maximum accessibility.
-    plot_linewidth : float
+    linewidth : float
         The line width for plotting, scaled by component importance.
 
     """
 
     label: str
-    parent: Optional["_ComponentConf"]
-    plot_color: str
-    plot_alpha: float
-    plot_zorder: int
-    plot_linestyle: str
-    plot_linewidth: float
+    parent: Optional["_ComponentPlotStyle"]
+    color: str
+    alpha: float
+    zorder: int
+    linestyle: str
+    linewidth: float
 
     _instances = weakref.WeakSet()
 
@@ -158,10 +163,10 @@ class _ComponentConf:
     def get_mplstyle(self):
         """Return the matplotlib style kwargs for this component."""
         return {
-            "color": self.plot_color,
-            "alpha": self.plot_alpha,
-            "linestyle": self.plot_linestyle,
-            "linewidth": self.plot_linewidth,
+            "color": self.color,
+            "alpha": self.alpha,
+            "linestyle": self.linestyle,
+            "linewidth": self.linewidth,
         }
 
 
@@ -169,15 +174,29 @@ class _ComponentConf:
 # accessibility). Subcomponents use Paul Tol Bright colors for
 # differentiation within families.
 
-# Base components
-_no_component = _ComponentConf(
-    label="Unclassified",
+# WHOLE GALAXY
+# The pooled curve (e.g. GalaxyPlotter.rotation_curve's galaxy=True line).
+# It is the root of every other component and is plotted first, right
+# before the unclassified bucket, so everything else is drawn over it.
+_galaxy = _ComponentPlotStyle(
+    label="Galaxy",
     parent=None,
-    plot_color="#BBBBBB",  # Neutral gray
-    plot_alpha=1.0,
-    plot_zorder=0,
-    plot_linestyle=":",  # Dotted for uncertain/unclassified
-    plot_linewidth=1.0,
+    color="black",  # matches GalaxyPlotter's fixed look
+    alpha=1.0,
+    zorder=-1,
+    linestyle="-",  # Solid - matches GalaxyPlotter's fixed look
+    linewidth=2.5,  # same weight as the main particle types
+)
+
+# Base components
+_no_component = _ComponentPlotStyle(
+    label="Unclassified",
+    parent=_galaxy,
+    color="#BBBBBB",  # Neutral gray
+    alpha=1.0,
+    zorder=0,
+    linestyle=":",  # Dotted for uncertain/unclassified
+    linewidth=1.0,
 )
 
 # MAIN COMPONENTS
@@ -186,105 +205,105 @@ _no_component = _ComponentConf(
 # They are drawn slightly thicker than every component below, and only
 # gas/dm carry some alpha (making them read as slightly lighter); stars and
 # every component are fully opaque.
-_dm = _ComponentConf(
+_dm = _ComponentPlotStyle(
     label="Dark Matter",
-    parent=None,
-    plot_color="#222222",  # matches GalaxyPlotter's fixed look
-    plot_alpha=0.7,
-    plot_zorder=1,
-    plot_linestyle=":",  # Dotted - most fragmented
-    plot_linewidth=2.6,
+    parent=_galaxy,
+    color="#222222",  # matches GalaxyPlotter's fixed look
+    alpha=0.5,
+    zorder=1,
+    linestyle=":",  # Dotted - most fragmented
+    linewidth=2,
 )
 
-_gas = _ComponentConf(
+_gas = _ComponentPlotStyle(
     label="Gas",
-    parent=None,
-    plot_color="tab:blue",  # matches GalaxyPlotter's fixed look
-    plot_alpha=0.7,
-    plot_zorder=2,
-    plot_linestyle="--",  # Dashed - matches GalaxyPlotter's fixed look
-    plot_linewidth=2.6,
+    parent=_galaxy,
+    color="tab:blue",  # matches GalaxyPlotter's fixed look
+    alpha=0.5,
+    zorder=2,
+    linestyle="--",  # Dashed - matches GalaxyPlotter's fixed look
+    linewidth=2,
 )
 
-_stars = _ComponentConf(
+_stars = _ComponentPlotStyle(
     label="Stars",
-    parent=None,
-    plot_color="tab:red",  # matches GalaxyPlotter's fixed look
-    plot_alpha=1.0,
-    plot_zorder=3,
-    plot_linestyle="-",  # Solid - most continuous
-    plot_linewidth=2.6,
+    parent=_galaxy,
+    color="tab:red",  # matches GalaxyPlotter's fixed look
+    alpha=1.0,
+    zorder=3,
+    linestyle="-",  # Solid - most continuous
+    linewidth=2,
 )
 
-_disk = _ComponentConf(
+_disk = _ComponentPlotStyle(
     label="Disk",
-    parent=None,
-    plot_color="#2E5994",  # Dark blue - darker than cold_disk
-    plot_alpha=1.0,
-    plot_zorder=4,
-    plot_linestyle="-",  # Solid, same as stars (disk is a stellar structure)
-    plot_linewidth=2.2,
+    parent=_galaxy,
+    color="#2E5994",  # Dark blue - darker than cold_disk
+    alpha=1.0,
+    zorder=4,
+    linestyle="-",  # Solid, same as stars (disk is a stellar structure)
+    linewidth=1,
 )
 
 # SUBCOMPONENTS (Paul Tol Bright colors)
-_spheroid = _ComponentConf(
+_spheroid = _ComponentPlotStyle(
     label="Spheroid",
     parent=_stars,
-    plot_color="#EE6677",  # Red (Paul Tol) - hot kinematic component
-    plot_alpha=1.0,
-    plot_zorder=3,
-    plot_linestyle="-",  # Solid for spheroids
-    plot_linewidth=1.8,
+    color="#EE6677",  # Red (Paul Tol) - hot kinematic component
+    alpha=1.0,
+    zorder=3,
+    linestyle="-",  # Solid for spheroids
+    linewidth=1,
 )
 
-_cold_disk = _ComponentConf(
+_cold_disk = _ComponentPlotStyle(
     label="Cold Disk",
     parent=_disk,
-    plot_color="#4477AA",  # Blue (Paul Tol) - child of dark blue disk
-    plot_alpha=1.0,
-    plot_zorder=7,
-    plot_linestyle="-",  # Solid for primary disk component
-    plot_linewidth=2.0,
+    color="#4477AA",  # Blue (Paul Tol) - child of dark blue disk
+    alpha=1.0,
+    zorder=7,
+    linestyle="-",  # Solid for primary disk component
+    linewidth=1,
 )
 
-_warm_disk = _ComponentConf(
+_warm_disk = _ComponentPlotStyle(
     label="Warm Disk",
     parent=_disk,
-    plot_color="#228833",  # Green (Paul Tol) - intermediate component
-    plot_alpha=1.0,
-    plot_zorder=6,
-    plot_linestyle="-",  # Solid for secondary disk component
-    plot_linewidth=1.5,
+    color="#228833",  # Green (Paul Tol) - intermediate component
+    alpha=1.0,
+    zorder=6,
+    linestyle="-",  # Solid for secondary disk component
+    linewidth=1,
 )
 
-_bar = _ComponentConf(
+_bar = _ComponentPlotStyle(
     label="Bar",
     parent=_disk,
-    plot_color="#EE7733",  # Orange (Paul Tol) - prominent feature
-    plot_alpha=1.0,
-    plot_zorder=8,
-    plot_linestyle="-",  # Solid for observed bar signatures
-    plot_linewidth=2.5,
+    color="#EE7733",  # Orange (Paul Tol) - prominent feature
+    alpha=1.0,
+    zorder=8,
+    linestyle="-",  # Solid for observed bar signatures
+    linewidth=1,
 )
 
-_bulge = _ComponentConf(
+_bulge = _ComponentPlotStyle(
     label="Bulge",
     parent=_spheroid,
-    plot_color="#EE6677",  # Red (Paul Tol) - same as parent spheroid
-    plot_alpha=1.0,
-    plot_zorder=5,
-    plot_linestyle="-",  # Solid for classical bulge
-    plot_linewidth=1.8,
+    color="#EE6677",  # Red (Paul Tol) - same as parent spheroid
+    alpha=1.0,
+    zorder=5,
+    linestyle="-",  # Solid for classical bulge
+    linewidth=1,
 )
 
-_halo = _ComponentConf(
+_halo = _ComponentPlotStyle(
     label="Halo",
     parent=_spheroid,
-    plot_color="#BBBBBB",  # Gray (Paul Tol) - diffuse component
-    plot_alpha=1.0,
-    plot_zorder=4,
-    plot_linestyle="-",  # Solid for diffuse component
-    plot_linewidth=1.2,
+    color="#BBBBBB",  # Gray (Paul Tol) - diffuse component
+    alpha=1.0,
+    zorder=4,
+    linestyle="-",  # Solid for diffuse component
+    linewidth=1,
 )
 
 
@@ -292,7 +311,7 @@ _halo = _ComponentConf(
 # This Bunch instance is the single source of truth for component
 # configurations and should be imported by other modules.
 plot_config = bunch.Bunch(
-    "galaxychop_config",
+    "plot_config",
     {
         "no_component": _no_component,
         "dark_matter": _dm,
@@ -305,15 +324,59 @@ plot_config = bunch.Bunch(
         "bar": _bar,
         "bulge": _bulge,
         "halo": _halo,
+        "galaxy": _galaxy,
     },
 )
 
+# The components only need to be reachable through plot_config from here
+# on; drop the module-level names so plot_config stays the single source
+# of truth.
+del (
+    _galaxy,
+    _no_component,
+    _dm,
+    _gas,
+    _stars,
+    _disk,
+    _spheroid,
+    _cold_disk,
+    _warm_disk,
+    _bar,
+    _bulge,
+    _halo,
+)
+
 #: Drawing order of the galaxy particle types, derived from their
-#: ``plot_zorder`` in ``plot_config`` (stars go last, so they sit on top
+#: ``zorder`` in ``plot_config`` (stars go last, so they sit on top
 #: of the more diffuse components).
 PLOT_ORDER = tuple(
     sorted(
         plot_config.keys(),
-        key=lambda ptype: plot_config[ptype].plot_zorder,
+        key=lambda ptype: plot_config[ptype].zorder,
     )
 )
+
+
+def make_component_styles(names):
+    """
+    Build the fixed plot style for the given components.
+
+    Parameters
+    ----------
+    names : dict
+        Maps each component key in ``plot_config`` to its display name,
+        in drawing order.
+
+    Returns
+    -------
+    dict
+        Keys ``hue_order``, ``palette``, ``linestyles``, ``alphas`` and
+        ``linewidths``, indexed by the display names of the components.
+    """
+    return {
+        "hue_order": list(names.values()),
+        "palette": {names[p]: plot_config[p].color for p in names},
+        "linestyles": {names[p]: plot_config[p].linestyle for p in names},
+        "alphas": {names[p]: plot_config[p].alpha for p in names},
+        "linewidths": {names[p]: plot_config[p].linewidth for p in names},
+    }
