@@ -10,7 +10,6 @@
 .. toctree::
    :maxdepth: 2
 
-   config.rst
    constants.rst
    io.rst
    pipeline.rst

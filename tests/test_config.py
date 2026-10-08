@@ -26,7 +26,7 @@ import pytest
 def test_ComponentConf_immutability():
     """Test that _ComponentConf instances are immutable."""
     with pytest.raises(AttributeError):
-        config.dm.label = "New label"
+        config.dark_matter.label = "New label"
 
 
 def test_ComponentConf_childrens():
@@ -34,10 +34,10 @@ def test_ComponentConf_childrens():
     assert isinstance(config.stars.childrens, frozenset)
     assert isinstance(config.disk.childrens, frozenset)
     assert isinstance(config.cold_disk.childrens, frozenset)
-    assert isinstance(config.dm.childrens, frozenset)
+    assert isinstance(config.dark_matter.childrens, frozenset)
 
     assert config.cold_disk.childrens == frozenset()
-    assert config.dm.childrens == frozenset()
+    assert config.dark_matter.childrens == frozenset()
 
 
 def test_config_hierarchy():
@@ -49,4 +49,4 @@ def test_config_hierarchy():
     assert config.cold_disk.parent is config.disk
 
     assert config.stars.parent is None
-    assert config.dm.parent is None
+    assert config.dark_matter.parent is None

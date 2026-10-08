@@ -1,6 +1,6 @@
 [project]
 name = "galaxychop"
-version = "0.3.dev0"
+version = "1.0.dev0"
 authors = [
     { name = "Valeria Cristiani et al", email = "valeria.cristiani@unc.edu.ar" },
     { name = "Juan B Cabral", email = "jbcabral@unc.edu.ar" },

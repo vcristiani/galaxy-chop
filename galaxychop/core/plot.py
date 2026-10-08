@@ -27,6 +27,8 @@ import pandas as pd
 
 import seaborn as sns
 
+from ..constants import PLOT_ORDER, plot_config
+
 # =============================================================================
 # ACCESSOR
 # =============================================================================
@@ -37,16 +39,6 @@ class GalaxyPlotter:
     """Make plots of a Galaxy."""
 
     _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_sdyn_df_and_hue")
-
-    # Fixed look of the galaxy particle types. Drawing order puts stars last,
-    # so they sit on top of the more diffuse components.
-    _PTYPE_ORDER = ("dark_matter", "gas", "stars")
-    _PTYPE_COLORS = {
-        "stars": "tab:red",
-        "gas": "tab:blue",
-        "dark_matter": "#222222",
-    }
-    _PTYPE_LINESTYLES = {"stars": "-", "gas": "--", "dark_matter": ":"}
 
     # Percentile (and its mirror, 100 - it) used to zoom in on the bulk of
     # the plotted data, so a handful of far-out particles don't stretch the
@@ -198,8 +190,10 @@ class GalaxyPlotter:
         """
         return {
             "hue_order": list(names.values()),
-            "palette": {names[p]: self._PTYPE_COLORS[p] for p in names},
-            "linestyles": {names[p]: self._PTYPE_LINESTYLES[p] for p in names},
+            "palette": {names[p]: plot_config[p].plot_color for p in names},
+            "linestyles": {
+                names[p]: plot_config[p].plot_linestyle for p in names
+            },
         }
 
     # COMMON PLOTS ============================================================
@@ -249,7 +243,7 @@ class GalaxyPlotter:
 
         present = set(df["ptype"].unique())
         names = {}
-        for ptype in self._PTYPE_ORDER:
+        for ptype in PLOT_ORDER:
             if ptype in present:
                 names[ptype] = lmap(ptype)
 

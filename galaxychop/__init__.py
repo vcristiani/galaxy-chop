@@ -19,7 +19,7 @@ Implementation of a few galaxy dynamic decomposition methods.
 # =============================================================================
 
 from . import constants, decomposers, preproc, utils
-from .config import config
+from .constants import plot_config as config
 from .core import (
     Galaxy,
     NoGravitationalPotentialError,
