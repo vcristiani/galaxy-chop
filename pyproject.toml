@@ -8,6 +8,7 @@ readme = "README.md"
 license = { file = "LICENSE.txt" }
 description = "Galaxy dynamic de-composition"
 keywords = ["galaxy", "dynamics"]
+requires-python = ">=3.11,<3.16"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
@@ -16,10 +17,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
 ]
@@ -29,7 +31,7 @@ urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" 
 dependencies = [
     # --- Core ---
     "scipy >= 1.0",
-    "scikit-learn < 1.7",
+    "scikit-learn",
     "uttrs",
     "h5py",
     "custom_inherit",
@@ -68,7 +70,7 @@ galaxychop = "galaxychop.cli:main"
 
 [tool.black]
 line-length = 79
-target-version = ["py310", "py311", "py312", "py313"]
+target-version = ["py311", "py312", "py313"]
 
 [tool.pytest.ini_options]
 markers = [
