@@ -27,9 +27,11 @@ import attr
 
 import numpy as np
 
+import pandas as pd
+
 import uttr
 
-from ...core import Galaxy, ParticleSet
+from ...core import Galaxy, ParticleSet, ParticleSetType
 
 
 # =============================================================================
@@ -40,6 +42,10 @@ from ...core import Galaxy, ParticleSet
 #: Used when particles don't belong to any identified component (e.g., gas or
 #: dark matter particles in stellar decompositions, or unassigned particles).
 NAN_STR_REPR = "-"
+
+#: Emoji marking a particle set/galaxy as decomposed into components,
+#: used alongside the regular ptype/galaxy emoji in _repr_html_.
+DECOMPOSED_EMOJI = "🧩"
 
 
 # =============================================================================
@@ -275,6 +281,33 @@ class DecomposedParticleSet(ParticleSet):
         # Make the probabilities array read-only.
         self.probabilities.setflags(write=False)
 
+    def _repr_html_(self):
+        """HTML repr(x), used by Jupyter/IPython notebooks."""
+        cls_name = type(self).__name__
+
+        # total mass with its unit, both as LaTeX; the physical total,
+        # not the per-component breakdown total_mass() returns here
+        total_mass = ParticleSet.total_mass(self)
+        m_unit = total_mass.unit._repr_latex_()
+
+        # one row per component, indexed by its human-readable label
+        df = self.total_mass().set_index("labels")
+        df.index.name = None
+        table_html = df.to_html(float_format="{:.2e}".format)
+
+        return (
+            "<div>"
+            f"<p><b>{cls_name}</b> {self.ptype.emoji}{DECOMPOSED_EMOJI} "
+            f"{self.ptype.name!r} &mdash; "
+            f"<b>size</b>={len(self):,}, "
+            f"$\\mathbf{{M}}$={total_mass.value:.2e} {m_unit}, "
+            f"<b>potentials</b>={self.has_potential_}, "
+            f"<b>components</b>={len(set(self.labels))}, "
+            f"<b>probabilities</b>={self.has_probabilities}</p>"
+            f"{table_html}"
+            "</div>"
+        )
+
     # PUBLIC METHODS ==========================================================
 
     def total_mass(self):
@@ -300,6 +333,8 @@ class DecomposedParticleSet(ParticleSet):
         pandas.DataFrame
             DataFrame with MultiIndex (components, labels) and columns:
 
+            - 'particles' (int): Number of particles assigned to the
+              component
             - 'm' (float): Deterministic total mass in M_sun units
             - 'mf' (float): Deterministic mass fraction (m / total_mass)
             - 'pm' (float): Probabilistic total mass
@@ -323,35 +358,37 @@ class DecomposedParticleSet(ParticleSet):
 
         >>> dps = DecomposedParticleSet(...)  # has_probabilities=False
         >>> dps.total_mass()
-                       labels         m        mf
+                       labels  particles         m        mf
         components
-        0          disk      6.8e9    0.486
-        1          bulge     3.5e9    0.250
-        2          halo      3.7e9    0.264
+        0          disk              2    6.8e9    0.486
+        1          bulge             2    3.5e9    0.250
+        2          halo              2    3.7e9    0.264
 
         Probabilistic decomposition:
 
         >>> dps = DecomposedParticleSet(...)  # has_probabilities=True
         >>> dps.total_mass()
-                       labels         m        mf        pm       pmf
+                       labels  particles        m       mf       pm      pmf
         components
-        0          disk      6.8e9    0.486    6.9e9    0.493
-        1          bulge     3.5e9    0.250    3.4e9    0.243
-        2          halo      3.7e9    0.264    3.7e9    0.264
+        0          disk              2    6.8e9    0.486    6.9e9    0.493
+        1          bulge             2    3.5e9    0.250    3.4e9    0.243
+        2          halo              2    3.7e9    0.264    3.7e9    0.264
         """
         # Create DataFrame with component assignments, labels, masses,
-        # and probabilities
+        # and (if any) per-component membership probabilities
+        prob_columns = [f"prob_{i}" for i in range(self.probabilities_n)]
         df = self.to_dataframe(
-            attributes=["components", "labels", "m", "probabilities"],
-            galaxy_circular_velocity=False,
+            attributes=["components", "labels", "m", *prob_columns],
         )
         # Replace NaN component values with a placeholder for grouping
         df["components"] = df["components"].fillna(NAN_STR_REPR)
 
         pset_total_mass = self.m.sum().value
 
-        # Calculate deterministic masses: sum all particle masses by component
-        result = df.groupby(["components", "labels"])[["m"]].sum()
+        # Calculate deterministic masses and particle counts per component
+        result = df.groupby(["components", "labels"]).agg(
+            particles=("m", "size"), m=("m", "sum")
+        )
         result["mf"] = result["m"] / pset_total_mass
 
         # Calculate probabilistic masses if available
@@ -363,7 +400,7 @@ class DecomposedParticleSet(ParticleSet):
             for component in result.index.levels[0]:
                 if component != NAN_STR_REPR:
                     # For valid components, compute probability-weighted mass
-                    prob_column = f"probabilities_{int(component)}"
+                    prob_column = f"prob_{int(component)}"
                     component_particles = df[df["components"] == component]
 
                     # Probabilistic mass: Σ(mass × probability)
@@ -651,6 +688,77 @@ class DecomposedGalaxy(Galaxy):
 
         return f"<{cls_name} {method}, {gal_repr}, {probs}, {component}>"
 
+    def _repr_html_(self):
+        """Rich HTML representation, used by Jupyter/IPython notebooks."""
+        cls_name = type(self).__name__
+
+        # one row per particle type (particle count and total mass), same
+        # table Galaxy._repr_html_ builds; not the per-component breakdown
+        # total_mass() returns on this class. ParticleSet.total_mass is
+        # called explicitly: self.stars.total_mass() would resolve to
+        # DecomposedParticleSet's own override instead.
+        df = pd.DataFrame(
+            {
+                "particles": [
+                    len(self.stars),
+                    len(self.dark_matter),
+                    len(self.gas),
+                ],
+                "total_mass": [
+                    ParticleSet.total_mass(self.stars).value,
+                    ParticleSet.total_mass(self.dark_matter).value,
+                    ParticleSet.total_mass(self.gas).value,
+                ],
+            },
+            index=[
+                self.stars.ptype.humanize(),
+                self.dark_matter.ptype.humanize(),
+                self.gas.ptype.humanize(),
+            ],
+        )
+        index = []
+        for ptype_name in df.index:
+            pt = ParticleSetType.mktype(ptype_name)
+            name = " ".join(pt.name.split("_")).title()
+            index.append(f"{name} {pt.emoji}")
+        df.index = index
+
+        m_unit = self.stars.m.unit._repr_latex_()
+        columns = []
+        for column in df.columns:
+            if column == "total_mass":
+                name = f"{m_unit}"
+            else:
+                name = " ".join(column.split("_")).title()
+            columns.append(name)
+        df.columns = columns
+
+        table_html = df.to_html(float_format="{:.2e}".format)
+
+        # per-component breakdown, indexed by particle type and the
+        # human-readable component label
+        components_df = self.total_mass().reset_index()
+        components_df = components_df.set_index(["ptype", "labels"])
+        components_df = components_df.drop(columns="components")
+        components_df.index.names = [None, None]
+        components_html = components_df.to_html(float_format="{:.2e}".format)
+
+        has_pot = "yes" if self.has_potential_ else "no"
+        probs = "yes" if self.has_probabilities else "no"
+
+        return (
+            "<div>"
+            f"<p><b>🌌{DECOMPOSED_EMOJI} {cls_name}</b> "
+            f"&mdash; {len(self):,} particles, "
+            f"<b>method</b>={self.method!r}</p>"
+            f"{table_html}"
+            "<p><b>Components breakdown:</b></p>"
+            f"{components_html}"
+            f"<p><b>Potential computed:</b> {has_pot.title()}, "
+            f"<b>Probabilities:</b> {probs.title()}</p>"
+            "</div>"
+        )
+
     # PROPERTIES ==============================================================
 
     @property
@@ -705,33 +813,31 @@ class DecomposedGalaxy(Galaxy):
         """
         Calculate total mass and mass fraction per component, by particle type.
 
-        Creates a hierarchical DataFrame with MultiIndex (ptype, label)
-        containing the total mass and mass fraction for each component
-        within each particle type.
+        Creates a hierarchical DataFrame with MultiIndex (ptype, components)
+        containing the particle count, total mass and mass fraction for
+        each component within each particle type. See
+        ``DecomposedParticleSet.total_mass`` for the per-particle-type
+        columns (``labels``, ``particles``, ``m``, ``mf`` and, for
+        probabilistic decompositions, ``pm``/``pmf``).
 
         Returns
         -------
         DataFrame : pandas DataFrame
-            DataFrame with MultiIndex (ptype, label) and two columns:
-            - 'm': total mass in M_sun units
-            - 'mf': mass fraction (component mass / particle type total mass)
+            DataFrame with MultiIndex (ptype, components).
 
         Examples
         --------
         >>> import galaxychop as gchop
         >>> dgal = gchop.decomposers.DecomposedGalaxy(...)
         >>> dgal.total_mass()
-                                     m        mf
-        stars       Bulge       7.16e+09    0.189
-                    Cold disk   1.63e+10    0.430
-                    Halo        3.64e+09    0.096
-                    Warm disk   1.02e+10    0.268
-                    stars       1.40e+08    0.004
-        dark_matter dark_matter 1.22e+11    1.000
-        gas         gas         1.22e+11    1.000
+                                 labels  particles         m     mf
+        ptype       components
+        stars       0             Bulge        120  7.16e+09  0.189
+                    1         Cold Disk        310  1.63e+10  0.430
+                    2              Halo         90  3.64e+09  0.096
+        dark_matter 0       dark_matter        500  1.22e+11  1.000
+        gas         0               gas        200  1.22e+11  1.000
         """
-        import pandas as pd
-
         # Collect mass DataFrames from each particle type
         ptype_dfs = []
         for pset in [self.stars, self.dark_matter, self.gas]:

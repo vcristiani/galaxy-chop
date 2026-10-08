@@ -66,23 +66,21 @@ def test_DecomposedGalaxy_post_init_validations():
         has_probabilities=True,
     )
 
-    dark_matter = (
-        DecomposedParticleSet(
-            ptype=ParticleSetType.DARK_MATTER,
-            m=stars.m,
-            x=stars.x,
-            y=stars.y,
-            z=stars.z,
-            vx=stars.vx,
-            vy=stars.vy,
-            vz=stars.vz,
-            potential=stars.potential,
-            softening=softening_value,
-            components=components,
-            labels=labels,
-            probabilities=probabilities,
-            has_probabilities=True,
-        )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=softening_value,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -138,23 +136,21 @@ def test_DecomposedGalaxy_has_probabilities():
         has_probabilities=True,
     )
 
-    dark_matter = (
-        DecomposedParticleSet(
-            ptype=ParticleSetType.DARK_MATTER,  # Tipo correcto
-            m=stars.m,
-            x=stars.x,
-            y=stars.y,
-            z=stars.z,
-            vx=stars.vx,
-            vy=stars.vy,
-            vz=stars.vz,
-            potential=stars.potential,
-            softening=softening_value,
-            components=components,
-            labels=labels,
-            probabilities=probabilities,
-            has_probabilities=True,
-        )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,  # Tipo correcto
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=softening_value,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -210,23 +206,21 @@ def test_DecomposedGalaxy_unique_properties():
         has_probabilities=True,
     )
 
-    dark_matter = (
-        DecomposedParticleSet(
-            ptype=ParticleSetType.DARK_MATTER,
-            m=stars.m,
-            x=stars.x,
-            y=stars.y,
-            z=stars.z,
-            vx=stars.vx,
-            vy=stars.vy,
-            vz=stars.vz,
-            potential=stars.potential,
-            softening=softening_value,
-            components=components,
-            labels=labels,
-            probabilities=probabilities,
-            has_probabilities=True,
-        )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=softening_value,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -283,23 +277,21 @@ def test_DecomposedGalaxy_copy():
         has_probabilities=True,
     )
 
-    dark_matter = (
-        DecomposedParticleSet(
-            ptype=ParticleSetType.DARK_MATTER,
-            m=stars.m,
-            x=stars.x,
-            y=stars.y,
-            z=stars.z,
-            vx=stars.vx,
-            vy=stars.vy,
-            vz=stars.vz,
-            potential=stars.potential,
-            softening=softening_value,
-            components=components,
-            labels=labels,
-            probabilities=probabilities,
-            has_probabilities=True,
-        )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=softening_value,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
     )
 
     gas = DecomposedParticleSet(
@@ -652,6 +644,160 @@ def test_DecomposedGalaxy_repr():
         "probabilities=True, components=['disk', 'halo']>"
     )
     assert repr(galaxy) == expected_repr
+
+
+@pytest.mark.model
+def test_DecomposedGalaxy_total_mass():
+    components = np.array([0, 1, 0, 1])
+    labels = np.array(["disk", "halo", "disk", "halo"])
+    probabilities = np.full((4, 2), np.nan)
+
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=False,
+    )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=np.array([5.0, 5.0]),
+        x=np.array([0, 1]),
+        y=np.array([1, 2]),
+        z=np.array([2, 3]),
+        vx=np.array([3, 4]),
+        vy=np.array([4, 5]),
+        vz=np.array([5, 6]),
+        potential=np.array([6, 7]),
+        softening=0.1,
+        components=np.array([0, 0]),
+        labels=np.array(["dark_matter", "dark_matter"]),
+        probabilities=np.full((2, 1), np.nan),
+        has_probabilities=False,
+    )
+    gas = DecomposedParticleSet(
+        ptype=ParticleSetType.GAS,
+        m=np.array([2.0]),
+        x=np.array([0]),
+        y=np.array([1]),
+        z=np.array([2]),
+        vx=np.array([3]),
+        vy=np.array([4]),
+        vz=np.array([5]),
+        potential=np.array([6]),
+        softening=0.1,
+        components=np.array([0]),
+        labels=np.array(["gas"]),
+        probabilities=np.full((1, 1), np.nan),
+        has_probabilities=False,
+    )
+
+    galaxy = DecomposedGalaxy(
+        method="clustering",
+        component_name_mapping={0: "disk", 1: "halo"},
+        stars=stars,
+        dark_matter=dark_matter,
+        gas=gas,
+    )
+
+    result = galaxy.total_mass()
+
+    assert result.index.names == ["ptype", "components"]
+    assert list(result.columns) == ["labels", "particles", "m", "mf"]
+
+    stars_rows = result.loc["stars"]
+    assert set(stars_rows["particles"]) == {2, 2}
+    assert stars_rows["m"].sum() == pytest.approx(10.0)
+
+    dm_rows = result.loc["dark_matter"]
+    assert dm_rows["particles"].sum() == 2
+    assert dm_rows["m"].sum() == pytest.approx(10.0)
+
+    gas_rows = result.loc["gas"]
+    assert gas_rows["particles"].sum() == 1
+    assert gas_rows["m"].sum() == pytest.approx(2.0)
+
+
+@pytest.mark.model
+def test_DecomposedGalaxy_repr_html():
+    components = np.array([0, 1, 0, 1])
+    labels = np.array(["disk", "halo", "disk", "halo"])
+    probabilities = np.array([[0.8, 0.2], [0.1, 0.9], [0.7, 0.3], [0.2, 0.8]])
+
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
+    )
+    dark_matter = DecomposedParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
+    )
+    gas = DecomposedParticleSet(
+        ptype=ParticleSetType.GAS,
+        m=stars.m,
+        x=stars.x,
+        y=stars.y,
+        z=stars.z,
+        vx=stars.vx,
+        vy=stars.vy,
+        vz=stars.vz,
+        potential=stars.potential,
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
+    )
+
+    galaxy = DecomposedGalaxy(
+        method="clustering",
+        component_name_mapping={0: "disk", 1: "halo"},
+        stars=stars,
+        dark_matter=dark_matter,
+        gas=gas,
+    )
+
+    html = galaxy._repr_html_()
+
+    assert isinstance(html, str)
+    assert "🌌🧩" in html
+    assert "DecomposedGalaxy" in html
+    assert "method</b>='clustering'" in html
+    assert "Components breakdown" in html
+    assert "Probabilities:</b> Yes" in html
 
 
 # =============================================================================
@@ -1055,3 +1201,115 @@ def test_DecomposedParticleSet_copy_independence():
     assert not np.array_equal(new_components, cps.components)
     assert not np.array_equal(new_labels, cps.labels)
     assert not np.array_equal(new_probabilities, cps.probabilities)
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_total_mass():
+    components = np.array([0, 1, 0, 1])
+    labels = np.array(["disk", "halo", "disk", "halo"])
+    probabilities = np.full((4, 2), np.nan)
+
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=False,
+    )
+
+    result = stars.total_mass()
+
+    assert list(result.columns) == ["labels", "particles", "m", "mf"]
+
+    disk = result[result["labels"] == "disk"].iloc[0]
+    halo = result[result["labels"] == "halo"].iloc[0]
+
+    assert disk["particles"] == 2
+    assert disk["m"] == pytest.approx(4.0)  # particles 0 and 2: m=1+3
+    assert disk["mf"] == pytest.approx(0.4)
+
+    assert halo["particles"] == 2
+    assert halo["m"] == pytest.approx(6.0)  # particles 1 and 3: m=2+4
+    assert halo["mf"] == pytest.approx(0.6)
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_total_mass_probabilistic():
+    components = np.array([0, 1, 0, 1])
+    labels = np.array(["disk", "halo", "disk", "halo"])
+    probabilities = np.array([[0.8, 0.2], [0.1, 0.9], [0.7, 0.3], [0.2, 0.8]])
+
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=True,
+    )
+
+    result = stars.total_mass()
+
+    assert list(result.columns) == [
+        "labels",
+        "particles",
+        "m",
+        "mf",
+        "pm",
+        "pmf",
+    ]
+
+    disk = result[result["labels"] == "disk"].iloc[0]
+    # particles 0 and 2 (m=1, m=3) weighted by their prob_0
+    expected_pm = 1.0 * 0.8 + 3.0 * 0.7
+    assert disk["pm"] == pytest.approx(expected_pm)
+    assert disk["pmf"] == pytest.approx(expected_pm / 10.0)
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_repr_html():
+    components = np.array([0, 1, 0, 1])
+    labels = np.array(["disk", "halo", "disk", "halo"])
+    probabilities = np.full((4, 2), np.nan)
+
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=components,
+        labels=labels,
+        probabilities=probabilities,
+        has_probabilities=False,
+    )
+
+    html = stars._repr_html_()
+
+    assert isinstance(html, str)
+    assert "⭐🧩" in html
+    assert "DecomposedParticleSet" in html
+    assert "components</b>=2" in html
+    assert "probabilities</b>=False" in html
