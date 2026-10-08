@@ -14,6 +14,7 @@
 # IMPORTS
 # =============================================================================
 
+from . import decomposed_plot
 from .decomposed_galaxy import (
     DecomposedGalaxy,
     DecomposedParticleSet,
@@ -24,5 +25,6 @@ __all__ = [
     "DecomposedParticleSet",
     "DecomposedGalaxy",
     "GalaxyDecomposerABC",
+    "decomposed_plot",
     "hparam",
 ]

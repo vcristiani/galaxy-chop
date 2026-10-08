@@ -779,6 +779,16 @@ class DecomposedGalaxy(Galaxy):
     # PROPERTIES ==============================================================
 
     @property
+    def plot(self):
+        """Plot accessor, colored by component instead of particle type."""
+        if not hasattr(self, "_plot"):
+            from .decomposed_plot import DecomposedGalaxyPlotter
+
+            plotter = DecomposedGalaxyPlotter(self)
+            object.__setattr__(self, "_plot", plotter)
+        return self._plot
+
+    @property
     def has_probabilities(self):
         """
         Indicate whether the galaxy particle sets include probabilities.

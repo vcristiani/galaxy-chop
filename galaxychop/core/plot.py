@@ -701,35 +701,44 @@ class GalaxyPlotter:
             sdyn_kws=sdyn_kws, attributes=attributes, lmap=lmap
         )
 
-        (name,) = style["hue_order"]
+        ax = kwargs.pop("ax", None)
+        ax = plt.gca() if ax is None else ax
+        kwargs.setdefault("fill", False)
+
+        # bivariate kde draws contours (linestyles/linewidths), univariate
+        # draws curves (linestyle/linewidth)
         ls_key = "linestyle" if y is None else "linestyles"
         lw_key = "linewidth" if y is None else "linewidths"
-        kde_kws = {
-            "fill": False,
-            "color": style["palette"][name],
-            ls_key: style["linestyles"][name],
-            lw_key: style["linewidths"][name],
-            "alpha": style["alphas"][name],
-            "label": name,
-        }
-        kde_kws.update(kwargs)
+        for name in style["hue_order"]:
+            group = df[df["ptype"] == name]
+            group_kws = {
+                "color": style["palette"][name],
+                ls_key: style["linestyles"][name],
+                lw_key: style["linewidths"][name],
+                "alpha": style["alphas"][name],
+                "label": name,
+            }
+            group_kws.update(kwargs)
+            sns.kdeplot(data=group, x=x, y=y, ax=ax, **group_kws)
 
-        ax = sns.kdeplot(data=df, x=x, y=y, **kde_kws)
         self._zoom_to_data(ax, df, x, y)
         ax.set_box_aspect(1)
         if y is None:
-            # univariate: a real Line2D curve, label= works out of the box
+            # univariate: real Line2D curves, label= works out of the box
             ax.legend()
         else:
             # bivariate: contour sets don't register their label with
-            # matplotlib's legend, so build a proxy handle by hand
-            handle = Line2D(
-                [],
-                [],
-                color=style["palette"][name],
-                linestyle=style["linestyles"][name],
-                label=name,
-            )
-            ax.legend(handles=[handle])
+            # matplotlib's legend, so build proxy handles by hand
+            handles = [
+                Line2D(
+                    [],
+                    [],
+                    color=style["palette"][name],
+                    linestyle=style["linestyles"][name],
+                    label=name,
+                )
+                for name in style["hue_order"]
+            ]
+            ax.legend(handles=handles)
         self._drop_legend_title(ax)
         return ax
