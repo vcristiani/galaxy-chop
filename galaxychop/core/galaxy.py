@@ -327,11 +327,17 @@ class ParticleSet:
     def _repr_html_(self):
         """HTML repr(x), used by Jupyter/IPython notebooks."""
         cls_name = type(self).__name__
+
+        # total mass with its unit, both as LaTeX
+        total_mass = self.total_mass()
+        m_unit = total_mass.unit._repr_latex_()
+
         return (
-            f"<p>{self.ptype.emoji} <b>{cls_name}</b> "
-            f"{self.ptype.name!r}, size={len(self)}, "
-            f"softening={self.softening.value}, "
-            f"potentials={self.has_potential_}</p>"
+            f"<p><b>{cls_name}</b> {self.ptype.emoji} "
+            f"{self.ptype.name!r} &mdash; "
+            f"<b>size</b>={len(self):,}, "
+            f"$\\mathbf{{M}}$={total_mass.value:.2e} {m_unit}, "
+            f"<b>potentials</b>={self.has_potential_}</p>"
         )
 
     def __len__(self):
@@ -357,7 +363,7 @@ class ParticleSet:
         Quantity
             Total mass in M_sun units.
         """
-        return np.sum(self.m) * u.Msun
+        return np.sum(self.m)
 
     def get_value_makers(self):
         """
@@ -688,48 +694,40 @@ class Galaxy:
         # class name for the header
         cls_name = type(self).__name__
 
-        # one row per particle type: display name (with emoji), particle
-        # count and total mass
-        rows = (
-            (
-                f"Stars {self.stars.ptype.emoji}",
-                len(self.stars),
-                self.stars.total_mass(),
-            ),
-            (
-                f"Dark matter {self.dark_matter.ptype.emoji}",
-                len(self.dark_matter),
-                self.dark_matter.total_mass(),
-            ),
-            (
-                f"Gas {self.gas.ptype.emoji}",
-                len(self.gas),
-                self.gas.total_mass(),
-            ),
-        )
+        # one row per particle type (particle count and total mass), indexed
+        # by a display name with emoji (e.g. "Dark Matter ⚫")
+        df = self.total_mass()
+        index = []
+        for ptype_name in df.index:
+            pt = ParticleSetType.mktype(ptype_name)
+            name = " ".join(pt.name.split("_")).title()
+            index.append(f"{name} {pt.emoji}")
+        df.index = index
 
-        # render the rows as an HTML table body
-        rows_html = "".join(
-            f"<tr><td>{name}</td><td>{n:,}</td><td>{m.value:.3e}</td></tr>"
-            for name, n, m in rows
-        )
-
-        # whether the potential energy is computed, and the mass unit
-        # (all three particle sets share the same one) as LaTeX for the
-        # table header
-        has_pot = "yes" if self.has_potential_ else "no"
+        # human-readable column names; the mass column carries its unit
+        # (all three particle sets share the same one) as LaTeX
         m_unit = self.stars.m.unit._repr_latex_()
+        columns = []
+        for column in df.columns:
+            if column == "total_mass":
+                name = f"{m_unit}"
+            else:
+                name = " ".join(column.split("_")).title()
+            columns.append(name)
+        df.columns = columns
+
+        # render the table as HTML: thousands separator for the particle
+        # counts and scientific notation for the masses
+        table_html = df.to_html(float_format="{:.2e}".format)
+
+        # whether the potential energy is computed
+        has_pot = "yes" if self.has_potential_ else "no"
 
         # assemble the final HTML
         return (
             "<div>"
             f"<p><b>🌌 {cls_name}</b> &mdash; {len(self):,} particles</p>"
-            "<table>"
-            "<thead><tr>"
-            f"<th>Type</th><th>Particles</th><th>{m_unit}</th>"
-            "</tr></thead>"
-            f"<tbody>{rows_html}</tbody>"
-            "</table>"
+            f"{table_html}"
             f"<p><b>Potential computed:</b> {has_pot.title()}</p>"
             "</div>"
         )
@@ -905,30 +903,36 @@ class Galaxy:
 
     def total_mass(self):
         """
-        Calculate total mass for each particle type as a DataFrame.
+        Calculate particle count and total mass for each particle type.
 
         Returns
         -------
         DataFrame : pandas DataFrame
-            DataFrame with particle types as index and their total masses
-            in M_sun units.
+            DataFrame with particle types as index, the number of particles
+            (``particles``) and their total masses in M_sun units
+            (``total_mass``).
 
         Examples
         --------
         >>> import galaxychop as gchop
         >>> galaxy = gchop.Galaxy(...)
         >>> galaxy.total_mass()
-                      total_mass
-        stars              1.2e10
-        dark_matter        5.3e11
-        gas                2.1e09
+                     particles  total_mass
+        stars            37393      1.2e10
+        dark_matter     155101      5.3e11
+        gas              80153      2.1e09
         """
         data = {
+            "particles": [
+                len(self.stars),
+                len(self.dark_matter),
+                len(self.gas),
+            ],
             "total_mass": [
                 self.stars.total_mass().value,
                 self.dark_matter.total_mass().value,
                 self.gas.total_mass().value,
-            ]
+            ],
         }
         index = [
             self.stars.ptype.humanize(),
