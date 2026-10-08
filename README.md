@@ -84,9 +84,9 @@ Bibtex entry:
 }
 ```
 
-**Full text:** <https://www.aanda.org/articles/aa/pdf/2024/12/aa51202-24.pdf>
-
-**Full text (arXiv):** <https://arxiv.org/pdf/2410.00105>
+**Full texts:** 
+- <https://www.aanda.org/articles/aa/pdf/2024/12/aa51202-24.pdf>
+- <https://arxiv.org/pdf/2410.00105>
 
 ## 👥 Authors
 
