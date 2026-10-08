@@ -47,6 +47,43 @@ NAN_STR_REPR = "-"
 #: used alongside the regular ptype/galaxy emoji in _repr_html_.
 DECOMPOSED_EMOJI = "🧩"
 
+#: Display label used in _repr_html_ for particles with no assigned
+#: component (``NAN_STR_REPR`` in the raw ``total_mass()`` output).
+UNKNOWN_LABEL = "-"
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def _humanize(text):
+    """Turn a ``snake_case``/raw label into a human-readable, titled one."""
+    return " ".join(str(text).split("_")).title()
+
+
+def _mass_column_names(mass_unit):
+    """
+    Column header map for a ``total_mass()``-shaped table's HTML repr.
+
+    Parameters
+    ----------
+    mass_unit : str
+        The mass unit, as LaTeX (e.g. ``astropy.units.Unit._repr_latex_()``).
+
+    Returns
+    -------
+    dict
+        Maps each raw ``total_mass()`` column name to its display header.
+    """
+    return {
+        "particles": "Particles",
+        "m": mass_unit,
+        "mf": f"{mass_unit} f",
+        "pm": f"P({mass_unit})",
+        "pmf": f"P({mass_unit}) f",
+    }
+
 
 # =============================================================================
 # CLASSES
@@ -290,9 +327,15 @@ class DecomposedParticleSet(ParticleSet):
         total_mass = ParticleSet.total_mass(self)
         m_unit = total_mass.unit._repr_latex_()
 
-        # one row per component, indexed by its human-readable label
-        df = self.total_mass().set_index("labels")
+        # one row per component, indexed by its human-readable label;
+        # particles with no assigned component are shown as UNKNOWN_LABEL
+        df = self.total_mass().reset_index()
+        df["labels"] = np.where(
+            df["components"] == NAN_STR_REPR, UNKNOWN_LABEL, df["labels"]
+        )
+        df = df.set_index("labels").drop(columns="components")
         df.index.name = None
+        df = df.rename(columns=_mass_column_names(m_unit))
         table_html = df.to_html(float_format="{:.2e}".format)
 
         return (
@@ -692,55 +735,31 @@ class DecomposedGalaxy(Galaxy):
         """Rich HTML representation, used by Jupyter/IPython notebooks."""
         cls_name = type(self).__name__
 
-        # one row per particle type (particle count and total mass), same
-        # table Galaxy._repr_html_ builds; not the per-component breakdown
-        # total_mass() returns on this class. ParticleSet.total_mass is
-        # called explicitly: self.stars.total_mass() would resolve to
-        # DecomposedParticleSet's own override instead.
-        df = pd.DataFrame(
-            {
-                "particles": [
-                    len(self.stars),
-                    len(self.dark_matter),
-                    len(self.gas),
-                ],
-                "total_mass": [
-                    ParticleSet.total_mass(self.stars).value,
-                    ParticleSet.total_mass(self.dark_matter).value,
-                    ParticleSet.total_mass(self.gas).value,
-                ],
-            },
-            index=[
-                self.stars.ptype.humanize(),
-                self.dark_matter.ptype.humanize(),
-                self.gas.ptype.humanize(),
-            ],
-        )
-        index = []
-        for ptype_name in df.index:
-            pt = ParticleSetType.mktype(ptype_name)
-            name = " ".join(pt.name.split("_")).title()
-            index.append(f"{name} {pt.emoji}")
-        df.index = index
-
-        m_unit = self.stars.m.unit._repr_latex_()
-        columns = []
-        for column in df.columns:
-            if column == "total_mass":
-                name = f"{m_unit}"
-            else:
-                name = " ".join(column.split("_")).title()
-            columns.append(name)
-        df.columns = columns
-
-        table_html = df.to_html(float_format="{:.2e}".format)
-
-        # per-component breakdown, indexed by particle type and the
-        # human-readable component label
+        # per-component breakdown, indexed by particle type (with its
+        # emoji) and the human-readable component label; particles with
+        # no assigned component are shown as UNKNOWN_LABEL
         components_df = self.total_mass().reset_index()
+        components_df["labels"] = np.where(
+            components_df["components"] == NAN_STR_REPR,
+            UNKNOWN_LABEL,
+            components_df["labels"],
+        )
+        components_df["labels"] = [
+            _humanize(label) for label in components_df["labels"]
+        ]
+        components_df["ptype"] = components_df["ptype"].apply(
+            lambda ptype_name: (
+                f"{_humanize(ptype_name)} "
+                f"{ParticleSetType.mktype(ptype_name).emoji}"
+            )
+        )
         components_df = components_df.set_index(["ptype", "labels"])
         components_df = components_df.drop(columns="components")
         components_df.index.names = [None, None]
+        m_unit = self.stars.m.unit._repr_latex_()
+        components_df = components_df.rename(
+            columns=_mass_column_names(m_unit)
+        )
         components_html = components_df.to_html(float_format="{:.2e}".format)
 
         has_pot = "yes" if self.has_potential_ else "no"
@@ -751,8 +770,6 @@ class DecomposedGalaxy(Galaxy):
             f"<p><b>🌌{DECOMPOSED_EMOJI} {cls_name}</b> "
             f"&mdash; {len(self):,} particles, "
             f"<b>method</b>={self.method!r}</p>"
-            f"{table_html}"
-            "<p><b>Components breakdown:</b></p>"
             f"{components_html}"
             f"<p><b>Potential computed:</b> {has_pot.title()}, "
             f"<b>Probabilities:</b> {probs.title()}</p>"

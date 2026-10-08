@@ -796,7 +796,11 @@ def test_DecomposedGalaxy_repr_html():
     assert "🌌🧩" in html
     assert "DecomposedGalaxy" in html
     assert "method</b>='clustering'" in html
-    assert "Components breakdown" in html
+    assert "Stars ⭐" in html
+    assert "Dark Matter ⚫​" in html
+    assert "Gas 💨" in html
+    assert "Disk" in html
+    assert "Halo" in html
     assert "Probabilities:</b> Yes" in html
 
 
