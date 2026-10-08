@@ -29,7 +29,7 @@
 .. toctree::
    :maxdepth: 2
 
-   models/index
+   decomposers/index
 
 
 .. toctree::

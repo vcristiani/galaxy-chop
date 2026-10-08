@@ -6,7 +6,7 @@
 
 import galaxychop as gchop
 from galaxychop.core.galaxy import ParticleSetType
-from galaxychop.models.core.decomposed_galaxy import (
+from galaxychop.decomposers.core.decomposed_galaxy import (
     DecomposedGalaxy,
     DecomposedParticleSet,
 )
@@ -26,7 +26,7 @@ def test_Decomposedgalaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
-    class Decomposer(gchop.models.GalaxyDecomposerABC):
+    class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
         def get_attributes(self):
             return ["eps"]
 
@@ -38,7 +38,7 @@ def test_Decomposedgalaxy(read_hdf5_galaxy):
     gal_decomp = decomposer.decompose(gal)
 
     assert len(gal_decomp) == len(gal)
-    assert isinstance(gal_decomp, gchop.models.DecomposedGalaxy)
+    assert isinstance(gal_decomp, gchop.decomposers.DecomposedGalaxy)
 
 
 @pytest.mark.model
@@ -49,7 +49,7 @@ def test_DecomposedGalaxy_post_init_validations():
 
     softening_value = 0.1
 
-    stars = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    stars = DecomposedParticleSet(
         ptype=ParticleSetType.STARS,
         m=np.array([1, 2, 3, 4]),
         x=np.array([0, 1, 2, 3]),
@@ -66,24 +66,26 @@ def test_DecomposedGalaxy_post_init_validations():
         has_probabilities=True,
     )
 
-    dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
-        ptype=ParticleSetType.DARK_MATTER,
-        m=stars.m,
-        x=stars.x,
-        y=stars.y,
-        z=stars.z,
-        vx=stars.vx,
-        vy=stars.vy,
-        vz=stars.vz,
-        potential=stars.potential,
-        softening=softening_value,
-        components=components,
-        labels=labels,
-        probabilities=probabilities,
-        has_probabilities=True,
+    dark_matter = (
+        DecomposedParticleSet(
+            ptype=ParticleSetType.DARK_MATTER,
+            m=stars.m,
+            x=stars.x,
+            y=stars.y,
+            z=stars.z,
+            vx=stars.vx,
+            vy=stars.vy,
+            vz=stars.vz,
+            potential=stars.potential,
+            softening=softening_value,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+            has_probabilities=True,
+        )
     )
 
-    gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    gas = DecomposedParticleSet(
         ptype=ParticleSetType.GAS,
         m=stars.m,
         x=stars.x,
@@ -102,7 +104,7 @@ def test_DecomposedGalaxy_post_init_validations():
 
     # Método vacío
     with pytest.raises(ValueError, match="method cannot be empty"):
-        gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
+        DecomposedGalaxy(
             method="",
             component_name_mapping={0: "disk", 1: "halo"},
             stars=stars,
@@ -119,7 +121,7 @@ def test_DecomposedGalaxy_has_probabilities():
 
     softening_value = 0.1
 
-    stars = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    stars = DecomposedParticleSet(
         ptype=ParticleSetType.STARS,
         m=np.array([1, 2, 3, 4]),
         x=np.array([0, 1, 2, 3]),
@@ -136,24 +138,26 @@ def test_DecomposedGalaxy_has_probabilities():
         has_probabilities=True,
     )
 
-    dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
-        ptype=ParticleSetType.DARK_MATTER,  # Tipo correcto
-        m=stars.m,
-        x=stars.x,
-        y=stars.y,
-        z=stars.z,
-        vx=stars.vx,
-        vy=stars.vy,
-        vz=stars.vz,
-        potential=stars.potential,
-        softening=softening_value,
-        components=components,
-        labels=labels,
-        probabilities=probabilities,
-        has_probabilities=True,
+    dark_matter = (
+        DecomposedParticleSet(
+            ptype=ParticleSetType.DARK_MATTER,  # Tipo correcto
+            m=stars.m,
+            x=stars.x,
+            y=stars.y,
+            z=stars.z,
+            vx=stars.vx,
+            vy=stars.vy,
+            vz=stars.vz,
+            potential=stars.potential,
+            softening=softening_value,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+            has_probabilities=True,
+        )
     )
 
-    gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    gas = DecomposedParticleSet(
         ptype=ParticleSetType.GAS,  # Tipo correcto
         m=stars.m,
         x=stars.x,
@@ -170,7 +174,7 @@ def test_DecomposedGalaxy_has_probabilities():
         has_probabilities=True,
     )
 
-    galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
+    galaxy = DecomposedGalaxy(
         method="clustering",
         component_name_mapping={0: "disk", 1: "halo"},
         stars=stars,
@@ -189,7 +193,7 @@ def test_DecomposedGalaxy_unique_properties():
 
     softening_value = 0.1
 
-    stars = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    stars = DecomposedParticleSet(
         ptype=ParticleSetType.STARS,
         m=np.array([1, 2, 3, 4]),
         x=np.array([0, 1, 2, 3]),
@@ -206,24 +210,26 @@ def test_DecomposedGalaxy_unique_properties():
         has_probabilities=True,
     )
 
-    dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
-        ptype=ParticleSetType.DARK_MATTER,
-        m=stars.m,
-        x=stars.x,
-        y=stars.y,
-        z=stars.z,
-        vx=stars.vx,
-        vy=stars.vy,
-        vz=stars.vz,
-        potential=stars.potential,
-        softening=softening_value,
-        components=components,
-        labels=labels,
-        probabilities=probabilities,
-        has_probabilities=True,
+    dark_matter = (
+        DecomposedParticleSet(
+            ptype=ParticleSetType.DARK_MATTER,
+            m=stars.m,
+            x=stars.x,
+            y=stars.y,
+            z=stars.z,
+            vx=stars.vx,
+            vy=stars.vy,
+            vz=stars.vz,
+            potential=stars.potential,
+            softening=softening_value,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+            has_probabilities=True,
+        )
     )
 
-    gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    gas = DecomposedParticleSet(
         ptype=ParticleSetType.GAS,
         m=stars.m,
         x=stars.x,
@@ -240,7 +246,7 @@ def test_DecomposedGalaxy_unique_properties():
         has_probabilities=True,
     )
 
-    galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
+    galaxy = DecomposedGalaxy(
         method="clustering",
         component_name_mapping={0: "disk", 1: "halo"},
         stars=stars,
@@ -260,7 +266,7 @@ def test_DecomposedGalaxy_copy():
 
     softening_value = 0.1
 
-    stars = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    stars = DecomposedParticleSet(
         ptype=ParticleSetType.STARS,
         m=np.array([1, 2, 3, 4]),
         x=np.array([0, 1, 2, 3]),
@@ -277,24 +283,26 @@ def test_DecomposedGalaxy_copy():
         has_probabilities=True,
     )
 
-    dark_matter = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
-        ptype=ParticleSetType.DARK_MATTER,
-        m=stars.m,
-        x=stars.x,
-        y=stars.y,
-        z=stars.z,
-        vx=stars.vx,
-        vy=stars.vy,
-        vz=stars.vz,
-        potential=stars.potential,
-        softening=softening_value,
-        components=components,
-        labels=labels,
-        probabilities=probabilities,
-        has_probabilities=True,
+    dark_matter = (
+        DecomposedParticleSet(
+            ptype=ParticleSetType.DARK_MATTER,
+            m=stars.m,
+            x=stars.x,
+            y=stars.y,
+            z=stars.z,
+            vx=stars.vx,
+            vy=stars.vy,
+            vz=stars.vz,
+            potential=stars.potential,
+            softening=softening_value,
+            components=components,
+            labels=labels,
+            probabilities=probabilities,
+            has_probabilities=True,
+        )
     )
 
-    gas = gchop.models.core.decomposed_galaxy.DecomposedParticleSet(
+    gas = DecomposedParticleSet(
         ptype=ParticleSetType.GAS,
         m=stars.m,
         x=stars.x,
@@ -311,7 +319,7 @@ def test_DecomposedGalaxy_copy():
         has_probabilities=True,
     )
 
-    galaxy = gchop.models.core.decomposed_galaxy.DecomposedGalaxy(
+    galaxy = DecomposedGalaxy(
         method="clustering",
         component_name_mapping={0: "disk", 1: "halo"},
         stars=stars,
@@ -670,7 +678,7 @@ def test_DecomposedParticleSet():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 
@@ -723,7 +731,7 @@ def test_DecomposedParticleSet_validations():
         ValueError, match="galaxy length.*must match components length"
     ):
         components_invalid = np.array([0, 1])
-        gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+        DecomposedParticleSet.from_pset(
             pset,
             components_invalid,
             labels,
@@ -751,7 +759,7 @@ def test_DecomposedParticleSet_from_pset():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 
@@ -783,7 +791,7 @@ def test_DecomposedParticleSet_post_init_validations():
         ValueError, match="galaxy length.*must match components length"
     ):
         components_invalid = np.array([0, 1])
-        gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+        DecomposedParticleSet.from_pset(
             pset,
             components_invalid,
             labels,
@@ -793,7 +801,7 @@ def test_DecomposedParticleSet_post_init_validations():
 
     with pytest.raises(ValueError, match="probabilities must be in the range"):
         probabilities_invalid = np.array([[1.2, -0.2], [0.1, 0.9], [0.7, 0.3]])
-        gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+        DecomposedParticleSet.from_pset(
             pset,
             components,
             labels,
@@ -821,7 +829,7 @@ def test_DecomposedParticleSet_has_probabilities():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities_empty, has_probabilities=True
     )
 
@@ -847,7 +855,7 @@ def test_DecomposedParticleSet_get_value_makers():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 
@@ -882,7 +890,7 @@ def test_DecomposedParticleSet_copy():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 
@@ -933,7 +941,7 @@ def test_DecomposedParticleSet_probabilities_validation():
     )
 
     with pytest.raises(ValueError, match="probabilities must be in the range"):
-        gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+        DecomposedParticleSet.from_pset(
             pset,
             components,
             labels,
@@ -1000,7 +1008,7 @@ def test_DecomposedParticleSet_get_value_makers_probabilities():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 
@@ -1029,7 +1037,7 @@ def test_DecomposedParticleSet_copy_independence():
         softening=0.1,
     )
 
-    cps = gchop.models.core.decomposed_galaxy.DecomposedParticleSet.from_pset(
+    cps = DecomposedParticleSet.from_pset(
         pset, components, labels, probabilities, has_probabilities=True
     )
 

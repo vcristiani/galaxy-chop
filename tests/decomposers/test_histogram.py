@@ -8,8 +8,9 @@
 # IMPORTS
 # =============================================================================
 
-
 import galaxychop as gchop
+
+import numpy as np
 
 import pandas as pd
 
@@ -19,14 +20,12 @@ import pytest
 # =============================================================================
 # TESTS
 # =============================================================================
-
-@pytest.mark.slow
 @pytest.mark.model
-def test_GaussianMixture(read_hdf5_galaxy):
+def test_JHistogram(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
-    decomposer = gchop.models.GaussianMixture(random_state=42, n_init=1)
+    decomposer = gchop.decomposers.JHistogram()
     dgal = decomposer.decompose(gal)
 
     assert len(dgal) == len(gal)
@@ -40,24 +39,21 @@ def test_GaussianMixture(read_hdf5_galaxy):
     total_labels_nans = pd.isna(dgal.stars.labels).sum()
     assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    dm_labels = pd.Series(dgal.dark_matter.labels)
-    gas_labels = pd.Series(dgal.gas.labels)
-    assert (pd.isna(dm_labels).all()) or ((dm_labels == "dark_matter").all())
-    assert (pd.isna(gas_labels).all()) or ((gas_labels == "gas").all())
+    assert np.all(dgal.dark_matter.labels == "dark_matter")
+    assert np.all(dgal.gas.labels == "gas")
 
-    assert dgal.stars.probabilities.shape == (
-        len(gal.stars),
-        decomposer.n_components,
-    )
+    for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
+        assert (pset.probabilities is None) or np.isnan(
+            pset.probabilities
+        ).all()
 
 
-@pytest.mark.slow
 @pytest.mark.model
-def test_AutoGaussianMixture(read_hdf5_galaxy):
+def test_JEHistogram(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
-    decomposer = gchop.models.AutoGaussianMixture(random_state=42, n_init=1)
+    decomposer = gchop.decomposers.JEHistogram()
     dgal = decomposer.decompose(gal)
 
     assert len(dgal) == len(gal)
@@ -71,9 +67,10 @@ def test_AutoGaussianMixture(read_hdf5_galaxy):
     total_labels_nans = pd.isna(dgal.stars.labels).sum()
     assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    dm_labels = pd.Series(dgal.dark_matter.labels)
-    gas_labels = pd.Series(dgal.gas.labels)
-    assert (pd.isna(dm_labels).all()) or ((dm_labels == "dark_matter").all())
-    assert (pd.isna(gas_labels).all()) or ((gas_labels == "gas").all())
+    assert np.all(dgal.dark_matter.labels == "dark_matter")
+    assert np.all(dgal.gas.labels == "gas")
 
-    assert dgal.stars.probabilities.shape == (len(gal.stars), 4)
+    for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
+        assert (pset.probabilities is None) or np.isnan(
+            pset.probabilities
+        ).all()

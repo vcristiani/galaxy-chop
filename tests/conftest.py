@@ -46,7 +46,7 @@ TEST_DATA_PATH = PATH / "datasets"
 _APPLY_PATCH = sys.version_info >= (3, 9)
 
 if _APPLY_PATCH:
-    import galaxychop.models.core.galaxy_decomposer_abc as _abc
+    import galaxychop.decomposers.core.galaxy_decomposer_abc as _abc
 
     @pytest.fixture(autouse=True)
     def _clip_gmm_probs(monkeypatch):
@@ -80,6 +80,7 @@ if _APPLY_PATCH:
             patched,
         )
 
+
 # Parche específico solo para Py3.9 (pandas + numpy)
 if (sys.version_info.major, sys.version_info.minor) == (3, 9):
 
@@ -92,9 +93,8 @@ if (sys.version_info.major, sys.version_info.minor) == (3, 9):
         orig_series = _RealPandasSeries
 
         def patched_series(data=None, *args, **kwargs):
-            if (
-                isinstance(data, (memoryview, bytes))
-                or hasattr(data, "setflags")
+            if isinstance(data, (memoryview, bytes)) or hasattr(
+                data, "setflags"
             ):
                 try:
                     data = data.copy()
@@ -103,14 +103,18 @@ if (sys.version_info.major, sys.version_info.minor) == (3, 9):
             return orig_series(data, *args, **kwargs)
 
         monkeypatch.setattr(pd, "Series", patched_series)
+
+
 if sys.version_info[:2] == (3, 9):
     import pandas as pd
 
     try:
         import seaborn._oldcore as oldcore
+
         _real_call = oldcore.HueMapping.__call__
 
         import importlib
+
         _OriginalSeries = importlib.import_module("pandas").Series
 
         def _fixed_call(self, key, *args, **kwargs):

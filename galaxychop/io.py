@@ -82,7 +82,7 @@ import numpy as np
 
 from . import core
 from .constants import VERSION
-from .models import DecomposedGalaxy, DecomposedParticleSet
+from .decomposers import DecomposedGalaxy, DecomposedParticleSet
 
 # =============================================================================
 # CONSTANTS
@@ -209,7 +209,7 @@ class GalaxyHDF5ReaderABC:
 
         Returns
         -------
-        core.Galaxy or models.DecomposedGalaxy
+        core.Galaxy or decomposers.DecomposedGalaxy
             Reconstructed galaxy object from the HDF5 data.
 
         Raises
@@ -479,7 +479,7 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
 
         Returns
         -------
-        core.Galaxy or models.DecomposedGalaxy
+        core.Galaxy or decomposers.DecomposedGalaxy
             Galaxy object reconstructed from the HDF5 data. The specific type
             depends on the galaxy_type metadata stored in the file.
 
@@ -559,7 +559,7 @@ def read_hdf5(
 
     Returns
     -------
-    core.Galaxy or models.DecomposedGalaxy
+    core.Galaxy or decomposers.DecomposedGalaxy
         Reconstructed galaxy object. The specific type depends on what was
         stored in the file.
 
@@ -658,7 +658,7 @@ def to_hdf5(
         Path to the HDF5 file to create/modify, or an open file-like object.
         If the file doesn't exist, it will be created. If it exists, data will
         be added to it (see ``force_group`` parameter).
-    galaxy : core.Galaxy or models.DecomposedGalaxy
+    galaxy : core.Galaxy or decomposers.DecomposedGalaxy
         The galaxy object to save. Can be either a basic Galaxy or a
         DecomposedGalaxy with component information.
     metadata : dict, optional

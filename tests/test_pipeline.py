@@ -20,8 +20,8 @@
 # import galaxychop as gchop
 
 from galaxychop import pipeline
-from galaxychop.models.gaussian_mixture import GaussianMixture
-from galaxychop.models.threshold import JThreshold
+from galaxychop.decomposers.gaussian_mixture import GaussianMixture
+from galaxychop.decomposers.threshold import JThreshold
 from galaxychop.preproc.pcenter import Centralizer, center
 from galaxychop.preproc.potential_energy import Potentializer
 from galaxychop.preproc.salign import Aligner, star_align

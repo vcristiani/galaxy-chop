@@ -18,7 +18,7 @@ Implementation of a few galaxy dynamic decomposition methods.
 # IMPORTS
 # =============================================================================
 
-from . import constants, models, preproc, utils
+from . import constants, decomposers, preproc, utils
 from .config import config
 from .core import (
     Galaxy,
@@ -39,7 +39,7 @@ __all__ = [
     "ParticleSetType",
     "NoGravitationalPotentialError",
     "io",
-    "models",
+    "decomposers",
     "preproc",
     "utils",
     "mkgalaxy",

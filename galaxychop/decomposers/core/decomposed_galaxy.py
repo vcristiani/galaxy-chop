@@ -719,7 +719,7 @@ class DecomposedGalaxy(Galaxy):
         Examples
         --------
         >>> import galaxychop as gchop
-        >>> dgal = gchop.models.DecomposedGalaxy(...)
+        >>> dgal = gchop.decomposers.DecomposedGalaxy(...)
         >>> dgal.total_mass()
                                      m        mf
         stars       Bulge       7.16e+09    0.189

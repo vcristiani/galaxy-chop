@@ -1,19 +1,21 @@
 import galaxychop as gchop
 import numpy as np
-#gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_17234.h5")
+
+# gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_17234.h5")
 # gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_20.h5")
 # gal = gchop.read_hdf5("/home/juanbc/Descargas/galaxy_TNG_60737.h5")
 gal = gchop.read_hdf5("tests/datasets/gal394242.h5")
 
 gal
 gal = gchop.preproc.center_and_align(gal)
-#id(gal.stars), id(gal.stars.copy())
-#dgal = gchop.models.JHistogram().decompose(gal)
-dgal = gchop.models.AutoGaussianMixture().decompose(gal)
+# id(gal.stars), id(gal.stars.copy())
+# dgal = gchop.decomposers.JHistogram().decompose(gal)
+dgal = gchop.decomposers.AutoGaussianMixture().decompose(gal)
 import joblib
+
 joblib.dump(dgal, "dgal_np.jlib")
 
 #
-#dgal.to_hdf5("foo.h5", force_group=True)
-#df = comps.to_dataframe()
-#import ipdb; ipdb.set_trace()
+# dgal.to_hdf5("foo.h5", force_group=True)
+# df = comps.to_dataframe()
+# import ipdb; ipdb.set_trace()

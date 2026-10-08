@@ -1,7 +1,7 @@
-``galaxychop.models`` package
-==============================
+``galaxychop.decomposers`` package
+==================================
 
-.. automodule:: galaxychop.models
+.. automodule:: galaxychop.decomposers
    :members:
    :show-inheritance:
    :member-order: bysource

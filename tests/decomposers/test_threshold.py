@@ -21,13 +21,12 @@ import pytest
 # =============================================================================
 
 
-@pytest.mark.slow
 @pytest.mark.model
-def test_KMeans(read_hdf5_galaxy):
+def test_JThreshold(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
     gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
 
-    decomposer = gchop.models.KMeans(random_state=42)
+    decomposer = gchop.decomposers.JThreshold()
     dgal = decomposer.decompose(gal)
 
     assert len(dgal) == len(gal)
@@ -41,10 +40,25 @@ def test_KMeans(read_hdf5_galaxy):
     total_labels_nans = pd.isna(dgal.stars.labels).sum()
     assert total_labels_nans == len(gal.stars) - total_labels_no_nans
 
-    assert np.all(dgal.dark_matter.labels == "dark_matter")
-    assert np.all(dgal.gas.labels == "gas")
+    assert (dgal.dark_matter.labels == "dark_matter").all()
+    assert (dgal.gas.labels == "gas").all()
 
-    for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
-        assert (
-            (pset.probabilities is None) or np.isnan(pset.probabilities).all()
-        )
+    assert (
+        dgal.stars.probabilities is None
+        or np.isnan(dgal.stars.probabilities).all()
+    )
+    assert (
+        dgal.dark_matter.probabilities is None
+        or np.isnan(dgal.dark_matter.probabilities).all()
+    )
+    assert (
+        dgal.gas.probabilities is None
+        or np.isnan(dgal.gas.probabilities).all()
+    )
+
+
+@pytest.mark.model
+@pytest.mark.parametrize("eps_cut", [1.1, -1.1])
+def test_JThreshold_eps_cut_value_error(eps_cut):
+    with pytest.raises(ValueError):
+        gchop.decomposers.JThreshold(eps_cut=eps_cut)
