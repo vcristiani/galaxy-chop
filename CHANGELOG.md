@@ -3,7 +3,7 @@
 
 <!-- BODY -->
 
-## Version 0.3
+## Version 1.0 (unreleased)
 
 - Every implemented method is a-priori stable; for future changes, a deprecation strategy will be implemented.
 
@@ -17,10 +17,17 @@
 - The utility previously implemented in the jcirc function has now become a method
   within the `Galaxy` class called `Galaxy.stellar_dynamics()`.
 
+- The decomposition models live in the `galaxychop.decomposers` package
+  (formerly `galaxychop.models`).
+
 - Now the decomposition models are stateless and return a `DecomposedGalaxy`
-  object (formed by `DecomposedParticleSet` instances) that can be used as a
-  hue in all plots, and can calculate deterministic and probabilistic mass
-  fractions for each component via `DecomposedGalaxy.total_mass()`.
+  object (formed by `DecomposedParticleSet` instances): the same galaxy, where
+  every particle also has its component (`components`) and label (`labels`).
+  It can calculate the number of particles and the deterministic and
+  probabilistic mass fractions of each component via
+  `DecomposedGalaxy.total_mass()`, and its plots (`DecomposedGalaxy.plot`)
+  group the particles by component. Components without a physical name
+  (e.g. KMeans clusters) are labeled with their number.
 
 - Decompositions now track whether they are deterministic (hard assignment,
   e.g. KMeans) or probabilistic (soft/fuzzy assignment, e.g. GaussianMixture)
@@ -45,12 +52,42 @@
   through `decompose()` (JThreshold, JHistogram, KMeans, GaussianMixture,
   AutoGaussianMixture, JEHistogram).
 
+- Fixed the matrix every decomposer receives in `split()`: it also included
+  the particle type as one more attribute. `JHistogram` histogrammed it
+  together with the circularity, leaving almost no stars in the spheroid,
+  and `AutoGaussianMixture` fitted its gaussians on that extra constant
+  column (its results change).
+
+- Fixed `ParticleSet.total_mass()`, which returned the mass in squared solar
+  masses, and saving a `DecomposedGalaxy` to HDF5.
+
 - All parameters with defaults, now are keyword only.
 
-- Components and plots now support a `lmap` parameter (label-map)
-  which allows to arbitrarily change component names.
-  In addition, the models that "know" which component is which automatically
-  assign the lmaps.
+- Plots support a `lmap` parameter (label-map) which allows to arbitrarily
+  rename particle types and components. In addition, the models that "know"
+  which component is which name them through
+  `get_component_name_mapping()`.
+
+- New plotting API: `hist`, `hist2d`, `kde`, `kde2d` and `rotation_curve`
+  for the galaxy, and `sdyn_hist`, `sdyn_hist2d`, `sdyn_kde` and
+  `sdyn_kde2d` for the stellar dynamics. Every particle type and component
+  has a fixed look, configurable in `galaxychop.config`. The scatter and
+  pairplot plots and the `labels` parameter were removed.
+
+- Circular velocities from the enclosed mass, measured from the origin:
+  `Galaxy.galaxy_circular_velocity_` (whole galaxy),
+  `ParticleSet.ptype_circular_velocity_` (each particle type on its own),
+  `DecomposedParticleSet.component_circular_velocity_` (each component on its
+  own), and the underlying `galaxychop.utils.cvelocity.circular_velocity()`.
+  `ParticleSet.radius_` gives the distance of each particle to the origin.
+  `rotation_curve()` warns if the galaxy is not centered.
+
+- New `galaxychop` command line interface: `galaxychop methods`,
+  `galaxychop info` and `galaxychop decompose`.
+
+- Rich HTML representations of galaxies and particle sets for Jupyter.
+
+- Python 3.11 to 3.15 are supported.
 
 - All preprocessing utilities now live in the `preproc` package.
 
