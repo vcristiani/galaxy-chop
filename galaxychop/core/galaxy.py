@@ -29,6 +29,7 @@ import pandas as pd
 import uttr
 
 from .. import constants as const
+from ..utils.cvelocity import circular_velocity
 
 # =============================================================================
 # EXCEPTIONS
@@ -83,51 +84,6 @@ class ParticleSetType(enum.IntEnum):
     def humanize(self):
         """Particle type name in lower case."""
         return self.name.lower()
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
-
-
-def _circular_velocity(mass, radius):
-    """
-    Circular velocity from the mass enclosed within each radius.
-
-    Sorts ``mass`` by ``radius``, accumulates it, and returns
-    sqrt(G * M(<r) / r) for every input element, in the original order.
-    Particles at radius 0 get NaN (the enclosed mass there is singular).
-
-    Parameters
-    ----------
-    mass : np.ndarray(n)
-        Particle masses, in M_sun.
-    radius : np.ndarray(n)
-        Distance of each particle to the origin, in kpc.
-
-    Returns
-    -------
-    np.ndarray(n)
-        Circular velocity in km/s, in the same order as the inputs.
-
-    Notes
-    -----
-    If ``mass`` and ``radius`` have different lengths, this returns NaNs
-    instead of raising, so a caller validating lengths elsewhere can raise
-    its own, clearer error.
-    """
-    if len(mass) != len(radius):
-        return np.full(len(radius), np.nan)
-
-    order = np.argsort(radius)
-    enclosed_mass = np.cumsum(mass[order])
-    with np.errstate(divide="ignore", invalid="ignore"):
-        vcirc = np.sqrt(const.G * enclosed_mass / radius[order])
-    vcirc[radius[order] == 0] = np.nan
-
-    result = np.empty_like(vcirc)
-    result[order] = vcirc
-    return result
 
 
 # =============================================================================
@@ -279,7 +235,7 @@ class ParticleSet:
         # Galaxy.circular_velocity_ for the version that pools the mass
         # of stars, dark matter and gas together.
         arr = self.arr_
-        return _circular_velocity(arr.m, arr.radius_)
+        return circular_velocity(arr.m, arr.radius_)
 
     def __attrs_post_init__(self):
         """
@@ -652,7 +608,7 @@ class Galaxy:
         radius = np.concatenate([arr_s.radius_, arr_dm.radius_, arr_g.radius_])
 
         # circular velocity from the mass enclosed by the whole galaxy
-        vcirc = _circular_velocity(mass, radius) * (u.km / u.s)
+        vcirc = circular_velocity(mass, radius) * (u.km / u.s)
 
         # split the pooled result back into one array per particle type
         return (vcirc[:n_s], vcirc[n_s:n_sdm], vcirc[n_sdm:])

@@ -14,12 +14,9 @@
 # IMPORTS
 # =============================================================================
 
-import numpy as np
-
 import pandas as pd
 
 from ...constants import PLOT_ORDER, make_component_styles, plot_config
-from ...core.galaxy import _circular_velocity
 from ...core.plot import GalaxyPlotter
 
 # =============================================================================
@@ -70,11 +67,12 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
         Same as ``GalaxyPlotter.get_df_and_hue``, except the hue is each
         particle's component (``labels``, or its raw ``components`` code
         when unlabeled) instead of its particle type. If
-        ``"circular_velocity"`` is requested, it is also recomputed
-        self-contained per component (rather than per particle type), so
-        e.g. the disk and the halo of the same galaxy get their own,
-        different rotation curves instead of both replaying the whole
-        stellar population's curve.
+        ``"circular_velocity"`` is requested, its column holds each
+        component's own circular velocity
+        (``DecomposedParticleSet.component_circular_velocity_``) rather
+        than the particle type's, so e.g. the disk and the halo of the same
+        galaxy get their own, different rotation curves instead of both
+        replaying the whole stellar population's curve.
 
         Parameters
         ----------
@@ -98,16 +96,26 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
             components present in ``df``.
         """
         attributes = ["x", "y", "z"] if attributes is None else attributes
-        needs_vcirc = "circular_velocity" in attributes
-        extra = ["labels", "components"] + (
-            ["m", "radius"] if needs_vcirc else []
+
+        # the plots read the circular velocity from "circular_velocity",
+        # but per component rather than per particle type: the particle
+        # type's one pools every component of that type together, so every
+        # component's curve would just replay the same whole-type curve
+        attributes = [
+            "component_circular_velocity" if a == "circular_velocity" else a
+            for a in attributes
+        ]
+        attributes = list(
+            dict.fromkeys(attributes + ["labels", "components"])
         )
-        attributes = list(dict.fromkeys(list(attributes) + extra))
 
         df = self._galaxy.to_dataframe(
             ptypes=ptypes,
             attributes=attributes,
             galaxy_circular_velocity=galaxy_circular_velocity,
+        )
+        df = df.rename(
+            columns={"component_circular_velocity": "circular_velocity"}
         )
 
         raw = df["labels"].where(
@@ -115,21 +123,6 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
         )
         df["ptype"] = raw.map(_component_key)
         df = df.drop(columns=["labels", "components"])
-
-        if needs_vcirc:
-            # self-contained circular velocity, per component rather than
-            # per particle type: ParticleSet.circular_velocity_ (already
-            # in the "circular_velocity" column) pools every component of
-            # that type together, so every component's curve would just
-            # replay the same whole-type curve and overlap each other.
-            vcirc = np.empty(len(df))
-            for key in df["ptype"].unique():
-                group = df["ptype"] == key
-                vcirc[group.to_numpy()] = _circular_velocity(
-                    df.loc[group, "m"].to_numpy(),
-                    df.loc[group, "radius"].to_numpy(),
-                )
-            df["circular_velocity"] = vcirc
 
         lmap = self._coerce_lmap(lmap)
 

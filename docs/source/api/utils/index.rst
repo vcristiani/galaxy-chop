@@ -11,5 +11,6 @@
    :maxdepth: 2
 
    bunch.rst
+   cvelocity.rst
    decorators.rst
    unames.rst

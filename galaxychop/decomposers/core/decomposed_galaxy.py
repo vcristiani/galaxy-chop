@@ -23,6 +23,8 @@ assignments.
 # =============================================================================
 
 
+from astropy import units as u
+
 import attr
 
 import numpy as np
@@ -32,6 +34,7 @@ import pandas as pd
 import uttr
 
 from ...core import Galaxy, ParticleSet, ParticleSetType
+from ...utils.cvelocity import circular_velocity
 
 
 # =============================================================================
@@ -125,6 +128,14 @@ class DecomposedParticleSet(ParticleSet):
     probabilities_n : int
         Number of components in the decomposition. Automatically computed from
         the shape of the probabilities array.
+    component_circular_velocity_ : Quantity
+        Circular velocity from the mass enclosed within each component alone
+        (particles grouped by ``labels``), sorted by ``radius_``
+        (sqrt(G * M(<r) / r)). Assumes each component is the only source of
+        its own potential, so it is that component's contribution to the
+        rotation curve. See ``circular_velocity_`` for the whole particle
+        set and ``Galaxy.circular_velocity_`` for the whole galaxy.
+        Shape: (n,). Default unit: km/s.
 
     Notes
     -----
@@ -174,6 +185,10 @@ class DecomposedParticleSet(ParticleSet):
     probabilities: np.ndarray = uttr.ib(converter=np.copy)
 
     probabilities_n = uttr.ib(init=False)
+
+    component_circular_velocity_: np.ndarray = uttr.ib(
+        unit=(u.km / u.s), init=False
+    )
 
     # CONSTRUCTORS ============================================================
 
@@ -262,6 +277,32 @@ class DecomposedParticleSet(ParticleSet):
             np.shape(self.probabilities)[-1] if self.has_probabilities else 0
         )
         return probs_n
+
+    @component_circular_velocity_.default
+    def _component_circular_velocity__default(self):
+        """
+        Compute the self-contained circular velocity of each component.
+
+        Same as ``circular_velocity_``, but accumulating the mass of each
+        component (particles sharing the same label) separately, so e.g.
+        the disk and the spheroid get their own rotation curves instead of
+        both replaying the curve of the whole particle set.
+
+        Returns
+        -------
+        np.ndarray
+            Circular velocity of each particle in km/s, in the original
+            particle order.
+        """
+        arr = self.arr_
+        mass, radius = arr.m, arr.radius_
+
+        vcirc = np.empty(len(mass))
+        for label in np.unique(self.labels):
+            group = self.labels == label
+            vcirc[group] = circular_velocity(mass[group], radius[group])
+
+        return vcirc
 
     def __attrs_post_init__(self):
         """
@@ -475,7 +516,8 @@ class DecomposedParticleSet(ParticleSet):
         The result is a dictionary mapping attribute names to
         functions that return copies of the corresponding data.
         In addition to inherited makers, it includes `components`,
-        `labels`, and one key for each probability column (`prob_i`).
+        `labels`, `component_circular_velocity`, and one key for each
+        probability column (`prob_i`).
 
         Returns
         -------
@@ -484,12 +526,17 @@ class DecomposedParticleSet(ParticleSet):
             Includes:
             - `"components"`: copy of the components array.
             - `"labels"`: copy of the labels array.
+            - `"component_circular_velocity"`: per component circular velocity.
             - `"prob_i"`: copy of the i-th probability column.
         """
         value_makers = super().get_value_makers()
+        arr = self.arr_
         component_makers = {
             "components": lambda: self.components.copy(),
             "labels": lambda: self.labels.copy(),
+            "component_circular_velocity": (
+                lambda: arr.component_circular_velocity_
+            ),
         }
         for i in range(self.probabilities_n):
             component_makers[f"prob_{i}"] = lambda i=i: self.probabilities[

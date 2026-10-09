@@ -4,6 +4,8 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
+from astropy import units as u
+
 import galaxychop as gchop
 from galaxychop.core.galaxy import ParticleSetType
 from galaxychop.decomposers.core.decomposed_galaxy import (
@@ -1019,6 +1021,76 @@ def test_DecomposedParticleSet_get_value_makers():
             value_makers[f"prob_{i}"]().tolist()
             == probabilities[:, i].tolist()
         )
+
+    np.testing.assert_array_equal(
+        value_makers["component_circular_velocity"](),
+        cps.component_circular_velocity_.to_value(),
+    )
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_component_circular_velocity():
+    pset = gchop.core.ParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([1.0, 2.0, 3.0, 4.0]),
+        y=np.zeros(4),
+        z=np.zeros(4),
+        vx=np.zeros(4),
+        vy=np.zeros(4),
+        vz=np.zeros(4),
+        potential=np.zeros(4),
+        softening=0.1,
+    )
+    cps = DecomposedParticleSet.from_pset(
+        pset,
+        components=np.array([0, 1, 0, 1]),
+        labels=np.array(["disk", "halo", "disk", "halo"]),
+        probabilities=np.full((4, 1), np.nan),
+        has_probabilities=False,
+    )
+
+    vcirc = cps.component_circular_velocity_
+
+    # each component only accumulates its own mass: the disk (m=1 at r=1,
+    # m=3 at r=3) and the halo (m=2 at r=2, m=4 at r=4)
+    G = gchop.constants.G
+    expected = np.sqrt(
+        G * np.array([1.0, 2.0, 1.0 + 3.0, 2.0 + 4.0]) / [1, 2, 3, 4]
+    )
+    assert vcirc.unit == u.km / u.s
+    np.testing.assert_allclose(vcirc.to_value(), expected)
+
+    # and it differs from the whole particle set's circular velocity
+    assert not np.allclose(vcirc, cps.circular_velocity_)
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_component_circular_velocity_one_label():
+    pset = gchop.core.ParticleSet(
+        ptype=ParticleSetType.DARK_MATTER,
+        m=np.array([1.0, 2.0, 3.0]),
+        x=np.array([1.0, 2.0, 3.0]),
+        y=np.zeros(3),
+        z=np.zeros(3),
+        vx=np.zeros(3),
+        vy=np.zeros(3),
+        vz=np.zeros(3),
+        potential=np.zeros(3),
+        softening=0.1,
+    )
+    cps = DecomposedParticleSet.from_pset(
+        pset,
+        components=np.full(3, np.nan),
+        labels=np.array(["dark_matter"] * 3),
+        probabilities=np.full((3, 1), np.nan),
+        has_probabilities=False,
+    )
+
+    # a single component is the whole particle set
+    np.testing.assert_allclose(
+        cps.component_circular_velocity_, cps.circular_velocity_
+    )
 
 
 @pytest.mark.model
