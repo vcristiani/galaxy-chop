@@ -8,7 +8,6 @@ recursive-include galaxychop *.py
 recursive-include galaxychop *.ipynb
 
 recursive-exclude docs *
-recursive-exclude draft *
 recursive-exclude legacy *
 recursive-exclude legacy_test *
 recursive-exclude resource *
