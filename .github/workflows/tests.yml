@@ -2,21 +2,18 @@
 # CI with GitHub Actions
 # ==============================================================
 
+# Reusable workflow with every tox environment. It is called by CI.yml
+# (on every push and pull request) and by publish.yml (before a release).
+
 name: Testing
 
 on:
-  push:
-    branches: 
-      - "dev"
-  pull_request:
-      branches: 
-      - "dev"
   workflow_call:
 
 jobs:
   test:
 
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     strategy:
 
       # continues even if an environment fails
@@ -29,8 +26,11 @@ jobs:
         tox_env:
           - style
           - docstyle
+          - check-testdir
           - check-headers
+          - check-apidocsdir
           - make-docs
+          - coverage
 
         # check version by version
         include:
@@ -47,19 +47,27 @@ jobs:
 
     # the steps of the CI
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       # optionals
-      - name: Install pandoc 2.x  # Extremely important for make-docs...
-        if: ${{ matrix.tox_env == 'make-docs'}}
-        run: sudo apt-get install pandoc=2.*  # Extremely important for make-docs...
+      - name: Install pandoc  # nbsphinx needs it to render the tutorials
+        if: ${{ matrix.tox_env == 'make-docs' }}
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      # coverage runs on python 3.12 (tox.ini basepython)
+      - name: Set up Python 3.12 for coverage
+        if: ${{ matrix.tox_env == 'coverage' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       # tox steps
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py_version }}
+          allow-prereleases: true
       - name: Install tox
         run: pip install tox
       - name: tox -e ${{ matrix.tox_env }}
         run: tox -re ${{ matrix.tox_env }}
-

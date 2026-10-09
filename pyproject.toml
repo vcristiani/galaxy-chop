@@ -6,7 +6,8 @@ authors = [
     { name = "Juan B Cabral", email = "jbcabral@unc.edu.ar" },
 ]
 readme = "README.md"
-license = { file = "LICENSE.txt" }
+license = "MIT"
+license-files = ["LICENSE.txt"]
 description = "Galaxy dynamic de-composition"
 keywords = ["galaxy", "dynamics"]
 requires-python = ">=3.11,<3.16"
@@ -14,7 +15,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -75,7 +75,7 @@ markers = [
 testpaths = ["tests"]
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
