@@ -44,6 +44,10 @@ def test_KMeans(read_hdf5_galaxy):
     assert np.all(dgal.dark_matter.labels == "dark_matter")
     assert np.all(dgal.gas.labels == "gas")
 
+    # KMeans clusters have no physical name: each keeps its own number
+    stars_labels = set(dgal.stars.labels) - {"stars"}
+    assert stars_labels == {str(c) for c in range(decomposer.n_components)}
+
     for pset in (dgal.stars, dgal.dark_matter, dgal.gas):
         assert (pset.probabilities is None) or np.isnan(
             pset.probabilities

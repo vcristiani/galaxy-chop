@@ -326,6 +326,11 @@ class AutoGaussianMixture(DynamicStarsGaussianDecomposerABC):
                 bulge = bulge + predict_proba[:, i]
 
         probability = np.column_stack((halo, bulge, cold_disk, warm_disk))
+
+        # adding several gaussians' probabilities can overshoot 1 by a
+        # floating point error (e.g. 1.0000000000000004)
+        np.clip(probability, 0.0, 1.0, out=probability)
+
         labels = probability.argmax(axis=1)
 
         return labels, probability

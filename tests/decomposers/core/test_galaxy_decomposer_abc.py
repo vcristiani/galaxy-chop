@@ -142,3 +142,55 @@ def test_assign_components_and_probabilities():
     )
     assert np.isnan(probs_none).all()
     assert has_probs_none is False
+
+
+@pytest.mark.model
+def test_GalaxyDecomposerABC_split_only_gets_the_attributes(
+    read_hdf5_galaxy,
+):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
+
+    received = {}
+
+    class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["normalized_star_energy", "eps"]
+
+        def split(self, X, y, attributes):
+            received.update(X=X, y=y)
+            return np.zeros(len(X)), None
+
+    Decomposer().decompose(gal)
+
+    # one column per attribute: the particle type only travels in y
+    assert received["X"].shape[1] == 2
+    assert (received["y"] == gchop.core.ParticleSetType.STARS.value).all()
+
+
+@pytest.mark.model
+def test_GalaxyDecomposerABC_decompose_unnamed_components_labels(
+    read_hdf5_galaxy,
+):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
+
+    class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["eps"]
+
+        def split(self, X, y, attributes):
+            return np.arange(len(X)) % 2, None
+
+    dgal = Decomposer().decompose(gal)
+
+    # components without a physical name keep their number, and the
+    # particles without a component are named by their type
+    stars = dgal.stars.to_dataframe(attributes=["components", "labels"])
+    assigned = stars[stars.components.notna()]
+    np.testing.assert_array_equal(
+        assigned.labels, assigned.components.astype(int).astype(str)
+    )
+    assert set(stars[stars.components.isna()].labels) == {"stars"}
+    assert set(dgal.gas.labels) == {"gas"}
+    assert set(dgal.dark_matter.labels) == {"dark_matter"}

@@ -315,12 +315,10 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             galaxy, all_properties
         )
 
-        # remove if ptypev is duplicated
-        # dynamics_dataframe =
-        # dynamics_dataframe.loc[:, ~dynamics_dataframe.columns.duplicated()]
-
-        # separate matrix and particle types
-        X = dynamics_dataframe[all_properties].to_numpy()
+        # separate matrix and particle types: X only holds the attributes,
+        # the particle type goes in y (otherwise split() would get it as one
+        # more attribute)
+        X = dynamics_dataframe[list(attributes)].to_numpy()
         y = dynamics_dataframe.ptypev.to_numpy()
 
         return X, y
@@ -432,7 +430,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
     def create_physical_component_labels(
         self,
-        X,
+        y,
         full_component_assignment,
         full_membership_probabilities,
         component_name_mapper,
@@ -448,9 +446,9 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        X : np.ndarray
-            Input matrix where the last column (`X[:, -1]`) contains
-            the particle type values.
+        y : np.ndarray
+            Particle type value of each particle:
+            0 = STARS, 1 = DARK_MATTER, 2 = GAS.
         full_component_assignment : np.ndarray
             Array with the component assignment for each particle.
         full_membership_probabilities : np.ndarray
@@ -468,19 +466,29 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             - `component`: assigned component index.
             - `prob_i`: probability columns for each component.
             - `label`: descriptive physical name from the mapping.
+
+            Components without a name are labeled with their number, and
+            particles without a component with their particle type.
         """
 
         def physical_name_mapper(galactic_component, particle_type_value):
-            particle_type_name = core.ParticleSetType.mktype(
-                particle_type_value
-            ).humanize()
+            # particles without a component (dark matter, gas, or stars
+            # left out of the decomposition) are named by their type
+            if np.isnan(galactic_component):
+                return core.ParticleSetType.mktype(
+                    particle_type_value
+                ).humanize()
+
+            # components without a physical name (e.g. KMeans clusters)
+            # keep their own number, so they stay apart from each other
+            galactic_component = int(galactic_component)
             return component_name_mapper.get(
-                galactic_component, particle_type_name
+                galactic_component, str(galactic_component)
             )
 
         particle_component_data = np.column_stack(
             (
-                X[:, -1],
+                y,
                 full_component_assignment,
                 full_membership_probabilities,
             )
@@ -633,7 +641,7 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
 
         # Convert component numbers to physical names (disk, bulge, halo, etc.)
         components_df = self.create_physical_component_labels(
-            X=X,
+            y=y,
             full_component_assignment=full_component_assignment,
             full_membership_probabilities=full_membership_probabilities,
             component_name_mapper=self.get_component_name_mapping(),

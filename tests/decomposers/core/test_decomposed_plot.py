@@ -199,6 +199,9 @@ def test_DecomposedGalaxyPlotter_plots_smoke(read_hdf5_galaxy):
     show up in the legend too, alongside those three.
     """
     gal = read_hdf5_galaxy("gal394242.h5")
+    # unaligned, most stars counter-rotate and JHistogram (rightly) makes
+    # them all spheroid
+    gal = gchop.preproc.center_and_align(gal, r_cut=30)
     dgal = gchop.decomposers.JHistogram().decompose(gal)
 
     df, style = dgal.plot.get_sdyn_df_and_hue(
