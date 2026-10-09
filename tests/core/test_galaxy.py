@@ -279,6 +279,36 @@ def test_ParticleSet_to_dataframe_no_potential(data_particleset):
 
 
 @pytest.mark.parametrize("has_potential", [True, False])
+def test_ParticleSet_repr_html(data_particleset, has_potential):
+    m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
+        seed=42, has_potential=has_potential
+    )
+
+    pset = core.ParticleSet(
+        core.ParticleSetType.STARS,
+        m=m,
+        x=x,
+        y=y,
+        z=z,
+        vx=vx,
+        vy=vy,
+        vz=vz,
+        softening=soft,
+        potential=pot,
+    )
+
+    total_mass = pset.total_mass()
+    expected = (
+        f"<p><b>ParticleSet</b> {core.ParticleSetType.STARS.emoji} 'STARS' "
+        f"&mdash; <b>size</b>={len(pset):,}, "
+        f"$\\mathbf{{M}}$={total_mass.value:.2e} "
+        f"{total_mass.unit._repr_latex_()}, "
+        f"<b>potentials</b>={has_potential}</p>"
+    )
+    assert pset._repr_html_() == expected
+
+
+@pytest.mark.parametrize("has_potential", [True, False])
 def test_ParticleSet_repr(data_particleset, has_potential):
     m, x, y, z, vx, vy, vz, soft, pot = data_particleset(
         seed=42, has_potential=has_potential
@@ -685,6 +715,29 @@ def test_Galaxy_repr(galaxy):
 
     expected = "<Galaxy stars=100, dark_matter=100, gas=100, potential=True>"
     assert repr(gal) == expected
+
+
+def test_Galaxy_repr_html(galaxy):
+    gal = galaxy(
+        stars_min=1000,
+        stars_max=1000,
+        dm_min=200,
+        dm_max=200,
+        gas_min=100,
+        gas_max=100,
+    )
+
+    html = gal._repr_html_()
+
+    assert "<b>🌌 Galaxy</b> &mdash; 1,300 particles" in html
+    # one row per particle type, named and with its emoji
+    for ptype in core.ParticleSetType:
+        name = " ".join(ptype.name.split("_")).title()
+        assert f"<th>{name} {ptype.emoji}</th>" in html
+    # particle counts and the mass column labelled with its unit
+    assert "<td>1000</td>" in html
+    assert gal.stars.m.unit._repr_latex_() in html
+    assert "<b>Potential computed:</b> Yes" in html
 
 
 # =============================================================================
