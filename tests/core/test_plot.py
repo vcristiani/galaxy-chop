@@ -256,7 +256,7 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
 
     df = gal.to_dataframe(
         ptypes=["gas"],
-        attributes=["radius", "circular_velocity"],
+        attributes=["radius", "ptype_circular_velocity"],
         galaxy_circular_velocity=True,
     ).sort_values("radius")
     # whole galaxy: a single black curve
@@ -276,7 +276,7 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
     sns.lineplot(
         data=df,
         x="radius",
-        y="circular_velocity",
+        y="ptype_circular_velocity",
         estimator=None,
         color=PTYPE_PALETTE["gas"],
         linestyle="--",
@@ -304,14 +304,14 @@ def test_GalaxyPlotter_rotation_curve_no_galaxy(galaxy, fig_test, fig_ref):
 
     df = gal.to_dataframe(
         ptypes=["gas"],
-        attributes=["radius", "circular_velocity"],
+        attributes=["radius", "ptype_circular_velocity"],
         galaxy_circular_velocity=False,
     ).sort_values("radius")
     # no whole-galaxy curve this time: only gas, self-contained
     sns.lineplot(
         data=df,
         x="radius",
-        y="circular_velocity",
+        y="ptype_circular_velocity",
         estimator=None,
         color=PTYPE_PALETTE["gas"],
         linestyle="--",

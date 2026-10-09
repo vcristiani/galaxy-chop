@@ -45,6 +45,10 @@ class GalaxyPlotter:
     # axes and shrink everything else down to a speck.
     _ZOOM_PCT = 1
 
+    # Column with each curve's own circular velocity in rotation_curve():
+    # the particle type's here, each component's in DecomposedGalaxyPlotter.
+    _VCIRC_ATTRIBUTE = "ptype_circular_velocity"
+
     _galaxy = attr.ib()
 
     # INTERNAL ================================================================
@@ -201,13 +205,13 @@ class GalaxyPlotter:
             Particle type. Default value = None
         attributes : keys of ``ParticleSet class`` parameters.
             Names of ``ParticleSet class`` parameters. Each particle set's
-            own, self-contained ``circular_velocity`` is one of them.
+            own, self-contained ``ptype_circular_velocity`` is one of them.
         lmap : dict or callable
             Name assignment to the particle types.
         galaxy_circular_velocity : bool, default value = False
             Whether to add the ``galaxy_circular_velocity`` column (see
-            ``Galaxy.circular_velocity_``). Most plots don't use it, so it
-            isn't computed unless asked for.
+            ``Galaxy.galaxy_circular_velocity_``). Most plots don't use it, so
+            it isn't computed unless asked for.
 
         Returns
         -------
@@ -417,10 +421,10 @@ class GalaxyPlotter:
 
         - The whole galaxy's rotation curve, in solid black: circular
           velocity computed from the mass enclosed by stars, dark matter
-          and gas pooled together (see ``Galaxy.circular_velocity_``).
+          and gas pooled together (see ``Galaxy.galaxy_circular_velocity_``).
         - One curve per particle type, in its usual style (stars solid,
           gas dashed, dark matter dotted), computed from that type's own
-          mass alone (see ``ParticleSet.circular_velocity_``). These show
+          mass alone (see ``ParticleSet.ptype_circular_velocity_``). These show
           each component's own contribution, not the galaxy's real
           dynamics.
 
@@ -443,7 +447,7 @@ class GalaxyPlotter:
         """
         df, style = self.get_df_and_hue(
             ptypes=ptypes,
-            attributes=["radius", "circular_velocity"],
+            attributes=["radius", self._VCIRC_ATTRIBUTE],
             lmap=lmap,
             galaxy_circular_velocity=True,
         )
@@ -482,7 +486,7 @@ class GalaxyPlotter:
             sns.lineplot(
                 data=group,
                 x="radius",
-                y="circular_velocity",
+                y=self._VCIRC_ATTRIBUTE,
                 ax=ax,
                 **group_kws,
             )

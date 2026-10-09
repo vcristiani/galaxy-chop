@@ -240,7 +240,7 @@ def test_ParticleSet_to_dataframe(data_particleset, has_potential):
             "Jy": z * vx - x * vz,
             "Jz": x * vy - y * vx,
             "radius": radius,
-            "circular_velocity": circular_velocity,
+            "ptype_circular_velocity": circular_velocity,
         }
     )
     df = pset.to_dataframe()
@@ -838,7 +838,7 @@ def test_Galaxy_to_dict(galaxy):
 
 def test_Galaxy_to_dict_galaxy_circular_velocity(galaxy):
     gal = galaxy()
-    v_s, v_dm, v_g = gal.circular_velocity_
+    v_s, v_dm, v_g = gal.galaxy_circular_velocity_
 
     gal_dict = gal.to_dict()
     assert np.array_equal(
@@ -850,16 +850,16 @@ def test_Galaxy_to_dict_galaxy_circular_velocity(galaxy):
     assert np.array_equal(
         gal_dict["gas"]["galaxy_circular_velocity"], v_g.value
     )
-    # each particle set's own, self-contained circular_velocity is still
-    # there too, and it's a different value
-    assert "circular_velocity" in gal_dict["stars"]
+    # each particle set's own, self-contained ptype_circular_velocity is
+    # still there too, and it's a different value
+    assert "ptype_circular_velocity" in gal_dict["stars"]
     assert not np.array_equal(
-        gal_dict["stars"]["circular_velocity"], v_s.value
+        gal_dict["stars"]["ptype_circular_velocity"], v_s.value
     )
 
     gal_dict = gal.to_dict(galaxy_circular_velocity=False)
     assert "galaxy_circular_velocity" not in gal_dict["stars"]
-    assert "circular_velocity" in gal_dict["stars"]
+    assert "ptype_circular_velocity" in gal_dict["stars"]
 
 
 # =============================================================================

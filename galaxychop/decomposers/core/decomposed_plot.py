@@ -59,6 +59,11 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
     every plot group particles by component instead of particle type.
     """
 
+    # rotation_curve() draws each component's own circular velocity, not
+    # its particle type's: that one pools every component of the type
+    # together, so every component's curve would just replay it
+    _VCIRC_ATTRIBUTE = "component_circular_velocity"
+
     def get_df_and_hue(
         self, ptypes, attributes, lmap, *, galaxy_circular_velocity=False
     ):
@@ -66,13 +71,7 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
 
         Same as ``GalaxyPlotter.get_df_and_hue``, except the hue is each
         particle's component (``labels``, or its raw ``components`` code
-        when unlabeled) instead of its particle type. If
-        ``"circular_velocity"`` is requested, its column holds each
-        component's own circular velocity
-        (``DecomposedParticleSet.component_circular_velocity_``) rather
-        than the particle type's, so e.g. the disk and the halo of the same
-        galaxy get their own, different rotation curves instead of both
-        replaying the whole stellar population's curve.
+        when unlabeled) instead of its particle type.
 
         Parameters
         ----------
@@ -96,26 +95,14 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
             components present in ``df``.
         """
         attributes = ["x", "y", "z"] if attributes is None else attributes
-
-        # the plots read the circular velocity from "circular_velocity",
-        # but per component rather than per particle type: the particle
-        # type's one pools every component of that type together, so every
-        # component's curve would just replay the same whole-type curve
-        attributes = [
-            "component_circular_velocity" if a == "circular_velocity" else a
-            for a in attributes
-        ]
         attributes = list(
-            dict.fromkeys(attributes + ["labels", "components"])
+            dict.fromkeys(list(attributes) + ["labels", "components"])
         )
 
         df = self._galaxy.to_dataframe(
             ptypes=ptypes,
             attributes=attributes,
             galaxy_circular_velocity=galaxy_circular_velocity,
-        )
-        df = df.rename(
-            columns={"component_circular_velocity": "circular_velocity"}
         )
 
         raw = df["labels"].where(

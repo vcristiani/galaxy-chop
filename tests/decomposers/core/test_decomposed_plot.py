@@ -155,27 +155,27 @@ def test_DecomposedGalaxyPlotter_get_df_and_hue_ptypes_filter():
 
 @pytest.mark.model
 def test_DecomposedGalaxyPlotter_get_df_and_hue_self_contained_vcirc():
-    """Each component's circular_velocity is its own, not the whole type's.
+    """Each component's circular velocity is its own, not the whole type's.
 
     Otherwise every component of the same particle type would just
-    replay the type's pooled ParticleSet.circular_velocity_ curve and
+    replay the type's pooled ParticleSet.ptype_circular_velocity_ curve and
     overlap each other in rotation_curve().
     """
     dgal = _mk_decomposed_galaxy()
 
     df, _ = dgal.plot.get_df_and_hue(
         ptypes=["stars"],
-        attributes=["radius", "circular_velocity"],
+        attributes=["radius", "component_circular_velocity"],
         lmap=None,
     )
 
-    disk_vcirc = df.loc[df["ptype"] == "disk", "circular_velocity"]
-    halo_vcirc = df.loc[df["ptype"] == "halo", "circular_velocity"]
+    disk_vcirc = df.loc[df["ptype"] == "disk", "component_circular_velocity"]
+    halo_vcirc = df.loc[df["ptype"] == "halo", "component_circular_velocity"]
 
     # neither matches the pooled, whole-stars curve ParticleSet exposes
-    pooled_vcirc = dgal.stars.to_dataframe(attributes=["circular_velocity"])[
-        "circular_velocity"
-    ]
+    pooled_vcirc = dgal.stars.to_dataframe(
+        attributes=["ptype_circular_velocity"]
+    )["ptype_circular_velocity"]
     assert not np.allclose(
         disk_vcirc.sort_index(), pooled_vcirc.loc[disk_vcirc.index]
     )

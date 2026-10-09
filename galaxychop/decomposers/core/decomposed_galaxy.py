@@ -133,8 +133,8 @@ class DecomposedParticleSet(ParticleSet):
         (particles grouped by ``labels``), sorted by ``radius_``
         (sqrt(G * M(<r) / r)). Assumes each component is the only source of
         its own potential, so it is that component's contribution to the
-        rotation curve. See ``circular_velocity_`` for the whole particle
-        set and ``Galaxy.circular_velocity_`` for the whole galaxy.
+        rotation curve. See ``ptype_circular_velocity_`` for the whole particle
+        set and ``Galaxy.galaxy_circular_velocity_`` for the whole galaxy.
         Shape: (n,). Default unit: km/s.
 
     Notes
@@ -288,7 +288,7 @@ class DecomposedParticleSet(ParticleSet):
         """
         Compute the self-contained circular velocity of each component.
 
-        Same as ``circular_velocity_``, but accumulating the mass of each
+        Same as ``ptype_circular_velocity_``, but accumulating the mass of each
         component (particles sharing the same label) separately, so e.g.
         the disk and the spheroid get their own rotation curves instead of
         both replaying the curve of the whole particle set.

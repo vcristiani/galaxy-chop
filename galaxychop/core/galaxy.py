@@ -126,12 +126,12 @@ class ParticleSet:
     radius_ : Quantity
         Distance of each particle to the origin. Shape: (n,1). Default
         unit: kpc.
-    circular_velocity_ : Quantity
+    ptype_circular_velocity_ : Quantity
         Circular velocity from the mass enclosed within this set alone,
         sorted by ``radius_`` (sqrt(G * M(<r) / r)). Assumes the particles
         of this set are the only source of the potential; it does not
         account for the mass of other particle sets in the same galaxy.
-        See ``Galaxy.circular_velocity_`` for the version that pools the
+        See ``Galaxy.galaxy_circular_velocity_`` for the version that pools the
         mass of stars, dark matter and gas together. Shape: (n,1).
         Default unit: km/s.
     has_potential_ : bool.
@@ -183,7 +183,9 @@ class ParticleSet:
     Jz_: np.ndarray = uttr.ib(unit=(u.kpc * u.km / u.s), init=False)
 
     radius_: np.ndarray = uttr.ib(unit=u.kpc, init=False)
-    circular_velocity_: np.ndarray = uttr.ib(unit=(u.km / u.s), init=False)
+    ptype_circular_velocity_: np.ndarray = uttr.ib(
+        unit=(u.km / u.s), init=False
+    )
 
     # INITIALIZATION ==========================================================
 
@@ -228,11 +230,11 @@ class ParticleSet:
         arr = self.arr_
         return np.sqrt(arr.x**2 + arr.y**2 + arr.z**2)
 
-    @circular_velocity_.default
-    def _circular_velocity__default(self):
+    @ptype_circular_velocity_.default
+    def _ptype_circular_velocity__default(self):
         # self-contained circular velocity: assumes this set's own mass
         # is the only source of the potential. See
-        # Galaxy.circular_velocity_ for the version that pools the mass
+        # Galaxy.galaxy_circular_velocity_ for the version that pools the mass
         # of stars, dark matter and gas together.
         arr = self.arr_
         return circular_velocity(arr.m, arr.radius_)
@@ -349,7 +351,7 @@ class ParticleSet:
             - ``total_energy``: total energy per particle (NaN if unavailable).
             - ``Jx``, ``Jy``, ``Jz`` : angular momentum components.
             - ``radius`` : distance to the origin.
-            - ``circular_velocity`` : circular velocity from the mass
+            - ``ptype_circular_velocity`` : circular velocity from the mass
               enclosed within this set alone.
         """
         arr = self.arr_
@@ -379,7 +381,7 @@ class ParticleSet:
             "Jy": lambda: arr.Jy_,
             "Jz": lambda: arr.Jz_,
             "radius": lambda: arr.radius_,
-            "circular_velocity": lambda: arr.circular_velocity_,
+            "ptype_circular_velocity": lambda: arr.ptype_circular_velocity_,
         }
         return value_makers
 
@@ -548,11 +550,11 @@ class Galaxy:
     is_centered_ : bool.
         Indicates if this Galaxy instance has been already centered i.e.
         the most bound particle defines the origin of the system.
-    circular_velocity_ : tuple of Quantity
+    galaxy_circular_velocity_ : tuple of Quantity
         (v_s, v_dm, v_g): circular velocity of stars, dark matter and gas
         particles, from the mass enclosed within the whole galaxy. Computed
         once at construction time. Unit: km/s. See the
-        ``circular_velocity_`` property docs below for details.
+        ``galaxy_circular_velocity_`` property docs below for details.
 
     """
 
@@ -563,7 +565,7 @@ class Galaxy:
     gas = uttr.ib(validator=attr.validators.instance_of(ParticleSet))
 
     has_potential_ = attr.ib(init=False)
-    circular_velocity_ = attr.ib(init=False)
+    galaxy_circular_velocity_ = attr.ib(init=False)
 
     # INITIALIZATION ==========================================================
 
@@ -585,8 +587,8 @@ class Galaxy:
             )
         return self.stars.has_potential_
 
-    @circular_velocity_.default
-    def _circular_velocity__default(self):
+    @galaxy_circular_velocity_.default
+    def _galaxy_circular_velocity__default(self):
         # circular velocity from the mass enclosed within the whole galaxy:
         # pools the mass of stars, dark matter and gas together before
         # accumulating it by radius (sqrt(G * M(<r) / r)), computed once
@@ -918,10 +920,11 @@ class Galaxy:
             Dictionary keys of ParticleSet parameters used to create the data
             frame. If it's None, the data frame is constructed from all the
             parameters of the ``ParticleSet class`` (this already includes
-            each particle set's own, self-contained ``circular_velocity``).
+            each particle set's own, self-contained
+            ``ptype_circular_velocity``).
         galaxy_circular_velocity: bool, default value = True
             Whether to add the ``galaxy_circular_velocity`` column (see
-            ``Galaxy.circular_velocity_``). It can't be computed by a
+            ``Galaxy.galaxy_circular_velocity_``). It can't be computed by a
             single ``ParticleSet``, so it isn't governed by ``attributes``.
 
         Return
@@ -934,7 +937,7 @@ class Galaxy:
 
         parts = []
         vcirc_parts = []
-        for pset, vcirc in zip(psets, self.circular_velocity_):
+        for pset, vcirc in zip(psets, self.galaxy_circular_velocity_):
             if ptypes is None or pset.ptype.humanize() in ptypes:
                 df = pset.to_dataframe(attributes=attributes)
                 parts.append(df)
@@ -992,10 +995,11 @@ class Galaxy:
             Dictionary keys of ParticleSet parameters used to create the dict.
             If it's None, the data frame is constructed from all the
             parameters of the ``ParticleSet class`` (this already includes
-            each particle set's own, self-contained ``circular_velocity``).
+            each particle set's own, self-contained
+            ``ptype_circular_velocity``).
         galaxy_circular_velocity: bool, default value = True
             Whether to add ``galaxy_circular_velocity`` to each particle
-            type's dict (see ``Galaxy.circular_velocity_``). It can't be
+            type's dict (see ``Galaxy.galaxy_circular_velocity_``). It can't be
             computed by a single ``ParticleSet``, so it isn't governed by
             ``attributes``.
 
@@ -1009,7 +1013,7 @@ class Galaxy:
         psets = [self.stars, self.dark_matter, self.gas]
 
         the_dict = {}
-        for pset, vcirc in zip(psets, self.circular_velocity_):
+        for pset, vcirc in zip(psets, self.galaxy_circular_velocity_):
             ptype = pset.ptype.humanize()
             if ptypes is None or ptype in ptypes:
                 p_dict = pset.to_dict(attributes=attributes)

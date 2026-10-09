@@ -1062,7 +1062,7 @@ def test_DecomposedParticleSet_component_circular_velocity():
     np.testing.assert_allclose(vcirc.to_value(), expected)
 
     # and it differs from the whole particle set's circular velocity
-    assert not np.allclose(vcirc, cps.circular_velocity_)
+    assert not np.allclose(vcirc, cps.ptype_circular_velocity_)
 
 
 @pytest.mark.model
@@ -1089,7 +1089,7 @@ def test_DecomposedParticleSet_component_circular_velocity_one_label():
 
     # a single component is the whole particle set
     np.testing.assert_allclose(
-        cps.component_circular_velocity_, cps.circular_velocity_
+        cps.component_circular_velocity_, cps.ptype_circular_velocity_
     )
 
 
