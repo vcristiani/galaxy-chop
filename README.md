@@ -54,6 +54,20 @@ $ cd galaxy-chop
 $ pip install -r requirements_dev.txt
 ```
 
+## 💻 Command Line
+
+Installing GalaxyChop also installs the `galaxychop` command:
+
+```bash
+$ galaxychop methods                       # list the decomposition methods
+$ galaxychop info galaxy.h5                # summary of a stored galaxy
+$ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
+```
+
+`decompose` centers and aligns the galaxy before decomposing it (use
+`--no-align` to skip it) and stores the result in a new HDF5 file. Run
+`galaxychop --help` or `galaxychop COMMAND --help` for every option.
+
 ## 📦 Code Repository & Issues
 
 <https://github.com/vcristiani/galaxy-chop>
