@@ -20,4 +20,4 @@ toml
 
 -r docs/requirements.txt
 
-https://github.com/quatrope/qafan/archive/refs/heads/master.zip
+https://github.com/quatrope/qafan/archive/59f3071a1d673e9df2c3f8168dd181918ec30cd0.zip
