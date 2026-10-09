@@ -115,7 +115,6 @@ venv.bak/
 dask-worker-space/
 result_images/
 .mutmut-cache
-docs/source/_dynamic/*.rst
 docs/source/tutorials/gal394242.h5
 # Stray dataset dumps left at the repo root during manual testing
 /*.h5

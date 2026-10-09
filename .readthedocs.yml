@@ -7,9 +7,12 @@ version: 2
 
 # Set the version of Python and other tools you might need
 build:
-  os: ubuntu-20.04
+  os: ubuntu-24.04
   tools:
-    python: "3.9"
+    python: "3.12"
+  apt_packages:
+    # nbsphinx needs it to render the tutorials
+    - pandoc
 
 
 # Build documentation in the docs/ directory with Sphinx

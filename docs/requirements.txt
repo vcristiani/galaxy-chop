@@ -4,9 +4,7 @@ custom_inherit
 Sphinx
 sphinx-rtd-theme
 nbsphinx
-m2r2
-mistune==0.8.4
-nbconvert==6.5.3
+myst-parser
 lxml_html_clean
 
 numba>=0.59

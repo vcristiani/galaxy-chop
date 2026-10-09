@@ -16,7 +16,9 @@ Ver. |release|
 
 
 .. Here we render the README.md of the repository as a main page
-.. include:: _dynamic/README.rst
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+   :start-after: <!-- BODY -->
 
 
 Contents
