@@ -44,6 +44,7 @@ To find the children of a component:
 # =============================================================================
 
 import dataclasses
+import functools
 import weakref
 from importlib.metadata import version
 from typing import Optional
@@ -357,6 +358,72 @@ PLOT_ORDER = tuple(
 )
 
 
+#: Colors of the components without a physical name (e.g. KMeans clusters),
+#: assigned by component number. Paul Tol's "muted" scheme, so they don't
+#: clash with the "bright" colors of the named components.
+GENERIC_COMPONENT_COLORS = (
+    "#332288",  # Indigo
+    "#DDCC77",  # Sand
+    "#117733",  # Green
+    "#88CCEE",  # Cyan
+    "#882255",  # Wine
+    "#44AA99",  # Teal
+    "#999933",  # Olive
+    "#AA4499",  # Purple
+    "#CC6677",  # Rose
+)
+
+#: Prefix of the keys of the components without a physical name; the
+#: component number follows it (e.g. ``"component_0"``).
+GENERIC_COMPONENT_PREFIX = "component_"
+
+
+@functools.lru_cache(maxsize=None)
+def _generic_component_style(number):
+    # no parent: these don't belong to the named components hierarchy
+    return _ComponentPlotStyle(
+        label=f"Component {number}",
+        parent=None,
+        color=GENERIC_COMPONENT_COLORS[number % len(GENERIC_COMPONENT_COLORS)],
+        alpha=1.0,
+        zorder=3,
+        linestyle="-",
+        linewidth=1,
+    )
+
+
+def get_component_style(key):
+    """
+    Return the plot style of a component.
+
+    Parameters
+    ----------
+    key : str
+        A key of ``plot_config``, or ``"component_<number>"`` for a
+        component without a physical name.
+
+    Returns
+    -------
+    _ComponentPlotStyle
+        The component style. Components without a physical name get a
+        color from ``GENERIC_COMPONENT_COLORS`` by their number.
+
+    Raises
+    ------
+    KeyError
+        If ``key`` is neither a ``plot_config`` key nor a generic
+        component key.
+    """
+    if key in plot_config:
+        return plot_config[key]
+
+    number = key.removeprefix(GENERIC_COMPONENT_PREFIX)
+    if key.startswith(GENERIC_COMPONENT_PREFIX) and number.isdigit():
+        return _generic_component_style(int(number))
+
+    raise KeyError(key)
+
+
 def make_component_styles(names):
     """
     Build the fixed plot style for the given components.
@@ -364,8 +431,8 @@ def make_component_styles(names):
     Parameters
     ----------
     names : dict
-        Maps each component key in ``plot_config`` to its display name,
-        in drawing order.
+        Maps each component key (see ``get_component_style``) to its
+        display name, in drawing order.
 
     Returns
     -------
@@ -373,10 +440,11 @@ def make_component_styles(names):
         Keys ``hue_order``, ``palette``, ``linestyles``, ``alphas`` and
         ``linewidths``, indexed by the display names of the components.
     """
+    styles = {p: get_component_style(p) for p in names}
     return {
         "hue_order": list(names.values()),
-        "palette": {names[p]: plot_config[p].color for p in names},
-        "linestyles": {names[p]: plot_config[p].linestyle for p in names},
-        "alphas": {names[p]: plot_config[p].alpha for p in names},
-        "linewidths": {names[p]: plot_config[p].linewidth for p in names},
+        "palette": {names[p]: styles[p].color for p in names},
+        "linestyles": {names[p]: styles[p].linestyle for p in names},
+        "alphas": {names[p]: styles[p].alpha for p in names},
+        "linewidths": {names[p]: styles[p].linewidth for p in names},
     }

@@ -21,6 +21,7 @@ from galaxychop.decomposers.core.decomposed_galaxy import (
 from galaxychop.decomposers.core.decomposed_plot import (
     DecomposedGalaxyPlotter,
     _component_key,
+    _sorted_component_keys,
 )
 
 import matplotlib.pyplot as plt
@@ -109,7 +110,29 @@ def test_component_key():
     assert _component_key("Cold Disk") == "cold_disk"
     assert _component_key("dark_matter") == "dark_matter"
     assert _component_key("totally-unknown-xyz") == "no_component"
-    assert _component_key(0.0) == "no_component"
+
+    # components without a physical name keep their number
+    assert _component_key("0") == "component_0"
+    assert _component_key("3.0") == "component_3"
+    assert _component_key(2.0) == "component_2"
+    assert _component_key("nan") == "no_component"
+    assert _component_key("-1") == "no_component"
+    assert _component_key("1.5") == "no_component"
+
+
+@pytest.mark.model
+def test_sorted_component_keys():
+    keys = ["component_10", "disk", "component_2", "stars", "gas"]
+
+    # named components in their fixed drawing order, then the generic
+    # ones by number (not alphabetically: 2 before 10)
+    assert _sorted_component_keys(keys) == [
+        "gas",
+        "stars",
+        "disk",
+        "component_2",
+        "component_10",
+    ]
 
 
 @pytest.mark.model

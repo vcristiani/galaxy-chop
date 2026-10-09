@@ -14,9 +14,16 @@
 # IMPORTS
 # =============================================================================
 
+import numpy as np
+
 import pandas as pd
 
-from ...constants import PLOT_ORDER, make_component_styles, plot_config
+from ...constants import (
+    GENERIC_COMPONENT_PREFIX,
+    PLOT_ORDER,
+    make_component_styles,
+    plot_config,
+)
 from ...core.plot import GalaxyPlotter
 
 # =============================================================================
@@ -26,7 +33,7 @@ from ...core.plot import GalaxyPlotter
 
 def _component_key(raw_label):
     """
-    Normalize a raw component label into a ``plot_config`` key.
+    Normalize a raw component label into a component style key.
 
     Parameters
     ----------
@@ -37,11 +44,47 @@ def _component_key(raw_label):
     Returns
     -------
     str
-        The matching ``plot_config`` key, or ``"no_component"`` if
-        ``raw_label`` doesn't match any of them.
+        The matching ``plot_config`` key; ``"component_<number>"`` for a
+        component without a physical name (e.g. ``"0"`` from a KMeans
+        cluster); or ``"no_component"`` if ``raw_label`` is neither.
     """
     key = str(raw_label).lower().replace(" ", "_")
-    return key if key in plot_config else "no_component"
+    if key in plot_config:
+        return key
+
+    # components without a physical name are labeled with their number
+    try:
+        number = float(raw_label)
+    except (TypeError, ValueError):
+        return "no_component"
+
+    if np.isfinite(number) and number.is_integer() and number >= 0:
+        return f"{GENERIC_COMPONENT_PREFIX}{int(number)}"
+    return "no_component"
+
+
+def _sorted_component_keys(keys):
+    """
+    Sort component keys in drawing order.
+
+    Parameters
+    ----------
+    keys : iterable of str
+        Keys returned by ``_component_key``.
+
+    Returns
+    -------
+    list of str
+        The ``plot_config`` keys first, in ``PLOT_ORDER``, followed by
+        the components without a physical name, by their number.
+    """
+    keys = set(keys)
+    named = [key for key in PLOT_ORDER if key in keys]
+    generic = sorted(
+        keys.difference(named),
+        key=lambda key: int(key.removeprefix(GENERIC_COMPONENT_PREFIX)),
+    )
+    return named + generic
 
 
 # =============================================================================
@@ -113,11 +156,10 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
 
         lmap = self._coerce_lmap(lmap)
 
-        present = set(df["ptype"].unique())
-        names = {}
-        for key in PLOT_ORDER:
-            if key in present:
-                names[key] = lmap(key)
+        names = {
+            key: lmap(key)
+            for key in _sorted_component_keys(df["ptype"].unique())
+        }
 
         df["ptype"] = df["ptype"].map(names).astype("category")
 
@@ -173,11 +215,10 @@ class DecomposedGalaxyPlotter(GalaxyPlotter):
 
         lmap = self._coerce_lmap(lmap)
 
-        present = set(df["ptype"].unique())
-        names = {}
-        for key in PLOT_ORDER:
-            if key in present:
-                names[key] = lmap(key)
+        names = {
+            key: lmap(key)
+            for key in _sorted_component_keys(df["ptype"].unique())
+        }
 
         df["ptype"] = df["ptype"].map(names).astype("category")
 
