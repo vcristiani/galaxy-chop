@@ -8,7 +8,7 @@
 [![Documentation Status](https://readthedocs.org/projects/galaxy-chop/badge/?version=latest)](https://galaxy-chop.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/galaxychop)](https://pypi.org/project/galaxychop/)
 [![License](https://img.shields.io/pypi/l/galaxychop?color=blue)](https://raw.githubusercontent.com/vcristiani/galaxy-chop/master/LICENSE.txt)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://pypi.org/project/galaxychop/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://pypi.org/project/galaxychop/)
 [![https://github.com/leliel12/diseno_sci_sfw](https://img.shields.io/badge/DiSoftCompCi-FAMAF-ffda00)](https://github.com/leliel12/diseno_sci_sfw)
 
 **GalaxyChop** is a Python package that tackles the dynamical decomposition problem by using clustering techniques in phase space for stellar galactic components.
@@ -34,7 +34,7 @@ Dynamical decomposition is a fundamental tool to separate each galaxy component 
 
 ## 🔧 Requirements
 
-You need Python `>= 3.10` to run GalaxyChop.
+You need Python `>= 3.11` to run GalaxyChop.
 
 ### Standard Installation
 

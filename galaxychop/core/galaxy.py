@@ -544,12 +544,6 @@ class Galaxy:
     ----------
     has_potential_: bool
         Indicates if this Galaxy instance has the potential energy computed.
-    is_aligned_ : bool.
-        Indicates if this Galaxy instance has been already aligned i.e. the
-        Z-axis is parallel to the minor axis of the particle system.
-    is_centered_ : bool.
-        Indicates if this Galaxy instance has been already centered i.e.
-        the most bound particle defines the origin of the system.
     galaxy_circular_velocity_ : tuple of Quantity
         (v_s, v_dm, v_g): circular velocity of stars, dark matter and gas
         particles, from the mass enclosed within the whole galaxy. Computed

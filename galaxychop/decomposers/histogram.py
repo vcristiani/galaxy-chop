@@ -38,8 +38,9 @@ class JHistogram(GalaxyDecomposerABC):
         Number of bins needed to build the circularity parameter histogram.
     digits: int, default=2
         Number of decimals to which an array is rounded.
-    seed: int, default=None
-        Seed to initialize the random generator.
+    random_state: int, numpy.random.Generator or None, default=None
+        Seed or generator for the random choice of co-rotating spheroid
+        particles.
 
     Notes
     -----
@@ -53,8 +54,8 @@ class JHistogram(GalaxyDecomposerABC):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
-    >>> chopper = gchop.JHistogram()
+    >>> galaxy = gchop.preproc.center_and_align(galaxy)
+    >>> chopper = gchop.decomposers.JHistogram()
     >>> chopper.decompose(galaxy)
 
     References
@@ -230,8 +231,8 @@ class JEHistogram(JHistogram):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
-    >>> chopper = gchop.JEHistogram()
+    >>> galaxy = gchop.preproc.center_and_align(galaxy)
+    >>> chopper = gchop.decomposers.JEHistogram()
     >>> chopper.decompose(galaxy)
 
     """

@@ -65,8 +65,8 @@ class KMeans(GalaxyDecomposerABC):
 
     >>> import galaxychop as gchop
     >>> galaxy = gchop.read_hdf5(...)
-    >>> galaxy = gchop.utils.star_align(gchop.utils.center(galaxy))
-    >>> chopper = gchop.KMeans()
+    >>> galaxy = gchop.preproc.center_and_align(galaxy)
+    >>> chopper = gchop.decomposers.KMeans()
     >>> chopper.decompose(galaxy)
 
     References
