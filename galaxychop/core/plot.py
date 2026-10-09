@@ -14,6 +14,8 @@
 # IMPORTS
 # =============================================================================
 
+import warnings
+
 from astropy import units as u
 
 import attr
@@ -187,6 +189,22 @@ class GalaxyPlotter:
         legend = ax.get_legend()
         if legend is not None:
             legend.set_title(None)
+
+    def _warn_if_not_centered(self):
+        """Warn if the galaxy is not centered (circular velocity plots)."""
+        # imported here: preproc imports core, which imports this module
+        from ..preproc import is_centered
+
+        # without the potential there is no way to tell where the center is
+        galaxy = self._galaxy
+        if galaxy.has_potential_ and not is_centered(galaxy):
+            warnings.warn(
+                "Input Galaxy is not centered, but circular velocities are "
+                "measured from the origin. Please, center it with "
+                "galaxychop.preproc.center(galaxy) or proceed with caution.",
+                UserWarning,
+                stacklevel=3,
+            )
 
     # COMMON PLOTS ============================================================
 
@@ -428,6 +446,10 @@ class GalaxyPlotter:
           each component's own contribution, not the galaxy's real
           dynamics.
 
+        Every circular velocity is measured from the origin, so the galaxy
+        should be centered first; if it has the potential energy computed
+        and is not centered, a ``UserWarning`` is issued.
+
         Parameters
         ----------
         ptypes : keys of ``ParticleSet class`` parameters.
@@ -445,6 +467,8 @@ class GalaxyPlotter:
         -------
         matplotlib.axes.Axes
         """
+        self._warn_if_not_centered()
+
         df, style = self.get_df_and_hue(
             ptypes=ptypes,
             attributes=["radius", self._VCIRC_ATTRIBUTE],

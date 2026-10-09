@@ -11,12 +11,14 @@
 # =============================================================================
 
 import sys
+import warnings
 from unittest import mock
 
 from astropy import units as u
 
-from galaxychop import core
+from galaxychop import core, preproc
 
+import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.testing.decorators import check_figures_equal
 
@@ -498,3 +500,22 @@ def test_GalaxyPlotter_sdyn_kde(read_hdf5_galaxy, fig_test, fig_ref):
 
     exp_ax = fig_ref.subplots()
     plotter.sdyn_kde2d("eps", y=None, ax=exp_ax)
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_rotation_curve_warns_not_centered(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    with pytest.warns(UserWarning, match="not centered"):
+        plotter.rotation_curve(ax=plt.figure().subplots())
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_rotation_curve_centered_no_warning(read_hdf5_galaxy):
+    gal = preproc.center(read_hdf5_galaxy("gal394242.h5"))
+    plotter = core.plot.GalaxyPlotter(galaxy=gal)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message=".*not centered.*")
+        plotter.rotation_curve(ax=plt.figure().subplots())
