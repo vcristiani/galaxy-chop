@@ -1,8 +1,36 @@
 # Reporte de estado del repositorio GalaxyChop
 
-Fecha del análisis inicial: 2026-09-30 · Última actualización: 2026-10-01 · Rama: `newplots` · Versión declarada: `0.3.dev0` · Python del entorno: 3.10.12
+Fecha del análisis inicial: 2026-09-30 · Última actualización: 2026-10-09 · Rama: `dev` · Versión declarada: `1.0.dev0` · Python requerido: `>=3.11,<3.16` · Python del venv local: 3.10.12 (⚠️ ver pendientes)
 
-## 🔖 Hasta dónde llegamos hoy (01/10) — leer esto primero
+## 🔖 Hasta dónde llegamos (09/10) — leer esto primero
+
+Entre el 01/10 y el 09/10 la rama de trabajo pasó a ser `dev` y entraron muchos cambios del usuario: rename del paquete `galaxychop.models` → `galaxychop.decomposers`, Python 3.11–3.15, versión `1.0.dev0`, `plot_config` en `constants`, `DecomposedGalaxyPlotter`, curvas de rotación y reprs HTML. Sobre eso, en la sesión del 06–09/10 se hicieron estas correcciones (todas en `dev`):
+
+| Commit | Qué |
+|---|---|
+| `f5a255e`, `06f35c3` | `get_sdyn_df_and_hue()`: fix de `labels[mask]` (el único test que fallaba el 01/10) y luego los plots `sdyn` dejaron de recibir `labels` (son todas estrellas); `lmap` compartido vía `_coerce_lmap()`. |
+| `1dfb36b` | `ParticleSet.total_mass()` devolvía **solMass²**; `_repr_html_` de `Galaxy`/`ParticleSet` (tenía un `SyntaxError` que impedía importar el paquete). |
+| `74e9cb9` | El cálculo de velocidad circular pasa a `galaxychop.utils.cvelocity.circular_velocity()` (público, sin imports privados cruzados). Nuevo `DecomposedParticleSet.component_circular_velocity_` (por componente); el plotter lo lee en vez de calcularlo. |
+| `6a7fbea` | **Guardar una `DecomposedGalaxy` a HDF5 estaba roto** (`KeyError: 'probabilities'`, regresión de `8f9a253` del 01/10). Se escriben las columnas `probabilities_i` (formato de archivo sin cambios). Además `read_hdf5` devolvía `component_name_mapping` con claves string. Test de ida y vuelta nuevo. |
+| `bd2f36d` | Rename por la masa que encierra cada velocidad circular: `Galaxy.galaxy_circular_velocity_`, `ParticleSet.ptype_circular_velocity_` (columna `ptype_circular_velocity`), `DecomposedParticleSet.component_circular_velocity_`. |
+| `d3a86c8` | **Bug científico grave en los decomposers**: `split()` recibía el tipo de partícula (`ptypev`) como un atributo más en `X`. `JHistogram` dejaba ~20 estrellas en el esferoide en vez de ~5.700 (gal394242); `AutoGaussianMixture` ajustaba sobre una columna constante extra (sus resultados cambiaron bastante: revisar desde lo físico). Además `KMeans`/`GaussianMixture` etiquetaban todas las estrellas como `"stars"`; ahora los componentes sin nombre conservan su número (`"0"`, `"1"`). |
+| `2a220ab` | Los componentes sin nombre (clusters de KMeans/GMM) se dibujan cada uno con su color (paleta Paul Tol "muted", por número) en vez de juntos como "Unclassified". |
+| `cc12c8a` | Los errores de redondeo en probabilidades (p. ej. `1.0000000000000004`) se corrigen en el ABC para todos los decomposers (tolerancia `1e-9`). Se sacó de `tests/conftest.py` el fixture `autouse` que recortaba probabilidades en todos los tests (tapaba este bug) y los parches de Python 3.9. |
+| `7ee829c` | Docs desactualizadas: ejemplos de los decomposers, parámetro `seed` → `random_state` en `JHistogram`, atributos `is_aligned_`/`is_centered_` inexistentes en `Galaxy`, README a Python 3.11. |
+
+**Estado al cierre (`7ee829c` + este commit del reporte, pusheado a `origin/dev`):** `pytest` **219 passed / 1 xfailed / 0 failed**; `flake8`, `pydocstyle` y `tox -e make-docs` sin errores; cobertura 94 % (medida al inicio de la sesión, antes de los últimos commits). Los entornos de tox `style`, `check-testdir`, `check-headers` y `check-apidocsdir` fallan **solo** por archivos locales ignorados por git (ver pendientes).
+
+### Notas para retomar (09/10)
+
+- Correr los tests con el Python del venv: `python -m pytest` (el `pytest` de `~/.local/bin` usa el Python del sistema, sin `astropy`). Hay que recrear el venv con Python ≥ 3.11.
+- Los tests de los decomposers ahora verifican cuántas estrellas caen en cada componente (no solo tamaños): si cambian los números, mirar si es un bug antes de ajustar el test.
+- La lista priorizada de lo que falta está al final, en "Acciones pendientes".
+
+## Historial: sesión del 01/10
+
+> Lo que sigue (hasta "Acciones pendientes") describe el estado del 01/10 en la rama `newplots` y se deja como historial; varios puntos ya no aplican (rutas `models/`, Python 3.10, el fallo de `get_sdyn_df_and_hue`, etc.).
+
+### Hasta dónde llegamos el 01/10
 
 Hoy se hizo una sesión de correcciones guiada (uno por uno, con confirmación y commit por cada punto). Resultado: **13 commits**, suite de tests de **47 failed / 141 passed** a **1 failed / 187 passed / 1 xfailed**, `flake8`/`pydocstyle`/`sphinx-build -W` en cero avisos, y un **bug grave de corrección científica preexistente corregido** (`sorted()` en `decompose()`, commit `a10102c` — ver "Progreso de correcciones").
 
@@ -135,16 +163,23 @@ Nota adicional pendiente: `[testenv]` tiene `usedevelo = True` (typo de `usedeve
 
 ## Acciones pendientes para generar un release
 
-- Decidir la estrategia de integración: consolidar `newplots`, `persistence-new` y demás ramas en `dev` y luego en `master`, y definir el número de versión final (0.3.0).
-- Corregir `get_sdyn_df_and_hue()` en `galaxychop/core/plot.py`: filtra `labels` con `np.isfinite(labels)` en vez de reusar la `mask` ya calculada para el resto de las columnas (rompe con labels no numéricos como los de `DecomposedParticleSet`, y ni siquiera está bien alineado si fueran numéricos). Fix propuesto y pendiente de aplicar: `labels = labels[mask]`.
-- Aumentar cobertura puntual en `decomposed_galaxy.py` (69 %), `potential_energy` (74 %), `io.py` (83 %, formato HDF5 antiguo) y `preproc/_base.py` (78 %); el total ya supera el 90 % exigido, esto es afinado, no bloqueante.
-- Implementar `galaxychop/cli.py` con `main` (o quitar el entry point y la dependencia `typer`), y agregarle tests y documentación.
-- Correr `tox` completo (todos los entornos, incluyendo `py311`/`py312`/`py313`) y dejarlo en verde; se verificó sólo `py310`, `style`, `docstyle`, `check-testdir`, `check-headers`, `check-apidocsdir`, `make-docs` y `coverage`.
-- Ejecutar todos los tutoriales y reparar los que se rompan con la API nueva; regenerar salidas.
-- Documentar en la API y en un tutorial `DecomposedGalaxy`, `DecomposedParticleSet`, masas probabilísticas y el nuevo formato/compatibilidad HDF5.
-- Documentar el uso del CLI en `README.md` cuando `galaxychop/cli.py` exista.
-- Actualizar `.readthedocs.yml` (OS y Python 3.11+) y pinear dependencias de docs modernas; verificar que `make-docs` compile sin errores en Read the Docs.
-- Reemplazar la dependencia `qafan` desde zip de GitHub por una versión reproducible o eliminarla.
-- Revisar `draft/` y `docs/tutorial.ipynb` (material obsoleto trackeado); decidir si se borran o se archivan.
-- Reescribir `publish.yml` para un paquete Python puro (`python -m build`, Python 3.10–3.13, publicación a PyPI con token/trusted publishing) y quitar `cibuildwheel`.
-- Apuntar `CI.yml` al repositorio oficial (no a un fork) y hacer que los tests corran también sobre `master` y PRs.
+Actualizado al 09/10. En orden de prioridad, sin numerar a propósito para poder reordenar.
+
+- **Recrear el venv local con Python ≥ 3.11.** El actual es 3.10.12 y `pyproject.toml` ya exige `>=3.11,<3.16`; los tests corren desde el árbol de fuentes, pero no se puede reinstalar el paquete en ese venv.
+- **Borrar archivos locales ignorados que hacen fallar tox** (`style`, `check-testdir`, `check-headers`, `check-apidocsdir`): `galaxychop/.ipynb_checkpoints/`, `galaxychop/models/` (restos del rename: `.pyc` y un checkpoint), `tests/models/` y `Untitled.ipynb` en la raíz. Pendiente de confirmación del usuario.
+- **Revisar desde lo físico los resultados nuevos de `AutoGaussianMixture`** (cambiaron con el fix de `d3a86c8`; en gal394242 centrada/alineada: Cold disk 7.965 / Warm disk 18.545 / Bulge 5.504 / Halo 5.243, antes 15.843 / 9.863 / 7.641 / 3.910).
+- **Reescribir los tutoriales con la API actual**: `decomposers.ipynb` (10 usos de `labels=`, más `get_lmap`) y `quickstart.ipynb` (2 usos de `labels=` y un `.scatter`) usan la API de plots vieja; los plots por componente ahora son `dgal.plot.*`. Ejecutar los 5 tutoriales y regenerar salidas.
+- **CLI**: `pyproject.toml` declara `galaxychop = "galaxychop.cli:main"` y depende de `typer`, pero `galaxychop/cli.py` no existe. Implementarlo (con tests y docs en el README) o quitar el entry point y la dependencia.
+- **CI/CD**:
+  - `publish.yml`: Python 3.9–3.12, `cibuildwheel` cp37–39, acciones `@v2`. Reescribir para paquete Python puro (`python -m build`, 3.11–3.15, PyPI con trusted publishing).
+  - `CI.yml` y `publish.yml` llaman al workflow reutilizable del **fork** `BrunoCeliz/galaxy-chop@<sha>`; apuntar al repo oficial.
+  - `tests.yml` solo corre en `dev`; sumar `master` y PRs.
+- **`.readthedocs.yml`**: `ubuntu-20.04` y Python 3.9 (numpy ≥ 2 y astropy ≥ 6 no instalan); pasar a un OS actual y Python 3.11+. `docs/requirements.txt` fija `mistune==0.8.4` y `nbconvert==6.5.3`.
+- **Correr `tox` completo** en `py311`…`py315` (solo se corrió la suite en el venv 3.10 y `make-docs` en 3.11).
+- **Decidir la estrategia de ramas y la versión**: `dev` está muy por delante de `master`; quedan `newplots`, `persistence-new`, `pset`, `refactor`, `ref_abadi`, `issue#106`, `dataset_test`. La versión declarada es `1.0.dev0`.
+- **`CHANGELOG.md`**: sumar lo de la sesión del 06–09/10 (rename `models` → `decomposers`, `DecomposedGalaxyPlotter`, velocidades circulares, fixes científicos de `d3a86c8`, HDF5 de `DecomposedGalaxy`).
+- **Documentar** en la API y en un tutorial `DecomposedGalaxy`, `DecomposedParticleSet`, masas probabilísticas, velocidades circulares (galaxia/tipo/componente) y el formato HDF5.
+- **Cobertura puntual** (total 94 %, por encima del 90 %): `potential_energy` 74 %, `preproc/_base.py` 78 %, `io.py` 83 % (formato HDF5 antiguo); los `_repr_html_` de `galaxy.py` no tienen tests.
+- **Diseño, para considerar**: `galaxy_circular_velocity_` y `ptype_circular_velocity_` se calculan al construir cada `Galaxy`/`ParticleSet` (y cada paso de preprocesamiento crea una galaxia nueva); podrían ser perezosas. Ninguna de las tres velocidades circulares valida que la galaxia esté centrada.
+- Reemplazar `qafan` (se instala desde un zip de GitHub master) por una versión reproducible o eliminarlo.
+- Revisar `draft/` y `docs/tutorial.ipynb` (material obsoleto trackeado): borrar o archivar.
