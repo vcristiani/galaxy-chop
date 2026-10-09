@@ -12,9 +12,13 @@
 
 from io import BytesIO
 
-from galaxychop import core, io
+from galaxychop import core, decomposers, io, preproc
+
+import numpy as np
 
 import pandas as pd
+
+import pytest
 
 
 # =============================================================================
@@ -167,3 +171,37 @@ def test_to_hdf5(galaxy):
     expected_df = gal.to_dataframe(attributes=stored_attributes)
 
     pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+@pytest.mark.parametrize(
+    "decomposer",
+    [
+        decomposers.JThreshold(),
+        decomposers.GaussianMixture(random_state=42),
+    ],
+)
+def test_to_hdf5_decomposed_galaxy(read_hdf5_galaxy, decomposer):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = preproc.center_and_align(gal, r_cut=30)
+    dgal = decomposer.decompose(gal)
+
+    buff = BytesIO()
+    io.to_hdf5(buff, dgal)
+    buff.seek(0)
+    result = io.read_hdf5(buff)
+
+    assert isinstance(result, decomposers.DecomposedGalaxy)
+    assert result.method == dgal.method
+    assert result.component_name_mapping == dgal.component_name_mapping
+    assert result.has_probabilities == dgal.has_probabilities
+
+    for rpset, epset in zip(
+        (result.stars, result.dark_matter, result.gas),
+        (dgal.stars, dgal.dark_matter, dgal.gas),
+    ):
+        np.testing.assert_array_equal(rpset.components, epset.components)
+        np.testing.assert_array_equal(rpset.labels, epset.labels)
+        np.testing.assert_array_equal(
+            rpset.probabilities, epset.probabilities
+        )
+        assert rpset.probabilities_n == epset.probabilities_n

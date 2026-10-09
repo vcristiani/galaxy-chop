@@ -177,7 +177,12 @@ class DecomposedParticleSet(ParticleSet):
     #: - has_probabilities: Boolean flag stored in dataset metadata
     #:   instead of as a column, used to determine decomposition type
     #:   at read time
-    H5_TRANSIENTS = ParticleSet.H5_TRANSIENTS + ("has_probabilities",)
+    #: - probabilities: 2D array, stored as one ``probabilities_i``
+    #:   column per component by ``_gchop_h5_`` instead
+    H5_TRANSIENTS = ParticleSet.H5_TRANSIENTS + (
+        "has_probabilities",
+        "probabilities",
+    )
 
     components: np.ndarray = uttr.ib(converter=np.copy)
     labels: np.ndarray = uttr.ib(converter=lambda arr: np.astype(arr, np.str_))
@@ -633,6 +638,13 @@ class DecomposedParticleSet(ParticleSet):
         """
         # Get base metadata and table from parent
         metadata, table = super()._gchop_h5_()
+
+        # one "probabilities_i" column per component (the format the reader
+        # expects); deterministic decompositions still store their NaN
+        # column, so the reader always finds at least "probabilities_0"
+        probabilities = np.reshape(self.probabilities, (len(self), -1))
+        for i in range(probabilities.shape[1]):
+            table[f"probabilities_{i}"] = probabilities[:, i]
 
         # Add component-specific metadata
         metadata.update(

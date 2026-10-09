@@ -396,7 +396,13 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
         Including component probabilities.
         """
         method = gal_meta["method"]
-        component_name_mapping = json.loads(gal_meta["component_name_mapping"])
+        # JSON stores every key as a string, but the components are ints
+        component_name_mapping = {
+            int(component): name
+            for component, name in json.loads(
+                gal_meta["component_name_mapping"]
+            ).items()
+        }
 
         ds_and_soft = zip(
             [softening_s, softening_dm, softening_g],
