@@ -194,3 +194,45 @@ def test_GalaxyDecomposerABC_decompose_unnamed_components_labels(
     assert set(stars[stars.components.isna()].labels) == {"stars"}
     assert set(dgal.gas.labels) == {"gas"}
     assert set(dgal.dark_matter.labels) == {"dark_matter"}
+
+
+@pytest.mark.model
+@pytest.mark.parametrize(
+    "rounding_error, expected", [(4e-16, 1.0), (-4e-16, 0.0)]
+)
+def test_GalaxyDecomposerABC_decompose_snaps_probability_rounding(
+    read_hdf5_galaxy, rounding_error, expected
+):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
+
+    value = expected + rounding_error
+
+    class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["eps"]
+
+        def split(self, X, y, attributes):
+            return np.zeros(len(X)), np.full((len(X), 1), value)
+
+    dgal = Decomposer().decompose(gal)
+
+    probs = dgal.stars.probabilities
+    assert set(probs[np.isfinite(probs)]) == {expected}
+
+
+@pytest.mark.model
+def test_GalaxyDecomposerABC_decompose_invalid_probability(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.salign.star_align(gchop.preproc.pcenter.center(gal))
+
+    class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
+        def get_attributes(self):
+            return ["eps"]
+
+        def split(self, X, y, attributes):
+            return np.zeros(len(X)), np.full((len(X), 1), 1.5)
+
+    # beyond a rounding error it is a bug, not something to snap back
+    with pytest.raises(ValueError):
+        Decomposer().decompose(gal)

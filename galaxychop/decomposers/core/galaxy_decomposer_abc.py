@@ -38,6 +38,10 @@ _CIRCULARITY_ATTRIBUTES = sdyn._GalaxyStellarDynamics.circularity_attributes()
 
 _PTYPES_ORDER = tuple(p.name.lower() for p in core.ParticleSetType)
 
+#: How far outside [0, 1] a membership probability can be and still be
+#: taken as a floating point error (and snapped back) instead of a bug.
+_PROBABILITY_ROUNDING_TOLERANCE = 1e-9
+
 
 # =============================================================================
 # FUNCTIONS
@@ -409,6 +413,22 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
             # Deterministic decomposition: no probabilistic information
             # available
             return np.full((len(X), 1), np.nan), False
+
+        # floating point errors can leave a probability a hair outside
+        # [0, 1] (e.g. 1.0000000000000004, from sklearn's predict_proba or
+        # from adding up several gaussians): snap those back, and leave
+        # anything farther off to the DecomposedParticleSet validation
+        membership_probabilities = np.array(
+            membership_probabilities, dtype=float
+        )
+        tol = _PROBABILITY_ROUNDING_TOLERANCE
+        membership_probabilities[
+            (membership_probabilities < 0) & (membership_probabilities > -tol)
+        ] = 0.0
+        membership_probabilities[
+            (membership_probabilities > 1)
+            & (membership_probabilities < 1 + tol)
+        ] = 1.0
 
         # Extract the shape of probability dimensions (excluding particle
         # count)
