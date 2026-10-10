@@ -17,7 +17,7 @@ Se cerró casi toda la lista de pendientes del 09/10 (todo en `dev`, pusheado):
 | `136efe6` | Tests de los `_repr_html_`. |
 | `7837e9f` | CHANGELOG al día (sección "Version 1.0 (unreleased)"). |
 | `7c5e124` | **Los 5 tutoriales reescritos para la API actual**, ejecutados de punta a punta y guardados con salidas (4 de 5 fallaban). |
-| `0988e09` | **`uttrs` integrado como `galaxychop.utils.uttr`**: `uttrs` 0.5 no se puede instalar en un entorno limpio (su `setup.py` usa `ez_setup`, que baja setuptools 18 de una URL muerta; solo andaba por la caché de pip). Dependencia `uttrs` → `attrs`; licencia `MIT AND BSD-3-Clause` con `licenses/uttrs-LICENSE.txt` en el sdist y el wheel. |
+| `0988e09` | **`uttrs` integrado como `galaxychop.utils.uttr`**: `uttrs` 0.5 no se puede instalar en un entorno limpio (su `setup.py` usa `ez_setup`, que baja setuptools 18 de una URL muerta; solo andaba por la caché de pip). Dependencia `uttrs` → `attrs`. Relicenciado como MIT por sus autores, así que el paquete sigue siendo solo `MIT`. |
 | `434420e` | CI: instala `libhdf5-dev` en el job de Python 3.15 (ver pendientes). |
 
 **Estado al cierre:** `tox -r` desde cero → `py311`, `py312`, `py313`, `py314`: **268 passed / 1 xfailed** cada uno; `coverage`: **96,58 %**; `style`, `docstyle`, `check-testdir`, `check-headers`, `check-apidocsdir`, `make-docs`: OK. **`py315` falla** solo porque `h5py` todavía no publica wheels para 3.15 (ver pendientes).
@@ -200,4 +200,3 @@ Actualizado al 10/10. En orden de prioridad, sin numerar a propósito para poder
   - Un componente con un nombre que no está en `plot_config` (p. ej. `"thin-disk"`) se dibuja como "Unclassified", junto con cualquier otro nombre desconocido. Solo los nombres de `galaxychop.config` y los componentes numerados tienen estilo propio.
   - Seaborn crea las leyendas con `loc="best"`, y matplotlib avisa que es lento con muchos datos (aparece en las salidas de los tutoriales). Cambiarlo mueve las leyendas y obliga a regenerar las imágenes de referencia de los tests.
 - **Cobertura puntual** (total 96,58 %): `preproc/potential_energy/__init__.py` 74 %, `preproc/_base.py` 78 %.
-- **`uttr`**: como Juan B Cabral es coautor de `uttrs`, podría relicenciar el módulo integrado como MIT y simplificar la licencia del paquete a solo `MIT` (opcional).

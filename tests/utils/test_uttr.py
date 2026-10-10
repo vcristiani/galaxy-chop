@@ -4,10 +4,8 @@
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 #
-# The uttr module is adapted from uttrs (https://github.com/quatrope/uttrs):
-# Copyright (c) 2020, Juan B Cabral and QuatroPe.
-# License: BSD-3-Clause
-# Full Text: licenses/uttrs-LICENSE.txt
+# The uttr module is adapted from uttrs (https://github.com/quatrope/uttrs),
+# by Juan B Cabral and QuatroPe, relicensed under MIT by its authors.
 
 
 # =============================================================================
