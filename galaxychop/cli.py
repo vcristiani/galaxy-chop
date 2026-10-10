@@ -77,7 +77,7 @@ def available_plots():
         ``"hist2d"``), the same ones ``galaxy.plot(plot_kind)`` accepts.
     """
     plotter = core.plot.GalaxyPlotter
-    forbidden = plotter._P_KIND_FORBIDEN_METHODS
+    forbidden = plotter.P_KIND_FORBIDDEN_METHODS
     return [
         name
         for name, _ in inspect.getmembers(plotter, inspect.isfunction)

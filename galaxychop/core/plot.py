@@ -40,7 +40,9 @@ from ..constants import PLOT_ORDER, make_component_styles, plot_config
 class GalaxyPlotter:
     """Make plots of a Galaxy."""
 
-    _P_KIND_FORBIDEN_METHODS = ("get_df_and_hue", "get_sdyn_df_and_hue")
+    # Public methods that are helpers, not plots, so they can't be used as
+    # a 'plot_kind' (neither in __call__ nor in the CLI).
+    P_KIND_FORBIDDEN_METHODS = ("get_df_and_hue", "get_sdyn_df_and_hue")
 
     # Percentile (and its mirror, 100 - it) used to zoom in on the bulk of
     # the plotted data, so a handful of far-out particles don't stretch the
@@ -75,7 +77,7 @@ class GalaxyPlotter:
         """
         if (
             plot_kind.startswith("_")
-            or plot_kind in self._P_KIND_FORBIDEN_METHODS
+            or plot_kind in self.P_KIND_FORBIDDEN_METHODS
         ):
             raise ValueError(f"invalid 'plot_kind' name '{plot_kind}'")
         method = getattr(self, plot_kind, None)

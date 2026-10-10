@@ -721,12 +721,18 @@ def test_DecomposedGalaxy_total_mass():
     assert stars_rows["m"].sum() == pytest.approx(10.0)
 
     dm_rows = result.loc["dark_matter"]
+    assert list(dm_rows.index) == [0]
+    assert list(dm_rows["labels"]) == ["dark_matter"]
     assert dm_rows["particles"].sum() == 2
     assert dm_rows["m"].sum() == pytest.approx(10.0)
+    assert dm_rows["mf"].isna().all()
 
     gas_rows = result.loc["gas"]
+    assert list(gas_rows.index) == [0]
+    assert list(gas_rows["labels"]) == ["gas"]
     assert gas_rows["particles"].sum() == 1
     assert gas_rows["m"].sum() == pytest.approx(2.0)
+    assert gas_rows["mf"].isna().all()
 
 
 @pytest.mark.model

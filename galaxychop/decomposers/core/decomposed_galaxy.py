@@ -35,7 +35,6 @@ from ...core import Galaxy, ParticleSet, ParticleSetType
 from ...utils import uttr
 from ...utils.cvelocity import circular_velocity
 
-
 # =============================================================================
 # CONSTANTS
 # =============================================================================
@@ -381,7 +380,9 @@ class DecomposedParticleSet(ParticleSet):
         df = df.set_index("labels").drop(columns="components")
         df.index.name = None
         df = df.rename(columns=_mass_column_names(m_unit))
-        table_html = df.to_html(float_format="{:.2e}".format)
+        table_html = df.to_html(
+            float_format="{:.2e}".format, na_rep=UNKNOWN_LABEL
+        )
 
         return (
             "<div>"
@@ -425,10 +426,11 @@ class DecomposedParticleSet(ParticleSet):
               component
             - 'm' (float): Deterministic total mass in M_sun units
             - 'mf' (float): Deterministic mass fraction (m / total_mass)
+              (only for stars)
             - 'pm' (float): Probabilistic total mass
-              (only if has_probabilities=True)
+              (only for stars, if has_probabilities=True)
             - 'pmf' (float): Probabilistic mass fraction
-              (only if has_probabilities=True)
+              (only for stars, if has_probabilities=True)
             - 'labels' (str): Human-readable component label (reset as column)
 
         Notes
@@ -477,6 +479,12 @@ class DecomposedParticleSet(ParticleSet):
         result = df.groupby(["components", "labels"]).agg(
             particles=("m", "size"), m=("m", "sum")
         )
+
+        # Only stars are split into several components; dark matter and
+        # gas have a single one, so their fractions add nothing
+        if self.ptype != ParticleSetType.STARS:
+            return result.reset_index("labels")
+
         result["mf"] = result["m"] / pset_total_mass
 
         # Calculate probabilistic masses if available
@@ -818,7 +826,9 @@ class DecomposedGalaxy(Galaxy):
         components_df = components_df.rename(
             columns=_mass_column_names(m_unit)
         )
-        components_html = components_df.to_html(float_format="{:.2e}".format)
+        components_html = components_df.to_html(
+            float_format="{:.2e}".format, na_rep=UNKNOWN_LABEL
+        )
 
         has_pot = "yes" if self.has_potential_ else "no"
         probs = "yes" if self.has_probabilities else "no"
@@ -903,7 +913,8 @@ class DecomposedGalaxy(Galaxy):
         each component within each particle type. See
         ``DecomposedParticleSet.total_mass`` for the per-particle-type
         columns (``labels``, ``particles``, ``m``, ``mf`` and, for
-        probabilistic decompositions, ``pm``/``pmf``).
+        probabilistic decompositions, ``pm``/``pmf``); dark matter and gas
+        have no fractions, so their ``mf``, ``pm`` and ``pmf`` are NaN.
 
         Returns
         -------

@@ -44,7 +44,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.mark.plot
 @pytest.mark.parametrize(
-    "pkind", core.plot.GalaxyPlotter._P_KIND_FORBIDEN_METHODS
+    "pkind", core.plot.GalaxyPlotter.P_KIND_FORBIDDEN_METHODS
 )
 def test_GalaxyPlotter_call_invalid_forbiden_plot_kind(galaxy, pkind):
     gal = galaxy(seed=42)
