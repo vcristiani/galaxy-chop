@@ -39,18 +39,15 @@ from ...utils.cvelocity import circular_velocity
 # CONSTANTS
 # =============================================================================
 
-#: String representation used for NaN values in component identifiers.
-#: Used when particles don't belong to any identified component (e.g., gas or
-#: dark matter particles in stellar decompositions, or unassigned particles).
+#: String representation of a missing value: the component identifier of
+#: particles that don't belong to any identified component (e.g., gas or
+#: dark matter particles in stellar decompositions, or unassigned
+#: particles), and, in _repr_html_, their label and their NaN columns.
 NAN_STR_REPR = "-"
 
 #: Emoji marking a particle set/galaxy as decomposed into components,
 #: used alongside the regular ptype/galaxy emoji in _repr_html_.
 DECOMPOSED_EMOJI = "🧩"
-
-#: Display label used in _repr_html_ for particles with no assigned
-#: component (``NAN_STR_REPR`` in the raw ``total_mass()`` output).
-UNKNOWN_LABEL = "-"
 
 
 # =============================================================================
@@ -372,16 +369,16 @@ class DecomposedParticleSet(ParticleSet):
         m_unit = total_mass.unit._repr_latex_()
 
         # one row per component, indexed by its human-readable label;
-        # particles with no assigned component are shown as UNKNOWN_LABEL
+        # particles with no assigned component are shown as NAN_STR_REPR
         df = self.total_mass().reset_index()
         df["labels"] = np.where(
-            df["components"] == NAN_STR_REPR, UNKNOWN_LABEL, df["labels"]
+            df["components"] == NAN_STR_REPR, NAN_STR_REPR, df["labels"]
         )
         df = df.set_index("labels").drop(columns="components")
         df.index.name = None
         df = df.rename(columns=_mass_column_names(m_unit))
         table_html = df.to_html(
-            float_format="{:.2e}".format, na_rep=UNKNOWN_LABEL
+            float_format="{:.2e}".format, na_rep=NAN_STR_REPR
         )
 
         return (
@@ -509,9 +506,10 @@ class DecomposedParticleSet(ParticleSet):
                     prob_masses_column.append(prob_mass)
                     prob_masses_column_fraction.append(prob_mass_fraction)
                 else:
-                    # For unassigned particles, use placeholder
-                    prob_masses_column.append(NAN_STR_REPR)
-                    prob_masses_column_fraction.append(NAN_STR_REPR)
+                    # Unassigned particles have no probabilistic mass
+                    # (the HTML reprs show the NaN as NAN_STR_REPR)
+                    prob_masses_column.append(np.nan)
+                    prob_masses_column_fraction.append(np.nan)
 
             # Add probabilistic columns to result
             result["pm"] = prob_masses_column
@@ -803,11 +801,11 @@ class DecomposedGalaxy(Galaxy):
 
         # per-component breakdown, indexed by particle type (with its
         # emoji) and the human-readable component label; particles with
-        # no assigned component are shown as UNKNOWN_LABEL
+        # no assigned component are shown as NAN_STR_REPR
         components_df = self.total_mass().reset_index()
         components_df["labels"] = np.where(
             components_df["components"] == NAN_STR_REPR,
-            UNKNOWN_LABEL,
+            NAN_STR_REPR,
             components_df["labels"],
         )
         components_df["labels"] = [
@@ -827,7 +825,7 @@ class DecomposedGalaxy(Galaxy):
             columns=_mass_column_names(m_unit)
         )
         components_html = components_df.to_html(
-            float_format="{:.2e}".format, na_rep=UNKNOWN_LABEL
+            float_format="{:.2e}".format, na_rep=NAN_STR_REPR
         )
 
         has_pot = "yes" if self.has_potential_ else "no"

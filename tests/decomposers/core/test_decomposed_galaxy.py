@@ -11,6 +11,7 @@ from galaxychop.core.galaxy import ParticleSetType
 from galaxychop.decomposers.core.decomposed_galaxy import (
     DecomposedGalaxy,
     DecomposedParticleSet,
+    NAN_STR_REPR,
 )
 
 import numpy as np
@@ -1363,6 +1364,43 @@ def test_DecomposedParticleSet_total_mass_probabilistic():
     expected_pm = 1.0 * 0.8 + 3.0 * 0.7
     assert disk["pm"] == pytest.approx(expected_pm)
     assert disk["pmf"] == pytest.approx(expected_pm / 10.0)
+
+
+@pytest.mark.model
+def test_DecomposedParticleSet_total_mass_probabilistic_unassigned():
+    stars = DecomposedParticleSet(
+        ptype=ParticleSetType.STARS,
+        m=np.array([1.0, 2.0, 3.0, 4.0]),
+        x=np.array([0, 1, 2, 3]),
+        y=np.array([1, 2, 3, 4]),
+        z=np.array([2, 3, 4, 5]),
+        vx=np.array([3, 4, 5, 6]),
+        vy=np.array([4, 5, 6, 7]),
+        vz=np.array([5, 6, 7, 8]),
+        potential=np.array([6, 7, 8, 9]),
+        softening=0.1,
+        components=np.array([0, 1, 0, np.nan]),
+        labels=np.array(["disk", "halo", "disk", "stars"]),
+        probabilities=np.array(
+            [[0.8, 0.2], [0.1, 0.9], [0.7, 0.3], [np.nan, np.nan]]
+        ),
+        has_probabilities=True,
+    )
+
+    result = stars.total_mass()
+
+    # the unassigned particle has no probabilistic mass: NaN in the
+    # DataFrame, shown as NAN_STR_REPR only in the HTML repr
+    unassigned = result.loc[NAN_STR_REPR]
+    assert unassigned["mf"] == pytest.approx(0.4)
+    assert np.isnan(unassigned["pm"])
+    assert np.isnan(unassigned["pmf"])
+    assert result["pm"].dtype == float
+    assert result["pmf"].dtype == float
+
+    html = stars._repr_html_()
+    assert f"<td>{NAN_STR_REPR}</td>" in html
+    assert "NaN" not in html
 
 
 @pytest.mark.model
