@@ -61,6 +61,7 @@ Installing GalaxyChop also installs the `galaxychop` command:
 ```bash
 $ galaxychop methods                       # list the decomposition methods
 $ galaxychop info galaxy.h5                # summary of a stored galaxy
+$ galaxychop show decomposed.h5            # total mass of each type/component
 $ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
 ```
 
