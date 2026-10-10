@@ -54,6 +54,12 @@ jobs:
         if: ${{ matrix.tox_env == 'make-docs' }}
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
+      # h5py has no python 3.15 wheels yet, so pip builds it from source
+      # and needs the HDF5 library
+      - name: Install HDF5
+        if: ${{ matrix.tox_env == 'py315' }}
+        run: sudo apt-get update && sudo apt-get install -y libhdf5-dev pkg-config
+
       # coverage runs on python 3.12 (tox.ini basepython)
       - name: Set up Python 3.12 for coverage
         if: ${{ matrix.tox_env == 'coverage' }}
