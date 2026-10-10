@@ -6,8 +6,8 @@ authors = [
     { name = "Juan B Cabral", email = "jbcabral@unc.edu.ar" },
 ]
 readme = "README.md"
-license = "MIT"
-license-files = ["LICENSE.txt"]
+license = "MIT AND BSD-3-Clause"
+license-files = ["LICENSE.txt", "licenses/*.txt"]
 description = "Galaxy dynamic de-composition"
 keywords = ["galaxy", "dynamics"]
 requires-python = ">=3.11,<3.16"
@@ -33,7 +33,7 @@ dependencies = [
     # --- Core ---
     "scipy >= 1.0",
     "scikit-learn",
-    "uttrs",
+    "attrs",
     "h5py",
     "custom_inherit",
     "grispy",

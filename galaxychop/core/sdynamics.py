@@ -22,10 +22,9 @@ import numpy as np
 
 import pandas as pd
 
-import uttr
-
 from .galaxy import NoGravitationalPotentialError, ParticleSetType
 from .. import constants as const
+from ..utils import uttr
 
 
 # =============================================================================

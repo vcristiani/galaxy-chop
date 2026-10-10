@@ -31,9 +31,8 @@ import numpy as np
 
 import pandas as pd
 
-import uttr
-
 from ...core import Galaxy, ParticleSet, ParticleSetType
+from ...utils import uttr
 from ...utils.cvelocity import circular_velocity
 
 

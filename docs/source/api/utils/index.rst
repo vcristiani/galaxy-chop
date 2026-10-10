@@ -14,3 +14,4 @@
    cvelocity.rst
    decorators.rst
    unames.rst
+   uttr.rst

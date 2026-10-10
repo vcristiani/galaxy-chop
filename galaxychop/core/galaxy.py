@@ -26,9 +26,8 @@ import numpy as np
 
 import pandas as pd
 
-import uttr
-
 from .. import constants as const
+from ..utils import uttr
 from ..utils.cvelocity import circular_velocity
 
 # =============================================================================
@@ -137,7 +136,7 @@ class ParticleSet:
     has_potential_ : bool.
         Indicates if the specific potential energy is computed.
     arr_ : Instances of ``ArrayAccessor``
-        Access to the attributes (defined with uttrs) of the provided instance,
+        Access to the attributes (defined with uttr) of the provided instance,
         and if they are of astropy.units.Quantity type it converts them into
         numpy.ndarray.
 
