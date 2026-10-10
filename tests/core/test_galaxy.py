@@ -729,7 +729,7 @@ def test_Galaxy_repr_html(galaxy):
 
     html = gal._repr_html_()
 
-    assert "<b>🌌 Galaxy</b> &mdash; 1,300 particles" in html
+    assert "<b>🌌 Galaxy</b> &mdash; 1300 particles" in html
     # one row per particle type, named and with its emoji
     for ptype in core.ParticleSetType:
         name = " ".join(ptype.name.split("_")).title()

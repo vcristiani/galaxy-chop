@@ -385,7 +385,7 @@ class DecomposedParticleSet(ParticleSet):
             "<div>"
             f"<p><b>{cls_name}</b> {self.ptype.emoji}{DECOMPOSED_EMOJI} "
             f"{self.ptype.name!r} &mdash; "
-            f"<b>size</b>={len(self):,}, "
+            f"<b>size</b>={len(self)}, "
             f"$\\mathbf{{M}}$={total_mass.value:.2e} {m_unit}, "
             f"<b>potentials</b>={self.has_potential_}, "
             f"<b>components</b>={len(set(self.labels))}, "
@@ -834,7 +834,7 @@ class DecomposedGalaxy(Galaxy):
         return (
             "<div>"
             f"<p><b>🌌{DECOMPOSED_EMOJI} {cls_name}</b> "
-            f"&mdash; {len(self):,} particles, "
+            f"&mdash; {len(self)} particles, "
             f"<b>method</b>={self.method!r}</p>"
             f"{components_html}"
             f"<p><b>Potential computed:</b> {has_pot.title()}, "

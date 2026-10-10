@@ -292,7 +292,7 @@ class ParticleSet:
         return (
             f"<p><b>{cls_name}</b> {self.ptype.emoji} "
             f"{self.ptype.name!r} &mdash; "
-            f"<b>size</b>={len(self):,}, "
+            f"<b>size</b>={len(self)}, "
             f"$\\mathbf{{M}}$={total_mass.value:.2e} {m_unit}, "
             f"<b>potentials</b>={self.has_potential_}</p>"
         )
@@ -677,7 +677,7 @@ class Galaxy:
         # assemble the final HTML
         return (
             "<div>"
-            f"<p><b>🌌 {cls_name}</b> &mdash; {len(self):,} particles</p>"
+            f"<p><b>🌌 {cls_name}</b> &mdash; {len(self)} particles</p>"
             f"{table_html}"
             f"<p><b>Potential computed:</b> {has_pot.title()}</p>"
             "</div>"
