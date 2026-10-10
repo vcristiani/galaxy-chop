@@ -13,8 +13,7 @@
 Installed as the ``galaxychop`` command::
 
     $ galaxychop methods
-    $ galaxychop info galaxy.h5
-    $ galaxychop show decomposed.h5
+    $ galaxychop info decomposed.h5
     $ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
 
 """
@@ -78,18 +77,6 @@ def methods():
 
 @app.command()
 def info(
-    path: pathlib.Path = typer.Argument(
-        ..., exists=True, dir_okay=False, help="HDF5 file with a galaxy."
-    ),
-):
-    """Show a summary of a galaxy stored in an HDF5 file."""
-    galaxy = io.read_hdf5(path)
-    typer.echo(repr(galaxy))
-    typer.echo(galaxy.total_mass().to_string())
-
-
-@app.command()
-def show(
     path: pathlib.Path = typer.Argument(
         ...,
         exists=True,

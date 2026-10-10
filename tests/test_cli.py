@@ -57,25 +57,17 @@ def test_methods(runner):
     assert result.stdout.split() == list(cli.available_decomposers())
 
 
-def test_info(runner, data_path):
-    result = runner.invoke(cli.app, ["info", str(data_path("gal394242.h5"))])
-
-    assert result.exit_code == 0
-    assert "<Galaxy stars=37393" in result.stdout
-    assert "total_mass" in result.stdout
-
-
-def test_show_galaxy(runner, data_path):
+def test_info_galaxy(runner, data_path):
     path = data_path("gal394242.h5")
 
-    result = runner.invoke(cli.app, ["show", str(path)])
+    result = runner.invoke(cli.app, ["info", str(path)])
 
     assert result.exit_code == 0
     expected = io.read_hdf5(path).total_mass().to_string()
     assert result.stdout.strip() == expected.strip()
 
 
-def test_show_decomposed_galaxy(runner, data_path, tmp_path):
+def test_info_decomposed_galaxy(runner, data_path, tmp_path):
     output = tmp_path / "decomposed.h5"
     dgal = decomposers.JThreshold().decompose(
         preproc.center_and_align(
@@ -84,7 +76,7 @@ def test_show_decomposed_galaxy(runner, data_path, tmp_path):
     )
     io.to_hdf5(output, dgal)
 
-    result = runner.invoke(cli.app, ["show", str(output)])
+    result = runner.invoke(cli.app, ["info", str(output)])
 
     assert result.exit_code == 0
     expected = io.read_hdf5(output).total_mass().to_string()
