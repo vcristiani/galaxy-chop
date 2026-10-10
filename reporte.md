@@ -1,8 +1,34 @@
 # Reporte de estado del repositorio GalaxyChop
 
-Fecha del análisis inicial: 2026-09-30 · Última actualización: 2026-10-09 · Rama: `dev` · Versión declarada: `1.0.dev0` · Python requerido: `>=3.11,<3.16` · Python del venv local: 3.10.12 (⚠️ ver pendientes)
+Fecha del análisis inicial: 2026-09-30 · Última actualización: 2026-10-10 · Rama: `dev` · Versión declarada: `1.0.dev0` · Python requerido: `>=3.11,<3.16` · Python del venv local: 3.13.16
 
-## 🔖 Hasta dónde llegamos (09/10) — leer esto primero
+## 🔖 Hasta dónde llegamos (10/10) — leer esto primero
+
+Se cerró casi toda la lista de pendientes del 09/10 (todo en `dev`, pusheado):
+
+| Commit | Qué |
+|---|---|
+| `7efb002` | Borrados `draft/` y `docs/tutorial.ipynb` (material viejo; queda en la historia de git). |
+| `f5d7c60` | `qafan` (no está en PyPI) fijado a un commit en vez del zip de `master`. |
+| `07b7c79` | CI y publicación reescritos: `CI.yml` usa el `tests.yml` del propio repo (antes un fork) en todo push/PR; `tests.yml` suma `check-testdir`, `check-apidocsdir` y `coverage`; `publish.yml` arma sdist + wheel puro con `python -m build`, `twine check`, y sube con el secret `PYPI_API_TOKEN`. Licencia en formato SPDX. |
+| `2dbb66c` | Read the Docs en ubuntu-24.04 / Python 3.12 (+ pandoc). `m2r2` → `myst-parser`, lo que libera los pines viejos de `mistune`/`nbconvert`. |
+| `578ed72` | CLI `galaxychop` (typer): `methods`, `info`, `decompose`; con tests, página de API y sección en el README. |
+| `cca7c0a` | `rotation_curve()` avisa si la galaxia no está centrada (las velocidades circulares se miden desde el origen). |
+| `136efe6` | Tests de los `_repr_html_`. |
+| `7837e9f` | CHANGELOG al día (sección "Version 1.0 (unreleased)"). |
+| `7c5e124` | **Los 5 tutoriales reescritos para la API actual**, ejecutados de punta a punta y guardados con salidas (4 de 5 fallaban). |
+| `0988e09` | **`uttrs` integrado como `galaxychop.utils.uttr`**: `uttrs` 0.5 no se puede instalar en un entorno limpio (su `setup.py` usa `ez_setup`, que baja setuptools 18 de una URL muerta; solo andaba por la caché de pip). Dependencia `uttrs` → `attrs`; licencia `MIT AND BSD-3-Clause` con `licenses/uttrs-LICENSE.txt` en el sdist y el wheel. |
+| `434420e` | CI: instala `libhdf5-dev` en el job de Python 3.15 (ver pendientes). |
+
+**Estado al cierre:** `tox -r` desde cero → `py311`, `py312`, `py313`, `py314`: **268 passed / 1 xfailed** cada uno; `coverage`: **96,58 %**; `style`, `docstyle`, `check-testdir`, `check-headers`, `check-apidocsdir`, `make-docs`: OK. **`py315` falla** solo porque `h5py` todavía no publica wheels para 3.15 (ver pendientes).
+
+### Notas para retomar (10/10)
+
+- El venv local ya es Python 3.13 y `python`/`pytest` del venv funcionan directo.
+- Los tutoriales se ejecutan con datos de `tests/datasets/` (copiar `gal394242.h5` junto al notebook o usar la celda oculta que hace `chdir`); nbsphinx no los ejecuta porque ya tienen salidas guardadas.
+- Primera vez que corren en GitHub los workflows nuevos: revisar la pestaña Actions después del push.
+
+## Sesión del 06–09/10
 
 Entre el 01/10 y el 09/10 la rama de trabajo pasó a ser `dev` y entraron muchos cambios del usuario: rename del paquete `galaxychop.models` → `galaxychop.decomposers`, Python 3.11–3.15, versión `1.0.dev0`, `plot_config` en `constants`, `DecomposedGalaxyPlotter`, curvas de rotación y reprs HTML. Sobre eso, en la sesión del 06–09/10 se hicieron estas correcciones (todas en `dev`):
 
@@ -20,7 +46,7 @@ Entre el 01/10 y el 09/10 la rama de trabajo pasó a ser `dev` y entraron muchos
 
 **Estado al cierre (`7ee829c` + este commit del reporte, pusheado a `origin/dev`):** `pytest` **219 passed / 1 xfailed / 0 failed**; `flake8`, `pydocstyle` y `tox -e make-docs` sin errores; cobertura 94 % (medida al inicio de la sesión, antes de los últimos commits). Los entornos de tox `style`, `check-testdir`, `check-headers` y `check-apidocsdir` fallan **solo** por archivos locales ignorados por git (ver pendientes).
 
-### Notas para retomar (09/10)
+### Notas de esa sesión (09/10)
 
 - Correr los tests con el Python del venv: `python -m pytest` (el `pytest` de `~/.local/bin` usa el Python del sistema, sin `astropy`). Hay que recrear el venv con Python ≥ 3.11.
 - Los tests de los decomposers ahora verifican cuántas estrellas caen en cada componente (no solo tamaños): si cambian los números, mirar si es un bug antes de ajustar el test.
@@ -163,23 +189,15 @@ Nota adicional pendiente: `[testenv]` tiene `usedevelo = True` (typo de `usedeve
 
 ## Acciones pendientes para generar un release
 
-Actualizado al 09/10. En orden de prioridad, sin numerar a propósito para poder reordenar.
+Actualizado al 10/10. En orden de prioridad, sin numerar a propósito para poder reordenar.
 
-- **Recrear el venv local con Python ≥ 3.11.** El actual es 3.10.12 y `pyproject.toml` ya exige `>=3.11,<3.16`; los tests corren desde el árbol de fuentes, pero no se puede reinstalar el paquete en ese venv.
-- **Borrar archivos locales ignorados que hacen fallar tox** (`style`, `check-testdir`, `check-headers`, `check-apidocsdir`): `galaxychop/.ipynb_checkpoints/`, `galaxychop/models/` (restos del rename: `.pyc` y un checkpoint), `tests/models/` y `Untitled.ipynb` en la raíz. Pendiente de confirmación del usuario.
+- **Crear el secret `PYPI_API_TOKEN`** en GitHub (Settings → Secrets → Actions) con un token de pypi.org para el proyecto `galaxychop`; `publish.yml` lo necesita. Los secrets viejos `PYPI_USERNAME`/`PYPI_PASSWORD` ya no sirven y se pueden borrar.
+- **Verificar el primer run de los workflows nuevos** en GitHub Actions (nunca corrieron).
 - **Revisar desde lo físico los resultados nuevos de `AutoGaussianMixture`** (cambiaron con el fix de `d3a86c8`; en gal394242 centrada/alineada: Cold disk 7.965 / Warm disk 18.545 / Bulge 5.504 / Halo 5.243, antes 15.843 / 9.863 / 7.641 / 3.910).
-- **Reescribir los tutoriales con la API actual**: `decomposers.ipynb` (10 usos de `labels=`, más `get_lmap`) y `quickstart.ipynb` (2 usos de `labels=` y un `.scatter`) usan la API de plots vieja; los plots por componente ahora son `dgal.plot.*`. Ejecutar los 5 tutoriales y regenerar salidas.
-- **CLI**: `pyproject.toml` declara `galaxychop = "galaxychop.cli:main"` y depende de `typer`, pero `galaxychop/cli.py` no existe. Implementarlo (con tests y docs en el README) o quitar el entry point y la dependencia.
-- **CI/CD**:
-  - `publish.yml`: Python 3.9–3.12, `cibuildwheel` cp37–39, acciones `@v2`. Reescribir para paquete Python puro (`python -m build`, 3.11–3.15, PyPI con trusted publishing).
-  - `CI.yml` y `publish.yml` llaman al workflow reutilizable del **fork** `BrunoCeliz/galaxy-chop@<sha>`; apuntar al repo oficial.
-  - `tests.yml` solo corre en `dev`; sumar `master` y PRs.
-- **`.readthedocs.yml`**: `ubuntu-20.04` y Python 3.9 (numpy ≥ 2 y astropy ≥ 6 no instalan); pasar a un OS actual y Python 3.11+. `docs/requirements.txt` fija `mistune==0.8.4` y `nbconvert==6.5.3`.
-- **Correr `tox` completo** en `py311`…`py315` (solo se corrió la suite en el venv 3.10 y `make-docs` en 3.11).
-- **Decidir la estrategia de ramas y la versión**: `dev` está muy por delante de `master`; quedan `newplots`, `persistence-new`, `pset`, `refactor`, `ref_abadi`, `issue#106`, `dataset_test`. La versión declarada es `1.0.dev0`.
-- **`CHANGELOG.md`**: sumar lo de la sesión del 06–09/10 (rename `models` → `decomposers`, `DecomposedGalaxyPlotter`, velocidades circulares, fixes científicos de `d3a86c8`, HDF5 de `DecomposedGalaxy`).
-- **Documentar** en la API y en un tutorial `DecomposedGalaxy`, `DecomposedParticleSet`, masas probabilísticas, velocidades circulares (galaxia/tipo/componente) y el formato HDF5.
-- **Cobertura puntual** (total 94 %, por encima del 90 %): `potential_energy` 74 %, `preproc/_base.py` 78 %, `io.py` 83 % (formato HDF5 antiguo); los `_repr_html_` de `galaxy.py` no tienen tests.
-- **Diseño, para considerar**: `galaxy_circular_velocity_` y `ptype_circular_velocity_` se calculan al construir cada `Galaxy`/`ParticleSet` (y cada paso de preprocesamiento crea una galaxia nueva); podrían ser perezosas. Ninguna de las tres velocidades circulares valida que la galaxia esté centrada.
-- Reemplazar `qafan` (se instala desde un zip de GitHub master) por una versión reproducible o eliminarlo.
-- Revisar `draft/` y `docs/tutorial.ipynb` (material obsoleto trackeado): borrar o archivar.
+- **Decidir la estrategia de ramas y la versión**: `dev` está muy por delante de `master`; quedan `newplots`, `persistence-new`, `pset`, `refactor`, `ref_abadi`, `issue#106`, `dataset_test`. La versión declarada es `1.0.dev0` (el CHANGELOG ya usa "Version 1.0").
+- **Python 3.15 y `h5py`**: `h5py` no tiene wheels para 3.15, así que se compila y necesita `libhdf5-dev` (en el CI ya se instala; localmente `sudo apt install libhdf5-dev`). Cuando `h5py` publique wheels para 3.15, sacar ese paso de `tests.yml`.
+- **Plots, limitaciones encontradas al reescribir los tutoriales**:
+  - Un componente con un nombre que no está en `plot_config` (p. ej. `"thin-disk"`) se dibuja como "Unclassified", junto con cualquier otro nombre desconocido. Solo los nombres de `galaxychop.config` y los componentes numerados tienen estilo propio.
+  - Seaborn crea las leyendas con `loc="best"`, y matplotlib avisa que es lento con muchos datos (aparece en las salidas de los tutoriales). Cambiarlo mueve las leyendas y obliga a regenerar las imágenes de referencia de los tests.
+- **Cobertura puntual** (total 96,58 %): `preproc/potential_energy/__init__.py` 74 %, `preproc/_base.py` 78 %.
+- **`uttr`**: como Juan B Cabral es coautor de `uttrs`, podría relicenciar el módulo integrado como MIT y simplificar la licencia del paquete a solo `MIT` (opcional).
