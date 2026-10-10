@@ -14,6 +14,7 @@ Installed as the ``galaxychop`` command::
 
     $ galaxychop methods
     $ galaxychop info decomposed.h5
+    $ galaxychop plot decomposed.h5 --kind sdyn_hist2d -o plot.png
     $ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
 
 """
@@ -24,11 +25,13 @@ Installed as the ``galaxychop`` command::
 
 import inspect
 import pathlib
-from typing import Optional
+from typing import List, Optional
+
+import matplotlib.pyplot as plt
 
 import typer
 
-from . import decomposers, io, preproc
+from . import core, decomposers, io, preproc
 
 # =============================================================================
 # APP
@@ -63,6 +66,25 @@ def available_decomposers():
     return found
 
 
+def available_plots():
+    """
+    Return the plots that can be drawn from the command line.
+
+    Returns
+    -------
+    list of str
+        Names of the public plot methods of ``GalaxyPlotter`` (e.g.
+        ``"hist2d"``), the same ones ``galaxy.plot(plot_kind)`` accepts.
+    """
+    plotter = core.plot.GalaxyPlotter
+    forbidden = plotter._P_KIND_FORBIDEN_METHODS
+    return [
+        name
+        for name, _ in inspect.getmembers(plotter, inspect.isfunction)
+        if not name.startswith("_") and name not in forbidden
+    ]
+
+
 # =============================================================================
 # COMMANDS
 # =============================================================================
@@ -87,6 +109,71 @@ def info(
     """Print the total mass of a galaxy or of each of its components."""
     galaxy = io.read_hdf5(path)
     typer.echo(galaxy.total_mass().to_string())
+
+
+@app.command()
+def plot(
+    path: pathlib.Path = typer.Argument(
+        ...,
+        exists=True,
+        dir_okay=False,
+        help="HDF5 file with a galaxy or a decomposed galaxy.",
+    ),
+    kind: str = typer.Option(
+        "hist2d",
+        "--kind",
+        "-k",
+        help="Plot to draw: one of the galaxy.plot methods (e.g. hist2d, "
+        "kde2d, rotation_curve, sdyn_hist2d).",
+    ),
+    x: Optional[str] = typer.Option(None, help="Attribute on the x axis."),
+    y: Optional[str] = typer.Option(None, help="Attribute on the y axis."),
+    ptypes: Optional[List[str]] = typer.Option(
+        None,
+        "--ptype",
+        help="Particle type to plot (stars, dark_matter or gas); repeat "
+        "it for several.",
+    ),
+    output: Optional[pathlib.Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        dir_okay=False,
+        help="Save the figure in this file instead of showing it.",
+    ),
+):
+    """Plot a galaxy (by particle type) or a decomposed one (by component)."""
+    available = available_plots()
+    if kind not in available:
+        raise typer.BadParameter(
+            f"{kind!r}. Choose one of: {', '.join(available)}",
+            param_hint="--kind",
+        )
+
+    galaxy = io.read_hdf5(path)
+    method = getattr(galaxy.plot, kind)
+
+    # only pass the options this plot takes, so an unsupported one is a
+    # clear error here instead of a seaborn error about its **kwargs
+    params = inspect.signature(method).parameters
+    options = {"x": ("--x", x), "y": ("--y", y), "ptypes": ("--ptype", ptypes)}
+    kwargs = {}
+    for name, (flag, value) in options.items():
+        if not value:
+            continue
+        if name not in params:
+            raise typer.BadParameter(
+                f"the {kind!r} plot doesn't take it", param_hint=flag
+            )
+        kwargs[name] = value
+
+    method(**kwargs)
+
+    if output is None:
+        plt.show()
+    else:
+        plt.gcf().savefig(output, bbox_inches="tight")
+        typer.echo(f"Saved {output}")
 
 
 @app.command()

@@ -83,7 +83,7 @@
   `rotation_curve()` warns if the galaxy is not centered.
 
 - New `galaxychop` command line interface: `galaxychop methods`,
-  `galaxychop info` and `galaxychop decompose`.
+  `galaxychop info`, `galaxychop plot` and `galaxychop decompose`.
 
 - Rich HTML representations of galaxies and particle sets for Jupyter.
 
