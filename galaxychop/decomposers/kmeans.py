@@ -51,7 +51,7 @@ class KMeans(GalaxyDecomposerABC):
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
     random_state : int, default=None
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
-    algorithm : {“lloyd”, “elkan”}, default="auto"
+    algorithm : {“lloyd”, “elkan”}, default="lloyd"
         Parameter of :py:class:``k-Means`` class into ``scikit-learn`` library.
 
     Notes

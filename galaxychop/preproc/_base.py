@@ -82,17 +82,8 @@ class GalaxyTransformerABC(metaclass=abc.ABCMeta):
         """
         Initiate of subclasses.
 
-        It ensures that every inherited class is decorated by ``attr.s()`` and
-        assigns as class configuration the parameters defined in the class
-        variable `__gchop_method_cls_config__`.
-
-        In other words it is slightly equivalent to:
-
-        .. code-block:: python
-
-            @attr.s(**GalaxyTransformerABC.__gchop_method_cls_config__)
-            class Transformer(GalaxyTransformerABC):
-                pass
+        Currently a no-op. Subclasses are *not* decorated with ``attr.s()``;
+        they define their own ``__init__``.
 
         """
 

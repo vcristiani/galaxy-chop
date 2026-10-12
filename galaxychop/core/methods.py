@@ -45,7 +45,7 @@ class GchopMethodABC(metaclass=abc.ABCMeta):
 
     def __init_subclass__(cls):
         """Validate if the subclass are well formed."""
-        is_abstract = vars(cls).get("_gchop_abstract_class ", False)
+        is_abstract = vars(cls).get("_gchop_abstract_class", False)
         if is_abstract:
             return
 

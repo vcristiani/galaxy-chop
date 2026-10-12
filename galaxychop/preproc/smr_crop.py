@@ -173,11 +173,7 @@ def is_star_cutted(galaxy, *, num_radii=3, rtol=1e-05, atol=1e-08):
         trim_stars_df.x**2 + trim_stars_df.y**2 + trim_stars_df.z**2
     )
 
-    # maximum distance index of all particles
-    maxdist_idx = np.argmin(distances)
-    max_values = distances[maxdist_idx]
-
-    return np.all(np.less_equal(max_values, cut_radius))
+    return bool(np.less_equal(distances.max(), cut_radius))
 
 
 def get_radius_half_mass(galaxy, particle="stars"):
