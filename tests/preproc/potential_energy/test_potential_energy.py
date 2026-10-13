@@ -39,8 +39,6 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
         gas_potential=True,
     )
 
-    potential_energy.potential(gal)
-
     with pytest.warns(
         UserWarning, match="Galaxy potential is already calculated"
     ):
@@ -155,6 +153,7 @@ def test_potential_recover(read_hdf5_galaxy):
 
 
 @pytest.mark.slow
+@pytest.mark.filterwarnings("ignore:Galaxy potential is already calculated")
 def test_potentializer_transformer(galaxy):
     gal = galaxy(
         seed=42,

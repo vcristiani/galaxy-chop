@@ -155,9 +155,8 @@ def star_align(galaxy, *, r_cut=None):
     """
     if not is_centered(galaxy):
         warnings.warn(
-            "Input Galaxy is not centered. Please, center it \
-                with Centralizer.transform(galaxy) \
-                or proceed with caution.",
+            "Input Galaxy is not centered. Please, center it with "
+            "Centralizer.transform(galaxy) or proceed with caution.",
             UserWarning,
         )
 

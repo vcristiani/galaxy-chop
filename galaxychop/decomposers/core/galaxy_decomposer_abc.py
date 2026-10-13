@@ -603,17 +603,15 @@ class GalaxyDecomposerABC(metaclass=abc.ABCMeta):
         # =====================================================================
         if not is_centered(galaxy):
             warnings.warn(
-                "Input Galaxy is not centered. Please, center it \
-                    with Centralizer.transform(galaxy) \
-                    or proceed with caution.",
+                "Input Galaxy is not centered. Please, center it with "
+                "Centralizer.transform(galaxy) or proceed with caution.",
                 UserWarning,
             )
 
         if not is_star_aligned(galaxy):
             warnings.warn(
-                "Input Galaxy is not aligned. Please, align it \
-                    with Aligner.transform(galaxy) \
-                    or proceed with caution.",
+                "Input Galaxy is not aligned. Please, align it with "
+                "Aligner.transform(galaxy) or proceed with caution.",
                 UserWarning,
             )
 

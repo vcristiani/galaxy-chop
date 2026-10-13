@@ -214,6 +214,7 @@ def test_DecomposedGalaxyPlotter_get_df_and_hue_self_contained_vcirc():
 
 @pytest.mark.plot
 @pytest.mark.slow
+@pytest.mark.filterwarnings("ignore:KDE cannot be estimated")
 def test_DecomposedGalaxyPlotter_plots_smoke(read_hdf5_galaxy):
     """Every plot method should run and hue by component, not ptype.
 

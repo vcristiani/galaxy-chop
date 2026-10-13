@@ -246,6 +246,7 @@ def test_GalaxyPlotter_kde(galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.plot
+@pytest.mark.filterwarnings("ignore:Input Galaxy is not centered")
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
@@ -294,6 +295,7 @@ def test_GalaxyPlotter_rotation_curve(galaxy, fig_test, fig_ref):
 
 
 @pytest.mark.plot
+@pytest.mark.filterwarnings("ignore:Input Galaxy is not centered")
 @check_figures_equal(extensions=["png"])
 def test_GalaxyPlotter_rotation_curve_no_galaxy(galaxy, fig_test, fig_ref):
     gal = galaxy(seed=42)
