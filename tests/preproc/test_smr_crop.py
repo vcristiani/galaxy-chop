@@ -51,12 +51,38 @@ def test_gal_crop_invalid_num_radii(galaxy):
 def test_is_gal_cutted_real_galaxy(read_hdf5_galaxy):
     gal = read_hdf5_galaxy("gal394242.h5")
 
+    # the original galaxy has stars beyond 3 half-mass radii
+    assert not smr_crop.is_star_cutted(gal)
+
+    # a radius large enough encloses every star
+    assert smr_crop.is_star_cutted(gal, num_radii=1000)
+
+
+def test_is_gal_cutted_after_crop(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
     cgal = smr_crop.half_star_mass_radius_crop(gal)
 
-    # Rev "is_star_cutted" porque mepa que vuelve a
-    # cortar la glx...
-    # assert not smr_crop.is_star_cutted(gal, num_radii=1)
-    assert smr_crop.is_star_cutted(cgal, num_radii=1)
+    # the crop removes exactly the stars that made the check fail...
+    r_half = smr_crop.get_radius_half_mass(gal)
+    assert (cgal.stars.radius_.value <= 3 * r_half).all()
+
+    # ...but cropping isn't idempotent: the half-mass radius of the cropped
+    # galaxy is smaller, so there are stars beyond its new cut radius
+    assert smr_crop.get_radius_half_mass(cgal) < r_half
+    assert not smr_crop.is_star_cutted(cgal)
+
+
+def test_half_star_mass_radius_crop_without_potential(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    cgal = smr_crop.half_star_mass_radius_crop(gal)
+
+    assert not cgal.has_potential_
 
 
 def test_cutter_transformer(galaxy):

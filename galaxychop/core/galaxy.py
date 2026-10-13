@@ -1055,6 +1055,13 @@ class Galaxy:
         dark_matter_kws = _flat(the_dict["dark_matter"], "dm")
         gas_kws = _flat(the_dict["gas"], "g")
 
+        # to_dict() fills a missing potential with NaN; mkgalaxy needs None
+        # to keep has_potential_ False
+        if not self.has_potential_:
+            stars_kws["potential_s"] = None
+            dark_matter_kws["potential_dm"] = None
+            gas_kws["potential_g"] = None
+
         disassembled = dict(**stars_kws, **dark_matter_kws, **gas_kws)
         return disassembled
 

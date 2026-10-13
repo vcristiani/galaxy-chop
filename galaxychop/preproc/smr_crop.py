@@ -123,7 +123,11 @@ def half_star_mass_radius_crop(galaxy, *, num_radii=3):
         vx=trim_stars_df["vx"].to_numpy(),
         vy=trim_stars_df["vy"].to_numpy(),
         vz=trim_stars_df["vz"].to_numpy(),
-        potential=trim_stars_df["potential"].to_numpy(),
+        potential=(
+            trim_stars_df["potential"].to_numpy()
+            if galaxy.stars.has_potential_
+            else None
+        ),
         softening=galaxy.stars.softening.value,
     )
 
@@ -165,13 +169,11 @@ def is_star_cutted(galaxy, *, num_radii=3, rtol=1e-05, atol=1e-08):
     # Now we extract only the needed column to rotate the galaxy
     stars_df = galaxy.stars.to_dataframe(attributes=["m", "x", "y", "z"])
 
-    to_trim_idxs, cut_radius = _get_half_smr_crop(stars_df, num_radii)
-    trim_stars_df = stars_df.drop(to_trim_idxs, axis="rows")
+    _, cut_radius = _get_half_smr_crop(stars_df, num_radii)
 
-    # Distances of all stellar particles that "survives"
-    distances = np.sqrt(
-        trim_stars_df.x**2 + trim_stars_df.y**2 + trim_stars_df.z**2
-    )
+    # Distances of all stellar particles: none of them may lie beyond the
+    # cut radius (i.e. cropping again would not remove any star)
+    distances = np.sqrt(stars_df.x**2 + stars_df.y**2 + stars_df.z**2)
 
     return bool(np.less_equal(distances.max(), cut_radius))
 

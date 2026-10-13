@@ -175,3 +175,19 @@ def test_potentializer_transformer(galaxy):
     func_df = func_pgal.to_dataframe()
 
     pd.testing.assert_frame_equal(class_df, func_df, check_dtype=False)
+
+
+@pytest.mark.slow
+def test_Galaxy_potential_energy_grispy_is_negative(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    pgal = potential_energy.potential(gal, backend="grispy")
+
+    assert (pgal.stars.potential.value < 0).all()
+    assert (pgal.dark_matter.potential.value < 0).all()
+    assert (pgal.gas.potential.value < 0).all()

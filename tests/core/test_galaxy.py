@@ -1049,3 +1049,19 @@ def test_Galaxy_stellar_dynamics(read_hdf5_galaxy):
         np.testing.assert_array_equal(gv, fv)
 
     np.testing.assert_array_equal(gv, fv)
+
+
+def test_galaxy_disassemble_without_potential(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    disassembled = gal.disassemble()
+
+    assert disassembled["potential_s"] is None
+    assert disassembled["potential_dm"] is None
+    assert disassembled["potential_g"] is None
+    assert not core.mkgalaxy(**disassembled).has_potential_

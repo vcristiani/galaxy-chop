@@ -173,6 +173,29 @@ def test_to_hdf5(galaxy):
     pd.testing.assert_frame_equal(result_df, expected_df)
 
 
+def test_to_hdf5_without_potential(galaxy):
+    gal = galaxy(
+        seed=42,
+        stars_potential=False,
+        dm_potential=False,
+        gas_potential=False,
+    )
+
+    buff = BytesIO()
+    io.to_hdf5(buff, gal)
+    buff.seek(0)
+    result = io.read_hdf5(buff)
+
+    assert not result.has_potential_
+
+    stored_attributes = ["m", "x", "y", "z", "vx", "vy", "vz"]
+
+    result_df = result.to_dataframe(attributes=stored_attributes)
+    expected_df = gal.to_dataframe(attributes=stored_attributes)
+
+    pd.testing.assert_frame_equal(result_df, expected_df)
+
+
 @pytest.mark.parametrize(
     "decomposer",
     [

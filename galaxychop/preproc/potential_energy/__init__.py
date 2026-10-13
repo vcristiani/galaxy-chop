@@ -98,7 +98,10 @@ def grispy_potential(x, y, z, m, softening):
             grid=grid,
         )
 
-    return epot * const.G, np.asarray
+    # potential_grispy already returns -sum(m/r), while the other backends
+    # return +sum(m/r) and potential() negates the result: flip the sign so
+    # every backend follows the same convention.
+    return -epot * const.G, np.asarray
 
 
 # NUMPY =======================================================================

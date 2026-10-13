@@ -365,6 +365,8 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
                 if k != "id"
                 and not (k.endswith(".mask") or k.startswith("probabilities"))
             }
+            # galaxies without potential don't store the column
+            kws.setdefault("potential", None)
 
             del table, meta
 
@@ -423,6 +425,8 @@ class HDF5ReaderV2(GalaxyHDF5ReaderABC):
                 if k != "id"
                 and not (k.endswith(".mask") or k.startswith("probabilities"))
             }
+            # galaxies without potential don't store the column
+            kws.setdefault("potential", None)
 
             has_probabilities = meta["has_probabilities"]
             probabilities_n = (
