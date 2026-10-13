@@ -16,7 +16,6 @@ coverage
 pytest-cov
 
 pydocstyle
-toml
 
 -r docs/requirements.txt
 

@@ -1,6 +1,6 @@
 # This file is part of
 # the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
-# Copyright (c) Cristiani, et al. 2021, 2022, 2023, 2026
+# Copyright (c) Cristiani, et al. 2020, 2021, 2022, 2023, 2024, 2025, 2026
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
@@ -13,6 +13,9 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+
+import pathlib
+import tomllib
 
 from galaxychop import cli, core, decomposers, io, preproc
 
@@ -268,8 +271,26 @@ def test_plot_option_not_taken(runner, data_path, kind, option):
 
 def test_main(monkeypatch):
     called = []
-    monkeypatch.setattr(cli, "app", lambda: called.append(True))
+    monkeypatch.setattr(cli, "app", lambda **kws: called.append(kws))
 
     cli.main()
 
-    assert called == [True]
+    assert called == [{"prog_name": "gchop"}]
+
+
+def test_main_help_uses_gchop(monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["anything", "--help"])
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main()
+
+    assert exc.value.code == 0
+    assert "Usage: gchop" in capsys.readouterr().out
+
+
+def test_gchop_entry_point():
+    pyproject = pathlib.Path(__file__).parents[1] / "pyproject.toml"
+    with open(pyproject, "rb") as fp:
+        scripts = tomllib.load(fp)["project"]["scripts"]
+
+    assert scripts == {"gchop": "galaxychop.cli:main"}

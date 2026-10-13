@@ -1,21 +1,8 @@
 ipykernel
 ipython
-custom_inherit
 Sphinx
 sphinx-rtd-theme
 nbsphinx
 myst-parser
 lxml_html_clean
 
-numba>=0.59
-numpy>=2.0
-pandas>=2.0
-
-
-scipy>=1.0
-h5py
-joblib
-seaborn
-astropy
-grispy
-attrs

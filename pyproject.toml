@@ -31,8 +31,7 @@ urls = { "Homepage" = "https://github.com/vcristiani/galaxy-chop", "Repository" 
 
 dependencies = [
     # --- Core ---
-    "scipy >= 1.0",
-    "scikit-learn",
+    "scikit-learn >= 1.3",
     "attrs",
     "h5py",
     "custom_inherit",
@@ -58,7 +57,7 @@ dependencies = [
 ]
 
 [project.scripts]
-galaxychop = "galaxychop.cli:main"
+gchop = "galaxychop.cli:main"
 
 
 

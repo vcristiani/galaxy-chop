@@ -56,18 +56,18 @@ $ pip install -r requirements_dev.txt
 
 ## 💻 Command Line
 
-Installing GalaxyChop also installs the `galaxychop` command:
+Installing GalaxyChop also installs the `gchop` command:
 
 ```bash
-$ galaxychop methods                       # list the decomposition methods
-$ galaxychop info decomposed.h5            # total mass of each type/component
-$ galaxychop plot decomposed.h5 -k sdyn_hist2d -o plot.png  # any galaxy.plot
-$ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
+$ gchop methods                            # list the decomposition methods
+$ gchop info decomposed.h5                 # total mass of each type/component
+$ gchop plot decomposed.h5 -k sdyn_hist2d -o plot.png  # any galaxy.plot
+$ gchop decompose galaxy.h5 decomposed.h5 --method JHistogram
 ```
 
 `decompose` centers and aligns the galaxy before decomposing it (use
 `--no-align` to skip it) and stores the result in a new HDF5 file. Run
-`galaxychop --help` or `galaxychop COMMAND --help` for every option.
+`gchop --help` or `gchop COMMAND --help` for every option.
 
 ## 📦 Code Repository & Issues
 

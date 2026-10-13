@@ -9,13 +9,13 @@ gal = gchop.read_hdf5("tests/datasets/gal394242.h5")
 gal
 gal = gchop.preproc.center_and_align(gal)
 # id(gal.stars), id(gal.stars.copy())
-# dgal = gchop.decomposers.JHistogram().decompose(gal)
-dgal = gchop.decomposers.AutoGaussianMixture().decompose(gal)
+dgal = gchop.decomposers.JHistogram().decompose(gal)
+#dgal = gchop.decomposers.AutoGaussianMixture().decompose(gal)
 import joblib
 
-joblib.dump(dgal, "dgal_np.jlib")
+#joblib.dump(dgal, "dgal_np.jlib")
 
 #
-# dgal.to_hdf5("foo.h5", force_group=True)
+dgal.to_hdf5("foo.h5", force_group=True)
 # df = comps.to_dataframe()
 # import ipdb; ipdb.set_trace()

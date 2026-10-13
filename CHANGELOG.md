@@ -82,8 +82,8 @@
   `ParticleSet.radius_` gives the distance of each particle to the origin.
   `rotation_curve()` warns if the galaxy is not centered.
 
-- New `galaxychop` command line interface: `galaxychop methods`,
-  `galaxychop info`, `galaxychop plot` and `galaxychop decompose`.
+- New `gchop` command line interface: `gchop methods`, `gchop info`,
+  `gchop plot` and `gchop decompose`.
 
 - Rich HTML representations of galaxies and particle sets for Jupyter.
 

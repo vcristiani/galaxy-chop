@@ -1,6 +1,6 @@
 # This file is part of
 # the galaxy-chop project (https://github.com/vcristiani/galaxy-chop)
-# Copyright (c) Cristiani, et al. 2021, 2022, 2023, 2026
+# Copyright (c) Cristiani, et al. 2020, 2021, 2022, 2023, 2024, 2025, 2026
 # License: MIT
 # Full Text: https://github.com/vcristiani/galaxy-chop/blob/master/LICENSE.txt
 
@@ -10,12 +10,12 @@
 
 """Command line interface of GalaxyChop.
 
-Installed as the ``galaxychop`` command::
+Installed as the ``gchop`` command::
 
-    $ galaxychop methods
-    $ galaxychop info decomposed.h5
-    $ galaxychop plot decomposed.h5 --kind sdyn_hist2d -o plot.png
-    $ galaxychop decompose galaxy.h5 decomposed.h5 --method JHistogram
+    $ gchop methods
+    $ gchop info decomposed.h5
+    $ gchop plot decomposed.h5 --kind sdyn_hist2d -o plot.png
+    $ gchop decompose galaxy.h5 decomposed.h5 --method JHistogram
 
 """
 
@@ -188,7 +188,7 @@ def decompose(
         "JHistogram",
         "--method",
         "-m",
-        help="Decomposition method (see `galaxychop methods`).",
+        help="Decomposition method (see `gchop methods`).",
     ),
     align: bool = typer.Option(
         True,
@@ -236,5 +236,5 @@ def decompose(
 
 
 def main():
-    """Run the ``galaxychop`` command (entry point in pyproject.toml)."""
-    app()
+    """Run the ``gchop`` command (entry point in pyproject.toml)."""
+    app(prog_name="gchop")
