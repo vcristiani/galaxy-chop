@@ -154,9 +154,11 @@ def is_star_cutted(galaxy, *, num_radii=3, rtol=1e-05, atol=1e-08):
         cutted at that radii, with only particles
         at radii smaller than num_radii*r_half.
     rtol : float
-        Relative tolerance. Default value = 1e-05.
+        Relative tolerance of the comparison against the cut radius.
+        Default value = 1e-05.
     atol : float
-        Absolute tolerance. Default value = 1e-08.
+        Absolute tolerance (kpc) of the comparison against the cut radius.
+        Default value = 1e-08.
 
     Returns
     -------
@@ -172,10 +174,12 @@ def is_star_cutted(galaxy, *, num_radii=3, rtol=1e-05, atol=1e-08):
     _, cut_radius = _get_half_smr_crop(stars_df, num_radii)
 
     # Distances of all stellar particles: none of them may lie beyond the
-    # cut radius (i.e. cropping again would not remove any star)
+    # cut radius (i.e. cropping again would not remove any star). The
+    # tolerance follows the numpy.isclose formula
     distances = np.sqrt(stars_df.x**2 + stars_df.y**2 + stars_df.z**2)
+    max_radius = cut_radius + atol + rtol * np.abs(cut_radius)
 
-    return bool(np.less_equal(distances.max(), cut_radius))
+    return bool(np.less_equal(distances.max(), max_radius))
 
 
 def get_radius_half_mass(galaxy, particle="stars"):

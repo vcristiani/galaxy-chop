@@ -3,16 +3,11 @@ include README.md
 include CHANGELOG.md
 include pyproject.toml
 
-recursive-include galaxychop *.npy
 recursive-include galaxychop *.py
 recursive-include galaxychop *.ipynb
 
 recursive-exclude docs *
-recursive-exclude legacy *
-recursive-exclude legacy_test *
-recursive-exclude resource *
 recursive-exclude tests *
-recursive-exclude tools *
 
 exclude tox.ini
 exclude requirements_dev.txt

@@ -61,6 +61,21 @@
 - Fixed `ParticleSet.total_mass()`, which returned the mass in squared solar
   masses, and saving a `DecomposedGalaxy` to HDF5.
 
+- Fixed the sign of the potential computed with the `grispy` backend: it
+  was positive, now it is negative like the `numpy` and `numba` ones.
+
+- Galaxies without potential stay without it: `Galaxy.disassemble()`
+  returns `None` (instead of NaN arrays) in `potential_*`, so the
+  preprocessors and `mkgalaxy(**galaxy.disassemble())` no longer report
+  `has_potential_=True`; and they can be read back from HDF5.
+
+- `preproc.is_star_cutted()` (and `Cutter.checker()`) now checks that no
+  star lies beyond `num_radii` half-mass radii (within `rtol`/`atol`); it
+  always returned `True`. Cropping is not idempotent (the half-mass radius
+  shrinks), so a freshly cropped galaxy may return `False`.
+
+- `scipy` is no longer a direct dependency.
+
 - All parameters with defaults, now are keyword only.
 
 - Plots support a `lmap` parameter (label-map) which allows to arbitrarily

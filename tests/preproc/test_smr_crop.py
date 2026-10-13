@@ -72,6 +72,20 @@ def test_is_gal_cutted_after_crop(read_hdf5_galaxy):
     assert not smr_crop.is_star_cutted(cgal)
 
 
+def test_is_gal_cutted_tolerance(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+
+    # num_radii that leaves the farthest star just beyond the cut radius
+    farthest = gal.stars.radius_.value.max()
+    r_half = smr_crop.get_radius_half_mass(gal)
+    num_radii = farthest / r_half * (1 - 1e-9)
+
+    assert smr_crop.is_star_cutted(gal, num_radii=num_radii)
+    assert not smr_crop.is_star_cutted(
+        gal, num_radii=num_radii, rtol=0, atol=0
+    )
+
+
 def test_half_star_mass_radius_crop_without_potential(galaxy):
     gal = galaxy(
         seed=42,
