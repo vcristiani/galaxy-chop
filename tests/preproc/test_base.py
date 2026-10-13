@@ -13,7 +13,6 @@ import numpy as np
 
 import pytest
 
-
 # =============================================================================
 # TRANSFORMER ABC
 # =============================================================================
@@ -40,11 +39,9 @@ def GalaxyTransformerABC_not_implemethed():
 @pytest.mark.model
 def test_GalaxyTransformerABC_repr():
     class Transformer(gchop.preproc._base.GalaxyTransformerABC):
-        def transform(self, galaxy):
-            ...
+        def transform(self, galaxy): ...
 
-        def checker(self, galaxy):
-            ...
+        def checker(self, galaxy): ...
 
     transformer = Transformer()
     result = repr(transformer)
@@ -63,9 +60,7 @@ def test_GalaxyTransformerABC_transform(read_hdf5_galaxy):
         def transform(self, galaxy):
             df = galaxy.to_dataframe(attributes=["ptypev", "z"])
             df.loc[:, "z"] = np.zeros(len(df))
-            stars = df[
-                df.ptypev == gchop.core.ParticleSetType.STARS.value
-            ]
+            stars = df[df.ptypev == gchop.core.ParticleSetType.STARS.value]
             dark_matter = df[
                 df.ptypev == gchop.core.ParticleSetType.DARK_MATTER.value
             ]

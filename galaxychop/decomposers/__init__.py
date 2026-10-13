@@ -29,7 +29,6 @@ from .histogram import JEHistogram, JHistogram
 from .kmeans import KMeans
 from .threshold import JThreshold
 
-
 # =============================================================================
 # MAKE IT PUBLIC!
 # =============================================================================

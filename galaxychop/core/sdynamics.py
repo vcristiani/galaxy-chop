@@ -26,7 +26,6 @@ from .galaxy import NoGravitationalPotentialError, ParticleSetType
 from .. import constants as const
 from ..utils import uttr
 
-
 # =============================================================================
 # API
 # =============================================================================

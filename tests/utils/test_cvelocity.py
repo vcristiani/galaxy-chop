@@ -10,7 +10,6 @@
 
 """test for galaxychop.utils.cvelocity"""
 
-
 # =============================================================================
 # IMPORTS
 # =============================================================================
@@ -19,7 +18,6 @@ from galaxychop import constants
 from galaxychop.utils import cvelocity
 
 import numpy as np
-
 
 # =============================================================================
 # TESTS

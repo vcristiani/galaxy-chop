@@ -24,9 +24,7 @@ import pytest
 
 
 def test_get_component_style_named():
-    assert (
-        constants.get_component_style("disk") is constants.plot_config.disk
-    )
+    assert constants.get_component_style("disk") is constants.plot_config.disk
 
 
 def test_get_component_style_generic():

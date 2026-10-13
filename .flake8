@@ -4,4 +4,5 @@ exclude =
     ./build,
     ./.tox,
     ./.pkg
-ignore = BLK100, W503, W504, E402
+# E704: black puts stub bodies (``def f(): ...``) on one line
+ignore = BLK100, W503, W504, E402, E704

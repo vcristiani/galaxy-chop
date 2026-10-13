@@ -30,7 +30,6 @@ from .core import (
 from .io import read_hdf5, to_hdf5
 from .pipeline import GchopPipeline, mkpipe
 
-
 __version__ = tuple(constants.VERSION.split("."))
 
 __all__ = [

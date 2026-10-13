@@ -12,7 +12,6 @@
 
 """Test utilities  galaxychop.preproc.potential_energy.grispy_calculation"""
 
-
 # =============================================================================
 # IMPORTS
 # =============================================================================
@@ -23,7 +22,6 @@ from galaxychop.preproc.potential_energy import grispy_calculation
 import grispy as gsp
 
 import numpy as np
-
 
 # =============================================================================
 # TESTS

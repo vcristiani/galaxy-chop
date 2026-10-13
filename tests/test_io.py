@@ -20,7 +20,6 @@ import pandas as pd
 
 import pytest
 
-
 # =============================================================================
 # IO TESTS
 # =============================================================================
@@ -224,7 +223,5 @@ def test_to_hdf5_decomposed_galaxy(read_hdf5_galaxy, decomposer):
     ):
         np.testing.assert_array_equal(rpset.components, epset.components)
         np.testing.assert_array_equal(rpset.labels, epset.labels)
-        np.testing.assert_array_equal(
-            rpset.probabilities, epset.probabilities
-        )
+        np.testing.assert_array_equal(rpset.probabilities, epset.probabilities)
         assert rpset.probabilities_n == epset.probabilities_n

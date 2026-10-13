@@ -23,7 +23,6 @@ from .potential_energy import (
 from .salign import Aligner, is_star_aligned, star_align
 from .smr_crop import Cutter, half_star_mass_radius_crop, is_star_cutted
 
-
 __all__ = [
     "center",
     "is_centered",

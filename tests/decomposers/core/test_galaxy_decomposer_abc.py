@@ -41,11 +41,9 @@ def test_GalaxyDecomposerABC_not_implemented():
 )
 def test_GalaxyDecomposerABC_invalid_bins(bins_value):
     class Decomposer(gchop.decomposers.GalaxyDecomposerABC):
-        def get_attributes(self):
-            ...
+        def get_attributes(self): ...
 
-        def split(self, X, y, attributes):
-            ...
+        def split(self, X, y, attributes): ...
 
     with pytest.raises(ValueError):
         Decomposer(cbins=bins_value)
@@ -59,8 +57,7 @@ def test_GalaxyDecomposerABC_repr():
         def get_attributes(self):
             return ["normalized_star_energy", "eps", "eps_r"]
 
-        def split(self, X, y, attributes):
-            ...
+        def split(self, X, y, attributes): ...
 
     decomposer = Decomposer(cbins=(0.3, 0.2), reassign=True, other="zaraza")
     result = repr(decomposer)

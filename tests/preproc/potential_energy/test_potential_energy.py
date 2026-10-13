@@ -12,7 +12,6 @@
 
 """Test utilities  galaxychop.preproc.potential_energy"""
 
-
 # =============================================================================
 # IMPORTS
 # =============================================================================
@@ -26,7 +25,6 @@ import numpy.testing as npt
 import pandas as pd
 
 import pytest
-
 
 # =============================================================================
 # POTENTIAL ENERGY
@@ -43,10 +41,9 @@ def test_Galaxy_potential_energy_already_calculated(galaxy):
 
     potential_energy.potential(gal)
 
-    with (pytest.warns(
-        UserWarning,
-        match="Galaxy potential is already calculated"
-    )):
+    with pytest.warns(
+        UserWarning, match="Galaxy potential is already calculated"
+    ):
         potential_energy.potential(gal)
 
 

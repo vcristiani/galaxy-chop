@@ -23,7 +23,6 @@ from sklearn import mixture
 from .core import GalaxyDecomposerABC, hparam
 from ..utils import doc_inherit
 
-
 # =============================================================================
 # GAUSSIAN ABC
 # =============================================================================

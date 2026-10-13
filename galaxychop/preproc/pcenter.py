@@ -80,8 +80,8 @@ def center(galaxy, with_potential=True):
     """
     if with_potential and not galaxy.has_potential_:
         raise ValueError(
-            "Galaxy must has the potential energy. Use \
-            with_potential = False"
+            "Galaxy must have the potential energy. "
+            "Use with_potential=False"
         )
 
     if with_potential:

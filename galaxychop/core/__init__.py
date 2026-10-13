@@ -24,7 +24,6 @@ from .galaxy import (
 )
 from .methods import GchopMethodABC
 
-
 __all__ = [
     "Galaxy",
     "NoGravitationalPotentialError",
