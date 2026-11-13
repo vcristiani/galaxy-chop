@@ -167,3 +167,58 @@ def test_aligner_checker(galaxy):
 
     assert (aligner.checker(gal)) == (salign.is_star_aligned(gal))
     assert (aligner.checker(agal)) == (salign.is_star_aligned(agal))
+
+
+def test_default_r_cut_is_shared():
+    # every alignment entry point must agree on the default radius
+    import inspect
+
+    from galaxychop import preproc
+
+    assert salign.DEFAULT_R_CUT == 30
+    for func in (
+        salign.Aligner,
+        salign.star_align,
+        salign.is_star_aligned,
+        preproc.center_and_align,
+        preproc.is_centered_and_aligned,
+    ):
+        default = inspect.signature(func).parameters["r_cut"].default
+        assert default == salign.DEFAULT_R_CUT, func.__name__
+
+
+@pytest.mark.filterwarnings("ignore:Input Galaxy is not centered")
+def test_star_align_default_r_cut(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+
+    default = salign.star_align(gal).to_dataframe()
+    with_30 = salign.star_align(gal, r_cut=30).to_dataframe()
+    every_star = salign.star_align(gal, r_cut=None).to_dataframe()
+
+    pd.testing.assert_frame_equal(default, with_30)
+    assert not default[["x", "y", "z"]].equals(every_star[["x", "y", "z"]])
+
+
+@pytest.mark.filterwarnings("ignore:Input Galaxy is not centered")
+def test_star_align_no_stars_within_r_cut(galaxy):
+    # the synthetic stars live in [0, 1), so none is within 1e-3 of the origin
+    gal = galaxy(seed=42)
+
+    with pytest.raises(ValueError, match="No stars within r_cut"):
+        salign.star_align(gal, r_cut=1e-3)
+
+
+@pytest.mark.filterwarnings("ignore:Input Galaxy is not centered")
+def test_aligner_checker_uses_its_r_cut(read_hdf5_galaxy, monkeypatch):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    calls = []
+    monkeypatch.setattr(
+        salign,
+        "is_star_aligned",
+        lambda galaxy, **kwargs: calls.append(kwargs) or True,
+    )
+
+    salign.Aligner(r_cut=10).checker(gal)
+    salign.Aligner(r_cut=10).checker(gal, r_cut=5)
+
+    assert calls == [{"r_cut": 10}, {"r_cut": 5}]

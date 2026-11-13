@@ -194,9 +194,12 @@ def decompose(
         True,
         help="Center and align the galaxy before decomposing it.",
     ),
-    r_cut: Optional[float] = typer.Option(
-        None,
-        help="Radius (kpc) of the stars used to align the galaxy.",
+    r_cut: float = typer.Option(
+        preproc.DEFAULT_R_CUT,
+        help=(
+            "Radius (kpc) of the stars used to align the galaxy "
+            "(`inf` uses every star)."
+        ),
     ),
     overwrite: bool = typer.Option(
         False, help="Replace the output file if it already exists."
@@ -208,6 +211,11 @@ def decompose(
         raise typer.BadParameter(
             f"{method!r}. Choose one of: {', '.join(available)}",
             param_hint="--method",
+        )
+
+    if not r_cut > 0:
+        raise typer.BadParameter(
+            f"must be positive, found {r_cut}", param_hint="--r-cut"
         )
 
     # to_hdf5 appends to an existing file, so never mix with an old one

@@ -120,6 +120,50 @@ def test_decompose(runner, data_path, tmp_path):
     assert set(dgal.stars.labels) == {"Disk", "Spheroid", "stars"}
 
 
+@pytest.mark.parametrize("r_cut", [None, "inf"])
+def test_decompose_r_cut(runner, data_path, tmp_path, monkeypatch, r_cut):
+    received = []
+    center_and_align = preproc.center_and_align
+
+    def fake_center_and_align(galaxy, *, r_cut):
+        received.append(r_cut)
+        return center_and_align(galaxy, r_cut=r_cut)
+
+    monkeypatch.setattr(preproc, "center_and_align", fake_center_and_align)
+    args = [
+        "decompose",
+        str(data_path("gal394242.h5")),
+        str(tmp_path / "decomposed.h5"),
+        "--method",
+        "JThreshold",
+    ]
+    if r_cut is not None:
+        args += ["--r-cut", r_cut]
+
+    result = runner.invoke(cli.app, args)
+
+    assert result.exit_code == 0, result.output
+    expected = preproc.DEFAULT_R_CUT if r_cut is None else float(r_cut)
+    assert received == [expected]
+
+
+@pytest.mark.parametrize("r_cut", ["0", "-1"])
+def test_decompose_invalid_r_cut(runner, data_path, tmp_path, r_cut):
+    result = runner.invoke(
+        cli.app,
+        [
+            "decompose",
+            str(data_path("gal394242.h5")),
+            str(tmp_path / "decomposed.h5"),
+            "--r-cut",
+            r_cut,
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert not (tmp_path / "decomposed.h5").exists()
+
+
 def test_decompose_invalid_method(runner, data_path, tmp_path):
     output = tmp_path / "decomposed.h5"
 

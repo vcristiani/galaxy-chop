@@ -24,6 +24,15 @@ from ..preproc import is_centered
 from ..utils import doc_inherit
 
 # =============================================================================
+# CONSTANTS
+# =============================================================================
+
+#: Default radius (kpc) of the stars used to align a galaxy. Only the stars
+#: inside it define the rotation, so the alignment follows the disk and not
+#: the outskirts (stellar halo, satellites). ``None`` uses every star.
+DEFAULT_R_CUT = 30.0
+
+# =============================================================================
 # INTERNALS
 # =============================================================================
 
@@ -72,6 +81,11 @@ def _get_rot_matrix(m, x, y, z, Jx, Jy, Jz, r_cut):
     mask = _make_mask(x, y, z, r_cut)
 
     mjx, mjy, mjz = m * Jx, m * Jy, m * Jz
+    if not np.size(mjx[mask]):
+        raise ValueError(
+            f"No stars within r_cut={r_cut} kpc of the origin. Center the "
+            "galaxy first, or use a larger r_cut (None uses every star)."
+        )
 
     rjx = np.sum(mjx[mask])
     rjy = np.sum(mjy[mask])
@@ -110,9 +124,15 @@ class Aligner(GalaxyTransformerABC):
     align them to make the Z-axis perpendicular to the galaxy-plane
     i.e. make the "face-on" projection the new XY plane.
 
+    Parameters
+    ----------
+    r_cut : float or None, default 30
+        Only the stars with radii smaller than ``r_cut`` (kpc) are used to
+        calculate the rotation matrix. ``None`` uses every star.
+
     """
 
-    def __init__(self, r_cut=30):
+    def __init__(self, r_cut=DEFAULT_R_CUT):
         self.r_cut = r_cut
 
     @doc_inherit(GalaxyTransformerABC.transform)
@@ -121,6 +141,7 @@ class Aligner(GalaxyTransformerABC):
 
     @doc_inherit(GalaxyTransformerABC.checker)
     def checker(self, galaxy, **kwargs):
+        kwargs.setdefault("r_cut", self.r_cut)
         return is_star_aligned(galaxy, **kwargs)
 
 
@@ -129,22 +150,22 @@ class Aligner(GalaxyTransformerABC):
 # =============================================================================
 
 
-def star_align(galaxy, *, r_cut=None):
+def star_align(galaxy, *, r_cut=DEFAULT_R_CUT):
     """
     Align the galaxy.
 
     Rotates the positions, velocities and angular momentum of the
     particles so that the total angular moment of the stars particles coincides
-    with the z-axis. Optionally, only stars particles within a cutting radius
-    `(r_cut)` can be used to calculate the rotation matrix.
+    with the z-axis. By default only the stars within 30 kpc (``r_cut``) are
+    used to calculate the rotation matrix.
 
     Parameters
     ----------
     galaxy : ``Galaxy class`` object
-    r_cut : float, optional
-        Default value =  None. If it's provided, it must be positive and the
-        rotation matrix `A` is calculated from the particles with radii smaller
-        than r_cut.
+    r_cut : float or None, default 30
+        Only the stars with radii smaller than ``r_cut`` (kpc) are used to
+        calculate the rotation matrix. It must be positive; ``None`` uses
+        every star.
 
     Returns
     -------
@@ -226,19 +247,17 @@ def star_align(galaxy, *, r_cut=None):
     return core.mkgalaxy(**new)
 
 
-def is_star_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
+def is_star_aligned(galaxy, *, r_cut=DEFAULT_R_CUT, rtol=1e-05, atol=1e-08):
     """
     Validate if the galaxy is aligned.
 
     Parameters
     ----------
     galaxy : ``Galaxy class`` object
-    r_cut : float, optional
-        Default value =  None. If it's provided,
-        it must be positive and the
-        rotation matrix `A` is calculated from
-        the particles with radii smaller
-        than r_cut.
+    r_cut : float or None, default 30
+        Only the stars with radii smaller than ``r_cut`` (kpc) are used to
+        compute the total angular momentum. Use the same value used to align
+        the galaxy; ``None`` uses every star.
     rtol : float
         Relative tolerance. Default value = 1e-05.
     atol : float

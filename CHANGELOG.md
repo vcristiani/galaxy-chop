@@ -26,6 +26,18 @@
   `components`, to map only some components on the grid of the whole galaxy.
   See the new "Projected maps" tutorial.
 
+- **Behavior change:** every alignment entry point now uses the same default
+  radius, `r_cut=30` kpc (`galaxychop.preproc.DEFAULT_R_CUT`): only the
+  stars inside it define the rotation, so the alignment follows the disk
+  and not the stellar halo or satellites. Before, `Aligner()` used 30 kpc
+  but `star_align()`, `is_star_aligned()`, `center_and_align()`,
+  `is_centered_and_aligned()` and `gchop decompose` used every star, so
+  the same galaxy could end up with different orientations. Pass
+  `r_cut=None` (`--r-cut inf` in the CLI) to use every star as before.
+  Also, `Aligner.checker()` now checks with the aligner's own `r_cut`, and
+  aligning with no stars inside `r_cut` raises a `ValueError` instead of
+  silently producing `NaN` coordinates.
+
 - The decomposition models live in the `galaxychop.decomposers` package
   (formerly `galaxychop.models`).
 

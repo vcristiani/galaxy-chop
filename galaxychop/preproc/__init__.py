@@ -20,7 +20,7 @@ from .potential_energy import (
     Potentializer,
     potential,
 )
-from .salign import Aligner, is_star_aligned, star_align
+from .salign import Aligner, DEFAULT_R_CUT, is_star_aligned, star_align
 from .smr_crop import Cutter, half_star_mass_radius_crop, is_star_cutted
 
 __all__ = [
@@ -44,7 +44,7 @@ __all__ = [
 # =============================================================================
 
 
-def center_and_align(galaxy, *, r_cut=None):
+def center_and_align(galaxy, *, r_cut=DEFAULT_R_CUT):
     """
     Sequentially performs centering and alignment.
 
@@ -53,10 +53,9 @@ def center_and_align(galaxy, *, r_cut=None):
     Parameters
     ----------
     galaxy : ``Galaxy class`` object
-    r_cut : float, optional
-        Default value =  None. If it's provided, it must be positive and the
-        rotation matrix `A` is calculated from the particles with radii smaller
-        than r_cut.
+    r_cut : float or None, default 30
+        Only the stars with radii smaller than ``r_cut`` (kpc) are used to
+        align the galaxy. ``None`` uses every star.
 
     Returns
     -------
@@ -74,7 +73,9 @@ def center_and_align(galaxy, *, r_cut=None):
     return galaxy
 
 
-def is_centered_and_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
+def is_centered_and_aligned(
+    galaxy, *, r_cut=DEFAULT_R_CUT, rtol=1e-05, atol=1e-08
+):
     """
     Validate if the galaxy is centered and aligned.
 
@@ -84,10 +85,9 @@ def is_centered_and_aligned(galaxy, *, r_cut=None, rtol=1e-05, atol=1e-08):
     Parameters
     ----------
     galaxy : ``Galaxy class`` object
-    r_cut : float, optional
-        Default value =  None. If it's provided, it must be positive and the
-        rotation matrix `A` is calculated from the particles with radii smaller
-        than r_cut.
+    r_cut : float or None, default 30
+        Only the stars with radii smaller than ``r_cut`` (kpc) are used to
+        align the galaxy. ``None`` uses every star.
     rtol : float
         Relative tolerance. Default value = 1e-05.
     atol : float
