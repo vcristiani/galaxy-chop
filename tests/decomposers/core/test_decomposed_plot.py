@@ -257,3 +257,42 @@ def test_DecomposedGalaxyPlotter_plots_smoke(read_hdf5_galaxy):
         legend_labels = {t.get_text() for t in ax.get_legend().get_texts()}
         assert legend_labels
         assert ax.get_legend().get_title().get_text() == ""
+
+
+# =============================================================================
+# PROJECTED MAPS
+# =============================================================================
+
+
+@pytest.fixture(scope="module")
+def jthreshold_galaxy(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    gal = gchop.preproc.star_align(gchop.preproc.center(gal))
+    return gchop.decomposers.JThreshold().decompose(gal)
+
+
+@pytest.mark.plot
+@pytest.mark.parametrize(
+    "components, title",
+    [
+        (None, "edge-on"),
+        ("Disk", "Disk (edge-on)"),
+        (("Disk", "Spheroid"), "Disk, Spheroid (edge-on)"),
+    ],
+)
+def test_DecomposedGalaxyPlotter_projected_map(
+    jthreshold_galaxy, components, title
+):
+    ax = jthreshold_galaxy.plot.projected_map(
+        "mass", bins=10, components=components, ax=plt.figure().subplots()
+    )
+
+    expected = jthreshold_galaxy.projected_maps(bins=10, components=components)
+    expected = expected["mass"].to_numpy(dtype=float, copy=True)
+    expected[expected <= 0] = np.nan
+
+    (mesh,) = ax.collections
+    np.testing.assert_allclose(
+        mesh.get_array().filled(np.nan).ravel(), expected, equal_nan=True
+    )
+    assert ax.get_title() == title

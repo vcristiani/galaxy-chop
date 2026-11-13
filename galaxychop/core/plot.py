@@ -14,6 +14,7 @@
 # IMPORTS
 # =============================================================================
 
+import inspect
 import warnings
 
 from astropy import units as u
@@ -528,6 +529,123 @@ class GalaxyPlotter:
         ax.legend()
         self._drop_legend_title(ax)
 
+        return ax
+
+    # PROJECTED MAPS ==========================================================
+
+    # Look of each projected_map() quantity: colormap, log scale and label.
+    _MAP_STYLES = {
+        "n_particles": ("magma", True, "particles"),
+        "mass": ("magma", True, r"mass [$M_\odot$]"),
+        "surface_density": ("magma", True, r"$\Sigma$ [$M_\odot$ kpc$^{-2}$]"),
+        "v_los": ("RdBu_r", False, r"$v_\mathrm{los}$ [km s$^{-1}$]"),
+        "sigma_los": (
+            "viridis",
+            False,
+            r"$\sigma_\mathrm{los}$ [km s$^{-1}$]",
+        ),
+    }
+
+    def projected_map(
+        self,
+        quantity="surface_density",
+        *,
+        ptypes=("stars",),
+        colorbar=True,
+        ax=None,
+        **kwargs,
+    ):
+        """Draw a projected (IFU-like) map of the galaxy.
+
+        Each pixel is colored by one column of ``Galaxy.projected_maps()``:
+        densities on a log scale, ``v_los`` on a diverging scale symmetric
+        around zero and ``sigma_los`` on a sequential one. Empty pixels are
+        left blank. Warns if the galaxy is not aligned.
+
+        Parameters
+        ----------
+        quantity : str, default "surface_density"
+            One of ``n_particles``, ``mass``, ``surface_density``, ``v_los``
+            or ``sigma_los``.
+        ptypes : tuple of str, default ("stars",)
+            Particle types to project, pooled together.
+        colorbar : bool, default True
+            Whether to add a colorbar.
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on.
+        **kwargs
+            The parameters of ``galaxychop.core.maps.projected_maps()``
+            (``projection``, ``bins``, ``half_width``,
+            ``min_particles`` and, for decomposed galaxies,
+            ``components``); the rest go to
+            ``matplotlib.axes.Axes.pcolormesh`` (``cmap``, ``norm``,
+            ``vmin``, ``vmax``, ...).
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+        """
+        # imported here: preproc imports core, which imports this module
+        from ..preproc import is_star_aligned
+        from .maps import PROJECTIONS, projected_maps
+
+        if quantity not in self._MAP_STYLES:
+            raise ValueError(
+                f"'quantity' must be one of {list(self._MAP_STYLES)}, "
+                f"found {quantity!r}"
+            )
+        if not is_star_aligned(self._galaxy):
+            warnings.warn(
+                "Input Galaxy is not aligned, but the projections assume the "
+                "stellar angular momentum points along z. Please, align it "
+                "with galaxychop.preproc.star_align(galaxy) or proceed with "
+                "caution.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        maps_params = inspect.signature(projected_maps).parameters
+        maps_kws = {k: kwargs.pop(k) for k in list(kwargs) if k in maps_params}
+        df = self._galaxy.projected_maps(ptypes=ptypes, **maps_kws)
+        attrs = df.attrs
+        h_axis, v_axis, _ = PROJECTIONS[attrs["projection"]]
+
+        # rows run along the horizontal axis first: reshape to (v, h)
+        image = df[quantity].to_numpy(dtype=float, copy=True)
+        image = image.reshape(attrs["bins"], attrs["bins"])
+        edges = np.linspace(
+            -attrs["half_width"], attrs["half_width"], attrs["bins"] + 1
+        )
+
+        cmap, log, label = self._MAP_STYLES[quantity]
+        kwargs.setdefault("cmap", cmap)
+        user_scale = {"norm", "vmin", "vmax"}.intersection(kwargs)
+        if log:
+            image[image <= 0] = np.nan  # empty pixels: blank, not -inf
+            if not user_scale:
+                kwargs["norm"] = "log"
+        elif quantity == "v_los" and not user_scale:
+            # symmetric, and a percentile so a few noisy pixels don't wash
+            # out the rest
+            vmax = np.nanpercentile(np.abs(image), 99)
+            kwargs.update(vmin=-vmax, vmax=vmax)
+
+        ax = plt.gca() if ax is None else ax
+        mesh = ax.pcolormesh(
+            edges, edges, np.ma.masked_invalid(image), **kwargs
+        )
+
+        kpc = u.kpc.to_string("latex")
+        ax.set_xlabel(f"{h_axis} [{kpc}]")
+        ax.set_ylabel(f"{v_axis} [{kpc}]")
+        components = attrs["components"]
+        title = attrs["projection"]
+        ax.set_title(
+            f"{', '.join(components)} ({title})" if components else title
+        )
+        ax.set_aspect("equal")
+        if colorbar:
+            ax.figure.colorbar(mesh, ax=ax, label=label)
         return ax
 
     # STELLAR DYNAMICS ========================================================

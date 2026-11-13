@@ -180,6 +180,7 @@ def test_available_plots():
         "hist2d",
         "kde",
         "kde2d",
+        "projected_map",
         "rotation_curve",
         "sdyn_hist",
         "sdyn_hist2d",

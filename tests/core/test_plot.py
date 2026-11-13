@@ -521,3 +521,109 @@ def test_GalaxyPlotter_rotation_curve_centered_no_warning(read_hdf5_galaxy):
     with warnings.catch_warnings():
         warnings.filterwarnings("error", message=".*not centered.*")
         plotter.rotation_curve(ax=plt.figure().subplots())
+
+
+# =============================================================================
+# PROJECTED MAPS
+# =============================================================================
+
+
+@pytest.fixture(scope="module")
+def aligned_galaxy(read_hdf5_galaxy):
+    gal = read_hdf5_galaxy("gal394242.h5")
+    return preproc.star_align(preproc.center(gal))
+
+
+@pytest.mark.plot
+@pytest.mark.parametrize("projection", ["edge-on", "face-on"])
+@pytest.mark.parametrize(
+    "quantity",
+    ["n_particles", "mass", "surface_density", "v_los", "sigma_los"],
+)
+def test_GalaxyPlotter_projected_map(aligned_galaxy, projection, quantity):
+    plotter = core.plot.GalaxyPlotter(galaxy=aligned_galaxy)
+    ax = plt.figure().subplots()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        result = plotter.projected_map(
+            quantity, projection=projection, bins=10, half_width=20, ax=ax
+        )
+
+    assert result is ax
+    df = aligned_galaxy.projected_maps(
+        projection=projection, bins=10, half_width=20
+    )
+    expected = df[quantity].to_numpy(dtype=float, copy=True).reshape(10, 10)
+    if quantity in ("n_particles", "mass", "surface_density"):
+        expected[expected <= 0] = np.nan
+
+    (mesh,) = ax.collections
+    image = mesh.get_array()
+    np.testing.assert_allclose(
+        image.filled(np.nan).reshape(10, 10), expected, equal_nan=True
+    )
+
+    h_axis, v_axis, _ = core.maps.PROJECTIONS[projection]
+    assert ax.get_xlabel().startswith(h_axis)
+    assert ax.get_ylabel().startswith(v_axis)
+    assert ax.get_title() == projection
+    assert ax.get_xlim() == ax.get_ylim() == (-20, 20)
+    # the colorbar adds its own axes to the figure
+    assert len(ax.figure.axes) == 2
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_projected_map_scales(aligned_galaxy):
+    plotter = core.plot.GalaxyPlotter(galaxy=aligned_galaxy)
+
+    ax = plotter.projected_map(
+        "surface_density", bins=10, ax=plt.figure().subplots()
+    )
+    assert ax.collections[0].norm.__class__.__name__ == "LogNorm"
+
+    ax = plotter.projected_map("v_los", bins=10, ax=plt.figure().subplots())
+    vmin, vmax = ax.collections[0].get_clim()
+    assert vmin == -vmax
+
+    ax = plotter.projected_map(
+        "v_los", bins=10, vmin=-1, vmax=3, ax=plt.figure().subplots()
+    )
+    assert ax.collections[0].get_clim() == (-1, 3)
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_projected_map_no_colorbar(aligned_galaxy):
+    plotter = core.plot.GalaxyPlotter(galaxy=aligned_galaxy)
+    ax = plotter.projected_map(
+        bins=10, colorbar=False, ax=plt.figure().subplots()
+    )
+    assert len(ax.figure.axes) == 1
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_projected_map_invalid_quantity(aligned_galaxy):
+    plotter = core.plot.GalaxyPlotter(galaxy=aligned_galaxy)
+    with pytest.raises(ValueError, match="quantity"):
+        plotter.projected_map("zaraza")
+
+
+@pytest.mark.plot
+def test_GalaxyPlotter_projected_map_warns_not_aligned(read_hdf5_galaxy):
+    gal = preproc.center(read_hdf5_galaxy("gal394242.h5"))
+    # tilt the galaxy: swap y and z so the angular momentum leaves z
+    kws = gal.disassemble()
+    for suffix in ("s", "dm", "g"):
+        kws[f"y_{suffix}"], kws[f"z_{suffix}"] = (
+            kws[f"z_{suffix}"],
+            kws[f"y_{suffix}"],
+        )
+        kws[f"vy_{suffix}"], kws[f"vz_{suffix}"] = (
+            kws[f"vz_{suffix}"],
+            kws[f"vy_{suffix}"],
+        )
+    tilted = core.mkgalaxy(**kws)
+    plotter = core.plot.GalaxyPlotter(galaxy=tilted)
+
+    with pytest.warns(UserWarning, match="not aligned"):
+        plotter.projected_map(bins=10, ax=plt.figure().subplots())

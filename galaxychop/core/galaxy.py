@@ -1149,6 +1149,23 @@ class Galaxy:
             runtime_warnings=runtime_warnings,
         )
 
+    def projected_maps(self, **kwargs):
+        """
+        Project the galaxy onto a square grid of pixels (IFU-like maps).
+
+        Shortcut to ``galaxychop.core.maps.projected_maps()``, see it for
+        the parameters. Decomposed galaxies also take ``components``.
+
+        Examples
+        --------
+        >>> maps = galaxy.projected_maps(projection="face-on", bins=64)
+        >>> maps.pivot(index="y", columns="x", values="surface_density")
+
+        """
+        from . import maps
+
+        return maps.projected_maps(self, **kwargs)
+
     # CONVERSION METHODS ======================================================
 
     def copy(self):

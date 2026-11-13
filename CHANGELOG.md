@@ -17,6 +17,15 @@
 - The utility previously implemented in the jcirc function has now become a method
   within the `Galaxy` class called `Galaxy.stellar_dynamics()`.
 
+- New projected (IFU-like) maps: `Galaxy.projected_maps()` (shortcut to
+  `galaxychop.core.maps.projected_maps()`) projects the galaxy edge-on or
+  face-on onto a square grid centered on the origin, and returns one row per
+  pixel with its particle count, mass, surface density and mass weighted
+  line of sight velocity and dispersion. `Galaxy.plot.projected_map()` draws
+  any of them. `DecomposedGalaxy.projected_maps()` and its plot also take
+  `components`, to map only some components on the grid of the whole galaxy.
+  See the new "Projected maps" tutorial.
+
 - The decomposition models live in the `galaxychop.decomposers` package
   (formerly `galaxychop.models`).
 

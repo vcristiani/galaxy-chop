@@ -14,7 +14,7 @@
 # IMPORTS
 # =============================================================================
 
-from . import plot, sdynamics
+from . import maps, plot, sdynamics
 from .galaxy import (
     Galaxy,
     NoGravitationalPotentialError,
@@ -30,6 +30,7 @@ __all__ = [
     "ParticleSet",
     "ParticleSetType",
     "mkgalaxy",
+    "maps",
     "plot",
     "sdynamics",
     "GchopMethodABC",
