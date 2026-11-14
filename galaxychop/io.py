@@ -715,6 +715,9 @@ def to_hdf5(
 
     **File Structure (Format Version 2.0):**
 
+    The full specification (columns, units and attributes) is in the
+    "HDF5 file format" page of the documentation.
+
     - ``/`` (root attributes): Global metadata, version info, timestamp
     - ``/group_name/`` (group attributes): Galaxy-level metadata
     - ``/group_name/stars``: Stellar particle dataset

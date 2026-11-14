@@ -57,6 +57,17 @@ extensions = [
     "myst_parser",
 ]
 
+# Link the references to other projects (e.g. ``astropy.table.Table``) to
+# their documentation
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/docs", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "astropy": ("https://docs.astropy.org/en/stable", None),
+    "h5py": ("https://docs.h5py.org/en/stable", None),
+}
+
 # README.md and CHANGELOG.md are included (with myst_parser) under the title
 # of an rst page, so their headings rightly start below H1
 suppress_warnings = ["myst.header"]
@@ -66,6 +77,8 @@ napoleon_google_docstring = False   # No usar estilo Google
 napoleon_numpy_docstring = True     # Sí usar estilo NumPy
 napoleon_use_param = True           # Reconocer "Parameters"
 napoleon_use_rtype = True           # Reconocer "Returns"
+napoleon_use_ivar = True            # "Attributes" como campos: autodoc ya
+                                    # documenta los atributos de attrs
 autodoc_docstring_signature = True
 
 # Add any paths that contain templates here, relative to this directory.

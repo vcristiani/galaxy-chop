@@ -38,6 +38,13 @@
   aligning with no stars inside `r_cut` raises a `ValueError` instead of
   silently producing `NaN` coordinates.
 
+- Documentation: new "HDF5 file format" page in the User Guide, with the
+  full specification of the version 2.0 files written by `to_hdf5()`
+  (layout, columns and units, attributes and HDF5 types) and examples of
+  how to read them without GalaxyChop in Python, R, Julia, C, C++ and
+  Fortran. The API reference now documents `DecomposedGalaxy` and links to
+  the documentation of Python, NumPy, pandas, Matplotlib, Astropy and h5py.
+
 - The decomposition models live in the `galaxychop.decomposers` package
   (formerly `galaxychop.models`).
 

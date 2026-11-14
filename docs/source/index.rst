@@ -30,6 +30,7 @@ Contents
 
    installation.rst
    tutorials/index.rst
+   hdf5_format.rst
 
 
 .. toctree::
