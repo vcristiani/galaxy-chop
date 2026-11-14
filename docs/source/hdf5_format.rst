@@ -24,11 +24,8 @@ Layout
     /                                    file attributes (format version, ...)
     └── galaxy/                          group: one galaxy, with its attributes
         ├── stars                        dataset: one row per star particle
-        ├── stars.__table_column_meta__  astropy table metadata of "stars"
         ├── dark_matter                  dataset: one row per dark matter particle
-        ├── dark_matter.__table_column_meta__
         ├── gas                          dataset: one row per gas particle
-        └── gas.__table_column_meta__
 
 The group is named ``galaxy`` by default. Passing ``group="<name>"`` to
 :func:`~galaxychop.io.to_hdf5` and :func:`~galaxychop.io.read_hdf5` stores and
