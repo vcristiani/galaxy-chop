@@ -26,6 +26,13 @@
   `components`, to map only some components on the grid of the whole galaxy.
   See the new "Projected maps" tutorial.
 
+- New `ClassifierDecomposer`: decomposes galaxies with any scikit-learn
+  classifier, either already trained or trained (on a copy) with the stars
+  of reference `DecomposedGalaxy` objects, labeled with their component:
+  `ClassifierDecomposer(RandomForestClassifier(), training=[gal0, gal1])`.
+  The decomposition is probabilistic when the classifier has
+  `predict_proba()`.
+
 - **Behavior change:** every alignment entry point now uses the same default
   radius, `r_cut=30` kpc (`galaxychop.preproc.DEFAULT_R_CUT`): only the
   stars inside it define the rotation, so the alignment follows the disk

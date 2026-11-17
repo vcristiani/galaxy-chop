@@ -61,6 +61,11 @@ def available_decomposers():
             isinstance(obj, type)
             and issubclass(obj, decomposers.GalaxyDecomposerABC)
             and not inspect.isabstract(obj)
+            # the CLI can only build the ones without required arguments
+            and all(
+                p.default is not p.empty
+                for p in inspect.signature(obj).parameters.values()
+            )
         ):
             found[name] = obj
     return found

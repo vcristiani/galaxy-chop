@@ -14,6 +14,7 @@
 # IMPORTS
 # =============================================================================
 
+from .classifier import ClassifierDecomposer
 from .core import (
     DecomposedGalaxy,
     DecomposedParticleSet,
@@ -44,5 +45,6 @@ __all__ = [
     "DynamicStarsGaussianDecomposerABC",
     "GaussianMixture",
     "AutoGaussianMixture",
+    "ClassifierDecomposer",
     "hparam",
 ]
