@@ -63,13 +63,12 @@ class SpyTree(DecisionTreeClassifier):
 @pytest.mark.model
 def test_TemplateTransfer_learns_the_reference(galaxy, reference):
     tree = DecisionTreeClassifier(random_state=0)
-    decomposer = gchop.decomposers.TemplateTransfer(tree, training=[reference])
+    decomposer = gchop.decomposers.TemplateTransfer(tree)
 
     # nothing is trained until fit() is called
     assert decomposer._trained is None
-    assert "training" not in repr(decomposer)
 
-    assert decomposer.fit() is decomposer
+    assert decomposer.fit([reference]) is decomposer
     dgal = decomposer.decompose(galaxy)
 
     # the given classifier is not modified: a trained copy is used
@@ -93,10 +92,10 @@ def test_TemplateTransfer_learns_the_reference(galaxy, reference):
 
 @pytest.mark.model
 def test_TemplateTransfer_pretrained(galaxy, reference):
+    # a single galaxy is accepted too
     trained = gchop.decomposers.TemplateTransfer(
-        DecisionTreeClassifier(random_state=0), training=[reference]
-    )
-    assert trained.fit() is trained
+        DecisionTreeClassifier(random_state=0)
+    ).fit(reference)
     pretrained = gchop.decomposers.TemplateTransfer(
         trained.trained_classifier_
     )
@@ -109,37 +108,27 @@ def test_TemplateTransfer_pretrained(galaxy, reference):
 
 @pytest.mark.model
 def test_TemplateTransfer_without_probabilities(galaxy, reference):
-    decomposer = gchop.decomposers.TemplateTransfer(
-        RidgeClassifier(), training=[reference]
-    ).fit()
+    decomposer = gchop.decomposers.TemplateTransfer(RidgeClassifier()).fit(
+        [reference]
+    )
     dgal = decomposer.decompose(galaxy)
 
     assert not dgal.has_probabilities
     assert set(dgal.stars.labels) <= {"Disk", "Spheroid", "stars"}
 
 
-def test_TemplateTransfer_not_fitted(galaxy):
+def test_TemplateTransfer_no_training_galaxies():
     decomposer = gchop.decomposers.TemplateTransfer(DecisionTreeClassifier())
 
-    with pytest.raises(NotFittedError):
-        decomposer.decompose(galaxy)
     with pytest.raises(ValueError, match="no training galaxies"):
-        decomposer.fit()
-
-    empty = gchop.decomposers.TemplateTransfer(
-        DecisionTreeClassifier(), training=[]
-    )
-    with pytest.raises(ValueError, match="no training galaxies"):
-        empty.fit()
+        decomposer.fit([])
 
 
 def test_TemplateTransfer_training_not_decomposed(galaxy):
-    decomposer = gchop.decomposers.TemplateTransfer(
-        DecisionTreeClassifier(), training=[galaxy]
-    )
+    decomposer = gchop.decomposers.TemplateTransfer(DecisionTreeClassifier())
 
     with pytest.raises(TypeError, match="must be decomposed"):
-        decomposer.fit()
+        decomposer.fit([galaxy])
 
 
 # MASS WEIGHTS ================================================================
@@ -147,11 +136,11 @@ def test_TemplateTransfer_training_not_decomposed(galaxy):
 
 @pytest.mark.model
 def test_TemplateTransfer_mass_weighted(reference):
-    decomposer = gchop.decomposers.TemplateTransfer(
-        SpyTree(random_state=0), training=[reference]
-    )
+    decomposer = gchop.decomposers.TemplateTransfer(SpyTree(random_state=0))
     assert decomposer.mass_weighted
-    sample_weight = decomposer.fit().trained_classifier_.sample_weight_
+    sample_weight = decomposer.fit(
+        [reference]
+    ).trained_classifier_.sample_weight_
 
     # the masses (plain Msun values) of the classified stars
     classified = np.isfinite(reference.stars.components)
@@ -164,30 +153,28 @@ def test_TemplateTransfer_mass_weighted(reference):
 @pytest.mark.model
 def test_TemplateTransfer_not_mass_weighted(reference):
     decomposer = gchop.decomposers.TemplateTransfer(
-        SpyTree(random_state=0), training=[reference], mass_weighted=False
+        SpyTree(random_state=0), mass_weighted=False
     )
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        decomposer.fit()
+        decomposer.fit([reference])
 
     assert decomposer.trained_classifier_.sample_weight_ is None
 
 
 @pytest.mark.model
 def test_TemplateTransfer_mass_weighted_unsupported(reference):
-    decomposer = gchop.decomposers.TemplateTransfer(
-        KNeighborsClassifier(), training=[reference]
-    )
+    decomposer = gchop.decomposers.TemplateTransfer(KNeighborsClassifier())
     with pytest.warns(UserWarning, match="does not accept sample_weight"):
-        decomposer.fit()
+        decomposer.fit([reference])
     check_is_fitted(decomposer.trained_classifier_)
 
     unweighted = gchop.decomposers.TemplateTransfer(
-        KNeighborsClassifier(), training=[reference], mass_weighted=False
+        KNeighborsClassifier(), mass_weighted=False
     )
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        unweighted.fit()
+        unweighted.fit([reference])
 
 
 # TRAINING LABELS =============================================================
@@ -204,12 +191,10 @@ def test_TemplateTransfer_different_components(reference):
             3: "Warm disk",
         },
     )
-    decomposer = gchop.decomposers.TemplateTransfer(
-        DecisionTreeClassifier(), training=[reference, reference, other]
-    )
+    decomposer = gchop.decomposers.TemplateTransfer(DecisionTreeClassifier())
 
     with pytest.raises(ValueError, match="training galaxy 2") as err:
-        decomposer.fit()
+        decomposer.fit([reference, reference, other])
     assert "['Bulge', 'Cold disk', 'Halo', 'Warm disk']" in str(err.value)
     assert "['Disk', 'Spheroid']" in str(err.value)
 
@@ -217,12 +202,11 @@ def test_TemplateTransfer_different_components(reference):
 @pytest.mark.model
 def test_TemplateTransfer_different_methods(reference, jhistogram_reference):
     decomposer = gchop.decomposers.TemplateTransfer(
-        DecisionTreeClassifier(random_state=0),
-        training=[reference, jhistogram_reference],
+        DecisionTreeClassifier(random_state=0)
     )
 
     with pytest.warns(UserWarning, match="different methods") as record:
-        decomposer.fit()
+        decomposer.fit([reference, jhistogram_reference])
     assert "['JHistogram', 'JThreshold']" in str(record[0].message)
     check_is_fitted(decomposer.trained_classifier_)
 
@@ -230,10 +214,8 @@ def test_TemplateTransfer_different_methods(reference, jhistogram_reference):
 # EXPLICIT TRAINING AND PARALLELISM ===========================================
 
 
-def test_TemplateTransfer_training_requires_fit(galaxy, reference):
-    decomposer = gchop.decomposers.TemplateTransfer(
-        SpyTree(), training=[reference]
-    )
+def test_TemplateTransfer_training_requires_fit(galaxy):
+    decomposer = gchop.decomposers.TemplateTransfer(SpyTree())
 
     # decompose() never trains: fit() must be called explicitly
     with mock.patch.object(
@@ -252,8 +234,8 @@ def test_TemplateTransfer_training_requires_fit(galaxy, reference):
 @pytest.mark.model
 def test_TemplateTransfer_pickle_keeps_training(galaxy, reference):
     decomposer = gchop.decomposers.TemplateTransfer(
-        SpyTree(random_state=0), training=[reference]
-    ).fit()
+        SpyTree(random_state=0)
+    ).fit([reference])
 
     restored = pickle.loads(pickle.dumps(decomposer))
     assert restored._trained is not None

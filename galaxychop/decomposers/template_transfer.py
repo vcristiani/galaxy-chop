@@ -43,16 +43,10 @@ class TemplateTransfer(GalaxyDecomposerABC):
     Parameters
     ----------
     classifier : sklearn classifier
-        Any scikit-learn compatible classifier. With ``training``, a copy of
-        it (``sklearn.base.clone``) is trained, so the given classifier is
-        never modified. Without ``training`` it must be already trained,
-        with the component names (e.g. ``"Disk"``) as classes.
-    training : list of DecomposedGalaxy, optional
-        Reference galaxies, decomposed, centered and aligned. Their
-        classified stars, labeled with their component name, are the
-        training set; the stars without a component are left out. The
-        training only happens when ``fit()`` is called, and it must be
-        called before ``decompose()``.
+        Any scikit-learn compatible classifier. ``fit()`` trains a copy of
+        it (``sklearn.base.clone``), so the given classifier is never
+        modified. Without ``fit()`` it must be already trained, with the
+        component names (e.g. ``"Disk"``) as classes.
     attributes : tuple of str, default ("normalized_star_energy", "eps", \
 "eps_r")
         Stellar dynamics attributes used as features. They are normalized,
@@ -83,13 +77,14 @@ class TemplateTransfer(GalaxyDecomposerABC):
     ``JThreshold`` and ``JHistogram``), a ``UserWarning`` is emitted, since
     labels of different methods are being mixed.
 
-    The training is never implicit: with ``training``, ``decompose()``
-    raises a ``NotFittedError`` until ``fit()`` is called. A trained
-    decomposer can be pickled with its trained classifier, so it can be
+    The training is never implicit: unless the given classifier is already
+    trained, ``decompose()`` raises a ``NotFittedError`` until
+    ``fit(galaxies)`` is called. The training galaxies are not kept, only
+    the trained classifier, so a trained decomposer can be pickled and
     trained once and then used to decompose several galaxies in parallel
     (e.g. with joblib or multiprocessing).
 
-    Do not evaluate the decomposer on a galaxy that is also in ``training``:
+    Do not evaluate the decomposer on a galaxy that was used to train it:
     the agreement with the reference is inflated (data leakage). To evaluate
     it, split the reference by galaxy, not by particle.
 
@@ -99,13 +94,12 @@ class TemplateTransfer(GalaxyDecomposerABC):
     >>> reference = [gchop.decomposers.JHistogram().decompose(g)
     ...              for g in (gal0, gal1)]
     >>> chopper = gchop.decomposers.TemplateTransfer(
-    ...     RandomForestClassifier(), training=reference).fit()
+    ...     RandomForestClassifier()).fit(reference)
     >>> chopper.decompose(gal2)
 
     """
 
     classifier = attr.ib()
-    training = hparam(default=None, repr=False, eq=False)
     attributes = hparam(
         default=("normalized_star_energy", "eps", "eps_r"), converter=tuple
     )
@@ -113,27 +107,38 @@ class TemplateTransfer(GalaxyDecomposerABC):
 
     _trained = attr.ib(init=False, default=None, repr=False, eq=False)
 
-    def fit(self):
+    def fit(self, galaxies):
         """
-        Train a copy of the classifier with the training galaxies.
+        Train a copy of the classifier with reference galaxies.
 
-        It must be called before ``decompose()`` when the decomposer has
-        ``training``.
+        It must be called before ``decompose()``, unless the given
+        classifier is already trained. Calling it again trains a new copy
+        and replaces the previous one.
+
+        Parameters
+        ----------
+        galaxies : DecomposedGalaxy or list of DecomposedGalaxy
+            Reference galaxies, decomposed, centered and aligned. Their
+            classified stars, labeled with their component name, are the
+            training set; the stars without a component are left out.
 
         Returns
         -------
         TemplateTransfer
             The same decomposer instance (``self``), trained and ready to
             decompose, so it can be chained:
-            ``TemplateTransfer(clf, training=refs).fit().decompose(gal)``.
+            ``TemplateTransfer(clf).fit(refs).decompose(gal)``.
         """
-        if self.training is None or len(self.training) == 0:
+        if isinstance(galaxies, DecomposedGalaxy):
+            galaxies = [galaxies]
+        galaxies = list(galaxies)
+        if not galaxies:
             raise ValueError("There are no training galaxies to fit")
 
-        self._check_training_labels()
+        self._check_training_labels(galaxies)
 
         X, labels, masses = [], [], []
-        for galaxy in self.training:
+        for galaxy in galaxies:
             gal_X, y = self._extract_stellar_dynamics_matrix(
                 galaxy, self.attributes
             )
@@ -164,18 +169,17 @@ class TemplateTransfer(GalaxyDecomposerABC):
         object.__setattr__(self, "_trained", trained)  # frozen class
         return self
 
-    def _check_training_labels(self):
+    def _check_training_labels(self, galaxies):
         """Check that the training galaxies share their component names."""
-        for galaxy in self.training:
+        for galaxy in galaxies:
             if not isinstance(galaxy, DecomposedGalaxy):
                 raise TypeError(
                     "The training galaxies must be decomposed, "
                     f"found {type(galaxy).__name__}"
                 )
 
-        first = self.training[0]
-        names = set(first.component_name_mapping.values())
-        for idx, galaxy in enumerate(self.training[1:], start=1):
+        names = set(galaxies[0].component_name_mapping.values())
+        for idx, galaxy in enumerate(galaxies[1:], start=1):
             other = set(galaxy.component_name_mapping.values())
             if other != names:
                 raise ValueError(
@@ -184,7 +188,7 @@ class TemplateTransfer(GalaxyDecomposerABC):
                     "All the training galaxies must have the same components"
                 )
 
-        methods = {galaxy.method for galaxy in self.training}
+        methods = {galaxy.method for galaxy in galaxies}
         if len(methods) > 1:
             warnings.warn(
                 "The training galaxies were decomposed with different "
@@ -197,17 +201,19 @@ class TemplateTransfer(GalaxyDecomposerABC):
     def trained_classifier_(self):
         """The trained classifier used to decompose.
 
-        Raises ``NotFittedError`` if the decomposer has ``training`` and
-        ``fit()`` was not called, or if the given classifier is not trained.
+        The copy trained by ``fit()`` or, if it was not called, the given
+        classifier. Raises ``NotFittedError`` if neither is trained.
         """
         if self._trained is not None:
             return self._trained
-        if self.training is not None:
+        try:
+            check_is_fitted(self.classifier)
+        except NotFittedError as err:
             raise NotFittedError(
-                f"This {type(self).__name__} has training galaxies but it "
-                "is not trained yet: call fit() before decompose()"
-            )
-        check_is_fitted(self.classifier)
+                f"This {type(self).__name__} is not trained: call "
+                "fit(galaxies) before decompose(), or give it an already "
+                "trained classifier"
+            ) from err
         return self.classifier
 
     @doc_inherit(GalaxyDecomposerABC.get_attributes)
