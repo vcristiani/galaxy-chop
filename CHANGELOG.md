@@ -26,12 +26,20 @@
   `components`, to map only some components on the grid of the whole galaxy.
   See the new "Projected maps" tutorial.
 
-- New `ClassifierDecomposer`: decomposes galaxies with any scikit-learn
+- New `TemplateTransfer`: decomposes galaxies with any scikit-learn
   classifier, either already trained or trained (on a copy) with the stars
   of reference `DecomposedGalaxy` objects, labeled with their component:
-  `ClassifierDecomposer(RandomForestClassifier(), training=[gal0, gal1])`.
+  `TemplateTransfer(RandomForestClassifier(), training=[gal0, gal1]).fit()`.
   The decomposition is probabilistic when the classifier has
-  `predict_proba()`.
+  `predict_proba()`. The training stars are weighted by their mass
+  (`mass_weighted=True`, as `total_mass()` reports the components), unless
+  the classifier does not accept `sample_weight`, which emits a warning.
+  The training galaxies must share their component names (`ValueError`
+  otherwise), and mixing labels of different methods emits a warning. The
+  training is always explicit: with `training`, `fit()` (which returns the
+  same instance) must be called before `decompose()`, which otherwise
+  raises `NotFittedError`. A trained `TemplateTransfer` can be pickled, so
+  it can be trained once and used in parallel.
 
 - **Behavior change:** every alignment entry point now uses the same default
   radius, `r_cut=30` kpc (`galaxychop.preproc.DEFAULT_R_CUT`): only the

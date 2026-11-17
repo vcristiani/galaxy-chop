@@ -14,7 +14,6 @@
 # IMPORTS
 # =============================================================================
 
-from .classifier import ClassifierDecomposer
 from .core import (
     DecomposedGalaxy,
     DecomposedParticleSet,
@@ -28,6 +27,7 @@ from .gaussian_mixture import (
 )
 from .histogram import JEHistogram, JHistogram
 from .kmeans import KMeans
+from .template_transfer import TemplateTransfer
 from .threshold import JThreshold
 
 # =============================================================================
@@ -45,6 +45,6 @@ __all__ = [
     "DynamicStarsGaussianDecomposerABC",
     "GaussianMixture",
     "AutoGaussianMixture",
-    "ClassifierDecomposer",
+    "TemplateTransfer",
     "hparam",
 ]
